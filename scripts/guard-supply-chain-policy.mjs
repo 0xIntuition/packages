@@ -50,6 +50,7 @@ const incidentIocs = [
 
 const dependencyGitPattern =
 	/^(?:git(?:\+ssh|\+https)?:|github:|https:\/\/github\.com\/|git:\/\/|ssh:\/\/git@)/i;
+const pagesWorkflowPath = path.join(repoRoot, '.github', 'workflows', 'deploy-schema.yml');
 
 const toRelativePath = (filePath) => path.relative(repoRoot, filePath) || '.';
 
@@ -199,8 +200,26 @@ const checkWorkflowPolicy = () => {
 			addFailure(workflowPath, 'pull_request_target is not allowed');
 		}
 
-		if (/^\s*id-token:\s*write\b/m.test(workflow)) {
+		if (/^\s*id-token:\s*write\b/m.test(workflow) && workflowPath !== pagesWorkflowPath) {
 			addFailure(workflowPath, 'id-token: write requires explicit publish-job review');
+		}
+
+		if (workflowPath === pagesWorkflowPath) {
+			if (!/^\s*pages:\s*write\b/m.test(workflow)) {
+				addFailure(workflowPath, 'schema Pages workflow must declare pages: write');
+			}
+
+			if (!/actions\/upload-pages-artifact@v3/.test(workflow)) {
+				addFailure(workflowPath, 'schema Pages workflow must upload a Pages artifact');
+			}
+
+			if (!/path:\s*schema\b/.test(workflow)) {
+				addFailure(workflowPath, 'schema Pages workflow must upload schema/ as artifact root');
+			}
+
+			if (!/actions\/deploy-pages@v4/.test(workflow)) {
+				addFailure(workflowPath, 'schema Pages workflow must deploy with actions/deploy-pages');
+			}
 		}
 
 		lines.forEach((line, index) => {

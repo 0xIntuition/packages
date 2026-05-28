@@ -1,0 +1,62 @@
+#!/usr/bin/env node
+
+const schemaUrls = [
+	'https://schema.intuition.systems/v1/oauth-atom.jsonld',
+	'https://schema.intuition.systems/v1/ethereum.jsonld',
+];
+
+const failures = [];
+
+function formatFetchError(error) {
+	if (!(error instanceof Error)) {
+		return String(error);
+	}
+
+	const cause = error.cause;
+	if (cause instanceof Error && cause.message.length > 0) {
+		return `${error.message}: ${cause.message}`;
+	}
+
+	return error.message;
+}
+
+for (const url of schemaUrls) {
+	try {
+		const response = await fetch(url, {
+			headers: {
+				accept: 'application/ld+json, application/json;q=0.9, */*;q=0.1',
+			},
+		});
+
+		if (!response.ok) {
+			failures.push(`${url}: HTTP ${response.status}`);
+			continue;
+		}
+
+		const contentType = response.headers.get('content-type') ?? '';
+		if (!/(application\/ld\+json|application\/json|text\/plain)/i.test(contentType)) {
+			failures.push(`${url}: unexpected content-type "${contentType || 'missing'}"`);
+			continue;
+		}
+
+		const parsed = await response.json();
+		if (!parsed || typeof parsed !== 'object' || !('@context' in parsed)) {
+			failures.push(`${url}: response JSON is missing @context`);
+			continue;
+		}
+
+		console.log(`${url}: ok`);
+	} catch (error) {
+		failures.push(`${url}: ${formatFetchError(error)}`);
+	}
+}
+
+if (failures.length > 0) {
+	console.error('Live schema verification failed:');
+	for (const failure of failures) {
+		console.error(`- ${failure}`);
+	}
+	process.exit(1);
+}
+
+console.log('Live schema verification passed.');
