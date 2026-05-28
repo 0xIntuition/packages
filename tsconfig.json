@@ -1,0 +1,5 @@
+{
+	"extends": "./tooling/typescript/base.json",
+	"include": ["packages/*/src", "scripts"],
+	"exclude": ["node_modules", "dist"]
+}

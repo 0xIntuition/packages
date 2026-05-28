@@ -1,0 +1,11 @@
+{
+	"@context": {
+		"@version": 1.1,
+		"IntuitionOAuthAtom": "https://schema.intuition.systems/v1/oauth-atom.jsonld#IntuitionOAuthAtom",
+		"provider": {
+			"@id": "https://schema.intuition.systems/v1/oauth-atom.jsonld#provider",
+			"@type": "@vocab"
+		},
+		"providerId": "https://schema.intuition.systems/v1/oauth-atom.jsonld#providerId"
+	}
+}
