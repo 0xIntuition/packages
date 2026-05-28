@@ -1,0 +1,62 @@
+Here are a few things to expand your plan with. Here is an example of a successful call on the transfer remote method on one of these SPO contracts. It's also basically almost the same for hubs. 
+
+
+Decoded input data
+Method id
+81b4e8b4
+Call
+transferRemote(uint32 _recipientDomain, bytes32 _recipientAddress, uint256 _amount)
+Name
+Type
+Data
+_recipientDomain
+uint32
+8453
+_recipientAddress
+bytes32
+0x000000000000000000000000b8e3452e62b45e654a300a296061597e3cf3e039
+_amount
+uint256
+2000000000000000000
+
+
+One thing that you will notice is the fact that the recipient address is zero-padded to be in the bytes32 format. This was abstracted away in the trust swap and pre-drouter, but you need to do it manually for these. 
+
+
+recipient domains (chain ids):
+Base: 8453
+Intuition Mainnet: 1155
+
+
+
+Also, another important distinction is what the hub and spoke mean here. Hub is basically a locker that locks the token that we are bridging, let's say USDC from base. Spoke is the representation of this token on the other chain.
+
+The practical consequence of this is that, when bridging spokes (which are the presentations of these tokens on our network), you don't need an approval, actually. That is something to take into account. You don't need to approve the USDC MetaERC20 spoke to itself, and same goes for wrapped it. Also, obviously, for the MetaNative spoke (which is used for Trust and Intuition), you obviously don't need to approve the native token. That goes without saying. 
+
+
+RELEVANT ADDRESSES:
+
+Base mainnet (chain id: 8453) addresses:
+
+MetaERC20Hub (USDC)	0x7e41962bE9B2640e653BfA8c8713A905659FE157
+MetaERC20Hub (WETH)	0xFB4BAa05BF339AD6074047176F90757A6C87f944
+TRUST on Base (ERC20): 0x6cd905dF2Ed214b22e0d48FF17CD4200C1C6d8A3
+USDC on Base (ERC20): 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+WETH on Base (ERC20): 0x4200000000000000000000000000000000000006
+
+Intuition mainnet (chain id: 1155) addresses:
+
+MetaERC20Spoke (USDC)	0x7e41962bE9B2640e653BfA8c8713A905659FE157
+MetaERC20Spoke (WETH)	0xFB4BAa05BF339AD6074047176F90757A6C87f944
+MetaNativeSpoke (TRUST)	0x375135fe908dD62f3C7939FA4e65bf41Da721AB9
+WrappedTrust (WTRUST)	0x81cFb09cb44f7184Ad934C09F82000701A4bF672
+
+
+(I already added all relevant bytecodes and abis in the intuition/periphery/src/contracts folder)
+
+One other relevant bonus is to recognize WTRUST (Wrapped TRUST) token on the Intuition mainnet and offer to unwrap it before direct TRUST bridge from Intuition to Base (not that because TRUST is the native token on the Intuition network, there is still no need approve it after unwrapping if user wants to bridge this native TRUST token back to the Base mainnet)
+
+Slight UX bonus: don't let user wrap entire ETH balance on Base and entire TRUST balance on Intuition; let them keep at least 0.0005 ETH for gas and 1 TRUST for gas, respectively. Same goes for the ETH swaps on Base: cap it to max 0.0005 ETH left for gas etc.
+NOTE: This applies EXCLUSIVELY for the native tokens on a given chain only! For ERC20 tokens, you're always free to do whateveramount you want up to your balance!
+
+Finally, for the best possible UX, make sure to include the easy <> type of button for swapping source/destination chains selectors etc.
