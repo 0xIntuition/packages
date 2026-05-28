@@ -167,8 +167,8 @@ describe('suggestClassification', () => {
 
 	it('suggests software for name and codeRepository fields', () => {
 		const suggestion = suggestClassification({
-			name: 'intuition-v2',
-			codeRepository: 'https://github.com/0xintuition/intuition-v2',
+			name: 'intuition-packages',
+			codeRepository: 'https://github.com/0xIntuition/packages',
 		});
 
 		expect(suggestion).toBe('software');

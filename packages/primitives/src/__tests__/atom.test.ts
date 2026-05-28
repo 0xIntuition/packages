@@ -262,8 +262,8 @@ describe('convenience builders', () => {
 
 	it('buildSoftware builds a valid software atom', () => {
 		const result = buildSoftware({
-			name: 'intuition-v2',
-			codeRepository: 'https://github.com/0xintuition/intuition-v2',
+			name: 'intuition-packages',
+			codeRepository: 'https://github.com/0xIntuition/packages',
 		});
 
 		expect(result.success).toBe(true);

@@ -112,8 +112,8 @@ export function buildCompany(values: {
  * @example
  * ```ts
  * const result = buildSoftware({
- *   name: 'intuition-v2',
- *   codeRepository: 'https://github.com/0xintuition/intuition-v2',
+ *   name: 'intuition-packages',
+ *   codeRepository: 'https://github.com/0xIntuition/packages',
  * });
  * ```
  *

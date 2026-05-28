@@ -6,7 +6,7 @@
 - Do not make the GitHub repository public before the agreed review point.
 - Do not push or open a PR from an agent run unless explicitly requested.
 - Do not copy or publish `@0xintuition/cli`, `@0xintuition/sdk`, or `@0xintuition/stacks` in this round.
-- Do not remove packages or deployment exports from `intuition-v2` in this round.
+- Do not remove packages or deployment exports from the product codebase in this round.
 
 ## Required Validation
 
@@ -15,7 +15,9 @@ bun install --frozen-lockfile
 bun run build
 bun run typecheck
 bun run test
+bun run check
 bun run schema:validate
+bun run guard:supply-chain
 bun run pack:dry-run
 bun run smoke:tarballs
 ```
@@ -51,6 +53,12 @@ GitHub Pages must serve:
 
 - `https://schema.intuition.systems/v1/oauth-atom.jsonld`
 - `https://schema.intuition.systems/v1/ethereum.jsonld`
+
+This repo includes a separate least-privilege Pages workflow that uploads `schema/` as the artifact root. After Pages and DNS are wired, verify the live host with:
+
+```bash
+bun run schema:verify-live
+```
 
 Treat `/v1/*` as immutable. Breaking schema changes go to `/v2/*` and require package constants and tests to change together.
 
