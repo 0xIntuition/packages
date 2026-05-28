@@ -1,0 +1,61 @@
+{
+	"name": "@0xintuition/classifications",
+	"version": "0.1.0-alpha.0",
+	"description": "Canonical Intuition classification specs and atom data builders",
+	"private": false,
+	"license": "MIT",
+	"type": "module",
+	"sideEffects": false,
+	"types": "./src/index.ts",
+	"files": [
+		"src",
+		"README.md"
+	],
+	"exports": {
+		".": "./src/index.ts",
+		"./package.json": "./package.json"
+	},
+	"keywords": [
+		"intuition",
+		"classifications",
+		"json-ld",
+		"schema"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/0xIntuition/packages.git",
+		"directory": "packages/classifications"
+	},
+	"bugs": {
+		"url": "https://github.com/0xIntuition/packages/issues"
+	},
+	"homepage": "https://github.com/0xIntuition/packages/tree/main/packages/classifications#readme",
+	"publishConfig": {
+		"access": "public",
+		"tag": "alpha"
+	},
+	"scripts": {
+		"build": "node ../../scripts/clean-dist.mjs && tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"dev": "tsc --watch",
+		"pack:dry-run": "bun run build && node ../../scripts/pack-release.mjs --dry-run --json --dist-entrypoints --rewrite-workspace-deps",
+		"pack:release": "bun run build && node ../../scripts/pack-release.mjs --dist-entrypoints --rewrite-workspace-deps",
+		"prepack": "bun run build",
+		"prepublishOnly": "node ../../scripts/guard-direct-publish.mjs",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"typecheck": "tsc --noEmit",
+		"ci": "biome check",
+		"lint": "biome lint",
+		"format": "biome format",
+		"check": "biome check",
+		"lint:write": "biome lint --write",
+		"format:write": "biome format --write",
+		"check:write": "biome check --write",
+		"check:unsafe:write": "biome check --write --unsafe"
+	},
+	"devDependencies": {
+		"typescript": "catalog:",
+		"vitest": "catalog:"
+	}
+}

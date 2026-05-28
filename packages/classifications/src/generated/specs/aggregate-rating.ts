@@ -1,0 +1,45 @@
+import type { ClassificationSpec } from '../../types.js';
+
+export const aggregateRating: ClassificationSpec = {
+	slug: 'aggregate-rating',
+	type: 'AggregateRating',
+	displayName: 'Aggregate Rating',
+	description: 'A stable aggregate rating summary for a reviewed thing.',
+	category: 'Product',
+	schemaOrg: { context: 'https://schema.org/', type: 'AggregateRating' },
+	fields: [
+		{
+			key: 'ratingValue',
+			label: 'Rating Value',
+			description: 'The aggregate average rating.',
+			fieldType: 'number',
+			required: true,
+			placeholder: '4.7',
+		},
+		{
+			key: 'reviewCount',
+			label: 'Review Count',
+			description: 'The number of reviews represented by the aggregate.',
+			fieldType: 'integer',
+			required: true,
+			placeholder: '1320',
+		},
+		{
+			key: 'bestRating',
+			label: 'Best Rating',
+			description: 'The upper bound of the rating scale when needed.',
+			fieldType: 'number',
+			required: false,
+			placeholder: '5',
+		},
+		{
+			key: 'worstRating',
+			label: 'Worst Rating',
+			description: 'The lower bound of the rating scale when needed.',
+			fieldType: 'number',
+			required: false,
+			placeholder: '1',
+		},
+	],
+	defaults: { pluginId: 'aggregate-rating', provider: 'opengraph' },
+};

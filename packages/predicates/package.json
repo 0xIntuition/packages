@@ -1,0 +1,67 @@
+{
+	"name": "@0xintuition/predicates",
+	"version": "0.1.0-alpha.0",
+	"description": "Canonical Intuition predicate registry, entity mappings, and display helpers",
+	"private": false,
+	"license": "MIT",
+	"type": "module",
+	"sideEffects": false,
+	"types": "./src/index.ts",
+	"files": [
+		"src",
+		"README.md"
+	],
+	"exports": {
+		".": "./src/index.ts",
+		"./package.json": "./package.json"
+	},
+	"keywords": [
+		"intuition",
+		"predicates",
+		"knowledge-graph"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/0xIntuition/packages.git",
+		"directory": "packages/predicates"
+	},
+	"bugs": {
+		"url": "https://github.com/0xIntuition/packages/issues"
+	},
+	"homepage": "https://github.com/0xIntuition/packages/tree/main/packages/predicates#readme",
+	"publishConfig": {
+		"access": "public",
+		"tag": "alpha"
+	},
+	"scripts": {
+		"build": "node ../../scripts/clean-dist.mjs && tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"dev": "tsc --watch",
+		"pack:dry-run": "bun run build && node ../../scripts/pack-release.mjs --dry-run --json --dist-entrypoints --rewrite-workspace-deps",
+		"pack:release": "bun run build && node ../../scripts/pack-release.mjs --dist-entrypoints --rewrite-workspace-deps",
+		"prepack": "bun run build",
+		"prepublishOnly": "node ../../scripts/guard-direct-publish.mjs",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"typecheck": "tsc --noEmit",
+		"ci": "biome check",
+		"lint": "biome lint",
+		"format": "biome format",
+		"check": "biome check",
+		"lint:write": "biome lint --write",
+		"format:write": "biome format --write",
+		"check:write": "biome check --write",
+		"check:unsafe:write": "biome check --write --unsafe"
+	},
+	"dependencies": {
+		"@0xintuition/ids": "workspace:*"
+	},
+	"peerDependencies": {
+		"viem": "^2.0.0"
+	},
+	"devDependencies": {
+		"typescript": "catalog:",
+		"vitest": "catalog:",
+		"viem": "catalog:"
+	}
+}

@@ -1,0 +1,71 @@
+{
+	"name": "@0xintuition/protocol",
+	"version": "3.0.0-alpha.0",
+	"description": "Intuition protocol contract ABIs and interaction helpers",
+	"private": false,
+	"license": "MIT",
+	"type": "module",
+	"sideEffects": false,
+	"types": "./src/index.ts",
+	"files": [
+		"src",
+		"README.md"
+	],
+	"exports": {
+		".": "./src/index.ts",
+		"./package.json": "./package.json"
+	},
+	"keywords": [
+		"intuition",
+		"protocol",
+		"multivault",
+		"trustbonding",
+		"viem",
+		"ethereum"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/0xIntuition/packages.git",
+		"directory": "packages/protocol"
+	},
+	"bugs": {
+		"url": "https://github.com/0xIntuition/packages/issues"
+	},
+	"homepage": "https://github.com/0xIntuition/packages/tree/main/packages/protocol#readme",
+	"publishConfig": {
+		"access": "public",
+		"tag": "alpha"
+	},
+	"scripts": {
+		"build": "node ../../scripts/clean-dist.mjs && tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"dev": "tsc --watch",
+		"pack:dry-run": "bun run build && node ../../scripts/pack-release.mjs --dry-run --json --dist-entrypoints --rewrite-workspace-deps",
+		"pack:release": "bun run build && node ../../scripts/pack-release.mjs --dist-entrypoints --rewrite-workspace-deps",
+		"prepack": "bun run build",
+		"prepublishOnly": "node ../../scripts/guard-direct-publish.mjs",
+		"test": "vitest run -c vitest.unit.config.ts",
+		"test:watch": "vitest -c vitest.unit.config.ts",
+		"typecheck": "tsc --noEmit",
+		"ci": "biome check",
+		"lint": "biome lint",
+		"format": "biome format",
+		"check": "biome check",
+		"lint:write": "biome lint --write",
+		"format:write": "biome format --write",
+		"check:write": "biome check --write",
+		"check:unsafe:write": "biome check --write --unsafe",
+		"test:unit": "vitest run -c vitest.unit.config.ts"
+	},
+	"dependencies": {
+		"@0xintuition/curves": "workspace:*"
+	},
+	"peerDependencies": {
+		"viem": "^2.0.0"
+	},
+	"devDependencies": {
+		"typescript": "catalog:",
+		"vitest": "catalog:",
+		"viem": "catalog:"
+	}
+}
