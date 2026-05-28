@@ -13,7 +13,8 @@
 	],
 	"exports": {
 		".": "./src/index.ts",
-		"./package.json": "./package.json"
+		"./package.json": "./package.json",
+		"./*": "./src/standalone/*.ts"
 	},
 	"keywords": [
 		"intuition",
@@ -34,7 +35,7 @@
 		"tag": "alpha"
 	},
 	"scripts": {
-		"build": "node ../../scripts/clean-dist.mjs && tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
+		"build": "node ../../scripts/generate-predicate-standalone-modules.mjs && node ../../scripts/clean-dist.mjs && tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
 		"clean": "git clean -xdf .cache .turbo dist node_modules",
 		"dev": "tsc --watch",
 		"pack:dry-run": "bun run build && node ../../scripts/pack-release.mjs --dry-run --json --dist-entrypoints --rewrite-workspace-deps",

@@ -11,7 +11,8 @@ bun add @0xintuition/primitives@alpha
 ## Usage
 
 ```ts
-import { buildEthereumAccount, buildTripleByName } from '@0xintuition/primitives'
+import { buildEthereumAccount } from '@0xintuition/primitives/atom'
+import { buildTripleByName } from '@0xintuition/primitives/triple'
 
 const account = buildEthereumAccount({
   address: '0x0000000000000000000000000000000000000001',

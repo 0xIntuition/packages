@@ -13,7 +13,13 @@
 	],
 	"exports": {
 		".": "./src/index.ts",
-		"./package.json": "./package.json"
+		"./package.json": "./package.json",
+		"./atom": "./src/atom.ts",
+		"./predicate": "./src/predicate.ts",
+		"./triple": "./src/triple.ts",
+		"./discover": "./src/discover.ts",
+		"./validate": "./src/validate.ts",
+		"./types": "./src/types.ts"
 	},
 	"keywords": [
 		"intuition",
