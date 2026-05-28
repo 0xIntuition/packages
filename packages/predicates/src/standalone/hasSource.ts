@@ -1,20 +1,13 @@
-import {
-	getPredicateAtomData,
-	getPredicateId,
-	getPredicateRecord,
-	type PredicateKey,
-} from '../predicates.js';
+import { calculateAtomId, createPredicateAtomData } from '@0xintuition/ids';
+import { hasSource as predicateSpec } from '../generated/specs/hasSource.js';
+import { definePredicateRecord } from '../record.js';
 
-export const key = 'hasSource' satisfies PredicateKey;
-const predicateRecord = getPredicateRecord(key);
-
-if (!predicateRecord) {
-	throw new Error('Missing generated predicate record for "hasSource".');
-}
-
-export const predicate = predicateRecord;
-export const id = getPredicateId(key);
-export const atomData = getPredicateAtomData(key);
+export const spec = predicateSpec;
+export const key = spec.key;
+export const predicate = definePredicateRecord(spec);
+export const atomData = createPredicateAtomData(spec.name, spec.description);
+export const id = calculateAtomId(atomData);
+export const hasSourceSpec = spec;
 export const hasSource = predicate;
 export const hasSourceId = id;
 export const hasSourceAtomData = atomData;

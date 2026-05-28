@@ -35,6 +35,27 @@ export interface PredicateDefinition {
 
 export type PredicateStatus = 'enshrined' | 'proposed' | 'deprecated';
 
+export interface PredicateSpec {
+	key: string;
+	name: string;
+	description: string;
+	marketPattern: MarketPattern;
+	conjugates: boolean;
+	thirdPerson?: string;
+	category: PredicateCategory;
+	status: PredicateStatus;
+	examples?: readonly string[];
+	isTransitive?: boolean;
+	isSymmetric?: boolean;
+	isHierarchical?: boolean;
+	inversePredicate?: string;
+}
+
+export type PredicateRecord<TSpec extends PredicateSpec = PredicateSpec> = PredicateDefinition & {
+	key: TSpec['key'];
+	status: TSpec['status'];
+};
+
 export interface PredicateAtomDocument {
 	'@context': 'https://schema.org/';
 	'@type': 'DefinedTerm';

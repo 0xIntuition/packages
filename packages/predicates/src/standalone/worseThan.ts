@@ -1,20 +1,13 @@
-import {
-	getPredicateAtomData,
-	getPredicateId,
-	getPredicateRecord,
-	type PredicateKey,
-} from '../predicates.js';
+import { calculateAtomId, createPredicateAtomData } from '@0xintuition/ids';
+import { worseThan as predicateSpec } from '../generated/specs/worseThan.js';
+import { definePredicateRecord } from '../record.js';
 
-export const key = 'worseThan' satisfies PredicateKey;
-const predicateRecord = getPredicateRecord(key);
-
-if (!predicateRecord) {
-	throw new Error('Missing generated predicate record for "worseThan".');
-}
-
-export const predicate = predicateRecord;
-export const id = getPredicateId(key);
-export const atomData = getPredicateAtomData(key);
+export const spec = predicateSpec;
+export const key = spec.key;
+export const predicate = definePredicateRecord(spec);
+export const atomData = createPredicateAtomData(spec.name, spec.description);
+export const id = calculateAtomId(atomData);
+export const worseThanSpec = spec;
 export const worseThan = predicate;
 export const worseThanId = id;
 export const worseThanAtomData = atomData;

@@ -1,20 +1,13 @@
-import {
-	getPredicateAtomData,
-	getPredicateId,
-	getPredicateRecord,
-	type PredicateKey,
-} from '../predicates.js';
+import { calculateAtomId, createPredicateAtomData } from '@0xintuition/ids';
+import { sponsoredBy as predicateSpec } from '../generated/specs/sponsoredBy.js';
+import { definePredicateRecord } from '../record.js';
 
-export const key = 'sponsoredBy' satisfies PredicateKey;
-const predicateRecord = getPredicateRecord(key);
-
-if (!predicateRecord) {
-	throw new Error('Missing generated predicate record for "sponsoredBy".');
-}
-
-export const predicate = predicateRecord;
-export const id = getPredicateId(key);
-export const atomData = getPredicateAtomData(key);
+export const spec = predicateSpec;
+export const key = spec.key;
+export const predicate = definePredicateRecord(spec);
+export const atomData = createPredicateAtomData(spec.name, spec.description);
+export const id = calculateAtomId(atomData);
+export const sponsoredBySpec = spec;
 export const sponsoredBy = predicate;
 export const sponsoredById = id;
 export const sponsoredByAtomData = atomData;

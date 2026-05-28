@@ -1,50 +1,15 @@
 import { calculateAtomId, createPredicateAtomData } from '@0xintuition/ids';
-import { PREDICATE_SPECS } from './generated/predicate-specs';
-import type { PredicateDefinition, PredicateStatus } from './types';
+import { PREDICATE_SPECS } from './generated/index.js';
+import { definePredicateRecord } from './record.js';
+import type { PredicateDefinition, PredicateRecord, PredicateStatus } from './types';
 
 type PredicateSpec = (typeof PREDICATE_SPECS)[number];
 
 export type PredicateKey = PredicateSpec['key'];
 export type PredicateId = ReturnType<typeof calculateAtomId>;
+export type { PredicateRecord };
 
-export type PredicateRecord = PredicateDefinition & {
-	key: PredicateKey;
-	status: PredicateStatus;
-};
-
-export const PREDICATE_RECORDS = PREDICATE_SPECS.map((spec) => {
-	const record: PredicateRecord = {
-		key: spec.key,
-		name: spec.name,
-		description: spec.description,
-		marketPattern: spec.marketPattern,
-		conjugates: spec.conjugates,
-		category: spec.category,
-		status: spec.status,
-		isTransitive:
-			'isTransitive' in spec && typeof spec.isTransitive === 'boolean' ? spec.isTransitive : false,
-		isSymmetric:
-			'isSymmetric' in spec && typeof spec.isSymmetric === 'boolean' ? spec.isSymmetric : false,
-		isHierarchical:
-			'isHierarchical' in spec && typeof spec.isHierarchical === 'boolean'
-				? spec.isHierarchical
-				: false,
-	};
-
-	if ('thirdPerson' in spec && typeof spec.thirdPerson === 'string') {
-		record.thirdPerson = spec.thirdPerson;
-	}
-
-	if ('examples' in spec && Array.isArray(spec.examples)) {
-		record.examples = spec.examples;
-	}
-
-	if ('inversePredicate' in spec && typeof spec.inversePredicate === 'string') {
-		record.inversePredicate = spec.inversePredicate;
-	}
-
-	return record;
-});
+export const PREDICATE_RECORDS = PREDICATE_SPECS.map((spec) => definePredicateRecord(spec));
 
 export const PREDICATE_DEFS = Object.fromEntries(
 	PREDICATE_RECORDS.map(({ key, status, ...definition }) => [key, definition])

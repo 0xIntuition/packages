@@ -2,7 +2,7 @@
 
 Canonical Intuition predicate registry, launch constants, entity mappings, and display helpers.
 
-Alpha status: publish under the alpha dist-tag after release review. Predicate standalone modules are generated from the canonical catalog.
+Alpha status: publish under the alpha dist-tag after release review. Predicate standalone modules are generated from per-predicate source specs.
 
 ## Included
 
@@ -23,6 +23,7 @@ import {
 } from '@0xintuition/predicates'
 import {
 	follow,
+	followSpec,
 	followAtomData as standaloneFollowAtomData,
 	followId as standaloneFollowId,
 } from '@0xintuition/predicates/follow'
@@ -34,6 +35,7 @@ const followAtomData = createPredicateAtomData(
 
 const registryFollowId = PREDICATE_IDS.follow
 const followName = follow.name
+const followKey = followSpec.key
 const standaloneFollow = { id: standaloneFollowId, atomData: standaloneFollowAtomData }
 
 const containIpfsDoc = buildPredicateIpfsDocument('contain', {
