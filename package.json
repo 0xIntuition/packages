@@ -7,7 +7,6 @@
 	"type": "module",
 	"packageManager": "bun@1.3.3",
 	"workspaces": [
-		"apps/*",
 		"packages/*"
 	],
 	"scripts": {
@@ -19,6 +18,8 @@
 		"format": "turbo run format",
 		"clean": "turbo run clean",
 		"schema:validate": "node scripts/validate-schema.mjs",
+		"schema:verify-live": "node scripts/verify-live-schema.mjs",
+		"predicates:check-generated": "node scripts/check-predicate-generation.mjs",
 		"pack:dry-run": "node scripts/pack-dry-run.mjs",
 		"smoke:tarballs": "node scripts/smoke-tarballs.mjs",
 		"guard:supply-chain": "node scripts/guard-supply-chain-policy.mjs",

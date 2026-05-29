@@ -1,0 +1,45 @@
+import type { ClassificationSpec } from '../../types.js';
+
+export const book: ClassificationSpec = {
+	slug: 'book',
+	type: 'Book',
+	displayName: 'Book',
+	description: 'A book identity with only the title and optional disambiguators.',
+	category: 'Creative Work',
+	schemaOrg: { context: 'https://schema.org/', type: 'Book' },
+	fields: [
+		{
+			key: 'name',
+			label: 'Title',
+			description: 'The title of the book.',
+			fieldType: 'string',
+			required: true,
+			placeholder: 'The Sovereign Individual',
+		},
+		{
+			key: 'author',
+			label: 'Author',
+			description: 'The author name when disambiguation is needed.',
+			fieldType: 'string',
+			required: false,
+			placeholder: 'James Dale Davidson',
+		},
+		{
+			key: 'isbn',
+			label: 'ISBN',
+			description: 'The ISBN identifier when known.',
+			fieldType: 'string',
+			required: false,
+			placeholder: '9780684832720',
+		},
+		{
+			key: 'sameAs',
+			label: 'Canonical References',
+			description: 'Canonical URLs that identify the same book.',
+			fieldType: 'string[]',
+			required: false,
+			placeholder: 'https://openlibrary.org/...',
+		},
+	],
+	defaults: { pluginId: 'book' },
+};

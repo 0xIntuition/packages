@@ -1,0 +1,45 @@
+import type { ClassificationSpec } from '../../types.js';
+
+export const service: ClassificationSpec = {
+	slug: 'service',
+	type: 'Service',
+	displayName: 'Service',
+	description: 'A service identity with optional provider and area-served disambiguators.',
+	category: 'Product',
+	schemaOrg: { context: 'https://schema.org/', type: 'Service' },
+	fields: [
+		{
+			key: 'name',
+			label: 'Service Name',
+			description: 'The service name.',
+			fieldType: 'string',
+			required: true,
+			placeholder: 'ENS Name Service',
+		},
+		{
+			key: 'provider',
+			label: 'Provider',
+			description: 'The provider name when needed.',
+			fieldType: 'string',
+			required: false,
+			placeholder: 'ENS Labs',
+		},
+		{
+			key: 'areaServed',
+			label: 'Area Served',
+			description: 'The served geography or audience when needed.',
+			fieldType: 'string',
+			required: false,
+			placeholder: 'Global',
+		},
+		{
+			key: 'sameAs',
+			label: 'Canonical References',
+			description: 'Canonical URLs for the same service.',
+			fieldType: 'string[]',
+			required: false,
+			placeholder: 'https://ens.domains',
+		},
+	],
+	defaults: { pluginId: 'service' },
+};
