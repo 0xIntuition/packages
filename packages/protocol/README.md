@@ -2,14 +2,14 @@
 
 Core Intuition protocol contract ABIs, event parsers, and interaction helpers for MultiVault, Trust, TrustBonding, WrappedTrust, and emissions controllers.
 
-Alpha status: this copy is versioned as `3.0.0-alpha.0` because deployment addresses and chain metadata were extracted into `@0xintuition/deployments`.
+Versioned as `3.0.0` and published on the `latest` dist-tag. The major bump (vs the legacy `2.x` line) reflects deployment addresses and chain metadata being extracted into `@0xintuition/deployments`.
 
 Runtime: ESM-only. This package does not publish CommonJS `require` entrypoints.
 
 ## Install
 
 ```bash
-bun add @0xintuition/protocol@alpha @0xintuition/curves@alpha viem
+bun add @0xintuition/protocol @0xintuition/curves@alpha viem
 ```
 
 Peer dependency: `viem ^2.0.0`. Release smoke tests install `viem@2.31.4`.

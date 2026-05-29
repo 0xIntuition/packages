@@ -31,11 +31,11 @@ bun run smoke:tarballs
 4. `@0xintuition/classifications@0.1.0-alpha.0` - schema-host-gated for `https://schema.intuition.systems/v1/ethereum.jsonld`.
 5. `@0xintuition/predicates@0.1.0-alpha.0` - depends on ids.
 6. `@0xintuition/primitives@0.1.0-alpha.0` - depends on classifications, ids, and predicates.
-7. `@0xintuition/protocol@3.0.0-alpha.0` - depends on curves; v3 alpha because deployment exports were extracted in this copy.
+7. `@0xintuition/protocol@3.0.0` - depends on curves; v3 (major) because deployment exports were extracted in this copy. Publishes on `latest`, superseding legacy `2.0.2`.
 8. `@0xintuition/periphery@0.1.0-alpha.0` - depends on deployments for shared Intuition chain IDs; keeps periphery bridge/router addresses in periphery.
 9. `@0xintuition/react@0.1.0-alpha.0` - depends on deployments, ids, and protocol; does not depend on the deferred SDK.
 
-Use `--tag alpha` when publishing staged tarballs after review. If protocol deployment extraction is reverted or slips, do not publish protocol as v3.
+Publish the eight fresh packages with `--tag alpha`; publish `@0xintuition/protocol@3.0.0` to the default `latest` tag (supersedes legacy `2.0.2`). If protocol deployment extraction is reverted or slips, do not publish protocol as v3. Heads-up: stable `protocol@3.0.0` pins `@0xintuition/curves@0.1.0-alpha.0` (a prerelease) at pack time — intentional, for the deprecated curve re-exports; the exact pin resolves on install.
 
 ## Staged Tarball Flow
 
@@ -70,8 +70,8 @@ Treat `/v1/*` as immutable. Breaking schema changes go to `/v2/*` and require pa
 - Confirm npm org access, package publish permissions, and 2FA before packing release tarballs.
 - Human-verify every address in `@0xintuition/deployments` for each supported chain; automated smoke only checks address shape.
 - Confirm the `@0xintuition/deployments` API surface intentionally includes small address lookup helpers.
-- Confirm whether fresh packages stay on prerelease `0.1.0-alpha.0` with the alpha dist-tag or flip to stable `0.1.0` on `latest`.
-- Confirm whether `@0xintuition/protocol` publishes as `3.0.0-alpha.0` on the alpha dist-tag or `3.0.0` on `latest`.
+- DECIDED (2026-05-28, JP): the eight fresh packages stay on prerelease `0.1.0-alpha.0` with the `alpha` dist-tag. Consumers install with `@alpha`; a bare `npm i`/`bun add` will not resolve until a stable release. Revisit before any stable cut.
+- DECIDED (2026-05-28, JP): `@0xintuition/protocol` publishes as `3.0.0` on `latest` (supersedes legacy `2.0.2`). Accepted trade-offs: protocol installs bare while the eight fresh packages need `@alpha`, and stable `3.0.0` pins alpha `@0xintuition/curves`.
 - Confirm the `viem` peer range. Source manifests allow `^2.0.0`; release smoke tests currently install `viem@2.31.4`.
 
 ## Rollback Notes
