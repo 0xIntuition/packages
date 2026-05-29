@@ -13,7 +13,8 @@
 	],
 	"exports": {
 		".": "./src/index.ts",
-		"./package.json": "./package.json"
+		"./package.json": "./package.json",
+		"./*": "./src/generated/specs/*.ts"
 	},
 	"keywords": [
 		"intuition",

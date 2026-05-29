@@ -137,6 +137,8 @@ try {
 		results.predicateAtomData = ids.createPredicateAtomData('follow', 'Directional subscription or tracking of the object entity');
 		const classifications = await import('@0xintuition/classifications');
 		results.classification = classifications.getClassification('ethereum-account')?.type;
+		const ethereumAccountClassification = await import('@0xintuition/classifications/ethereum-account');
+		results.classificationSubpath = ethereumAccountClassification.ethereumAccount.type;
 		const predicates = await import('@0xintuition/predicates');
 		results.predicate = predicates.getPredicateRecord('follow')?.name;
 		results.followId = predicates.getPredicateId('follow');
@@ -179,6 +181,7 @@ try {
 	assert.match(nodeResult.predicateId, /^0x[0-9a-f]{64}$/i);
 	assert.match(nodeResult.predicateAtomData, /"@type":"DefinedTerm"/);
 	assert.equal(nodeResult.classification, 'EthereumAccount');
+	assert.equal(nodeResult.classificationSubpath, 'EthereumAccount');
 	assert.equal(nodeResult.predicate, 'follow');
 	assert.match(nodeResult.followId, /^0x[0-9a-f]{64}$/i);
 	assert.equal(nodeResult.launchHasFollow, true);
