@@ -17,6 +17,7 @@ bun run typecheck
 bun run test
 bun run check
 bun run schema:validate
+bun run predicates:check-generated
 bun run guard:supply-chain
 bun run pack:dry-run
 bun run smoke:tarballs
@@ -47,6 +48,8 @@ bun run smoke:tarballs
 
 Direct `npm publish` from package roots is blocked by `prepublishOnly`. Publish only the staged tarballs produced by `bun run --cwd packages/<name> pack:release` after review.
 
+Internal workspace dependencies are pinned to the exact packed package versions in staged tarballs. Keep that lockstep policy for the first coordinated publication unless the release owner explicitly chooses semver ranges before publishing.
+
 ## Schema Host Gate
 
 GitHub Pages must serve:
@@ -61,6 +64,15 @@ bun run schema:verify-live
 ```
 
 Treat `/v1/*` as immutable. Breaking schema changes go to `/v2/*` and require package constants and tests to change together.
+
+## Pre-Publish Human Checks
+
+- Confirm npm org access, package publish permissions, and 2FA before packing release tarballs.
+- Human-verify every address in `@0xintuition/deployments` for each supported chain; automated smoke only checks address shape.
+- Confirm the `@0xintuition/deployments` API surface intentionally includes small address lookup helpers.
+- Confirm whether fresh packages stay on prerelease `0.1.0-alpha.0` with the alpha dist-tag or flip to stable `0.1.0` on `latest`.
+- Confirm whether `@0xintuition/protocol` publishes as `3.0.0-alpha.0` on the alpha dist-tag or `3.0.0` on `latest`.
+- Confirm the `viem` peer range. Source manifests allow `^2.0.0`; release smoke tests currently install `viem@2.31.4`.
 
 ## Rollback Notes
 

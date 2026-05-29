@@ -2,11 +2,15 @@
 
 High-level atom, claim, predicate, classification, and validation helpers for building with Intuition off-chain data.
 
+Runtime: ESM-only. This package does not publish CommonJS `require` entrypoints.
+
 ## Install
 
 ```bash
 bun add @0xintuition/primitives@alpha
 ```
+
+Peer dependency: `viem ^2.0.0`. Release smoke tests install `viem@2.31.4`.
 
 ## Usage
 

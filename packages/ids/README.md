@@ -4,13 +4,15 @@ Deterministic content-addressable ID utilities for Intuition atoms, triples, cou
 
 Alpha status: publish under the alpha dist-tag after review. OAuth atom helpers are schema-host-gated on https://schema.intuition.systems/v1/oauth-atom.jsonld.
 
+Runtime: ESM-only. This package does not publish CommonJS `require` entrypoints.
+
 ## Install
 
 ```bash
 bun add @0xintuition/ids@alpha viem
 ```
 
-Peer dependency: `viem ^2.0.0`.
+Peer dependency: `viem ^2.0.0`. Release smoke tests install `viem@2.31.4`.
 
 ## Example
 
@@ -33,4 +35,3 @@ const followPredicateId = calculatePredicateId(
 ## OAuth Atom Context
 
 `OAUTH_ATOM_CONTEXT` is locked to `https://schema.intuition.systems/v1/oauth-atom.jsonld`. Serialized JSON and derived atom ID vectors are covered by tests because changes alter on-chain atom identity.
-

@@ -4,6 +4,8 @@ Canonical Intuition predicate registry, launch constants, entity mappings, and d
 
 Alpha status: publish under the alpha dist-tag after release review. Predicate standalone modules are generated from per-predicate source specs.
 
+Runtime: ESM-only. This package does not publish CommonJS `require` entrypoints.
+
 ## Included
 
 - 97-predicate registry with deterministic inline `DefinedTerm` atom data and atom IDs
@@ -59,4 +61,4 @@ const bootstrapTriples = getLaunchPredicateBootstrapTriples()
 bun add @0xintuition/predicates@alpha @0xintuition/ids@alpha viem
 ```
 
-Peer dependency: `viem ^2.0.0`.
+Peer dependency: `viem ^2.0.0`. Release smoke tests install `viem@2.31.4`.

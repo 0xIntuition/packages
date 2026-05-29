@@ -2,6 +2,8 @@
 
 Mathematical helpers for Intuition bonding curve previews.
 
+Runtime: ESM-only. This package does not publish CommonJS `require` entrypoints.
+
 ## Install
 
 ```bash

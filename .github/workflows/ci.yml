@@ -36,6 +36,9 @@ jobs:
       - name: Validate schema assets
         run: bun run schema:validate
 
+      - name: Check generated predicate modules
+        run: bun run predicates:check-generated
+
       - name: Guard supply-chain policy
         run: bun run guard:supply-chain
 
