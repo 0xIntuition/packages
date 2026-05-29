@@ -7,6 +7,7 @@
 - Do not push or open a PR from an agent run unless explicitly requested.
 - Do not copy or publish `@0xintuition/cli`, `@0xintuition/sdk`, or `@0xintuition/stacks` in this round.
 - Do not remove packages or deployment exports from the product codebase in this round.
+- Do not publish `@0xintuition/ids` or `@0xintuition/classifications` until the atom identity versus canonical schema URL decision is resolved.
 
 ## Required Validation
 
@@ -64,6 +65,30 @@ bun run schema:verify-live
 ```
 
 Treat `/v1/*` as immutable. Breaking schema changes go to `/v2/*` and require package constants and tests to change together.
+
+## Atom Identity Gate
+
+Schema URL strings are part of serialized atom data, and atom IDs are derived from the exact serialized bytes. Changing a JSON-LD `@context` URL therefore changes on-chain atom identity even when the user-facing entity is the same.
+
+This repo currently uses re-canonicalized self-hosted contexts for OAuth atoms and Ethereum classifications:
+
+| Surface | Current live implementation | This repo |
+| --- | --- | --- |
+| OAuth atom | `https://schema.0xintuition.com/v1/metadata.jsonld` | `https://schema.intuition.systems/v1/oauth-atom.jsonld` |
+| Ethereum classifications | `https://schemas.intuition.systems/v1` | `https://schema.intuition.systems/v1/ethereum.jsonld` |
+
+Affected package surfaces:
+
+- `@0xintuition/ids`: OAuth atom helpers and derived OAuth atom IDs.
+- `@0xintuition/classifications`: `ethereum-account`, `ethereum-erc20`, and `ethereum-smart-contract`.
+- `@0xintuition/primitives`: Ethereum atom builders that consume those classification specs.
+
+The remaining schema.org classifications are unaffected.
+
+Decision required before publishing `ids` and `classifications`:
+
+- Preserve identity: restore the exact current serialized forms so package-derived IDs match already-created atoms.
+- Re-canonicalize intentionally: accept the identity fork, publish the new URLs, and document migration/dedupe expectations before consumers adopt the packages.
 
 ## Pre-Publish Human Checks
 

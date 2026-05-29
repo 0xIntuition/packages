@@ -8,4 +8,5 @@ Reconciliation decision for this alpha package repo:
 - Deployment extraction and publish metadata changes happen only in this copy.
 - Predicate specs live in one source module per predicate under `packages/predicates/src/generated/specs/`; `generated/index.ts` and standalone public modules are generated from those source modules.
 - Classification specs live in one source module per classification and are exposed as direct package subpaths; `@0xintuition/primitives` stays grouped by builder domain rather than duplicating catalog entries.
+- The self-hosted JSON-LD context recanonicalization in `ids` and the Ethereum classification specs is an unresolved atom-identity decision; do not publish those surfaces until the release owner chooses preserve-identity versus intentional recanonicalization.
 - Detailed provenance is maintained outside public repository docs.
