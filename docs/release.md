@@ -64,6 +64,17 @@ This repo includes a separate least-privilege Pages workflow that uploads `schem
 bun run schema:verify-live
 ```
 
+The live verifier intentionally requires a JSON-compatible response content type: `application/ld+json`, `application/json`, or another `application/*+json` media type. Do not loosen this to accept `text/plain` or `application/octet-stream`; that would make the gate pass for fetch-based consumers while strict JSON-LD processors may reject the remote context.
+
+Measure the served header after DNS is live:
+
+```bash
+curl -sI https://schema.intuition.systems/v1/oauth-atom.jsonld | grep -i content-type
+curl -sI https://schema.intuition.systems/v1/ethereum.jsonld | grep -i content-type
+```
+
+If the chosen canonical URLs keep the `.jsonld` extension and GitHub Pages does not serve a JSON-compatible content type, fix serving at the edge or host layer, for example with a Cloudflare response-header rule for `/v1/*.jsonld`. Renaming files to `.json` can also fix content type on static hosts, but that changes the `@context` URL string and must be decided together with the atom identity gate below.
+
 Treat `/v1/*` as immutable. Breaking schema changes go to `/v2/*` and require package constants and tests to change together.
 
 ## Atom Identity Gate

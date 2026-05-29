@@ -34,8 +34,15 @@ for (const url of schemaUrls) {
 		}
 
 		const contentType = response.headers.get('content-type') ?? '';
-		if (!/(application\/ld\+json|application\/json|text\/plain)/i.test(contentType)) {
-			failures.push(`${url}: unexpected content-type "${contentType || 'missing'}"`);
+		const mediaType = contentType.split(';', 1)[0]?.trim().toLowerCase() ?? '';
+		if (
+			mediaType !== 'application/ld+json' &&
+			mediaType !== 'application/json' &&
+			!(mediaType.startsWith('application/') && mediaType.endsWith('+json'))
+		) {
+			failures.push(
+				`${url}: unexpected content-type "${contentType || 'missing'}"; expected application/ld+json, application/json, or application/*+json`
+			);
 			continue;
 		}
 
