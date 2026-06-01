@@ -1,0 +1,86 @@
+import type { SchemaOrgTypeSpec } from '../../types.js';
+
+export const schemaOrgDataset = {
+	id: 'schema:Dataset',
+	name: 'Dataset',
+	label: 'Dataset',
+	comment: 'A body of structured information describing some topic(s) of interest.',
+	subClassOf: ['CreativeWork', 'Thing'],
+	properties: [
+		{
+			id: 'schema:catalog',
+			name: 'catalog',
+			label: 'catalog',
+			comment: 'A data catalog which contains this dataset.',
+			rangeIncludes: ['DataCatalog'],
+		},
+		{
+			id: 'schema:datasetTimeInterval',
+			name: 'datasetTimeInterval',
+			label: 'datasetTimeInterval',
+			comment:
+				'The range of temporal applicability of a dataset, e.g. for a 2011 census dataset, the year 2011 (in ISO 8601 time interval format).',
+			rangeIncludes: ['DateTime'],
+		},
+		{
+			id: 'schema:distribution',
+			name: 'distribution',
+			label: 'distribution',
+			comment:
+				'A downloadable form of this dataset, at a specific location, in a specific format. This property can be repeated if different variations are available. There is no expectation that different downloadable distributions must contain exactly equivalent information (see also [DCAT](https://www.w3.org/TR/vocab-dcat-3/#Class:Distribution) on this point). Different distributions might include or exclude different subsets of the entire dataset, for example.',
+			rangeIncludes: ['DataDownload'],
+		},
+		{
+			id: 'schema:includedDataCatalog',
+			name: 'includedDataCatalog',
+			label: 'includedDataCatalog',
+			comment:
+				"A data catalog which contains this dataset (this property was previously 'catalog', preferred name is now 'includedInDataCatalog').",
+			rangeIncludes: ['DataCatalog'],
+		},
+		{
+			id: 'schema:includedInDataCatalog',
+			name: 'includedInDataCatalog',
+			label: 'includedInDataCatalog',
+			comment: 'A data catalog which contains this dataset.',
+			rangeIncludes: ['DataCatalog'],
+		},
+		{
+			id: 'schema:issn',
+			name: 'issn',
+			label: 'issn',
+			comment:
+				'The International Standard Serial Number (ISSN) that identifies this serial publication. You can repeat this property to identify different formats of, or the linking ISSN (ISSN-L) for, this serial publication.',
+			rangeIncludes: ['Text'],
+		},
+		{
+			id: 'schema:measurementMethod',
+			name: 'measurementMethod',
+			label: 'measurementMethod',
+			comment:
+				'A subproperty of [[measurementTechnique]] that can be used for specifying specific methods, in particular via [[MeasurementMethodEnum]].',
+			rangeIncludes: ['DefinedTerm', 'MeasurementMethodEnum', 'Text', 'URL'],
+		},
+		{
+			id: 'schema:measurementTechnique',
+			name: 'measurementTechnique',
+			label: 'measurementTechnique',
+			comment:
+				'A technique, method or technology used in an [[Observation]], [[StatisticalVariable]] or [[Dataset]] (or [[DataDownload]], [[DataCatalog]]), corresponding to the method used for measuring the corresponding variable(s) (for datasets, described using [[variableMeasured]]; for [[Observation]], a [[StatisticalVariable]]). Often but not necessarily each [[variableMeasured]] will have an explicit representation as (or mapping to) an property such as those defined in Schema.org, or other RDF vocabularies and "knowledge graphs". In that case the subproperty of [[variableMeasured]] called [[measuredProperty]] is applicable.\n    \nThe [[measurementTechnique]] property helps when extra clarification is needed about how a [[measuredProperty]] was measured. This is oriented towards scientific and scholarly dataset publication but may have broader applicability; it is not intended as a full representation of measurement, but can often serve as a high level summary for dataset discovery. \n\nFor example, if [[variableMeasured]] is: molecule concentration, [[measurementTechnique]] could be: "mass spectrometry" or "nmr spectroscopy" or "colorimetry" or "immunofluorescence". If the [[variableMeasured]] is "depression rating", the [[measurementTechnique]] could be "Zung Scale" or "HAM-D" or "Beck Depression Inventory". \n\nIf there are several [[variableMeasured]] properties recorded for some given data object, use a [[PropertyValue]] for each [[variableMeasured]] and attach the corresponding [[measurementTechnique]]. The value can also be from an enumeration, organized as a [[MeasurementMethodEnum]].',
+			rangeIncludes: ['DefinedTerm', 'MeasurementMethodEnum', 'Text', 'URL'],
+		},
+		{
+			id: 'schema:variableMeasured',
+			name: 'variableMeasured',
+			label: 'variableMeasured',
+			comment:
+				'The variableMeasured property can indicate (repeated as necessary) the  variables that are measured in some dataset, either described as text or as pairs of identifier and description using PropertyValue, or more explicitly as a [[StatisticalVariable]].',
+			rangeIncludes: ['Property', 'PropertyValue', 'StatisticalVariable', 'Text'],
+		},
+	],
+} as const satisfies SchemaOrgTypeSpec;
+
+export const spec = schemaOrgDataset;
+export const Dataset = schemaOrgDataset;
+
+export default schemaOrgDataset;

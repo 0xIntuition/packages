@@ -1,0 +1,173 @@
+import type { SchemaOrgTypeSpec } from '../../types.js';
+
+export const schemaOrgLegislation = {
+	id: 'schema:Legislation',
+	name: 'Legislation',
+	label: 'Legislation',
+	comment:
+		'A legal document such as an act, decree, bill, etc. (enforceable or not) or a component of a legal act (like an article).',
+	subClassOf: ['CreativeWork', 'Thing'],
+	properties: [
+		{
+			id: 'schema:jurisdiction',
+			name: 'jurisdiction',
+			label: 'jurisdiction',
+			comment:
+				'Indicates a legal jurisdiction, e.g. of some legislation, or where some government service is based.',
+			rangeIncludes: ['AdministrativeArea', 'Text'],
+		},
+		{
+			id: 'schema:legislationAmends',
+			name: 'legislationAmends',
+			label: 'legislationAmends',
+			comment: 'Another legislation that this legislation amends, introducing legal changes.',
+			rangeIncludes: ['Legislation'],
+		},
+		{
+			id: 'schema:legislationApplies',
+			name: 'legislationApplies',
+			label: 'legislationApplies',
+			comment:
+				'Indicates that this legislation (or part of a legislation) somehow transfers another legislation in a different legislative context. This is an informative link, and it has no legal value. For legally-binding links of transposition, use the <a href="/legislationTransposes">legislationTransposes</a> property. For example an informative consolidated law of a European Union\'s member state "applies" the consolidated version of the European Directive implemented in it.',
+			rangeIncludes: ['Legislation'],
+		},
+		{
+			id: 'schema:legislationChanges',
+			name: 'legislationChanges',
+			label: 'legislationChanges',
+			comment:
+				'Another legislation that this legislation changes. This encompasses the notions of amendment, replacement, correction, repeal, or other types of change. This may be a direct change (textual or non-textual amendment) or a consequential or indirect change. The property is to be used to express the existence of a change relationship between two acts rather than the existence of a consolidated version of the text that shows the result of the change. For consolidation relationships, use the <a href="/legislationConsolidates">legislationConsolidates</a> property.',
+			rangeIncludes: ['Legislation'],
+		},
+		{
+			id: 'schema:legislationCommences',
+			name: 'legislationCommences',
+			label: 'legislationCommences',
+			comment: 'Another legislation that this one sets into force.',
+			rangeIncludes: ['Legislation'],
+		},
+		{
+			id: 'schema:legislationConsolidates',
+			name: 'legislationConsolidates',
+			label: 'legislationConsolidates',
+			comment:
+				'Indicates another legislation taken into account in this consolidated legislation (which is usually the product of an editorial process that revises the legislation). This property should be used multiple times to refer to both the original version or the previous consolidated version, and to the legislations making the change.',
+			rangeIncludes: ['Legislation'],
+		},
+		{
+			id: 'schema:legislationCorrects',
+			name: 'legislationCorrects',
+			label: 'legislationCorrects',
+			comment:
+				'Another legislation in which this one introduces textual changes, like correction of spelling mistakes, with no legal impact (for modifications that have legal impact, use <a href="/legislationAmends">legislationAmends</a>).',
+			rangeIncludes: ['Legislation'],
+		},
+		{
+			id: 'schema:legislationCountersignedBy',
+			name: 'legislationCountersignedBy',
+			label: 'legislationCountersignedBy',
+			comment:
+				'The person or organization that countersigned the legislation. Depending on the legal context, a countersignature can indicate that the signed authority undertakes to assume responsibility for texts emanating from a person who is inviolable and irresponsible, (for example a King, Grand Duc or President), or that the authority is in charge of the implementation of the text.',
+			rangeIncludes: ['Organization', 'Person'],
+		},
+		{
+			id: 'schema:legislationDate',
+			name: 'legislationDate',
+			label: 'legislationDate',
+			comment:
+				'The date of adoption or signature of the legislation. This is the date at which the text is officially aknowledged to be a legislation, even though it might not even be published or in force.',
+			rangeIncludes: ['Date'],
+		},
+		{
+			id: 'schema:legislationDateOfApplicability',
+			name: 'legislationDateOfApplicability',
+			label: 'legislationDateOfApplicability',
+			comment:
+				'The date at which the Legislation becomes applicable. This can sometimes be distinct from the date of entry into force : a text may come in force today, and state it will become applicable in 3 months.',
+			rangeIncludes: ['Date'],
+		},
+		{
+			id: 'schema:legislationDateVersion',
+			name: 'legislationDateVersion',
+			label: 'legislationDateVersion',
+			comment:
+				'The point-in-time at which the provided description of the legislation is valid (e.g.: when looking at the law on the 2016-04-07 (= dateVersion), I get the consolidation of 2015-04-12 of the "National Insurance Contributions Act 2015")',
+			rangeIncludes: ['Date'],
+		},
+		{
+			id: 'schema:legislationEnsuresImplementationOf',
+			name: 'legislationEnsuresImplementationOf',
+			label: 'legislationEnsuresImplementationOf',
+			comment:
+				'Indicates that this Legislation ensures the implementation of another Legislation, for example by modifying national legislations so that they do not contradict to an EU regulation or decision. This implies a legal meaning. Transpositions of EU Directive should be captured with <a href="/legislationTransposes">legislationTransposes</a>.',
+			rangeIncludes: ['Legislation'],
+		},
+		{
+			id: 'schema:legislationIdentifier',
+			name: 'legislationIdentifier',
+			label: 'legislationIdentifier',
+			comment:
+				'An identifier for the legislation. This can be either a string-based identifier, like the CELEX at EU level or the NOR in France, or a web-based, URL/URI identifier, like an ELI (European Legislation Identifier) or an URN-Lex.',
+			rangeIncludes: ['Text', 'URL'],
+		},
+		{
+			id: 'schema:legislationJurisdiction',
+			name: 'legislationJurisdiction',
+			label: 'legislationJurisdiction',
+			comment: 'The jurisdiction from which the legislation originates.',
+			rangeIncludes: ['AdministrativeArea', 'Text'],
+		},
+		{
+			id: 'schema:legislationLegalForce',
+			name: 'legislationLegalForce',
+			label: 'legislationLegalForce',
+			comment:
+				'Whether the legislation is currently in force, not in force, or partially in force.',
+			rangeIncludes: ['LegalForceStatus'],
+		},
+		{
+			id: 'schema:legislationPassedBy',
+			name: 'legislationPassedBy',
+			label: 'legislationPassedBy',
+			comment:
+				'The person or organization that originally passed or made the law: typically parliament (for primary legislation) or government (for secondary legislation). This indicates the "legal author" of the law, as opposed to its physical author.',
+			rangeIncludes: ['Organization', 'Person'],
+		},
+		{
+			id: 'schema:legislationRepeals',
+			name: 'legislationRepeals',
+			label: 'legislationRepeals',
+			comment: 'Another legislation that this legislation repeals (cancels, abrogates).',
+			rangeIncludes: ['Legislation'],
+		},
+		{
+			id: 'schema:legislationResponsible',
+			name: 'legislationResponsible',
+			label: 'legislationResponsible',
+			comment:
+				'An individual or organization that has some kind of responsibility for the legislation. Typically the ministry who is/was in charge of elaborating the legislation, or the adressee for potential questions about the legislation once it is published.',
+			rangeIncludes: ['Organization', 'Person'],
+		},
+		{
+			id: 'schema:legislationTransposes',
+			name: 'legislationTransposes',
+			label: 'legislationTransposes',
+			comment:
+				"Indicates that this legislation (or part of legislation) fulfills the objectives set by another legislation, by passing appropriate implementation measures. Typically, some legislations of European Union's member states or regions transpose European Directives. This indicates a legally binding link between the 2 legislations.",
+			rangeIncludes: ['Legislation'],
+		},
+		{
+			id: 'schema:legislationType',
+			name: 'legislationType',
+			label: 'legislationType',
+			comment:
+				'The type of the legislation. Examples of values are "law", "act", "directive", "decree", "regulation", "statutory instrument", "loi organique", "règlement grand-ducal", etc., depending on the country.',
+			rangeIncludes: ['CategoryCode', 'Text'],
+		},
+	],
+} as const satisfies SchemaOrgTypeSpec;
+
+export const spec = schemaOrgLegislation;
+export const Legislation = schemaOrgLegislation;
+
+export default schemaOrgLegislation;

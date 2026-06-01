@@ -12,6 +12,7 @@ const packageOrder = [
 	'deployments',
 	'curves',
 	'ids',
+	'schema-org',
 	'classifications',
 	'predicates',
 	'primitives',
@@ -135,6 +136,12 @@ try {
 		results.oauth = ids.serializeOAuthAtomData({ provider: 'google', providerAccountId: '123' });
 		results.predicateId = ids.calculatePredicateId('follow', 'Directional subscription or tracking of the object entity');
 		results.predicateAtomData = ids.createPredicateAtomData('follow', 'Directional subscription or tracking of the object entity');
+		const schemaOrg = await import('@0xintuition/schema-org');
+		results.schemaOrgBook = schemaOrg.getType('Book')?.name;
+		results.schemaOrgBookNameOrigin = schemaOrg.getPropertiesFor('Book').find((property) => property.name === 'name')?.originType;
+		results.schemaOrgBookAuthorOrigin = schemaOrg.getPropertiesFor('Book').find((property) => property.name === 'author')?.originType;
+		const schemaOrgBook = await import('@0xintuition/schema-org/Book');
+		results.schemaOrgBookSubpath = schemaOrgBook.schemaOrgBook.name;
 		const classifications = await import('@0xintuition/classifications');
 		results.classification = classifications.getClassification('ethereum-account')?.type;
 		const ethereumAccountClassification = await import('@0xintuition/classifications/ethereum-account');
@@ -180,6 +187,10 @@ try {
 	assert.match(nodeResult.oauth, /schema\.intuition\.systems\/v1\/oauth-atom\.jsonld/);
 	assert.match(nodeResult.predicateId, /^0x[0-9a-f]{64}$/i);
 	assert.match(nodeResult.predicateAtomData, /"@type":"DefinedTerm"/);
+	assert.equal(nodeResult.schemaOrgBook, 'Book');
+	assert.equal(nodeResult.schemaOrgBookNameOrigin, 'Thing');
+	assert.equal(nodeResult.schemaOrgBookAuthorOrigin, 'CreativeWork');
+	assert.equal(nodeResult.schemaOrgBookSubpath, 'Book');
 	assert.equal(nodeResult.classification, 'EthereumAccount');
 	assert.equal(nodeResult.classificationSubpath, 'EthereumAccount');
 	assert.equal(nodeResult.predicate, 'follow');
