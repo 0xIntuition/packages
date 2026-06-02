@@ -8,8 +8,8 @@ export const schemaOrgExercisePlan = {
 		'Fitness-related activity designed for a specific health-related purpose, including defined exercise routines as well as activity prescribed by a clinician.',
 	subClassOf: [
 		'CreativeWork',
-		'Thing',
 		'PhysicalActivity',
+		'Thing',
 		'LifestyleModification',
 		'MedicalEntity',
 	],

@@ -6,7 +6,7 @@ export const schemaOrgNewspaper = {
 	label: 'Newspaper',
 	comment:
 		'A publication containing information about varied topics that are pertinent to general information, a geographic area, or a specific subject matter (i.e. business, culture, education). Often published daily.',
-	subClassOf: ['Periodical', 'CreativeWorkSeries', 'CreativeWork', 'Thing', 'Series', 'Intangible'],
+	subClassOf: ['Periodical', 'CreativeWorkSeries', 'CreativeWork', 'Series', 'Thing', 'Intangible'],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;
 

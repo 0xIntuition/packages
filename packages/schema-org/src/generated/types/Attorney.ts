@@ -6,7 +6,7 @@ export const schemaOrgAttorney = {
 	label: 'Attorney',
 	comment:
 		'Professional service: Attorney. \\n\\nThis type is deprecated - [[LegalService]] is more inclusive and less ambiguous.',
-	subClassOf: ['LegalService', 'LocalBusiness', 'Organization', 'Thing', 'Place'],
+	subClassOf: ['LegalService', 'LocalBusiness', 'Organization', 'Place', 'Thing'],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;
 

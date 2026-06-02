@@ -5,7 +5,7 @@ export const schemaOrgAutomatedTeller = {
 	name: 'AutomatedTeller',
 	label: 'AutomatedTeller',
 	comment: 'ATM/cash machine.',
-	subClassOf: ['FinancialService', 'LocalBusiness', 'Organization', 'Thing', 'Place'],
+	subClassOf: ['FinancialService', 'LocalBusiness', 'Organization', 'Place', 'Thing'],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;
 

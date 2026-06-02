@@ -5,7 +5,7 @@ export const schemaOrgVideoGameSeries = {
 	name: 'VideoGameSeries',
 	label: 'VideoGameSeries',
 	comment: 'A video game series.',
-	subClassOf: ['CreativeWorkSeries', 'CreativeWork', 'Thing', 'Series', 'Intangible'],
+	subClassOf: ['CreativeWorkSeries', 'CreativeWork', 'Series', 'Thing', 'Intangible'],
 	properties: [
 		{
 			id: 'schema:actor',

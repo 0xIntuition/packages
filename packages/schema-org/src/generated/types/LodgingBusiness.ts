@@ -5,7 +5,7 @@ export const schemaOrgLodgingBusiness = {
 	name: 'LodgingBusiness',
 	label: 'LodgingBusiness',
 	comment: 'A lodging business, such as a motel, hotel, or inn.',
-	subClassOf: ['LocalBusiness', 'Organization', 'Thing', 'Place'],
+	subClassOf: ['LocalBusiness', 'Organization', 'Place', 'Thing'],
 	properties: [
 		{
 			id: 'schema:amenityFeature',

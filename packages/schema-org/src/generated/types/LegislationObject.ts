@@ -6,7 +6,7 @@ export const schemaOrgLegislationObject = {
 	label: 'LegislationObject',
 	comment:
 		'A specific object or file containing a Legislation. Note that the same Legislation can be published in multiple files. For example, a digitally signed PDF, a plain PDF and an HTML version.',
-	subClassOf: ['Legislation', 'CreativeWork', 'Thing', 'MediaObject'],
+	subClassOf: ['Legislation', 'MediaObject', 'CreativeWork', 'Thing'],
 	properties: [
 		{
 			id: 'schema:legislationLegalValue',

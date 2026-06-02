@@ -6,7 +6,7 @@ export const schemaOrgAmpStory = {
 	label: 'AmpStory',
 	comment:
 		'A creative work with a visual storytelling format intended to be viewed online, particularly on mobile devices.',
-	subClassOf: ['CreativeWork', 'Thing', 'MediaObject'],
+	subClassOf: ['CreativeWork', 'MediaObject', 'Thing'],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;
 

@@ -9,11 +9,11 @@ export const schemaOrgIndividualPhysician = {
 	subClassOf: [
 		'Physician',
 		'MedicalBusiness',
+		'MedicalOrganization',
 		'LocalBusiness',
 		'Organization',
-		'Thing',
 		'Place',
-		'MedicalOrganization',
+		'Thing',
 	],
 	properties: [
 		{

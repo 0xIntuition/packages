@@ -6,7 +6,7 @@ export const schemaOrgHowToSection = {
 	label: 'HowToSection',
 	comment:
 		'A sub-grouping of steps in the instructions for how to achieve a result (e.g. steps for making a pie crust within a pie recipe).',
-	subClassOf: ['CreativeWork', 'Thing', 'ItemList', 'Intangible', 'ListItem'],
+	subClassOf: ['CreativeWork', 'ItemList', 'ListItem', 'Thing', 'Intangible'],
 	properties: [
 		{
 			id: 'schema:steps',

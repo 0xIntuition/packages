@@ -6,7 +6,7 @@ export const schemaOrgReviewNewsArticle = {
 	label: 'ReviewNewsArticle',
 	comment:
 		"A [[NewsArticle]] and [[CriticReview]] providing a professional critic's assessment of a service, product, performance, or artistic or literary work.",
-	subClassOf: ['CriticReview', 'Review', 'CreativeWork', 'Thing', 'NewsArticle', 'Article'],
+	subClassOf: ['CriticReview', 'NewsArticle', 'Review', 'Article', 'CreativeWork', 'Thing'],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;
 

@@ -5,7 +5,7 @@ export const schemaOrgTVSeason = {
 	name: 'TVSeason',
 	label: 'TVSeason',
 	comment: 'Season dedicated to TV broadcast and associated online delivery.',
-	subClassOf: ['CreativeWork', 'Thing', 'CreativeWorkSeason'],
+	subClassOf: ['CreativeWork', 'CreativeWorkSeason', 'Thing'],
 	properties: [
 		{
 			id: 'schema:countryOfOrigin',

@@ -7,11 +7,11 @@ export const schemaOrgMedicalCode = {
 	comment: 'A code for a medical entity.',
 	subClassOf: [
 		'CategoryCode',
+		'MedicalIntangible',
 		'DefinedTerm',
+		'MedicalEntity',
 		'Intangible',
 		'Thing',
-		'MedicalIntangible',
-		'MedicalEntity',
 	],
 	properties: [
 		{

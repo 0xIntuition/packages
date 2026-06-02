@@ -8,11 +8,11 @@ export const schemaOrgPhysician = {
 		"An individual physician or a physician's office considered as a [[MedicalOrganization]].",
 	subClassOf: [
 		'MedicalBusiness',
+		'MedicalOrganization',
 		'LocalBusiness',
 		'Organization',
-		'Thing',
 		'Place',
-		'MedicalOrganization',
+		'Thing',
 	],
 	properties: [
 		{

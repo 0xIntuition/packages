@@ -5,7 +5,7 @@ export const schemaOrgComicCoverArt = {
 	name: 'ComicCoverArt',
 	label: 'ComicCoverArt',
 	comment: 'The artwork on the cover of a comic.',
-	subClassOf: ['ComicStory', 'CreativeWork', 'Thing', 'CoverArt', 'VisualArtwork'],
+	subClassOf: ['ComicStory', 'CoverArt', 'CreativeWork', 'VisualArtwork', 'Thing'],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;
 

@@ -6,7 +6,7 @@ export const schemaOrgHowToStep = {
 	label: 'HowToStep',
 	comment:
 		'A step in the instructions for how to achieve a result. It is an ordered list with HowToDirection and/or HowToTip items.',
-	subClassOf: ['CreativeWork', 'Thing', 'ItemList', 'Intangible', 'ListItem'],
+	subClassOf: ['CreativeWork', 'ItemList', 'ListItem', 'Thing', 'Intangible'],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;
 

@@ -7,10 +7,10 @@ export const schemaOrgStadiumOrArena = {
 	comment: 'A stadium.',
 	subClassOf: [
 		'CivicStructure',
-		'Place',
-		'Thing',
 		'SportsActivityLocation',
+		'Place',
 		'LocalBusiness',
+		'Thing',
 		'Organization',
 	],
 	properties: [],

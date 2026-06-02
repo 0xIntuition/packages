@@ -6,7 +6,7 @@ export const schemaOrgAccountingService = {
 	label: 'AccountingService',
 	comment:
 		'Accountancy business.\\n\\nAs a [[LocalBusiness]] it can be described as a [[provider]] of one or more [[Service]]\\(s).\n      ',
-	subClassOf: ['FinancialService', 'LocalBusiness', 'Organization', 'Thing', 'Place'],
+	subClassOf: ['FinancialService', 'LocalBusiness', 'Organization', 'Place', 'Thing'],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;
 

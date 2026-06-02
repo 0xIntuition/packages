@@ -6,7 +6,7 @@ export const schemaOrgDiet = {
 	label: 'Diet',
 	comment:
 		'A strategy of regulating the intake of food to achieve or maintain a specific health-related goal.',
-	subClassOf: ['CreativeWork', 'Thing', 'LifestyleModification', 'MedicalEntity'],
+	subClassOf: ['CreativeWork', 'LifestyleModification', 'Thing', 'MedicalEntity'],
 	properties: [
 		{
 			id: 'schema:dietFeatures',

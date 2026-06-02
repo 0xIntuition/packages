@@ -6,7 +6,7 @@ export const schemaOrgDefinedRegion = {
 	label: 'DefinedRegion',
 	comment:
 		'A DefinedRegion is a geographic area defined by potentially arbitrary (rather than political, administrative or natural geographical) criteria. Properties are provided for defining a region by reference to sets of postal codes.\n\nExamples: a delivery destination when shopping. Region where regional pricing is configured.\n\nRequirement 1:\nCountry: US\nStates: "NY", "CA"\n\nRequirement 2:\nCountry: US\nPostalCode Set: { [94000-94585], [97000, 97999], [13000, 13599]}\n{ [12345, 12345], [78945, 78945], }\nRegion = state, canton, prefecture, autonomous community...\n',
-	subClassOf: ['Place', 'Thing', 'StructuredValue', 'Intangible'],
+	subClassOf: ['Place', 'StructuredValue', 'Thing', 'Intangible'],
 	properties: [
 		{
 			id: 'schema:addressCountry',

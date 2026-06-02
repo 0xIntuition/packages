@@ -5,7 +5,7 @@ export const schemaOrgFinancialService = {
 	name: 'FinancialService',
 	label: 'FinancialService',
 	comment: 'Financial services business.',
-	subClassOf: ['LocalBusiness', 'Organization', 'Thing', 'Place'],
+	subClassOf: ['LocalBusiness', 'Organization', 'Place', 'Thing'],
 	properties: [
 		{
 			id: 'schema:feesAndCommissionsSpecification',

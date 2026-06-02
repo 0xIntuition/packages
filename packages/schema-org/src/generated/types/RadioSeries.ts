@@ -5,7 +5,7 @@ export const schemaOrgRadioSeries = {
 	name: 'RadioSeries',
 	label: 'RadioSeries',
 	comment: 'CreativeWorkSeries dedicated to radio broadcast and associated online delivery.',
-	subClassOf: ['CreativeWorkSeries', 'CreativeWork', 'Thing', 'Series', 'Intangible'],
+	subClassOf: ['CreativeWorkSeries', 'CreativeWork', 'Series', 'Thing', 'Intangible'],
 	properties: [
 		{
 			id: 'schema:actor',

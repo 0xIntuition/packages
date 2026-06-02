@@ -5,7 +5,7 @@ export const schemaOrgMedicalAudience = {
 	name: 'MedicalAudience',
 	label: 'MedicalAudience',
 	comment: 'Target audiences for medical web pages.',
-	subClassOf: ['Audience', 'Intangible', 'Thing', 'PeopleAudience'],
+	subClassOf: ['Audience', 'PeopleAudience', 'Intangible', 'Thing'],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;
 

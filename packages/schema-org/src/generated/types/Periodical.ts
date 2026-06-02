@@ -6,7 +6,7 @@ export const schemaOrgPeriodical = {
 	label: 'Periodical',
 	comment:
 		'A publication in any medium issued in successive parts bearing numerical or chronological designations and intended to continue indefinitely, such as a magazine, scholarly journal, or newspaper.\\n\\nSee also [blog post](https://blog.schema.org/2014/09/02/schema-org-support-for-bibliographic-relationships-and-periodicals/).',
-	subClassOf: ['CreativeWorkSeries', 'CreativeWork', 'Thing', 'Series', 'Intangible'],
+	subClassOf: ['CreativeWorkSeries', 'CreativeWork', 'Series', 'Thing', 'Intangible'],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;
 

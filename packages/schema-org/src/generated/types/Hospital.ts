@@ -7,12 +7,12 @@ export const schemaOrgHospital = {
 	comment: 'A hospital.',
 	subClassOf: [
 		'CivicStructure',
-		'Place',
-		'Thing',
 		'EmergencyService',
+		'MedicalOrganization',
+		'Place',
 		'LocalBusiness',
 		'Organization',
-		'MedicalOrganization',
+		'Thing',
 	],
 	properties: [
 		{

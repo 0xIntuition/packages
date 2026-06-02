@@ -5,7 +5,7 @@ export const schemaOrgEducationalOrganization = {
 	name: 'EducationalOrganization',
 	label: 'EducationalOrganization',
 	comment: 'An educational organization.',
-	subClassOf: ['CivicStructure', 'Place', 'Thing', 'Organization'],
+	subClassOf: ['CivicStructure', 'Organization', 'Place', 'Thing'],
 	properties: [
 		{
 			id: 'schema:alumni',

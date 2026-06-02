@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const SCHEMA_ORG_CONTEXT = 'https://schema.org/';
@@ -11,8 +11,11 @@ const SCHEMA_ORG_SOURCE_URL = 'https://schema.org/version/30.0/schemaorg-current
 
 const repoRoot = resolve(new URL('..', import.meta.url).pathname);
 const packageRoot = resolve(repoRoot, 'packages/schema-org');
+const vendorRoot = resolve(packageRoot, 'vendor');
+const schemaOrgSnapshotPath = resolve(vendorRoot, `schemaorg-v${SCHEMA_ORG_VERSION}.jsonld`);
 const generatedRoot = resolve(packageRoot, 'src/generated');
 const generatedTypesRoot = resolve(generatedRoot, 'types');
+const refreshSnapshot = process.argv.includes('--refresh');
 const restrictedGlobalExportNames = new Set([
 	'Array',
 	'Boolean',
@@ -194,18 +197,35 @@ function formatGeneratedFiles() {
 	});
 }
 
-async function fetchSchemaOrgGraph() {
+async function fetchSchemaOrgDocument() {
 	const response = await fetch(SCHEMA_ORG_SOURCE_URL);
 
 	if (!response.ok) {
 		throw new Error(`Failed to fetch ${SCHEMA_ORG_SOURCE_URL}: ${response.status} ${response.statusText}`);
 	}
 
-	const body = await response.json();
+	return response.json();
+}
+
+async function readSchemaOrgDocument() {
+	if (refreshSnapshot) {
+		const body = await fetchSchemaOrgDocument();
+
+		mkdirSync(vendorRoot, { recursive: true });
+		writeFileSync(schemaOrgSnapshotPath, `${JSON.stringify(body)}\n`);
+
+		return body;
+	}
+
+	return JSON.parse(readFileSync(schemaOrgSnapshotPath, 'utf8'));
+}
+
+async function readSchemaOrgGraph() {
+	const body = await readSchemaOrgDocument();
 	const graph = body['@graph'];
 
 	if (!Array.isArray(graph)) {
-		throw new Error('schema.org JSON-LD response did not include an @graph array.');
+		throw new Error('schema.org JSON-LD document did not include an @graph array.');
 	}
 
 	return graph;
@@ -248,17 +268,24 @@ function buildVocabulary(graph) {
 		}
 	}
 
-	function resolveSubClassChain(className, seen = new Set()) {
-		const parents = directParentsByClass.get(className) ?? [];
+	function resolveSubClassChain(className) {
 		const chain = [];
+		const seen = new Set();
+		const queue = [...(directParentsByClass.get(className) ?? [])];
 
-		for (const parent of parents) {
+		for (const parent of queue) {
 			if (seen.has(parent)) {
 				continue;
 			}
 
 			seen.add(parent);
-			chain.push(parent, ...resolveSubClassChain(parent, seen));
+			chain.push(parent);
+
+			for (const nextParent of directParentsByClass.get(parent) ?? []) {
+				if (!seen.has(nextParent)) {
+					queue.push(nextParent);
+				}
+			}
 		}
 
 		return chain;
@@ -286,7 +313,7 @@ function buildVocabulary(graph) {
 	};
 }
 
-const graph = await fetchSchemaOrgGraph();
+const graph = await readSchemaOrgGraph();
 const { propertyCount, typeSpecs } = buildVocabulary(graph);
 
 rmSync(generatedRoot, { force: true, recursive: true });

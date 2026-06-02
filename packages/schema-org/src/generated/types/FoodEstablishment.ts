@@ -5,7 +5,7 @@ export const schemaOrgFoodEstablishment = {
 	name: 'FoodEstablishment',
 	label: 'FoodEstablishment',
 	comment: 'A food-related business.',
-	subClassOf: ['LocalBusiness', 'Organization', 'Thing', 'Place'],
+	subClassOf: ['LocalBusiness', 'Organization', 'Place', 'Thing'],
 	properties: [
 		{
 			id: 'schema:acceptsReservations',

@@ -7,11 +7,11 @@ export const schemaOrgPhysicalExam = {
 	comment: 'A type of physical examination of a patient performed by a physician. ',
 	subClassOf: [
 		'MedicalEnumeration',
+		'MedicalProcedure',
 		'Enumeration',
+		'MedicalEntity',
 		'Intangible',
 		'Thing',
-		'MedicalProcedure',
-		'MedicalEntity',
 	],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;

@@ -5,7 +5,7 @@ export const schemaOrgMovieSeries = {
 	name: 'MovieSeries',
 	label: 'MovieSeries',
 	comment: 'A series of movies. Included movies can be indicated with the hasPart property.',
-	subClassOf: ['CreativeWorkSeries', 'CreativeWork', 'Thing', 'Series', 'Intangible'],
+	subClassOf: ['CreativeWorkSeries', 'CreativeWork', 'Series', 'Thing', 'Intangible'],
 	properties: [
 		{
 			id: 'schema:actor',

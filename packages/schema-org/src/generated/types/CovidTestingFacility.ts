@@ -9,11 +9,11 @@ export const schemaOrgCovidTestingFacility = {
 	subClassOf: [
 		'MedicalClinic',
 		'MedicalBusiness',
+		'MedicalOrganization',
 		'LocalBusiness',
 		'Organization',
-		'Thing',
 		'Place',
-		'MedicalOrganization',
+		'Thing',
 	],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;

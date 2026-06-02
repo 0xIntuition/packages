@@ -7,6 +7,7 @@ Runtime: ESM-only. This package does not publish CommonJS `require` entrypoints.
 ## Included
 
 - schema.org V30.0 vocabulary generated from `https://schema.org/version/30.0/schemaorg-current-https.jsonld`
+- Generation reads the vendored V30.0 JSON-LD snapshot by default; maintainers can refresh the snapshot explicitly with `bun run schema-org:refresh`
 - One typed source module per `schema:` class
 - Normalized type records with directly declared properties and resolved `subClassOf` chains
 - Runtime accessors that resolve inherited properties and tag each property with its originating type
@@ -33,3 +34,5 @@ console.log(title?.originType)
 ```
 
 Generated artifacts are intentionally normalized: a type file stores only that type's directly declared properties plus its `subClassOf` chain. `getPropertiesFor` derives inherited properties at runtime.
+
+Types whose schema.org names are not safe exact JavaScript exports, such as `3DModel`, `Number`, `Date`, or `Map`, are still available from their subpath module via the `schemaOrg<Name>` named export or default export.

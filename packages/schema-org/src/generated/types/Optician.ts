@@ -5,7 +5,7 @@ export const schemaOrgOptician = {
 	name: 'Optician',
 	label: 'Optician',
 	comment: 'A store that sells reading glasses and similar devices for improving vision.',
-	subClassOf: ['MedicalBusiness', 'LocalBusiness', 'Organization', 'Thing', 'Place'],
+	subClassOf: ['MedicalBusiness', 'LocalBusiness', 'Organization', 'Place', 'Thing'],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;
 

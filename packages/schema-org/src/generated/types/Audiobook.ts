@@ -5,7 +5,7 @@ export const schemaOrgAudiobook = {
 	name: 'Audiobook',
 	label: 'Audiobook',
 	comment: 'An audiobook.',
-	subClassOf: ['AudioObject', 'MediaObject', 'CreativeWork', 'Thing', 'Book'],
+	subClassOf: ['AudioObject', 'Book', 'MediaObject', 'CreativeWork', 'Thing'],
 	properties: [
 		{
 			id: 'schema:duration',

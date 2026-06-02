@@ -6,7 +6,7 @@ export const schemaOrgMiddleSchool = {
 	label: 'MiddleSchool',
 	comment:
 		'A middle school (typically for children aged around 11-14, although this varies somewhat).',
-	subClassOf: ['EducationalOrganization', 'CivicStructure', 'Place', 'Thing', 'Organization'],
+	subClassOf: ['EducationalOrganization', 'CivicStructure', 'Organization', 'Place', 'Thing'],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;
 

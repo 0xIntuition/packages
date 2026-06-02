@@ -5,7 +5,7 @@ export const schemaOrgEmploymentAgency = {
 	name: 'EmploymentAgency',
 	label: 'EmploymentAgency',
 	comment: 'An employment agency.',
-	subClassOf: ['LocalBusiness', 'Organization', 'Thing', 'Place'],
+	subClassOf: ['LocalBusiness', 'Organization', 'Place', 'Thing'],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;
 

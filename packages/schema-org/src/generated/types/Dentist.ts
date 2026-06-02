@@ -7,11 +7,11 @@ export const schemaOrgDentist = {
 	comment: 'A dentist.',
 	subClassOf: [
 		'LocalBusiness',
-		'Organization',
-		'Thing',
-		'Place',
 		'MedicalBusiness',
 		'MedicalOrganization',
+		'Organization',
+		'Place',
+		'Thing',
 	],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;

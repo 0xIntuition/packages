@@ -1,7 +1,15 @@
 {
 	"$schema": "https://biomejs.dev/schemas/2.3.10/schema.json",
 	"files": {
-		"includes": ["**", "!node_modules", "!dist", "!.git", "!.turbo", "!.cache"]
+		"includes": [
+			"**",
+			"!node_modules",
+			"!dist",
+			"!.git",
+			"!.turbo",
+			"!.cache",
+			"!packages/schema-org/vendor"
+		]
 	},
 	"vcs": {
 		"enabled": true,

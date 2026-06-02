@@ -6,7 +6,7 @@ export const schemaOrgArchiveOrganization = {
 	label: 'ArchiveOrganization',
 	comment:
 		'An organization with archival holdings. An organization which keeps and preserves archival material and typically makes it accessible to the public.',
-	subClassOf: ['LocalBusiness', 'Organization', 'Thing', 'Place'],
+	subClassOf: ['LocalBusiness', 'Organization', 'Place', 'Thing'],
 	properties: [
 		{
 			id: 'schema:archiveHeld',

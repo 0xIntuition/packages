@@ -6,7 +6,7 @@ export const schemaOrgComicSeries = {
 	label: 'ComicSeries',
 	comment:
 		'A sequential publication of comic stories under a\n    \tunifying title, for example "The Amazing Spider-Man" or "Groo the\n    \tWanderer".',
-	subClassOf: ['Periodical', 'CreativeWorkSeries', 'CreativeWork', 'Thing', 'Series', 'Intangible'],
+	subClassOf: ['Periodical', 'CreativeWorkSeries', 'CreativeWork', 'Series', 'Thing', 'Intangible'],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;
 

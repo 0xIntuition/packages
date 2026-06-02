@@ -5,7 +5,7 @@ export const schemaOrgPatient = {
 	name: 'Patient',
 	label: 'Patient',
 	comment: 'A patient is any person recipient of health care services.',
-	subClassOf: ['MedicalAudience', 'Audience', 'Intangible', 'Thing', 'PeopleAudience', 'Person'],
+	subClassOf: ['MedicalAudience', 'Person', 'Audience', 'PeopleAudience', 'Thing', 'Intangible'],
 	properties: [
 		{
 			id: 'schema:diagnosis',

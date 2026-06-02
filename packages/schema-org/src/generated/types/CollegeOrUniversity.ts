@@ -5,7 +5,7 @@ export const schemaOrgCollegeOrUniversity = {
 	name: 'CollegeOrUniversity',
 	label: 'CollegeOrUniversity',
 	comment: 'A college, university, or other third-level educational institution.',
-	subClassOf: ['EducationalOrganization', 'CivicStructure', 'Place', 'Thing', 'Organization'],
+	subClassOf: ['EducationalOrganization', 'CivicStructure', 'Organization', 'Place', 'Thing'],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;
 

@@ -5,7 +5,7 @@ export const schemaOrgBookSeries = {
 	name: 'BookSeries',
 	label: 'BookSeries',
 	comment: 'A series of books. Included books can be indicated with the hasPart property.',
-	subClassOf: ['CreativeWorkSeries', 'CreativeWork', 'Thing', 'Series', 'Intangible'],
+	subClassOf: ['CreativeWorkSeries', 'CreativeWork', 'Series', 'Thing', 'Intangible'],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;
 

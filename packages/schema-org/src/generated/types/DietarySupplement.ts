@@ -6,7 +6,7 @@ export const schemaOrgDietarySupplement = {
 	label: 'DietarySupplement',
 	comment:
 		'A product taken by mouth that contains a dietary ingredient intended to supplement the diet. Dietary ingredients may include vitamins, minerals, herbs or other botanicals, amino acids, and substances such as enzymes, organ tissues, glandulars and metabolites.',
-	subClassOf: ['Product', 'Thing', 'Substance', 'MedicalEntity'],
+	subClassOf: ['Product', 'Substance', 'Thing', 'MedicalEntity'],
 	properties: [
 		{
 			id: 'schema:activeIngredient',

@@ -7,10 +7,10 @@ export const schemaOrgMovieTheater = {
 	comment: 'A movie theater.',
 	subClassOf: [
 		'CivicStructure',
-		'Place',
-		'Thing',
 		'EntertainmentBusiness',
+		'Place',
 		'LocalBusiness',
+		'Thing',
 		'Organization',
 	],
 	properties: [

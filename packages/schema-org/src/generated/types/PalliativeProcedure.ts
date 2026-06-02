@@ -8,10 +8,10 @@ export const schemaOrgPalliativeProcedure = {
 		'A medical procedure intended primarily for palliative purposes, aimed at relieving the symptoms of an underlying health condition.',
 	subClassOf: [
 		'MedicalProcedure',
-		'MedicalEntity',
-		'Thing',
 		'MedicalTherapy',
+		'MedicalEntity',
 		'TherapeuticProcedure',
+		'Thing',
 	],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;

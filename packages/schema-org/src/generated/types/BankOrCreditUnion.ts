@@ -5,7 +5,7 @@ export const schemaOrgBankOrCreditUnion = {
 	name: 'BankOrCreditUnion',
 	label: 'BankOrCreditUnion',
 	comment: 'Bank or credit union.',
-	subClassOf: ['FinancialService', 'LocalBusiness', 'Organization', 'Thing', 'Place'],
+	subClassOf: ['FinancialService', 'LocalBusiness', 'Organization', 'Place', 'Thing'],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;
 

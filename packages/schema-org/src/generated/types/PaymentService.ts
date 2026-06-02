@@ -6,7 +6,7 @@ export const schemaOrgPaymentService = {
 	label: 'PaymentService',
 	comment:
 		'A Service to transfer funds from a person or organization to a beneficiary person or organization.',
-	subClassOf: ['FinancialProduct', 'Service', 'Intangible', 'Thing', 'PaymentMethod'],
+	subClassOf: ['FinancialProduct', 'PaymentMethod', 'Service', 'Intangible', 'Thing'],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;
 

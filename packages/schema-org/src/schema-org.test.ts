@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-
+import { schemaOrg3DModel } from './generated/types/3DModel.js';
+import { schemaOrgText } from './generated/types/Text.js';
 import {
 	getPropertiesFor,
 	getType,
@@ -39,5 +40,35 @@ describe('schema.org generated vocabulary', () => {
 			originTypeId: 'schema:CreativeWork',
 			rangeIncludes: ['Organization', 'Person'],
 		});
+	});
+
+	it('resolves multi-inheritance chains nearest parents first', () => {
+		const localBusiness = getType('LocalBusiness');
+
+		expect(localBusiness?.subClassOf).toEqual(['Organization', 'Place', 'Thing']);
+		expect(localBusiness?.properties.map((property) => property.name)).toContain('branchOf');
+	});
+
+	it('includes schema.org data types as vocabulary nodes', () => {
+		expect(schemaOrgText).toMatchObject({
+			id: 'schema:Text',
+			name: 'Text',
+			properties: [],
+			subClassOf: [],
+		});
+		expect(getPropertiesFor('Text')).toEqual([]);
+	});
+
+	it('keeps identifier-unsafe type names available through safe exports', () => {
+		expect(schemaOrg3DModel).toMatchObject({
+			id: 'schema:3DModel',
+			name: '3DModel',
+		});
+		expect(getType('3DModel')).toBe(schemaOrg3DModel);
+	});
+
+	it('resolves types by schema id and full schema.org URL', () => {
+		expect(getType('schema:Book')?.name).toBe('Book');
+		expect(getType('https://schema.org/Book')?.name).toBe('Book');
 	});
 });

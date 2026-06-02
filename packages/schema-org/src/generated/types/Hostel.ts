@@ -6,7 +6,7 @@ export const schemaOrgHostel = {
 	label: 'Hostel',
 	comment:
 		'A hostel - cheap accommodation, often in shared dormitories.\n<br /><br />\nSee also the <a href="/docs/hotels.html">dedicated document on the use of schema.org for marking up hotels and other forms of accommodations</a>.\n',
-	subClassOf: ['LodgingBusiness', 'LocalBusiness', 'Organization', 'Thing', 'Place'],
+	subClassOf: ['LodgingBusiness', 'LocalBusiness', 'Organization', 'Place', 'Thing'],
 	properties: [],
 } as const satisfies SchemaOrgTypeSpec;
 

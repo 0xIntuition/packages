@@ -6,7 +6,7 @@ export const schemaOrgPodcastSeries = {
 	label: 'PodcastSeries',
 	comment:
 		'A podcast is an episodic series of digital audio or video files which a user can download and listen to.',
-	subClassOf: ['CreativeWorkSeries', 'CreativeWork', 'Thing', 'Series', 'Intangible'],
+	subClassOf: ['CreativeWorkSeries', 'CreativeWork', 'Series', 'Thing', 'Intangible'],
 	properties: [
 		{
 			id: 'schema:actor',

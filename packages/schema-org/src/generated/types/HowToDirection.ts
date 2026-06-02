@@ -6,7 +6,7 @@ export const schemaOrgHowToDirection = {
 	label: 'HowToDirection',
 	comment:
 		'A direction indicating a single action to do in the instructions for how to achieve a result.',
-	subClassOf: ['CreativeWork', 'Thing', 'ListItem', 'Intangible'],
+	subClassOf: ['CreativeWork', 'ListItem', 'Thing', 'Intangible'],
 	properties: [
 		{
 			id: 'schema:afterMedia',

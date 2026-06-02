@@ -40,6 +40,7 @@
 		"clean": "git clean -xdf .cache .turbo dist node_modules",
 		"dev": "tsc --watch",
 		"generate": "node ../../scripts/generate-schema-org-package.mjs",
+		"refresh": "node ../../scripts/generate-schema-org-package.mjs --refresh",
 		"check:generated": "node ../../scripts/check-schema-org-generation.mjs",
 		"pack:dry-run": "bun run build && node ../../scripts/pack-release.mjs --dry-run --json --dist-entrypoints --rewrite-workspace-deps",
 		"pack:release": "bun run build && node ../../scripts/pack-release.mjs --dist-entrypoints --rewrite-workspace-deps",

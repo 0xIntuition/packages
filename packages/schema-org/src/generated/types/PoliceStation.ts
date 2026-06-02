@@ -7,10 +7,10 @@ export const schemaOrgPoliceStation = {
 	comment: 'A police station.',
 	subClassOf: [
 		'CivicStructure',
-		'Place',
-		'Thing',
 		'EmergencyService',
+		'Place',
 		'LocalBusiness',
+		'Thing',
 		'Organization',
 	],
 	properties: [],
