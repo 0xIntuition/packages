@@ -8,4 +8,26 @@ export const brand = {
 	conjugates: false,
 	category: 'Identity/Classification',
 	status: 'proposed',
+	relationships: {
+		product: {
+			direction: 'out',
+			expectedObjectTypes: ['brand', 'company'],
+			schemaOrgProperty: 'brand',
+		},
+		service: {
+			direction: 'out',
+			expectedObjectTypes: ['brand', 'company'],
+			schemaOrgProperty: 'brand',
+		},
+		company: {
+			direction: 'out',
+			expectedObjectTypes: ['brand', 'company'],
+			schemaOrgProperty: 'brand',
+		},
+		'local-business': {
+			direction: 'out',
+			expectedObjectTypes: ['brand', 'company'],
+			schemaOrgProperty: 'brand',
+		},
+	},
 } as const satisfies PredicateSpec;

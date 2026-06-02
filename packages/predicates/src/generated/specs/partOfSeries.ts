@@ -8,4 +8,11 @@ export const partOfSeries = {
 	conjugates: false,
 	category: 'Curation/Containment',
 	status: 'proposed',
+	relationships: {
+		'podcast-episode': {
+			direction: 'out',
+			expectedObjectTypes: ['podcast-series'],
+			schemaOrgProperty: 'partOfSeries',
+		},
+	},
 } as const satisfies PredicateSpec;

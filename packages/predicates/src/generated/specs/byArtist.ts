@@ -8,4 +8,16 @@ export const byArtist = {
 	conjugates: false,
 	category: 'Authorship/Contribution',
 	status: 'proposed',
+	relationships: {
+		'music-album': {
+			direction: 'out',
+			expectedObjectTypes: ['music-group', 'person'],
+			schemaOrgProperty: 'byArtist',
+		},
+		'music-recording': {
+			direction: 'out',
+			expectedObjectTypes: ['music-group', 'person'],
+			schemaOrgProperty: 'byArtist',
+		},
+	},
 } as const satisfies PredicateSpec;

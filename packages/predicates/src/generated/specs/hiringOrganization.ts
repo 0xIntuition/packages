@@ -8,4 +8,11 @@ export const hiringOrganization = {
 	conjugates: false,
 	category: 'Affiliation/Membership',
 	status: 'proposed',
+	relationships: {
+		'job-posting': {
+			direction: 'out',
+			expectedObjectTypes: ['company'],
+			schemaOrgProperty: 'hiringOrganization',
+		},
+	},
 } as const satisfies PredicateSpec;

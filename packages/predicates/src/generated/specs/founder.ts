@@ -9,4 +9,21 @@ export const founder = {
 	conjugates: false,
 	category: 'Affiliation/Membership',
 	status: 'proposed',
+	relationships: {
+		company: {
+			direction: 'out',
+			expectedObjectTypes: ['person', 'company'],
+			schemaOrgProperty: 'founder',
+		},
+		'local-business': {
+			direction: 'out',
+			expectedObjectTypes: ['person', 'company'],
+			schemaOrgProperty: 'founder',
+		},
+		'music-group': {
+			direction: 'out',
+			expectedObjectTypes: ['person', 'company'],
+			schemaOrgProperty: 'founder',
+		},
+	},
 } as const satisfies PredicateSpec;

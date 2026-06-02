@@ -8,4 +8,21 @@ export const areaServed = {
 	conjugates: false,
 	category: 'Metadata/Linking',
 	status: 'proposed',
+	relationships: {
+		service: {
+			direction: 'out',
+			expectedObjectTypes: ['location'],
+			schemaOrgProperty: 'areaServed',
+		},
+		company: {
+			direction: 'out',
+			expectedObjectTypes: ['location'],
+			schemaOrgProperty: 'areaServed',
+		},
+		'local-business': {
+			direction: 'out',
+			expectedObjectTypes: ['location'],
+			schemaOrgProperty: 'areaServed',
+		},
+	},
 } as const satisfies PredicateSpec;

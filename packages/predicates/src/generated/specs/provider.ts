@@ -9,4 +9,21 @@ export const provider = {
 	conjugates: false,
 	category: 'Metadata/Linking',
 	status: 'proposed',
+	relationships: {
+		service: {
+			direction: 'out',
+			expectedObjectTypes: ['person', 'company'],
+			schemaOrgProperty: 'provider',
+		},
+		'software-application': {
+			direction: 'out',
+			expectedObjectTypes: ['person', 'company'],
+			schemaOrgProperty: 'provider',
+		},
+		'mobile-application': {
+			direction: 'out',
+			expectedObjectTypes: ['person', 'company'],
+			schemaOrgProperty: 'provider',
+		},
+	},
 } as const satisfies PredicateSpec;

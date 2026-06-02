@@ -8,4 +8,31 @@ export const actor = {
 	conjugates: false,
 	category: 'Authorship/Contribution',
 	status: 'proposed',
+	relationships: {
+		movie: {
+			direction: 'out',
+			expectedObjectTypes: ['person', 'music-group'],
+			schemaOrgProperty: 'actor',
+		},
+		'podcast-episode': {
+			direction: 'out',
+			expectedObjectTypes: ['person', 'music-group'],
+			schemaOrgProperty: 'actor',
+		},
+		'podcast-series': {
+			direction: 'out',
+			expectedObjectTypes: ['person', 'music-group'],
+			schemaOrgProperty: 'actor',
+		},
+		'tv-series': {
+			direction: 'out',
+			expectedObjectTypes: ['person', 'music-group'],
+			schemaOrgProperty: 'actor',
+		},
+		'video-object': {
+			direction: 'out',
+			expectedObjectTypes: ['person', 'music-group'],
+			schemaOrgProperty: 'actor',
+		},
+	},
 } as const satisfies PredicateSpec;

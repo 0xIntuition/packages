@@ -8,4 +8,11 @@ export const performer = {
 	conjugates: false,
 	category: 'Authorship/Contribution',
 	status: 'proposed',
+	relationships: {
+		event: {
+			direction: 'out',
+			expectedObjectTypes: ['person', 'company', 'music-group'],
+			schemaOrgProperty: 'performer',
+		},
+	},
 } as const satisfies PredicateSpec;

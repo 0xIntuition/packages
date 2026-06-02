@@ -11,4 +11,11 @@ export const subOrganization = {
 	isTransitive: true,
 	isHierarchical: true,
 	inversePredicate: 'parent organization',
+	relationships: {
+		company: {
+			direction: 'out',
+			expectedObjectTypes: ['company', 'local-business'],
+			schemaOrgProperty: 'subOrganization',
+		},
+	},
 } as const satisfies PredicateSpec;

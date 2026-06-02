@@ -8,4 +8,26 @@ export const director = {
 	conjugates: false,
 	category: 'Authorship/Contribution',
 	status: 'proposed',
+	relationships: {
+		movie: {
+			direction: 'out',
+			expectedObjectTypes: ['person'],
+			schemaOrgProperty: 'director',
+		},
+		'podcast-episode': {
+			direction: 'out',
+			expectedObjectTypes: ['person'],
+			schemaOrgProperty: 'director',
+		},
+		'tv-series': {
+			direction: 'out',
+			expectedObjectTypes: ['person'],
+			schemaOrgProperty: 'director',
+		},
+		'video-object': {
+			direction: 'out',
+			expectedObjectTypes: ['person'],
+			schemaOrgProperty: 'director',
+		},
+	},
 } as const satisfies PredicateSpec;

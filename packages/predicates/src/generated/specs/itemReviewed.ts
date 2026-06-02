@@ -8,4 +8,16 @@ export const itemReviewed = {
 	conjugates: false,
 	category: 'Social/Reputation',
 	status: 'proposed',
+	relationships: {
+		review: {
+			direction: 'out',
+			expectedObjectTypes: ['thing'],
+			schemaOrgProperty: 'itemReviewed',
+		},
+		'aggregate-rating': {
+			direction: 'out',
+			expectedObjectTypes: ['thing'],
+			schemaOrgProperty: 'itemReviewed',
+		},
+	},
 } as const satisfies PredicateSpec;

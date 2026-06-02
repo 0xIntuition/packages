@@ -8,4 +8,11 @@ export const organizer = {
 	conjugates: false,
 	category: 'Affiliation/Membership',
 	status: 'proposed',
+	relationships: {
+		event: {
+			direction: 'out',
+			expectedObjectTypes: ['person', 'company'],
+			schemaOrgProperty: 'organizer',
+		},
+	},
 } as const satisfies PredicateSpec;

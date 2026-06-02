@@ -9,4 +9,36 @@ export const publisher = {
 	conjugates: false,
 	category: 'Authorship/Contribution',
 	status: 'proposed',
+	relationships: {
+		article: {
+			direction: 'out',
+			expectedObjectTypes: ['person', 'company'],
+			schemaOrgProperty: 'publisher',
+		},
+		book: {
+			direction: 'out',
+			expectedObjectTypes: ['person', 'company'],
+			schemaOrgProperty: 'publisher',
+		},
+		dataset: {
+			direction: 'out',
+			expectedObjectTypes: ['person', 'company'],
+			schemaOrgProperty: 'publisher',
+		},
+		'news-article': {
+			direction: 'out',
+			expectedObjectTypes: ['person', 'company'],
+			schemaOrgProperty: 'publisher',
+		},
+		'podcast-series': {
+			direction: 'out',
+			expectedObjectTypes: ['person', 'company'],
+			schemaOrgProperty: 'publisher',
+		},
+		'web-site': {
+			direction: 'out',
+			expectedObjectTypes: ['person', 'company'],
+			schemaOrgProperty: 'publisher',
+		},
+	},
 } as const satisfies PredicateSpec;

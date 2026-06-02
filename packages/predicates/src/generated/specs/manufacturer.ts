@@ -8,4 +8,11 @@ export const manufacturer = {
 	conjugates: false,
 	category: 'Authorship/Contribution',
 	status: 'proposed',
+	relationships: {
+		product: {
+			direction: 'out',
+			expectedObjectTypes: ['company'],
+			schemaOrgProperty: 'manufacturer',
+		},
+	},
 } as const satisfies PredicateSpec;

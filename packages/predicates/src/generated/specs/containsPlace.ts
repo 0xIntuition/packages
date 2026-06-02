@@ -11,4 +11,16 @@ export const containsPlace = {
 	isTransitive: true,
 	isHierarchical: true,
 	inversePredicate: 'contained in place',
+	relationships: {
+		location: {
+			direction: 'out',
+			expectedObjectTypes: ['location', 'local-business'],
+			schemaOrgProperty: 'containsPlace',
+		},
+		'local-business': {
+			direction: 'out',
+			expectedObjectTypes: ['location'],
+			schemaOrgProperty: 'containsPlace',
+		},
+	},
 } as const satisfies PredicateSpec;

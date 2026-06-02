@@ -8,4 +8,11 @@ export const jobLocation = {
 	conjugates: false,
 	category: 'Metadata/Linking',
 	status: 'proposed',
+	relationships: {
+		'job-posting': {
+			direction: 'out',
+			expectedObjectTypes: ['location', 'local-business'],
+			schemaOrgProperty: 'jobLocation',
+		},
+	},
 } as const satisfies PredicateSpec;

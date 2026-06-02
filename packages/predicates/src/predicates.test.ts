@@ -128,7 +128,7 @@ describe('@0xintuition/predicates registry', () => {
 		expect(followedBy?.inversePredicate).toBe('preceded by');
 	});
 
-	it('includes the first metadata predicate backfill tranche', () => {
+	it('includes the first metadata relationship backfill tranche', () => {
 		const backfillKeys = [
 			'actor',
 			'alumniOf',
@@ -176,10 +176,46 @@ describe('@0xintuition/predicates registry', () => {
 		}
 	});
 
-	it('records semantic flags for hierarchical backfill predicates', () => {
+	it('records classification relationship metadata for metadata predicates', () => {
+		const inPlaylist = getPredicateRecord('inPlaylist');
+		expect(inPlaylist?.relationships?.['music-recording']).toEqual({
+			direction: 'out',
+			expectedObjectTypes: ['MusicPlaylist'],
+			schemaOrgProperty: 'inPlaylist',
+		});
+
+		const inAlbum = getPredicateRecord('inAlbum');
+		expect(inAlbum?.relationships?.['music-recording']).toEqual({
+			direction: 'out',
+			expectedObjectTypes: ['music-album'],
+			schemaOrgProperty: 'inAlbum',
+		});
+
+		const byArtist = getPredicateRecord('byArtist');
+		expect(byArtist?.relationships?.['music-recording']?.expectedObjectTypes).toEqual([
+			'music-group',
+			'person',
+		]);
+		expect(byArtist?.relationships?.['music-album']?.expectedObjectTypes).toEqual([
+			'music-group',
+			'person',
+		]);
+
+		const itemReviewed = getPredicateRecord('itemReviewed');
+		expect(itemReviewed?.relationships).toEqual(
+			expect.objectContaining({
+				review: expect.objectContaining({ expectedObjectTypes: ['thing'] }),
+				'aggregate-rating': expect.objectContaining({ expectedObjectTypes: ['thing'] }),
+			})
+		);
+
 		const containsPlace = getPredicateRecord('containsPlace');
 		expect(containsPlace?.isTransitive).toBe(true);
 		expect(containsPlace?.isHierarchical).toBe(true);
+		expect(containsPlace?.relationships?.location?.expectedObjectTypes).toEqual([
+			'location',
+			'local-business',
+		]);
 		expect(containsPlace?.inversePredicate).toBe('contained in place');
 
 		const containedInPlace = getPredicateRecord('containedInPlace');

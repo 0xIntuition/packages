@@ -8,4 +8,11 @@ export const inPlaylist = {
 	conjugates: false,
 	category: 'Curation/Containment',
 	status: 'proposed',
+	relationships: {
+		'music-recording': {
+			direction: 'out',
+			expectedObjectTypes: ['MusicPlaylist'],
+			schemaOrgProperty: 'inPlaylist',
+		},
+	},
 } as const satisfies PredicateSpec;

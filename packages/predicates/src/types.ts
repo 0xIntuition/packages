@@ -31,9 +31,19 @@ export interface PredicateDefinition {
 	isSymmetric: boolean;
 	isHierarchical: boolean;
 	inversePredicate?: string;
+	relationships?: PredicateRelationshipMap;
 }
 
 export type PredicateStatus = 'enshrined' | 'proposed' | 'deprecated';
+export type PredicateRelationshipDirection = 'out' | 'in';
+
+export interface PredicateRelationshipSpec {
+	direction: PredicateRelationshipDirection;
+	expectedObjectTypes: readonly string[];
+	schemaOrgProperty?: string;
+}
+
+export type PredicateRelationshipMap = Record<string, PredicateRelationshipSpec>;
 
 export interface PredicateSpec {
 	key: string;
@@ -49,6 +59,7 @@ export interface PredicateSpec {
 	isSymmetric?: boolean;
 	isHierarchical?: boolean;
 	inversePredicate?: string;
+	relationships?: PredicateRelationshipMap;
 }
 
 export type PredicateRecord<TSpec extends PredicateSpec = PredicateSpec> = PredicateDefinition & {
