@@ -7,9 +7,11 @@ export const product: ClassificationSpec = {
 	description: 'A product identity with optional brand and SKU disambiguators.',
 	category: 'Product',
 	schemaOrg: { context: 'https://schema.org/', type: 'Product' },
+	metadataPredicates: ['brand', 'manufacturer', 'hasCategory', 'sameAs'] as const,
 	fields: [
 		{
 			key: 'name',
+			schemaOrgProperty: 'name',
 			label: 'Product Name',
 			description: 'The product name.',
 			fieldType: 'string',
@@ -18,6 +20,7 @@ export const product: ClassificationSpec = {
 		},
 		{
 			key: 'brand',
+			schemaOrgProperty: 'brand',
 			label: 'Brand',
 			description: 'The brand name when needed.',
 			fieldType: 'string',
@@ -26,6 +29,7 @@ export const product: ClassificationSpec = {
 		},
 		{
 			key: 'sku',
+			schemaOrgProperty: 'sku',
 			label: 'SKU',
 			description: 'The SKU when needed.',
 			fieldType: 'string',
@@ -34,6 +38,7 @@ export const product: ClassificationSpec = {
 		},
 		{
 			key: 'gtin',
+			schemaOrgProperty: 'gtin',
 			label: 'GTIN',
 			description: 'The GTIN when available.',
 			fieldType: 'string',
@@ -42,6 +47,7 @@ export const product: ClassificationSpec = {
 		},
 		{
 			key: 'sameAs',
+			schemaOrgProperty: 'sameAs',
 			label: 'Canonical References',
 			description: 'Canonical URLs for the same product.',
 			fieldType: 'string[]',

@@ -7,9 +7,17 @@ export const podcastEpisode: ClassificationSpec = {
 	description: 'A podcast episode with a canonical episode URL.',
 	category: 'Media',
 	schemaOrg: { context: 'https://schema.org/', type: 'PodcastEpisode' },
+	metadataPredicates: [
+		'partOfSeries',
+		'publishedAt',
+		'url',
+		'productionCompany',
+		'trailer',
+	] as const,
 	fields: [
 		{
 			key: 'name',
+			schemaOrgProperty: 'name',
 			label: 'Episode Name',
 			description: 'The title of the episode.',
 			fieldType: 'string',
@@ -18,6 +26,7 @@ export const podcastEpisode: ClassificationSpec = {
 		},
 		{
 			key: 'url',
+			schemaOrgProperty: 'url',
 			label: 'Episode URL',
 			description: 'The canonical episode URL.',
 			fieldType: 'url',
@@ -26,6 +35,7 @@ export const podcastEpisode: ClassificationSpec = {
 		},
 		{
 			key: 'partOfSeries',
+			schemaOrgProperty: 'partOfSeries',
 			label: 'Series',
 			description: 'The series name or URL the episode belongs to.',
 			fieldType: 'string',
@@ -34,6 +44,7 @@ export const podcastEpisode: ClassificationSpec = {
 		},
 		{
 			key: 'datePublished',
+			schemaOrgProperty: 'datePublished',
 			label: 'Publication Date',
 			description: 'The publication date.',
 			fieldType: 'iso-date',

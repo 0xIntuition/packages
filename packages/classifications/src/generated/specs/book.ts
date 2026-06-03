@@ -7,9 +7,19 @@ export const book: ClassificationSpec = {
 	description: 'A book identity with only the title and optional disambiguators.',
 	category: 'Creative Work',
 	schemaOrg: { context: 'https://schema.org/', type: 'Book' },
+	metadataPredicates: [
+		'authoredBy',
+		'publisher',
+		'hasCategory',
+		'publishedAt',
+		'reference',
+		'listedIn',
+		'sameAs',
+	] as const,
 	fields: [
 		{
 			key: 'name',
+			schemaOrgProperty: 'name',
 			label: 'Title',
 			description: 'The title of the book.',
 			fieldType: 'string',
@@ -18,6 +28,7 @@ export const book: ClassificationSpec = {
 		},
 		{
 			key: 'author',
+			schemaOrgProperty: 'author',
 			label: 'Author',
 			description: 'The author name when disambiguation is needed.',
 			fieldType: 'string',
@@ -26,6 +37,7 @@ export const book: ClassificationSpec = {
 		},
 		{
 			key: 'isbn',
+			schemaOrgProperty: 'isbn',
 			label: 'ISBN',
 			description: 'The ISBN identifier when known.',
 			fieldType: 'string',
@@ -34,6 +46,7 @@ export const book: ClassificationSpec = {
 		},
 		{
 			key: 'sameAs',
+			schemaOrgProperty: 'sameAs',
 			label: 'Canonical References',
 			description: 'Canonical URLs that identify the same book.',
 			fieldType: 'string[]',

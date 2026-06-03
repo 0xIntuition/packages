@@ -7,9 +7,11 @@ export const softwareApplication: ClassificationSpec = {
 	description: 'A software application identity with optional category and platform metadata.',
 	category: 'Product',
 	schemaOrg: { context: 'https://schema.org/', type: 'SoftwareApplication' },
+	metadataPredicates: ['url', 'imgUrl', 'hasCategory', 'compatibleWith', 'softwareAddOn'] as const,
 	fields: [
 		{
 			key: 'name',
+			schemaOrgProperty: 'name',
 			label: 'Application Name',
 			description: 'The software application name.',
 			fieldType: 'string',
@@ -18,6 +20,7 @@ export const softwareApplication: ClassificationSpec = {
 		},
 		{
 			key: 'applicationCategory',
+			schemaOrgProperty: 'applicationCategory',
 			label: 'Application Category',
 			description: 'The application category when needed.',
 			fieldType: 'string',
@@ -26,6 +29,7 @@ export const softwareApplication: ClassificationSpec = {
 		},
 		{
 			key: 'operatingSystem',
+			schemaOrgProperty: 'operatingSystem',
 			label: 'Operating System',
 			description: 'The target operating system when needed.',
 			fieldType: 'string',
@@ -34,6 +38,7 @@ export const softwareApplication: ClassificationSpec = {
 		},
 		{
 			key: 'url',
+			schemaOrgProperty: 'url',
 			label: 'Application URL',
 			description: 'The canonical app URL.',
 			fieldType: 'url',

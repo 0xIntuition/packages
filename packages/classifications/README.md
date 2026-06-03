@@ -21,6 +21,23 @@ const atomData = buildAtomData('ethereum-account', {
 })
 ```
 
+Each classification separates recommended atom fields from recommended triple
+metadata:
+
+```ts
+const book = getClassification('book')
+
+book?.fields.map((field) => field.schemaOrgProperty)
+// ['name', 'author', 'isbn', 'sameAs']
+
+book?.metadataPredicates
+// ['authoredBy', 'publisher', 'hasCategory', ...]
+```
+
+`schemaOrgProperty` points at the canonical schema.org property name. It does
+not copy inheritance or provenance into the classification; consumers can derive
+that from `@0xintuition/schema-org`.
+
 Known classifications are also available as direct subpath imports:
 
 ```ts

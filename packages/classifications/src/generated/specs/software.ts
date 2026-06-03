@@ -7,9 +7,11 @@ export const software: ClassificationSpec = {
 	description: 'A code project or software identity with a canonical repository URL.',
 	category: 'Product',
 	schemaOrg: { context: 'https://schema.org/', type: 'SoftwareSourceCode' },
+	metadataPredicates: ['createdBy', 'url', 'implement', 'compatibleWith'] as const,
 	fields: [
 		{
 			key: 'name',
+			schemaOrgProperty: 'name',
 			label: 'Software Name',
 			description: 'The software or project name.',
 			fieldType: 'string',
@@ -18,6 +20,7 @@ export const software: ClassificationSpec = {
 		},
 		{
 			key: 'codeRepository',
+			schemaOrgProperty: 'codeRepository',
 			label: 'Repository URL',
 			description: 'The canonical code repository URL.',
 			fieldType: 'url',

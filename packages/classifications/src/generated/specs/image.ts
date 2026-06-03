@@ -7,9 +7,18 @@ export const image: ClassificationSpec = {
 	description: 'An image identity with a canonical source URL.',
 	category: 'Media',
 	schemaOrg: { context: 'https://schema.org/', type: 'ImageObject' },
+	metadataPredicates: [
+		'authoredBy',
+		'createdBy',
+		'url',
+		'imgUrl',
+		'hasTag',
+		'hasCategory',
+	] as const,
 	fields: [
 		{
 			key: 'name',
+			schemaOrgProperty: 'name',
 			label: 'Image Name',
 			description: 'The image name or title.',
 			fieldType: 'string',
@@ -18,6 +27,7 @@ export const image: ClassificationSpec = {
 		},
 		{
 			key: 'url',
+			schemaOrgProperty: 'url',
 			label: 'Image URL',
 			description: 'The canonical image URL.',
 			fieldType: 'url',
@@ -26,6 +36,7 @@ export const image: ClassificationSpec = {
 		},
 		{
 			key: 'caption',
+			schemaOrgProperty: 'caption',
 			label: 'Caption',
 			description: 'A caption or short text describing the image.',
 			fieldType: 'string',
@@ -34,6 +45,7 @@ export const image: ClassificationSpec = {
 		},
 		{
 			key: 'keywords',
+			schemaOrgProperty: 'keywords',
 			label: 'Keywords',
 			description: 'Keywords that describe the image.',
 			fieldType: 'string[]',

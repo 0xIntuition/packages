@@ -7,9 +7,11 @@ export const comment: ClassificationSpec = {
 	description: 'A minimal comment identity linked to a stable target.',
 	category: 'Creative Work',
 	schemaOrg: { context: 'https://schema.org/', type: 'Comment' },
+	metadataPredicates: ['authoredBy', 'parentItem', 'publishedAt', 'sameAs'] as const,
 	fields: [
 		{
 			key: 'text',
+			schemaOrgProperty: 'text',
 			label: 'Comment Text',
 			description: 'The text body of the comment.',
 			fieldType: 'string',
@@ -18,6 +20,7 @@ export const comment: ClassificationSpec = {
 		},
 		{
 			key: 'about',
+			schemaOrgProperty: 'about',
 			label: 'Target',
 			description: 'The target identifier or URL the comment is about.',
 			fieldType: 'string',
@@ -26,6 +29,7 @@ export const comment: ClassificationSpec = {
 		},
 		{
 			key: 'dateCreated',
+			schemaOrgProperty: 'dateCreated',
 			label: 'Date Created',
 			description: 'The date the comment was created.',
 			fieldType: 'iso-date',
@@ -34,6 +38,7 @@ export const comment: ClassificationSpec = {
 		},
 		{
 			key: 'sameAs',
+			schemaOrgProperty: 'sameAs',
 			label: 'Canonical References',
 			description: 'Canonical URLs for the same comment.',
 			fieldType: 'string[]',

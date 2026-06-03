@@ -7,9 +7,11 @@ export const mobileApplication: ClassificationSpec = {
 	description: 'A mobile app identity with the app name and target platforms.',
 	category: 'Product',
 	schemaOrg: { context: 'https://schema.org/', type: 'MobileApplication' },
+	metadataPredicates: ['availableOn', 'url', 'imgUrl', 'hasCategory'] as const,
 	fields: [
 		{
 			key: 'name',
+			schemaOrgProperty: 'name',
 			label: 'Application Name',
 			description: 'The mobile application name.',
 			fieldType: 'string',
@@ -18,6 +20,7 @@ export const mobileApplication: ClassificationSpec = {
 		},
 		{
 			key: 'operatingSystem',
+			schemaOrgProperty: 'operatingSystem',
 			label: 'Operating System',
 			description: 'The supported operating systems.',
 			fieldType: 'string',
@@ -26,6 +29,7 @@ export const mobileApplication: ClassificationSpec = {
 		},
 		{
 			key: 'applicationCategory',
+			schemaOrgProperty: 'applicationCategory',
 			label: 'Application Category',
 			description: 'The app category when needed.',
 			fieldType: 'string',
@@ -34,6 +38,7 @@ export const mobileApplication: ClassificationSpec = {
 		},
 		{
 			key: 'downloadUrl',
+			schemaOrgProperty: 'downloadUrl',
 			label: 'Download URL',
 			description: 'The store or download URL.',
 			fieldType: 'url',

@@ -7,9 +7,11 @@ export const aggregateRating: ClassificationSpec = {
 	description: 'A stable aggregate rating summary for a reviewed thing.',
 	category: 'Product',
 	schemaOrg: { context: 'https://schema.org/', type: 'AggregateRating' },
+	metadataPredicates: ['itemReviewed', 'authoredBy'] as const,
 	fields: [
 		{
 			key: 'ratingValue',
+			schemaOrgProperty: 'ratingValue',
 			label: 'Rating Value',
 			description: 'The aggregate average rating.',
 			fieldType: 'number',
@@ -18,6 +20,7 @@ export const aggregateRating: ClassificationSpec = {
 		},
 		{
 			key: 'reviewCount',
+			schemaOrgProperty: 'reviewCount',
 			label: 'Review Count',
 			description: 'The number of reviews represented by the aggregate.',
 			fieldType: 'integer',
@@ -26,6 +29,7 @@ export const aggregateRating: ClassificationSpec = {
 		},
 		{
 			key: 'bestRating',
+			schemaOrgProperty: 'bestRating',
 			label: 'Best Rating',
 			description: 'The upper bound of the rating scale when needed.',
 			fieldType: 'number',
@@ -34,6 +38,7 @@ export const aggregateRating: ClassificationSpec = {
 		},
 		{
 			key: 'worstRating',
+			schemaOrgProperty: 'worstRating',
 			label: 'Worst Rating',
 			description: 'The lower bound of the rating scale when needed.',
 			fieldType: 'number',

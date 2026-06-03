@@ -7,9 +7,18 @@ export const location: ClassificationSpec = {
 	description: 'A place identity with optional address and canonical references.',
 	category: 'Entity',
 	schemaOrg: { context: 'https://schema.org/', type: 'Place' },
+	metadataPredicates: [
+		'containedInPlace',
+		'containsPlace',
+		'locatedIn',
+		'url',
+		'imgUrl',
+		'sameAs',
+	] as const,
 	fields: [
 		{
 			key: 'name',
+			schemaOrgProperty: 'name',
 			label: 'Location Name',
 			description: 'The place name.',
 			fieldType: 'string',
@@ -18,6 +27,7 @@ export const location: ClassificationSpec = {
 		},
 		{
 			key: 'address',
+			schemaOrgProperty: 'address',
 			label: 'Address',
 			description: 'The address when needed for disambiguation.',
 			fieldType: 'string',
@@ -26,6 +36,7 @@ export const location: ClassificationSpec = {
 		},
 		{
 			key: 'sameAs',
+			schemaOrgProperty: 'sameAs',
 			label: 'Canonical References',
 			description: 'Canonical URLs for the same place.',
 			fieldType: 'string[]',

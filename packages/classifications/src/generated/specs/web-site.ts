@@ -7,9 +7,11 @@ export const webSite: ClassificationSpec = {
 	description: 'A website identity with name and canonical URL.',
 	category: 'Web',
 	schemaOrg: { context: 'https://schema.org/', type: 'WebSite' },
+	metadataPredicates: ['publisher', 'createdBy', 'hasTag', 'hasCategory', 'url', 'sameAs'] as const,
 	fields: [
 		{
 			key: 'name',
+			schemaOrgProperty: 'name',
 			label: 'Site Name',
 			description: 'The name of the website.',
 			fieldType: 'string',
@@ -18,6 +20,7 @@ export const webSite: ClassificationSpec = {
 		},
 		{
 			key: 'url',
+			schemaOrgProperty: 'url',
 			label: 'Site URL',
 			description: 'The canonical website URL.',
 			fieldType: 'url',

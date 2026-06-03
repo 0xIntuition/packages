@@ -18,6 +18,8 @@ export interface ClassificationFieldSpec {
 	schemaOrgProperty?: string;
 }
 
+export type PredicateKeyReference = string;
+
 export type ClassificationCategory =
 	| 'Entity'
 	| 'Creative Work'
@@ -38,6 +40,7 @@ export interface ClassificationSpec {
 		type: string;
 	} | null;
 	fields: readonly ClassificationFieldSpec[];
+	metadataPredicates: readonly PredicateKeyReference[];
 	defaults: {
 		pluginId: string;
 		provider?: string;

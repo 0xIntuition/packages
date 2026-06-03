@@ -4,6 +4,7 @@ export {
 	CLASSIFICATION_SPECS,
 	getClassification,
 	getClassificationsByCategory,
+	getMetadataPredicatesFor,
 	hasClassification,
 } from './classifications.js';
 export type {
@@ -13,4 +14,5 @@ export type {
 	ClassificationValidationIssue,
 	ClassificationValueMap,
 	FieldType,
+	PredicateKeyReference,
 } from './types.js';

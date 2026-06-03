@@ -10,6 +10,7 @@ export const ethereumErc20: ClassificationSpec = {
 		context: 'https://schema.intuition.systems/v1/ethereum.jsonld',
 		type: 'EthereumERC20',
 	},
+	metadataPredicates: ['listedOn', 'pricedIn', 'backedBy'] as const,
 	fields: [
 		{
 			key: 'chainId',

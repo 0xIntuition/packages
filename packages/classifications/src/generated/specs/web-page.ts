@@ -7,9 +7,11 @@ export const webPage: ClassificationSpec = {
 	description: 'A web page identity with a canonical URL.',
 	category: 'Web',
 	schemaOrg: { context: 'https://schema.org/', type: 'WebPage' },
+	metadataPredicates: ['listedIn', 'publishedAt', 'authoredBy', 'imgUrl', 'url'] as const,
 	fields: [
 		{
 			key: 'name',
+			schemaOrgProperty: 'name',
 			label: 'Page Name',
 			description: 'The page title or name.',
 			fieldType: 'string',
@@ -18,6 +20,7 @@ export const webPage: ClassificationSpec = {
 		},
 		{
 			key: 'url',
+			schemaOrgProperty: 'url',
 			label: 'Page URL',
 			description: 'The canonical page URL.',
 			fieldType: 'url',
@@ -26,6 +29,7 @@ export const webPage: ClassificationSpec = {
 		},
 		{
 			key: 'isPartOf',
+			schemaOrgProperty: 'isPartOf',
 			label: 'Website',
 			description: 'The website name or URL that the page belongs to.',
 			fieldType: 'string',

@@ -7,6 +7,7 @@ export const socialMediaAccount: ClassificationSpec = {
 	description: 'A social profile identity keyed by username and platform.',
 	category: 'Web',
 	schemaOrg: { context: 'https://schema.org/', type: 'SocialMediaAccount' },
+	metadataPredicates: ['linkedAccount', 'url', 'availableOn'] as const,
 	fields: [
 		{
 			key: 'username',

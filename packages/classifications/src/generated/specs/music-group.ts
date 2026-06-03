@@ -7,9 +7,11 @@ export const musicGroup: ClassificationSpec = {
 	description: 'A band or artist identity.',
 	category: 'Media',
 	schemaOrg: { context: 'https://schema.org/', type: 'MusicGroup' },
+	metadataPredicates: ['musicGroupMember', 'track', 'contain', 'hasCategory'] as const,
 	fields: [
 		{
 			key: 'name',
+			schemaOrgProperty: 'name',
 			label: 'Artist or Group Name',
 			description: 'The artist or group name.',
 			fieldType: 'string',

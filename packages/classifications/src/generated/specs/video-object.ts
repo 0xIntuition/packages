@@ -7,9 +7,20 @@ export const videoObject: ClassificationSpec = {
 	description: 'A video identity with optional description and content URL.',
 	category: 'Media',
 	schemaOrg: { context: 'https://schema.org/', type: 'VideoObject' },
+	metadataPredicates: [
+		'actor',
+		'director',
+		'musicBy',
+		'productionCompany',
+		'sameAs',
+		'hasDescription',
+		'url',
+		'imgUrl',
+	] as const,
 	fields: [
 		{
 			key: 'name',
+			schemaOrgProperty: 'name',
 			label: 'Video Title',
 			description: 'The title of the video.',
 			fieldType: 'string',
@@ -18,6 +29,7 @@ export const videoObject: ClassificationSpec = {
 		},
 		{
 			key: 'description',
+			schemaOrgProperty: 'description',
 			label: 'Description',
 			description: 'A short description of the video.',
 			fieldType: 'string',
@@ -26,6 +38,7 @@ export const videoObject: ClassificationSpec = {
 		},
 		{
 			key: 'contentUrl',
+			schemaOrgProperty: 'contentUrl',
 			label: 'Content URL',
 			description: 'The video content or canonical URL.',
 			fieldType: 'url',
@@ -34,6 +47,7 @@ export const videoObject: ClassificationSpec = {
 		},
 		{
 			key: 'sameAs',
+			schemaOrgProperty: 'sameAs',
 			label: 'Canonical References',
 			description: 'Canonical URLs for the same video.',
 			fieldType: 'string[]',

@@ -10,6 +10,7 @@ export const ethereumSmartContract: ClassificationSpec = {
 		context: 'https://schema.intuition.systems/v1/ethereum.jsonld',
 		type: 'EthereumSmartContract',
 	},
+	metadataPredicates: ['implement', 'governedBy', 'use'] as const,
 	fields: [
 		{
 			key: 'chainId',
