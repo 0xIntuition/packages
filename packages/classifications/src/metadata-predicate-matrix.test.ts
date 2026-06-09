@@ -27,7 +27,7 @@ describe('metadata predicate matrix', () => {
 	it('models the MusicRecording predicate/object examples', () => {
 		expect(
 			getMetadataPredicateMatrixFor('music-recording').map((entry) => entry.predicate)
-		).toEqual(['byArtist', 'inAlbum', 'inPlaylist', 'hasCategory']);
+		).toEqual(['byArtist', 'inAlbum', 'inPlaylist', 'hasCategory', 'sameAs']);
 
 		expect(getMetadataPredicateRelation('music-recording', 'byArtist')?.expectedObjects).toEqual([
 			{ kind: 'classification', slug: 'music-group' },
@@ -47,6 +47,17 @@ describe('metadata predicate matrix', () => {
 				context: SCHEMA_ORG_CONTEXT,
 				property: 'genre',
 				match: 'broader',
+			}),
+		]);
+
+		expect(getMetadataPredicateRelation('music-recording', 'sameAs')?.expectedObjects).toEqual([
+			{ kind: 'same-classification' },
+		]);
+		expect(getMetadataPredicateRelation('music-recording', 'sameAs')?.schemaMappings).toEqual([
+			expect.objectContaining({
+				context: SCHEMA_ORG_CONTEXT,
+				property: 'sameAs',
+				match: 'exact',
 			}),
 		]);
 	});
@@ -139,8 +150,78 @@ describe('metadata predicate matrix', () => {
 		expect(issues).toEqual([]);
 	});
 
-	it('returns empty matrix entries for classifications without object-target details yet', () => {
-		expect(getMetadataPredicateMatrixFor('book')).toEqual([]);
-		expect(getMetadataPredicateRelation('book', 'authoredBy')).toBeUndefined();
+	it('models sameAs as strict same-classification identity for all promoted classifications', () => {
+		const sameAsSubjects = CLASSIFICATION_SPECS.filter((spec) =>
+			spec.metadataPredicates.includes('sameAs')
+		).map((spec) => spec.slug);
+		const matrixSameAsSubjects = METADATA_PREDICATE_MATRIX.filter(
+			(entry) => entry.predicate === 'sameAs'
+		).map((entry) => entry.subjectClassification);
+
+		expect(new Set(matrixSameAsSubjects)).toEqual(new Set(sameAsSubjects));
+
+		for (const subjectClassification of sameAsSubjects) {
+			const entry = getMetadataPredicateRelation(subjectClassification, 'sameAs');
+
+			expect(entry?.expectedObjects).toEqual([{ kind: 'same-classification' }]);
+			expect(entry?.schemaMappings).toEqual([
+				expect.objectContaining({
+					context: SCHEMA_ORG_CONTEXT,
+					property: 'sameAs',
+					match: 'exact',
+				}),
+			]);
+		}
+	});
+
+	it('does not add sameAs matrix entries for explicitly excluded classifications', () => {
+		const excludedSubjects = CLASSIFICATION_SPECS.filter(
+			(spec) => !spec.metadataPredicates.includes('sameAs')
+		).map((spec) => spec.slug);
+
+		for (const subjectClassification of excludedSubjects) {
+			expect(getMetadataPredicateRelation(subjectClassification, 'sameAs')).toBeUndefined();
+		}
+	});
+
+	it('models curated non-sameAs relationship examples for generated UI', () => {
+		expect(getMetadataPredicateRelation('book', 'authoredBy')?.expectedObjects).toEqual([
+			{ kind: 'classification', slug: 'person' },
+		]);
+		expect(getMetadataPredicateRelation('book', 'publisher')?.expectedObjects).toEqual([
+			{ kind: 'classification', slug: 'company' },
+		]);
+		expect(getMetadataPredicateRelation('book', 'reference')?.expectedObjects).toEqual([
+			{ kind: 'schema', context: SCHEMA_ORG_CONTEXT, type: 'CreativeWork' },
+		]);
+
+		expect(getMetadataPredicateRelation('person', 'url')?.expectedObjects).toEqual([
+			{ kind: 'primitive', valueType: 'url' },
+		]);
+		expect(getMetadataPredicateRelation('person', 'alumniOf')?.expectedObjects).toEqual([
+			{ kind: 'schema', context: SCHEMA_ORG_CONTEXT, type: 'EducationalOrganization' },
+		]);
+
+		expect(getMetadataPredicateRelation('movie', 'director')?.expectedObjects).toEqual([
+			{ kind: 'classification', slug: 'person' },
+		]);
+		expect(getMetadataPredicateRelation('movie', 'musicBy')?.expectedObjects).toEqual([
+			{ kind: 'classification', slug: 'music-group' },
+			{ kind: 'classification', slug: 'person' },
+		]);
+		expect(getMetadataPredicateRelation('movie', 'trailer')?.expectedObjects).toEqual([
+			{ kind: 'classification', slug: 'video-object' },
+		]);
+
+		expect(
+			getMetadataPredicateRelation('software-application', 'compatibleWith')?.expectedObjects
+		).toEqual([{ kind: 'schema', context: SCHEMA_ORG_CONTEXT, type: 'SoftwareApplication' }]);
+		expect(
+			getMetadataPredicateRelation('software-application', 'softwareAddOn')?.expectedObjects
+		).toEqual([{ kind: 'classification', slug: 'software-application' }]);
+	});
+
+	it('leaves still-unmodeled object targets unresolved until later matrix passes', () => {
+		expect(getMetadataPredicateRelation('article', 'authoredBy')).toBeUndefined();
 	});
 });
