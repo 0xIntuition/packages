@@ -1,0 +1,294 @@
+import type { ExpectedObject } from '@0xintuition/classifications';
+import type { ReactNode } from 'react';
+import { useState } from 'react';
+import { IdentityLinkingPage } from './IdentityLinkingPage.js';
+import { Playground } from './Playground.js';
+import { codeExample, lifecycle, packageCallouts } from './package-lifecycle.js';
+
+const schemaSampleNames = ['duration', 'sameAs', 'url', 'datePublished', 'isrcCode'];
+type DemoPage = 'lifecycle' | 'identity';
+
+export function App() {
+	const [page, setPage] = useState<DemoPage>('lifecycle');
+	const schemaSample = lifecycle.availableButNotRecommended
+		.filter((property) => schemaSampleNames.includes(property.name))
+		.slice(0, 5);
+
+	return (
+		<main className="app-shell">
+			<section className="intro">
+				<div>
+					<p className="section-label">Hackathon quickstart</p>
+					<h1>Build a Spotify song atom from the package contracts.</h1>
+					<p className="intro-copy">
+						No API key or wallet is needed for this dry run. The app shows the payload and triple
+						plan a builder can derive from the packages before wiring a live submit path.
+					</p>
+				</div>
+				<div className="intro-card">
+					<span className="eyebrow">Selected classification</span>
+					<strong>{lifecycle.classification.displayName}</strong>
+					<span>{lifecycle.classification.description}</span>
+				</div>
+			</section>
+
+			<section className="demo-strip" aria-label="How to use this demo">
+				<div>
+					<span>Use it as</span>
+					<strong>A package API walkthrough</strong>
+					<p>Start at classification, then follow the generated atom data and metadata triples.</p>
+				</div>
+				<div>
+					<span>Output</span>
+					<strong>Dry-run payloads</strong>
+					<p>The JSON and triple previews are what an SDK/API submit layer would consume later.</p>
+				</div>
+				<div>
+					<span>Not included yet</span>
+					<strong>Live writes</strong>
+					<p>
+						Wallet, RPC, API keys, and transaction submission stay out of this package showcase.
+					</p>
+				</div>
+			</section>
+
+			<nav className="page-nav" aria-label="Quickstart pages">
+				<button
+					type="button"
+					data-active={page === 'lifecycle'}
+					onClick={() => setPage('lifecycle')}
+				>
+					Package lifecycle
+				</button>
+				<button type="button" data-active={page === 'identity'} onClick={() => setPage('identity')}>
+					Identity linking
+				</button>
+			</nav>
+
+			{page === 'lifecycle' ? <LifecycleOverview schemaSample={schemaSample} /> : null}
+			{page === 'identity' ? <IdentityLinkingPage /> : null}
+		</main>
+	);
+}
+
+function LifecycleOverview({
+	schemaSample,
+}: {
+	schemaSample: typeof lifecycle.availableButNotRecommended;
+}) {
+	return (
+		<>
+			<Playground />
+
+			<section className="package-callouts" aria-label="Package calls by surface">
+				<div className="section-heading">
+					<p className="section-label">Package calls</p>
+					<h2>Each visible surface maps to a small importable API call.</h2>
+					<p>
+						Use these as the copyable pieces: ask classifications for recommended atom fields,
+						schema-org for the full available field set, and the matrix for relationship targets.
+					</p>
+				</div>
+
+				<div className="callout-grid">
+					<CodePair title="Recommended atom fields" code={packageCallouts.fields}>
+						<div className="field-list compact">
+							{lifecycle.classification.fields.map((field) => (
+								<div className="field-row" key={field.key}>
+									<div>
+										<strong>{field.label}</strong>
+										<span>{field.key}</span>
+									</div>
+									<em>{field.required ? 'required' : 'optional'}</em>
+								</div>
+							))}
+						</div>
+					</CodePair>
+
+					<CodePair title="Generated atom data" code={packageCallouts.atomData}>
+						<CodeBlock value={JSON.stringify(lifecycle.atomData, null, 2)} />
+					</CodePair>
+
+					<CodePair title="Schema.org available fields" code={packageCallouts.schemaSuperset}>
+						<div className="schema-list compact">
+							{schemaSample.map((property) => (
+								<div className="schema-row" key={property.id}>
+									<strong>{property.name}</strong>
+									<span>from {property.originType}</span>
+								</div>
+							))}
+						</div>
+					</CodePair>
+
+					<CodePair title="Metadata predicate targets" code={packageCallouts.metadataPredicates}>
+						<div className="schema-list compact">
+							{lifecycle.metadataPredicates.map((relation) => (
+								<div className="schema-row" key={relation.predicateKey}>
+									<strong>{relation.predicateKey}</strong>
+									<span>{relation.expectedObjects.map(formatExpectedObject).join(' or ')}</span>
+								</div>
+							))}
+						</div>
+					</CodePair>
+				</div>
+			</section>
+
+			<section className="workflow-grid" aria-label="Atom creation lifecycle">
+				<Panel index="01" title="Classification">
+					<KeyValue label="Slug" value={lifecycle.classification.slug} />
+					<KeyValue
+						label="Schema context"
+						value={lifecycle.classification.schema?.context ?? 'none'}
+					/>
+					<KeyValue label="Schema type" value={lifecycle.classification.schema?.type ?? 'none'} />
+				</Panel>
+
+				<Panel index="02" title="Recommended atom fields">
+					<div className="field-list">
+						{lifecycle.classification.fields.map((field) => (
+							<div className="field-row" key={field.key}>
+								<div>
+									<strong>{field.label}</strong>
+									<span>
+										{field.key}
+										{field.schemaProperty ? ` -> ${field.schemaProperty}` : ''}
+									</span>
+								</div>
+								<em>{field.required ? 'required' : 'optional'}</em>
+							</div>
+						))}
+					</div>
+				</Panel>
+
+				<Panel index="03" title="Generated atom data">
+					<CodeBlock value={JSON.stringify(lifecycle.atomData, null, 2)} />
+				</Panel>
+
+				<Panel index="04" title="Schema.org superset">
+					<p className="panel-copy">
+						{lifecycle.availableSchemaProperties.length} inherited properties are available for{' '}
+						{lifecycle.classification.schema?.type}; classifications only recommend the fields
+						Intuition wants on the atom.
+					</p>
+					<div className="schema-list">
+						{schemaSample.map((property) => (
+							<div className="schema-row" key={property.id}>
+								<strong>{property.name}</strong>
+								<span>from {property.originType}</span>
+							</div>
+						))}
+					</div>
+				</Panel>
+			</section>
+
+			<section className="relations-section">
+				<div className="section-heading">
+					<p className="section-label">Metadata predicates</p>
+					<h2>Recommended triples stay outside the atom data.</h2>
+					<p>
+						The matrix turns each promoted predicate into a usable object-target contract for app
+						builders.
+					</p>
+				</div>
+
+				<div className="relation-grid">
+					{lifecycle.metadataPredicates.map((relation) => (
+						<article className="relation-card" key={relation.predicateKey}>
+							<div className="relation-card-header">
+								<div>
+									<span>{relation.priority ?? 'recommended'}</span>
+									<h3>{relation.predicateKey}</h3>
+								</div>
+								<code>{truncateId(relation.predicateId)}</code>
+							</div>
+							<p>{relation.predicateRecord?.description}</p>
+							<div className="target-list">
+								{relation.expectedObjects.map((object) => (
+									<span key={formatExpectedObject(object)}>{formatExpectedObject(object)}</span>
+								))}
+							</div>
+							<CodeBlock value={JSON.stringify(relation.triplePreview, null, 2)} />
+						</article>
+					))}
+				</div>
+			</section>
+
+			<section className="code-section">
+				<div className="section-heading">
+					<p className="section-label">Developer surface</p>
+					<h2>The core package calls fit in one flow.</h2>
+					<p>
+						This is the code path to copy into a real app. Replace the sample objects with atoms
+						selected or created by your UI, then pass the generated plan into the submit layer.
+					</p>
+				</div>
+				<CodeBlock value={codeExample} />
+			</section>
+		</>
+	);
+}
+
+function CodePair({ title, code, children }: { title: string; code: string; children: ReactNode }) {
+	return (
+		<article className="code-pair">
+			<div className="code-pair-output">
+				<h3>{title}</h3>
+				{children}
+			</div>
+			<div className="code-pair-code">
+				<span>Package call</span>
+				<CodeBlock value={code} />
+			</div>
+		</article>
+	);
+}
+
+function Panel({ index, title, children }: { index: string; title: string; children: ReactNode }) {
+	return (
+		<article className="panel">
+			<div className="panel-header">
+				<span>{index}</span>
+				<h2>{title}</h2>
+			</div>
+			{children}
+		</article>
+	);
+}
+
+function KeyValue({ label, value }: { label: string; value: string }) {
+	return (
+		<div className="key-value">
+			<span>{label}</span>
+			<strong>{value}</strong>
+		</div>
+	);
+}
+
+function CodeBlock({ value }: { value: string }) {
+	return <pre className="code-block">{value}</pre>;
+}
+
+function formatExpectedObject(object: ExpectedObject): string {
+	switch (object.kind) {
+		case 'classification':
+			return `classification:${object.slug}`;
+		case 'schema':
+			return `schema:${object.type}`;
+		case 'primitive':
+			return `primitive:${object.valueType}`;
+		case 'same-classification':
+			return 'same classification';
+		case 'any':
+			return `any:${object.reason}`;
+		default:
+			return object satisfies never;
+	}
+}
+
+function truncateId(id: string | undefined): string {
+	if (!id) {
+		return 'id pending';
+	}
+
+	return `${id.slice(0, 8)}...${id.slice(-6)}`;
+}

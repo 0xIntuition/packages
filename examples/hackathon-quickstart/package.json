@@ -1,0 +1,30 @@
+{
+	"name": "@0xintuition/hackathon-quickstart-example",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc -p tsconfig.json && vite build",
+		"typecheck": "tsc -p tsconfig.json --noEmit",
+		"lint": "biome check .",
+		"check": "biome check .",
+		"format": "biome format --write .",
+		"clean": "node -e \"fs.rmSync('dist', { recursive: true, force: true })\""
+	},
+	"dependencies": {
+		"@0xintuition/classifications": "workspace:*",
+		"@0xintuition/ids": "workspace:*",
+		"@0xintuition/predicates": "workspace:*",
+		"@0xintuition/schema-org": "workspace:*",
+		"react": "catalog:",
+		"react-dom": "catalog:"
+	},
+	"devDependencies": {
+		"@types/react": "catalog:",
+		"@types/react-dom": "catalog:",
+		"@vitejs/plugin-react": "catalog:",
+		"typescript": "catalog:",
+		"vite": "catalog:"
+	}
+}
