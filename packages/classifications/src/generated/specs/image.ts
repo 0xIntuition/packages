@@ -14,6 +14,7 @@ export const image: ClassificationSpec = {
 		'imgUrl',
 		'hasTag',
 		'hasCategory',
+		'sameAs',
 	] as const,
 	fields: [
 		{
@@ -51,6 +52,15 @@ export const image: ClassificationSpec = {
 			fieldType: 'string[]',
 			required: false,
 			placeholder: 'knowledge-graph',
+		},
+		{
+			key: 'sameAs',
+			schemaProperty: 'sameAs',
+			label: 'Canonical References',
+			description: 'Canonical URLs that identify the same image.',
+			fieldType: 'string[]',
+			required: false,
+			placeholder: 'https://example.com/...',
 		},
 	],
 	defaults: { pluginId: 'image', provider: 'github' },

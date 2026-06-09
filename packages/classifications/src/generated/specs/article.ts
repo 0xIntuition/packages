@@ -15,6 +15,7 @@ export const article: ClassificationSpec = {
 		'reference',
 		'listedIn',
 		'hasCategory',
+		'sameAs',
 	] as const,
 	fields: [
 		{
@@ -43,6 +44,15 @@ export const article: ClassificationSpec = {
 			fieldType: 'url',
 			required: false,
 			placeholder: 'https://example.com/article',
+		},
+		{
+			key: 'sameAs',
+			schemaProperty: 'sameAs',
+			label: 'Canonical References',
+			description: 'Canonical URLs that identify the same article.',
+			fieldType: 'string[]',
+			required: false,
+			placeholder: 'https://example.com/...',
 		},
 	],
 	defaults: { pluginId: 'article', provider: 'dictionary' },

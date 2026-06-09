@@ -7,7 +7,7 @@ export const jobPosting: ClassificationSpec = {
 	description: 'A job opening with title and hiring organization as the durable identity.',
 	category: 'Other',
 	schema: { context: 'https://schema.org/', type: 'JobPosting' },
-	metadataPredicates: ['hiringOrganization', 'jobLocation', 'url', 'hasTag'] as const,
+	metadataPredicates: ['hiringOrganization', 'jobLocation', 'url', 'hasTag', 'sameAs'] as const,
 	fields: [
 		{
 			key: 'title',
@@ -53,6 +53,15 @@ export const jobPosting: ClassificationSpec = {
 			fieldType: 'url',
 			required: false,
 			placeholder: 'https://example.com/jobs/senior-protocol-engineer',
+		},
+		{
+			key: 'sameAs',
+			schemaProperty: 'sameAs',
+			label: 'Canonical References',
+			description: 'Canonical URLs that identify the same job posting.',
+			fieldType: 'string[]',
+			required: false,
+			placeholder: 'https://example.com/...',
 		},
 	],
 	defaults: { pluginId: 'job-posting', provider: 'opengraph' },

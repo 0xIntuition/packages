@@ -34,6 +34,15 @@ export const person: ClassificationSpec = {
 			required: true,
 			placeholder: 'Buterin',
 		},
+		{
+			key: 'sameAs',
+			schemaProperty: 'sameAs',
+			label: 'Canonical References',
+			description: 'Canonical URLs that identify the same person.',
+			fieldType: 'string[]',
+			required: false,
+			placeholder: 'https://example.com/...',
+		},
 	],
 	defaults: { pluginId: 'person', provider: 'wikidata' },
 };

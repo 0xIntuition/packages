@@ -7,7 +7,7 @@ export const musicAlbum: ClassificationSpec = {
 	description: 'A music album identity with an optional artist disambiguator.',
 	category: 'Media',
 	schema: { context: 'https://schema.org/', type: 'MusicAlbum' },
-	metadataPredicates: ['byArtist', 'track', 'contain', 'hasCategory'] as const,
+	metadataPredicates: ['byArtist', 'track', 'contain', 'hasCategory', 'sameAs'] as const,
 	fields: [
 		{
 			key: 'name',
@@ -26,6 +26,15 @@ export const musicAlbum: ClassificationSpec = {
 			fieldType: 'string',
 			required: false,
 			placeholder: 'Daft Punk',
+		},
+		{
+			key: 'sameAs',
+			schemaProperty: 'sameAs',
+			label: 'Canonical References',
+			description: 'Canonical URLs that identify the same music album.',
+			fieldType: 'string[]',
+			required: false,
+			placeholder: 'https://example.com/...',
 		},
 	],
 	defaults: { pluginId: 'song', provider: 'musicbrainz' },

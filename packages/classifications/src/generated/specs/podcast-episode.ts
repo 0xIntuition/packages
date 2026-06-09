@@ -7,7 +7,7 @@ export const podcastEpisode: ClassificationSpec = {
 	description: 'A podcast episode with a canonical episode URL.',
 	category: 'Media',
 	schema: { context: 'https://schema.org/', type: 'PodcastEpisode' },
-	metadataPredicates: ['partOfSeries', 'url', 'productionCompany', 'trailer'] as const,
+	metadataPredicates: ['partOfSeries', 'url', 'productionCompany', 'trailer', 'sameAs'] as const,
 	fields: [
 		{
 			key: 'name',
@@ -44,6 +44,15 @@ export const podcastEpisode: ClassificationSpec = {
 			fieldType: 'iso-date',
 			required: false,
 			placeholder: '2026-02-26',
+		},
+		{
+			key: 'sameAs',
+			schemaProperty: 'sameAs',
+			label: 'Canonical References',
+			description: 'Canonical URLs that identify the same podcast episode.',
+			fieldType: 'string[]',
+			required: false,
+			placeholder: 'https://example.com/...',
 		},
 	],
 	defaults: { pluginId: 'podcast-episode', provider: 'opengraph' },

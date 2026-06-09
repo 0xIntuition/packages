@@ -7,7 +7,7 @@ export const musicRecording: ClassificationSpec = {
 	description: 'An individual music track with optional artist and album disambiguators.',
 	category: 'Media',
 	schema: { context: 'https://schema.org/', type: 'MusicRecording' },
-	metadataPredicates: ['byArtist', 'inAlbum', 'inPlaylist', 'hasCategory'] as const,
+	metadataPredicates: ['byArtist', 'inAlbum', 'inPlaylist', 'hasCategory', 'sameAs'] as const,
 	fields: [
 		{
 			key: 'name',
@@ -35,6 +35,15 @@ export const musicRecording: ClassificationSpec = {
 			fieldType: 'string',
 			required: false,
 			placeholder: 'Discovery',
+		},
+		{
+			key: 'sameAs',
+			schemaProperty: 'sameAs',
+			label: 'Canonical References',
+			description: 'Canonical URLs that identify the same music recording.',
+			fieldType: 'string[]',
+			required: false,
+			placeholder: 'https://example.com/...',
 		},
 	],
 	defaults: { pluginId: 'song', provider: 'musicbrainz' },

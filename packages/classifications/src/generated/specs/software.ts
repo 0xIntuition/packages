@@ -7,7 +7,7 @@ export const software: ClassificationSpec = {
 	description: 'A code project or software identity with a canonical repository URL.',
 	category: 'Product',
 	schema: { context: 'https://schema.org/', type: 'SoftwareSourceCode' },
-	metadataPredicates: ['createdBy', 'url', 'implement', 'compatibleWith'] as const,
+	metadataPredicates: ['createdBy', 'url', 'implement', 'compatibleWith', 'sameAs'] as const,
 	fields: [
 		{
 			key: 'name',
@@ -26,6 +26,15 @@ export const software: ClassificationSpec = {
 			fieldType: 'url',
 			required: true,
 			placeholder: 'https://github.com/0xintuition/intuition-data-structure',
+		},
+		{
+			key: 'sameAs',
+			schemaProperty: 'sameAs',
+			label: 'Canonical References',
+			description: 'Canonical URLs that identify the same software.',
+			fieldType: 'string[]',
+			required: false,
+			placeholder: 'https://example.com/...',
 		},
 	],
 	defaults: { pluginId: 'software', provider: 'github' },

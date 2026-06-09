@@ -27,6 +27,15 @@ export const webSite: ClassificationSpec = {
 			required: true,
 			placeholder: 'https://www.wikipedia.org',
 		},
+		{
+			key: 'sameAs',
+			schemaProperty: 'sameAs',
+			label: 'Canonical References',
+			description: 'Canonical URLs that identify the same website.',
+			fieldType: 'string[]',
+			required: false,
+			placeholder: 'https://example.com/...',
+		},
 	],
 	defaults: { pluginId: 'web-site', provider: 'opengraph' },
 };

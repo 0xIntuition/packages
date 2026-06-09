@@ -7,7 +7,7 @@ export const webPage: ClassificationSpec = {
 	description: 'A web page identity with a canonical URL.',
 	category: 'Web',
 	schema: { context: 'https://schema.org/', type: 'WebPage' },
-	metadataPredicates: ['listedIn', 'authoredBy', 'imgUrl', 'url'] as const,
+	metadataPredicates: ['listedIn', 'authoredBy', 'imgUrl', 'url', 'sameAs'] as const,
 	fields: [
 		{
 			key: 'name',
@@ -35,6 +35,15 @@ export const webPage: ClassificationSpec = {
 			fieldType: 'string',
 			required: false,
 			placeholder: 'https://en.wikipedia.org',
+		},
+		{
+			key: 'sameAs',
+			schemaProperty: 'sameAs',
+			label: 'Canonical References',
+			description: 'Canonical URLs that identify the same web page.',
+			fieldType: 'string[]',
+			required: false,
+			placeholder: 'https://example.com/...',
 		},
 	],
 	defaults: { pluginId: 'web-page', provider: 'opengraph' },

@@ -83,6 +83,7 @@ export function buildAtom(
 export function buildPerson(values: {
 	givenName: string;
 	familyName: string;
+	sameAs?: string[];
 }): BuildResult<AtomBlueprint> {
 	return buildAtom('person', values);
 }
@@ -123,6 +124,7 @@ export function buildCompany(values: {
 export function buildSoftware(values: {
 	name: string;
 	codeRepository: string;
+	sameAs?: string[];
 }): BuildResult<AtomBlueprint> {
 	return buildAtom('software', values);
 }
@@ -142,6 +144,7 @@ export function buildMusicRecording(values: {
 	name: string;
 	byArtist?: string;
 	inAlbum?: string;
+	sameAs?: string[];
 }): BuildResult<AtomBlueprint> {
 	return buildAtom('music-recording', values);
 }
@@ -161,6 +164,7 @@ export function buildArticle(values: {
 	headline: string;
 	description?: string;
 	url?: string;
+	sameAs?: string[];
 }): BuildResult<AtomBlueprint> {
 	return buildAtom('article', values);
 }
@@ -180,6 +184,7 @@ export function buildBook(values: {
 	name: string;
 	author?: string;
 	isbn?: string;
+	sameAs?: string[];
 }): BuildResult<AtomBlueprint> {
 	return buildAtom('book', values);
 }
@@ -195,7 +200,11 @@ export function buildBook(values: {
  * @param values - Brand field values. `name` is required.
  * @returns A {@link BuildResult} with the atom blueprint or validation errors.
  */
-export function buildBrand(values: { name: string; url?: string }): BuildResult<AtomBlueprint> {
+export function buildBrand(values: {
+	name: string;
+	url?: string;
+	sameAs?: string[];
+}): BuildResult<AtomBlueprint> {
 	return buildAtom('brand', values);
 }
 
@@ -231,7 +240,11 @@ export function buildProduct(values: {
  * @param values - WebPage field values. `name` and `url` are required.
  * @returns A {@link BuildResult} with the atom blueprint or validation errors.
  */
-export function buildWebPage(values: { name: string; url: string }): BuildResult<AtomBlueprint> {
+export function buildWebPage(values: {
+	name: string;
+	url: string;
+	sameAs?: string[];
+}): BuildResult<AtomBlueprint> {
 	return buildAtom('web-page', values);
 }
 
@@ -246,7 +259,11 @@ export function buildWebPage(values: { name: string; url: string }): BuildResult
  * @param values - WebSite field values. `name` and `url` are required.
  * @returns A {@link BuildResult} with the atom blueprint or validation errors.
  */
-export function buildWebSite(values: { name: string; url: string }): BuildResult<AtomBlueprint> {
+export function buildWebSite(values: {
+	name: string;
+	url: string;
+	sameAs?: string[];
+}): BuildResult<AtomBlueprint> {
 	return buildAtom('web-site', values);
 }
 
@@ -320,6 +337,7 @@ export function buildEthereumAccount(values: { address: string }): BuildResult<A
 export function buildDefinedTerm(values: {
 	name: string;
 	description?: string;
+	sameAs?: string[];
 }): BuildResult<AtomBlueprint> {
 	return buildAtom('defined-term', values);
 }
@@ -338,6 +356,7 @@ export function buildDefinedTerm(values: {
 export function buildThing(values: {
 	name: string;
 	description?: string;
+	sameAs?: string[];
 }): BuildResult<AtomBlueprint> {
 	return buildAtom('thing', values);
 }
@@ -469,6 +488,7 @@ export function buildImage(values: {
 	url: string;
 	caption?: string;
 	keywords?: string[];
+	sameAs?: string[];
 }): BuildResult<AtomBlueprint> {
 	return buildAtom('image', values);
 }
@@ -490,6 +510,7 @@ export function buildJobPosting(values: {
 	jobLocation?: string;
 	datePosted?: string;
 	url?: string;
+	sameAs?: string[];
 }): BuildResult<AtomBlueprint> {
 	return buildAtom('job-posting', values);
 }
@@ -550,6 +571,7 @@ export function buildMobileApplication(values: {
 	operatingSystem: string;
 	applicationCategory?: string;
 	downloadUrl?: string;
+	sameAs?: string[];
 }): BuildResult<AtomBlueprint> {
 	return buildAtom('mobile-application', values);
 }
@@ -568,6 +590,7 @@ export function buildMobileApplication(values: {
 export function buildMusicAlbum(values: {
 	name: string;
 	byArtist?: string;
+	sameAs?: string[];
 }): BuildResult<AtomBlueprint> {
 	return buildAtom('music-album', values);
 }
@@ -583,7 +606,10 @@ export function buildMusicAlbum(values: {
  * @param values - MusicGroup field values. `name` is required.
  * @returns A {@link BuildResult} with the atom blueprint or validation errors.
  */
-export function buildMusicGroup(values: { name: string }): BuildResult<AtomBlueprint> {
+export function buildMusicGroup(values: {
+	name: string;
+	sameAs?: string[];
+}): BuildResult<AtomBlueprint> {
 	return buildAtom('music-group', values);
 }
 
@@ -623,6 +649,7 @@ export function buildPodcastEpisode(values: {
 	url?: string;
 	partOfSeries?: string;
 	datePublished?: string;
+	sameAs?: string[];
 }): BuildResult<AtomBlueprint> {
 	return buildAtom('podcast-episode', values);
 }
@@ -740,6 +767,7 @@ export function buildSoftwareApplication(values: {
 	applicationCategory?: string;
 	operatingSystem?: string;
 	url?: string;
+	sameAs?: string[];
 }): BuildResult<AtomBlueprint> {
 	return buildAtom('software-application', values);
 }

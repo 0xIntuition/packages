@@ -7,7 +7,7 @@ export const musicGroup: ClassificationSpec = {
 	description: 'A band or artist identity.',
 	category: 'Media',
 	schema: { context: 'https://schema.org/', type: 'MusicGroup' },
-	metadataPredicates: ['musicGroupMember', 'track', 'contain', 'hasCategory'] as const,
+	metadataPredicates: ['musicGroupMember', 'track', 'contain', 'hasCategory', 'sameAs'] as const,
 	fields: [
 		{
 			key: 'name',
@@ -17,6 +17,15 @@ export const musicGroup: ClassificationSpec = {
 			fieldType: 'string',
 			required: true,
 			placeholder: 'Daft Punk',
+		},
+		{
+			key: 'sameAs',
+			schemaProperty: 'sameAs',
+			label: 'Canonical References',
+			description: 'Canonical URLs that identify the same music group.',
+			fieldType: 'string[]',
+			required: false,
+			placeholder: 'https://example.com/...',
 		},
 	],
 	defaults: { pluginId: 'song', provider: 'musicbrainz' },

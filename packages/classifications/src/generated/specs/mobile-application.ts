@@ -7,7 +7,7 @@ export const mobileApplication: ClassificationSpec = {
 	description: 'A mobile app identity with the app name and target platforms.',
 	category: 'Product',
 	schema: { context: 'https://schema.org/', type: 'MobileApplication' },
-	metadataPredicates: ['availableOn', 'url', 'imgUrl', 'hasCategory'] as const,
+	metadataPredicates: ['availableOn', 'url', 'imgUrl', 'hasCategory', 'sameAs'] as const,
 	fields: [
 		{
 			key: 'name',
@@ -44,6 +44,15 @@ export const mobileApplication: ClassificationSpec = {
 			fieldType: 'url',
 			required: false,
 			placeholder: 'https://apps.apple.com/app/spotify/id324684580',
+		},
+		{
+			key: 'sameAs',
+			schemaProperty: 'sameAs',
+			label: 'Canonical References',
+			description: 'Canonical URLs that identify the same mobile application.',
+			fieldType: 'string[]',
+			required: false,
+			placeholder: 'https://example.com/...',
 		},
 	],
 	defaults: { pluginId: 'mobile-application', provider: 'opengraph' },

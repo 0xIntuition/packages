@@ -87,7 +87,27 @@ describe('classification references', () => {
 			'inAlbum',
 			'inPlaylist',
 			'hasCategory',
+			'sameAs',
 		]);
+	});
+
+	it('recommends sameAs for schema.org-backed entities while preserving explicit exclusions', () => {
+		expect(getClassification('music-recording')?.fields.map((field) => field.key)).toContain(
+			'sameAs'
+		);
+		expect(getClassification('music-album')?.metadataPredicates).toContain('sameAs');
+		expect(getClassification('person')?.fields.map((field) => field.key)).toContain('sameAs');
+
+		for (const slug of [
+			'aggregate-rating',
+			'ethereum-account',
+			'ethereum-erc20',
+			'ethereum-smart-contract',
+			'social-media-account',
+			'social-media-posting',
+		]) {
+			expect(getClassification(slug)?.metadataPredicates).not.toContain('sameAs');
+		}
 	});
 
 	it('keeps social media account on an Intuition-owned schema context', () => {

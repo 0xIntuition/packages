@@ -62,7 +62,7 @@ describe('getRequiredFields', () => {
 	it('returns fields for the person classification', () => {
 		const fields = getRequiredFields('person');
 
-		expect(fields).toHaveLength(2);
+		expect(fields).toHaveLength(3);
 		expect(fields).toContainEqual(
 			expect.objectContaining({
 				key: 'givenName',
@@ -75,6 +75,13 @@ describe('getRequiredFields', () => {
 				key: 'familyName',
 				required: true,
 				fieldType: 'string',
+			})
+		);
+		expect(fields).toContainEqual(
+			expect.objectContaining({
+				key: 'sameAs',
+				required: false,
+				fieldType: 'string[]',
 			})
 		);
 	});

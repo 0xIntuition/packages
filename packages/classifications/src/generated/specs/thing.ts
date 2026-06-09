@@ -27,6 +27,15 @@ export const thing: ClassificationSpec = {
 			required: false,
 			placeholder: 'A round fruit with red or green skin.',
 		},
+		{
+			key: 'sameAs',
+			schemaProperty: 'sameAs',
+			label: 'Canonical References',
+			description: 'Canonical URLs that identify the same thing.',
+			fieldType: 'string[]',
+			required: false,
+			placeholder: 'https://example.com/...',
+		},
 	],
 	defaults: { pluginId: 'thing', provider: 'wikidata' },
 };

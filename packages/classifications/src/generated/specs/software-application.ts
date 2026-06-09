@@ -7,7 +7,14 @@ export const softwareApplication: ClassificationSpec = {
 	description: 'A software application identity with optional category and platform metadata.',
 	category: 'Product',
 	schema: { context: 'https://schema.org/', type: 'SoftwareApplication' },
-	metadataPredicates: ['url', 'imgUrl', 'hasCategory', 'compatibleWith', 'softwareAddOn'] as const,
+	metadataPredicates: [
+		'url',
+		'imgUrl',
+		'hasCategory',
+		'compatibleWith',
+		'softwareAddOn',
+		'sameAs',
+	] as const,
 	fields: [
 		{
 			key: 'name',
@@ -44,6 +51,15 @@ export const softwareApplication: ClassificationSpec = {
 			fieldType: 'url',
 			required: false,
 			placeholder: 'https://www.notion.so',
+		},
+		{
+			key: 'sameAs',
+			schemaProperty: 'sameAs',
+			label: 'Canonical References',
+			description: 'Canonical URLs that identify the same software application.',
+			fieldType: 'string[]',
+			required: false,
+			placeholder: 'https://example.com/...',
 		},
 	],
 	defaults: { pluginId: 'software-application', provider: 'opengraph' },

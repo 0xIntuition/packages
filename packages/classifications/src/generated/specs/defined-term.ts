@@ -27,6 +27,15 @@ export const definedTerm: ClassificationSpec = {
 			required: false,
 			placeholder: 'Structured, semantic network that organizes data.',
 		},
+		{
+			key: 'sameAs',
+			schemaProperty: 'sameAs',
+			label: 'Canonical References',
+			description: 'Canonical URLs that identify the same defined term.',
+			fieldType: 'string[]',
+			required: false,
+			placeholder: 'https://example.com/...',
+		},
 	],
 	defaults: { pluginId: 'defined-term', provider: 'dictionary' },
 };
