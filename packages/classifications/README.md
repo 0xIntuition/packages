@@ -44,6 +44,24 @@ sources can be supported later. For schema.org-backed classifications,
 copy inheritance or provenance into the classification; consumers can derive that
 from `@0xintuition/schema-org`.
 
+The optional matrix layer adds object-target semantics for promoted metadata
+predicates without putting classification-specific relationships into
+`@0xintuition/predicates`:
+
+```ts
+import { getMetadataPredicateRelation } from '@0xintuition/classifications'
+
+getMetadataPredicateRelation('music-recording', 'inPlaylist')
+// {
+//   expectedObjects: [
+//     { kind: 'schema', context: 'https://schema.org/', type: 'MusicPlaylist' }
+//   ],
+//   schemaMappings: [
+//     { context: 'https://schema.org/', property: 'inPlaylist', match: 'exact' }
+//   ]
+// }
+```
+
 Known classifications are also available as direct subpath imports:
 
 ```ts
