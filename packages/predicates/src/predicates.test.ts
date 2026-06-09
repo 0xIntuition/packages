@@ -33,8 +33,8 @@ describe('@0xintuition/predicates registry', () => {
 		expect(getPredicatesByCategory('Identity/Classification')).toHaveLength(5);
 		expect(getPredicatesByCategory('Social/Reputation')).toHaveLength(12);
 		expect(getPredicatesByCategory('Curation/Containment')).toHaveLength(17);
-		expect(getPredicatesByCategory('Authorship/Contribution')).toHaveLength(14);
-		expect(getPredicatesByCategory('Metadata/Linking')).toHaveLength(15);
+		expect(getPredicatesByCategory('Authorship/Contribution')).toHaveLength(15);
+		expect(getPredicatesByCategory('Metadata/Linking')).toHaveLength(14);
 		expect(getPredicatesByCategory('Affiliation/Membership')).toHaveLength(14);
 		expect(getPredicatesByCategory('Domain-Specific')).toHaveLength(6);
 		expect(getPredicatesByCategory('Sentiment/Opinion')).toHaveLength(8);
@@ -126,6 +126,12 @@ describe('@0xintuition/predicates registry', () => {
 		const followedBy = getPredicateRecord('followedBy');
 		expect(followedBy?.isTransitive).toBe(true);
 		expect(followedBy?.inversePredicate).toBe('preceded by');
+
+		const founder = getPredicateRecord('founder');
+		expect(founder?.inversePredicate).toBe('founded');
+
+		const founded = getPredicateRecord('founded');
+		expect(founded?.inversePredicate).toBe('founder');
 	});
 
 	it('includes the first metadata predicate backfill tranche', () => {
@@ -228,9 +234,7 @@ describe('@0xintuition/predicates registry', () => {
 		expect(identityPredicates).toHaveLength(5);
 
 		for (const predicate of identityPredicates) {
-			if (predicate.status === 'enshrined') {
-				expect(predicate.examples?.length ?? 0).toBeGreaterThan(0);
-			}
+			expect(predicate.examples?.length ?? 0).toBeGreaterThan(0);
 		}
 	});
 

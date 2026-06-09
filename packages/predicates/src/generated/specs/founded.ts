@@ -8,4 +8,5 @@ export const founded = {
 	conjugates: false,
 	category: 'Affiliation/Membership',
 	status: 'proposed',
+	inversePredicate: 'founder',
 } as const satisfies PredicateSpec;

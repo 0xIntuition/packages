@@ -8,4 +8,5 @@ export const brand = {
 	conjugates: false,
 	category: 'Identity/Classification',
 	status: 'proposed',
+	examples: ['(iPhone, brand, Apple)', '(AWS, brand, Amazon Web Services)'],
 } as const satisfies PredicateSpec;

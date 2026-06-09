@@ -7,6 +7,6 @@ export const provider = {
 		'The subject service, software, or creative work is provided by the object person or organization',
 	marketPattern: 'attributive',
 	conjugates: false,
-	category: 'Metadata/Linking',
+	category: 'Authorship/Contribution',
 	status: 'proposed',
 } as const satisfies PredicateSpec;
