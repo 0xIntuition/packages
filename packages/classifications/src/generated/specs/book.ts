@@ -11,7 +11,6 @@ export const book: ClassificationSpec = {
 		'authoredBy',
 		'publisher',
 		'hasCategory',
-		'publishedAt',
 		'reference',
 		'listedIn',
 		'sameAs',

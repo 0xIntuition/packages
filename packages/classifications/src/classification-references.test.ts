@@ -5,7 +5,6 @@ import { describe, expect, it } from 'vitest';
 import { CLASSIFICATION_SPECS, getClassification, getMetadataPredicatesFor } from './index.js';
 
 const SCHEMA_ORG_CONTEXT = 'https://schema.org/';
-const LOCAL_SCHEMA_ORG_LIKE_SLUGS = new Set(['social-media-account']);
 
 describe('classification references', () => {
 	it('references only predicate keys exported by @0xintuition/predicates', () => {
@@ -42,18 +41,7 @@ describe('classification references', () => {
 			const schemaType = getType(spec.schema.type);
 
 			if (!schemaType) {
-				if (!LOCAL_SCHEMA_ORG_LIKE_SLUGS.has(spec.slug)) {
-					issues.push(`${spec.slug}: unknown schema.org type "${spec.schema.type}"`);
-				}
-
-				for (const field of spec.fields) {
-					if (field.schemaProperty) {
-						issues.push(
-							`${spec.slug}.${field.key}: cannot reference schema.org property without a resolved schema.org type`
-						);
-					}
-				}
-
+				issues.push(`${spec.slug}: unknown schema.org type "${spec.schema.type}"`);
 				continue;
 			}
 
@@ -102,14 +90,13 @@ describe('classification references', () => {
 		]);
 	});
 
-	it('keeps the legacy social media account type outside schema.org field validation', () => {
+	it('keeps social media account on an Intuition-owned schema context', () => {
 		const socialMediaAccount = getClassification('social-media-account');
 
 		expect(socialMediaAccount?.schema).toEqual({
-			context: SCHEMA_ORG_CONTEXT,
+			context: 'https://schema.intuition.systems/v1/social-media-account.jsonld',
 			type: 'SocialMediaAccount',
 		});
-		expect(getType('SocialMediaAccount')).toBeUndefined();
 		expect(socialMediaAccount?.fields.every((field) => !field.schemaProperty)).toBe(true);
 		expect(socialMediaAccount?.metadataPredicates).toContain('linkedAccount');
 	});

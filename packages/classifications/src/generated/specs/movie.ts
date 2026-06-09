@@ -13,7 +13,6 @@ export const movie: ClassificationSpec = {
 		'productionCompany',
 		'musicBy',
 		'trailer',
-		'publishedAt',
 		'hasCategory',
 		'sameAs',
 	] as const,

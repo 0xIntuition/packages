@@ -7,13 +7,7 @@ export const podcastEpisode: ClassificationSpec = {
 	description: 'A podcast episode with a canonical episode URL.',
 	category: 'Media',
 	schema: { context: 'https://schema.org/', type: 'PodcastEpisode' },
-	metadataPredicates: [
-		'partOfSeries',
-		'publishedAt',
-		'url',
-		'productionCompany',
-		'trailer',
-	] as const,
+	metadataPredicates: ['partOfSeries', 'url', 'productionCompany', 'trailer'] as const,
 	fields: [
 		{
 			key: 'name',

@@ -50,4 +50,4 @@ Known classifications are also available as direct subpath imports:
 import { ethereumAccount } from '@0xintuition/classifications/ethereum-account'
 ```
 
-Ethereum classifications use the immutable `https://schema.intuition.systems/v1/ethereum.jsonld` JSON-LD context and are gated on `schema.intuition.systems` resolving before publication.
+Ethereum and other Intuition-local classifications use immutable `https://schema.intuition.systems/v1/...` JSON-LD contexts and are gated on `schema.intuition.systems` resolving before publication.

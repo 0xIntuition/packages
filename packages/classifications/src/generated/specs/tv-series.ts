@@ -7,14 +7,7 @@ export const tvSeries: ClassificationSpec = {
 	description: 'A television series identity with optional start and end dates.',
 	category: 'Media',
 	schema: { context: 'https://schema.org/', type: 'TVSeries' },
-	metadataPredicates: [
-		'actor',
-		'director',
-		'productionCompany',
-		'trailer',
-		'publishedAt',
-		'sameAs',
-	] as const,
+	metadataPredicates: ['actor', 'director', 'productionCompany', 'trailer', 'sameAs'] as const,
 	fields: [
 		{
 			key: 'name',

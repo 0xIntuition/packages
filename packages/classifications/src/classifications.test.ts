@@ -99,6 +99,17 @@ describe('classification atom data', () => {
 		);
 	});
 
+	it('builds Intuition schema-backed atom data for social media accounts', () => {
+		expect(
+			buildAtomData('social-media-account', {
+				username: 'karpathy',
+				platform: 'x',
+			})
+		).toBe(
+			'{"@context":"https://schema.intuition.systems/v1/social-media-account.jsonld","@type":"SocialMediaAccount","username":"karpathy","platform":"x"}'
+		);
+	});
+
 	it('reports validation issues without throwing', () => {
 		expect(
 			validateClassificationValues('web-page', {

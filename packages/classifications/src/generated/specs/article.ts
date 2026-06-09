@@ -14,7 +14,6 @@ export const article: ClassificationSpec = {
 		'url',
 		'reference',
 		'listedIn',
-		'publishedAt',
 		'hasCategory',
 	] as const,
 	fields: [

@@ -11,7 +11,6 @@ export const newsArticle: ClassificationSpec = {
 		'authoredBy',
 		'publisher',
 		'reference',
-		'publishedAt',
 		'listedIn',
 		'url',
 		'sameAs',
