@@ -6,7 +6,7 @@ export const ethereumErc20: ClassificationSpec = {
 	displayName: 'ERC-20 Token',
 	description: 'A fungible token contract identity on an EVM chain.',
 	category: 'Blockchain',
-	schemaOrg: {
+	schema: {
 		context: 'https://schema.intuition.systems/v1/ethereum.jsonld',
 		type: 'EthereumERC20',
 	},

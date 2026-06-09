@@ -6,7 +6,7 @@ export const event: ClassificationSpec = {
 	displayName: 'Event',
 	description: 'An event identity with optional time and location disambiguators.',
 	category: 'Other',
-	schemaOrg: { context: 'https://schema.org/', type: 'Event' },
+	schema: { context: 'https://schema.org/', type: 'Event' },
 	metadataPredicates: [
 		'organizer',
 		'performer',
@@ -19,7 +19,7 @@ export const event: ClassificationSpec = {
 	fields: [
 		{
 			key: 'name',
-			schemaOrgProperty: 'name',
+			schemaProperty: 'name',
 			label: 'Event Name',
 			description: 'The name of the event.',
 			fieldType: 'string',
@@ -28,7 +28,7 @@ export const event: ClassificationSpec = {
 		},
 		{
 			key: 'startDate',
-			schemaOrgProperty: 'startDate',
+			schemaProperty: 'startDate',
 			label: 'Start Date',
 			description: 'The event start date.',
 			fieldType: 'iso-date',
@@ -37,7 +37,7 @@ export const event: ClassificationSpec = {
 		},
 		{
 			key: 'location',
-			schemaOrgProperty: 'location',
+			schemaProperty: 'location',
 			label: 'Location',
 			description: 'The location name when needed.',
 			fieldType: 'string',
@@ -46,7 +46,7 @@ export const event: ClassificationSpec = {
 		},
 		{
 			key: 'sameAs',
-			schemaOrgProperty: 'sameAs',
+			schemaProperty: 'sameAs',
 			label: 'Canonical References',
 			description: 'Canonical URLs for the same event.',
 			fieldType: 'string[]',

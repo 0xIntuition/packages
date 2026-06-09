@@ -6,7 +6,7 @@ export const localBusiness: ClassificationSpec = {
 	displayName: 'Local Business',
 	description: 'A local business identity with optional address and contact disambiguators.',
 	category: 'Entity',
-	schemaOrg: { context: 'https://schema.org/', type: 'LocalBusiness' },
+	schema: { context: 'https://schema.org/', type: 'LocalBusiness' },
 	metadataPredicates: [
 		'branchOf',
 		'containedInPlace',
@@ -18,7 +18,7 @@ export const localBusiness: ClassificationSpec = {
 	fields: [
 		{
 			key: 'name',
-			schemaOrgProperty: 'name',
+			schemaProperty: 'name',
 			label: 'Business Name',
 			description: 'The local business name.',
 			fieldType: 'string',
@@ -27,7 +27,7 @@ export const localBusiness: ClassificationSpec = {
 		},
 		{
 			key: 'address',
-			schemaOrgProperty: 'address',
+			schemaProperty: 'address',
 			label: 'Address',
 			description: 'The street address when needed.',
 			fieldType: 'string',
@@ -36,7 +36,7 @@ export const localBusiness: ClassificationSpec = {
 		},
 		{
 			key: 'telephone',
-			schemaOrgProperty: 'telephone',
+			schemaProperty: 'telephone',
 			label: 'Telephone',
 			description: 'A contact telephone number when needed.',
 			fieldType: 'string',
@@ -45,7 +45,7 @@ export const localBusiness: ClassificationSpec = {
 		},
 		{
 			key: 'url',
-			schemaOrgProperty: 'url',
+			schemaProperty: 'url',
 			label: 'Official Website',
 			description: 'The official website when available.',
 			fieldType: 'url',
@@ -54,7 +54,7 @@ export const localBusiness: ClassificationSpec = {
 		},
 		{
 			key: 'sameAs',
-			schemaOrgProperty: 'sameAs',
+			schemaProperty: 'sameAs',
 			label: 'Canonical References',
 			description: 'Canonical references for the same business.',
 			fieldType: 'string[]',

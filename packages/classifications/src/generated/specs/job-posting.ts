@@ -6,7 +6,7 @@ export const jobPosting: ClassificationSpec = {
 	displayName: 'Job Posting',
 	description: 'A job opening with title and hiring organization as the durable identity.',
 	category: 'Other',
-	schemaOrg: { context: 'https://schema.org/', type: 'JobPosting' },
+	schema: { context: 'https://schema.org/', type: 'JobPosting' },
 	metadataPredicates: [
 		'hiringOrganization',
 		'jobLocation',
@@ -17,7 +17,7 @@ export const jobPosting: ClassificationSpec = {
 	fields: [
 		{
 			key: 'title',
-			schemaOrgProperty: 'title',
+			schemaProperty: 'title',
 			label: 'Job Title',
 			description: 'The title of the role.',
 			fieldType: 'string',
@@ -26,7 +26,7 @@ export const jobPosting: ClassificationSpec = {
 		},
 		{
 			key: 'hiringOrganization',
-			schemaOrgProperty: 'hiringOrganization',
+			schemaProperty: 'hiringOrganization',
 			label: 'Hiring Organization',
 			description: 'The organization hiring for the role.',
 			fieldType: 'string',
@@ -35,7 +35,7 @@ export const jobPosting: ClassificationSpec = {
 		},
 		{
 			key: 'jobLocation',
-			schemaOrgProperty: 'jobLocation',
+			schemaProperty: 'jobLocation',
 			label: 'Job Location',
 			description: 'The location of the role if needed.',
 			fieldType: 'string',
@@ -44,7 +44,7 @@ export const jobPosting: ClassificationSpec = {
 		},
 		{
 			key: 'datePosted',
-			schemaOrgProperty: 'datePosted',
+			schemaProperty: 'datePosted',
 			label: 'Date Posted',
 			description: 'The date the job was posted.',
 			fieldType: 'iso-date',
@@ -53,7 +53,7 @@ export const jobPosting: ClassificationSpec = {
 		},
 		{
 			key: 'url',
-			schemaOrgProperty: 'url',
+			schemaProperty: 'url',
 			label: 'Job URL',
 			description: 'The canonical job posting URL.',
 			fieldType: 'url',

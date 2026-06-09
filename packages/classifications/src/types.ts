@@ -15,7 +15,7 @@ export interface ClassificationFieldSpec {
 	fieldType: FieldType;
 	required: boolean;
 	placeholder?: string;
-	schemaOrgProperty?: string;
+	schemaProperty?: string;
 }
 
 export type PredicateKeyReference = string;
@@ -35,7 +35,7 @@ export interface ClassificationSpec {
 	displayName: string;
 	description: string;
 	category: ClassificationCategory;
-	schemaOrg: {
+	schema: {
 		context: string;
 		type: string;
 	} | null;

@@ -6,12 +6,12 @@ export const musicRecording: ClassificationSpec = {
 	displayName: 'Music Recording',
 	description: 'An individual music track with optional artist and album disambiguators.',
 	category: 'Media',
-	schemaOrg: { context: 'https://schema.org/', type: 'MusicRecording' },
+	schema: { context: 'https://schema.org/', type: 'MusicRecording' },
 	metadataPredicates: ['byArtist', 'inAlbum', 'inPlaylist', 'hasCategory'] as const,
 	fields: [
 		{
 			key: 'name',
-			schemaOrgProperty: 'name',
+			schemaProperty: 'name',
 			label: 'Track Name',
 			description: 'The track title.',
 			fieldType: 'string',
@@ -20,7 +20,7 @@ export const musicRecording: ClassificationSpec = {
 		},
 		{
 			key: 'byArtist',
-			schemaOrgProperty: 'byArtist',
+			schemaProperty: 'byArtist',
 			label: 'Artist',
 			description: 'The artist name when needed.',
 			fieldType: 'string',
@@ -29,7 +29,7 @@ export const musicRecording: ClassificationSpec = {
 		},
 		{
 			key: 'inAlbum',
-			schemaOrgProperty: 'inAlbum',
+			schemaProperty: 'inAlbum',
 			label: 'Album',
 			description: 'The album name when needed.',
 			fieldType: 'string',

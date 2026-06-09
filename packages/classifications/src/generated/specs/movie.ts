@@ -6,7 +6,7 @@ export const movie: ClassificationSpec = {
 	displayName: 'Movie',
 	description: 'A movie identity with release-date disambiguation when needed.',
 	category: 'Media',
-	schemaOrg: { context: 'https://schema.org/', type: 'Movie' },
+	schema: { context: 'https://schema.org/', type: 'Movie' },
 	metadataPredicates: [
 		'actor',
 		'director',
@@ -20,7 +20,7 @@ export const movie: ClassificationSpec = {
 	fields: [
 		{
 			key: 'name',
-			schemaOrgProperty: 'name',
+			schemaProperty: 'name',
 			label: 'Movie Title',
 			description: 'The title of the movie.',
 			fieldType: 'string',
@@ -29,7 +29,7 @@ export const movie: ClassificationSpec = {
 		},
 		{
 			key: 'datePublished',
-			schemaOrgProperty: 'datePublished',
+			schemaProperty: 'datePublished',
 			label: 'Release Date',
 			description: 'The release date when needed.',
 			fieldType: 'iso-date',
@@ -38,7 +38,7 @@ export const movie: ClassificationSpec = {
 		},
 		{
 			key: 'sameAs',
-			schemaOrgProperty: 'sameAs',
+			schemaProperty: 'sameAs',
 			label: 'Canonical References',
 			description: 'Canonical URLs for the same movie.',
 			fieldType: 'string[]',

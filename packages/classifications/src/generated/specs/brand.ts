@@ -6,12 +6,12 @@ export const brand: ClassificationSpec = {
 	displayName: 'Brand',
 	description: 'A brand identity with a name and optional canonical references.',
 	category: 'Entity',
-	schemaOrg: { context: 'https://schema.org/', type: 'Brand' },
+	schema: { context: 'https://schema.org/', type: 'Brand' },
 	metadataPredicates: ['url', 'sameAs', 'imgUrl'] as const,
 	fields: [
 		{
 			key: 'name',
-			schemaOrgProperty: 'name',
+			schemaProperty: 'name',
 			label: 'Brand Name',
 			description: 'The human-readable brand name.',
 			fieldType: 'string',
@@ -20,7 +20,7 @@ export const brand: ClassificationSpec = {
 		},
 		{
 			key: 'url',
-			schemaOrgProperty: 'url',
+			schemaProperty: 'url',
 			label: 'Official Website',
 			description: 'The official website when available.',
 			fieldType: 'url',
@@ -29,7 +29,7 @@ export const brand: ClassificationSpec = {
 		},
 		{
 			key: 'sameAs',
-			schemaOrgProperty: 'sameAs',
+			schemaProperty: 'sameAs',
 			label: 'Canonical References',
 			description: 'Canonical URLs for the same brand.',
 			fieldType: 'string[]',

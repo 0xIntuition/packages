@@ -6,12 +6,12 @@ export const thing: ClassificationSpec = {
 	displayName: 'Thing',
 	description: 'A broad tangible or conceptual thing with a name and description.',
 	category: 'Entity',
-	schemaOrg: { context: 'https://schema.org/', type: 'Thing' },
+	schema: { context: 'https://schema.org/', type: 'Thing' },
 	metadataPredicates: ['sameAs', 'url', 'imgUrl', 'hasDescription'] as const,
 	fields: [
 		{
 			key: 'name',
-			schemaOrgProperty: 'name',
+			schemaProperty: 'name',
 			label: 'Thing Name',
 			description: 'The name of the thing.',
 			fieldType: 'string',
@@ -20,7 +20,7 @@ export const thing: ClassificationSpec = {
 		},
 		{
 			key: 'description',
-			schemaOrgProperty: 'description',
+			schemaProperty: 'description',
 			label: 'Description',
 			description: 'A short description of the thing.',
 			fieldType: 'string',

@@ -6,12 +6,12 @@ export const definedTerm: ClassificationSpec = {
 	displayName: 'Defined Term',
 	description: 'A dictionary-style defined term with a short description.',
 	category: 'Entity',
-	schemaOrg: { context: 'https://schema.org/', type: 'DefinedTerm' },
+	schema: { context: 'https://schema.org/', type: 'DefinedTerm' },
 	metadataPredicates: ['hasDescription', 'sameAs', 'url', 'hasCategory', 'hasTag'] as const,
 	fields: [
 		{
 			key: 'name',
-			schemaOrgProperty: 'name',
+			schemaProperty: 'name',
 			label: 'Term Name',
 			description: 'The defined term name.',
 			fieldType: 'string',
@@ -20,7 +20,7 @@ export const definedTerm: ClassificationSpec = {
 		},
 		{
 			key: 'description',
-			schemaOrgProperty: 'description',
+			schemaProperty: 'description',
 			label: 'Description',
 			description: 'The meaning or definition of the term.',
 			fieldType: 'string',

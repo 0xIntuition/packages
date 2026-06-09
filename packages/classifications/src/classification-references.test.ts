@@ -35,19 +35,19 @@ describe('classification references', () => {
 		const issues: string[] = [];
 
 		for (const spec of CLASSIFICATION_SPECS) {
-			if (spec.schemaOrg?.context !== SCHEMA_ORG_CONTEXT) {
+			if (spec.schema?.context !== SCHEMA_ORG_CONTEXT) {
 				continue;
 			}
 
-			const schemaOrgType = getType(spec.schemaOrg.type);
+			const schemaType = getType(spec.schema.type);
 
-			if (!schemaOrgType) {
+			if (!schemaType) {
 				if (!LOCAL_SCHEMA_ORG_LIKE_SLUGS.has(spec.slug)) {
-					issues.push(`${spec.slug}: unknown schema.org type "${spec.schemaOrg.type}"`);
+					issues.push(`${spec.slug}: unknown schema.org type "${spec.schema.type}"`);
 				}
 
 				for (const field of spec.fields) {
-					if (field.schemaOrgProperty) {
+					if (field.schemaProperty) {
 						issues.push(
 							`${spec.slug}.${field.key}: cannot reference schema.org property without a resolved schema.org type`
 						);
@@ -57,19 +57,19 @@ describe('classification references', () => {
 				continue;
 			}
 
-			const schemaOrgPropertyNames = new Set(
-				getPropertiesFor(schemaOrgType.name).map((property) => property.name)
+			const schemaPropertyNames = new Set(
+				getPropertiesFor(schemaType.name).map((property) => property.name)
 			);
 
 			for (const field of spec.fields) {
-				if (!field.schemaOrgProperty) {
-					issues.push(`${spec.slug}.${field.key}: missing schemaOrgProperty pointer`);
+				if (!field.schemaProperty) {
+					issues.push(`${spec.slug}.${field.key}: missing schemaProperty pointer`);
 					continue;
 				}
 
-				if (!schemaOrgPropertyNames.has(field.schemaOrgProperty)) {
+				if (!schemaPropertyNames.has(field.schemaProperty)) {
 					issues.push(
-						`${spec.slug}.${field.key}: unknown schema.org property "${field.schemaOrgProperty}" for ${schemaOrgType.name}`
+						`${spec.slug}.${field.key}: unknown schema.org property "${field.schemaProperty}" for ${schemaType.name}`
 					);
 				}
 			}
@@ -105,12 +105,12 @@ describe('classification references', () => {
 	it('keeps the legacy social media account type outside schema.org field validation', () => {
 		const socialMediaAccount = getClassification('social-media-account');
 
-		expect(socialMediaAccount?.schemaOrg).toEqual({
+		expect(socialMediaAccount?.schema).toEqual({
 			context: SCHEMA_ORG_CONTEXT,
 			type: 'SocialMediaAccount',
 		});
 		expect(getType('SocialMediaAccount')).toBeUndefined();
-		expect(socialMediaAccount?.fields.every((field) => !field.schemaOrgProperty)).toBe(true);
+		expect(socialMediaAccount?.fields.every((field) => !field.schemaProperty)).toBe(true);
 		expect(socialMediaAccount?.metadataPredicates).toContain('linkedAccount');
 	});
 });

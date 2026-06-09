@@ -6,7 +6,7 @@ export const tvSeries: ClassificationSpec = {
 	displayName: 'TV Series',
 	description: 'A television series identity with optional start and end dates.',
 	category: 'Media',
-	schemaOrg: { context: 'https://schema.org/', type: 'TVSeries' },
+	schema: { context: 'https://schema.org/', type: 'TVSeries' },
 	metadataPredicates: [
 		'actor',
 		'director',
@@ -18,7 +18,7 @@ export const tvSeries: ClassificationSpec = {
 	fields: [
 		{
 			key: 'name',
-			schemaOrgProperty: 'name',
+			schemaProperty: 'name',
 			label: 'Series Title',
 			description: 'The name of the TV series.',
 			fieldType: 'string',
@@ -27,7 +27,7 @@ export const tvSeries: ClassificationSpec = {
 		},
 		{
 			key: 'startDate',
-			schemaOrgProperty: 'startDate',
+			schemaProperty: 'startDate',
 			label: 'Start Date',
 			description: 'The series start date.',
 			fieldType: 'iso-date',
@@ -36,7 +36,7 @@ export const tvSeries: ClassificationSpec = {
 		},
 		{
 			key: 'endDate',
-			schemaOrgProperty: 'endDate',
+			schemaProperty: 'endDate',
 			label: 'End Date',
 			description: 'The series end date when known.',
 			fieldType: 'iso-date',
@@ -45,7 +45,7 @@ export const tvSeries: ClassificationSpec = {
 		},
 		{
 			key: 'sameAs',
-			schemaOrgProperty: 'sameAs',
+			schemaProperty: 'sameAs',
 			label: 'Canonical References',
 			description: 'Canonical URLs for the same series.',
 			fieldType: 'string[]',

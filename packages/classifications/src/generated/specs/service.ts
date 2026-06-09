@@ -6,12 +6,12 @@ export const service: ClassificationSpec = {
 	displayName: 'Service',
 	description: 'A service identity with optional provider and area-served disambiguators.',
 	category: 'Product',
-	schemaOrg: { context: 'https://schema.org/', type: 'Service' },
+	schema: { context: 'https://schema.org/', type: 'Service' },
 	metadataPredicates: ['provider', 'areaServed', 'hasCategory', 'url', 'sameAs'] as const,
 	fields: [
 		{
 			key: 'name',
-			schemaOrgProperty: 'name',
+			schemaProperty: 'name',
 			label: 'Service Name',
 			description: 'The service name.',
 			fieldType: 'string',
@@ -20,7 +20,7 @@ export const service: ClassificationSpec = {
 		},
 		{
 			key: 'provider',
-			schemaOrgProperty: 'provider',
+			schemaProperty: 'provider',
 			label: 'Provider',
 			description: 'The provider name when needed.',
 			fieldType: 'string',
@@ -29,7 +29,7 @@ export const service: ClassificationSpec = {
 		},
 		{
 			key: 'areaServed',
-			schemaOrgProperty: 'areaServed',
+			schemaProperty: 'areaServed',
 			label: 'Area Served',
 			description: 'The served geography or audience when needed.',
 			fieldType: 'string',
@@ -38,7 +38,7 @@ export const service: ClassificationSpec = {
 		},
 		{
 			key: 'sameAs',
-			schemaOrgProperty: 'sameAs',
+			schemaProperty: 'sameAs',
 			label: 'Canonical References',
 			description: 'Canonical URLs for the same service.',
 			fieldType: 'string[]',

@@ -6,7 +6,7 @@ export const newsArticle: ClassificationSpec = {
 	displayName: 'News Article',
 	description: 'A news article with durable publication identity fields.',
 	category: 'Creative Work',
-	schemaOrg: { context: 'https://schema.org/', type: 'NewsArticle' },
+	schema: { context: 'https://schema.org/', type: 'NewsArticle' },
 	metadataPredicates: [
 		'authoredBy',
 		'publisher',
@@ -20,7 +20,7 @@ export const newsArticle: ClassificationSpec = {
 	fields: [
 		{
 			key: 'headline',
-			schemaOrgProperty: 'headline',
+			schemaProperty: 'headline',
 			label: 'Headline',
 			description: 'The headline of the news article.',
 			fieldType: 'string',
@@ -29,7 +29,7 @@ export const newsArticle: ClassificationSpec = {
 		},
 		{
 			key: 'datePublished',
-			schemaOrgProperty: 'datePublished',
+			schemaProperty: 'datePublished',
 			label: 'Publication Date',
 			description: 'The publication date.',
 			fieldType: 'iso-date',
@@ -38,7 +38,7 @@ export const newsArticle: ClassificationSpec = {
 		},
 		{
 			key: 'url',
-			schemaOrgProperty: 'url',
+			schemaProperty: 'url',
 			label: 'Article URL',
 			description: 'The canonical article URL.',
 			fieldType: 'url',
@@ -47,7 +47,7 @@ export const newsArticle: ClassificationSpec = {
 		},
 		{
 			key: 'sameAs',
-			schemaOrgProperty: 'sameAs',
+			schemaProperty: 'sameAs',
 			label: 'Canonical References',
 			description: 'Canonical references for the same article.',
 			fieldType: 'string[]',

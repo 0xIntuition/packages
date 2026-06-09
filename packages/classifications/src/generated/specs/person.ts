@@ -6,7 +6,7 @@ export const person: ClassificationSpec = {
 	displayName: 'Person',
 	description: 'An individual human identity using structured first and last names.',
 	category: 'Entity',
-	schemaOrg: { context: 'https://schema.org/', type: 'Person' },
+	schema: { context: 'https://schema.org/', type: 'Person' },
 	metadataPredicates: [
 		'memberOf',
 		'employedBy',
@@ -18,7 +18,7 @@ export const person: ClassificationSpec = {
 	fields: [
 		{
 			key: 'givenName',
-			schemaOrgProperty: 'givenName',
+			schemaProperty: 'givenName',
 			label: 'First Name',
 			description: 'The person’s given or first name.',
 			fieldType: 'string',
@@ -27,7 +27,7 @@ export const person: ClassificationSpec = {
 		},
 		{
 			key: 'familyName',
-			schemaOrgProperty: 'familyName',
+			schemaProperty: 'familyName',
 			label: 'Last Name',
 			description: 'The person’s family or last name.',
 			fieldType: 'string',

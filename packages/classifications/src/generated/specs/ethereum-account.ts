@@ -6,7 +6,7 @@ export const ethereumAccount: ClassificationSpec = {
 	displayName: 'Ethereum Account',
 	description: 'A wallet or externally owned account identity on an EVM chain.',
 	category: 'Blockchain',
-	schemaOrg: {
+	schema: {
 		context: 'https://schema.intuition.systems/v1/ethereum.jsonld',
 		type: 'EthereumAccount',
 	},

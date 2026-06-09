@@ -70,7 +70,7 @@ describe('classification atom data', () => {
 	it('builds Intuition schema-backed atom data for blockchain classifications', () => {
 		// Pin the canonical serialized atom data for every Ethereum classification —
 		// these strings determine the on-chain atom IDs forever once published. Any
-		// silent change to schemaOrg, field order, or whitespace would flip them.
+		// silent change to schema, field order, or whitespace would flip them.
 		expect(
 			buildAtomData('ethereum-account', {
 				address: '0x0000000000000000000000000000000000000001',

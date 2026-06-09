@@ -6,7 +6,7 @@ export const article: ClassificationSpec = {
 	displayName: 'Article',
 	description: 'A written article with a durable headline and canonical URL.',
 	category: 'Creative Work',
-	schemaOrg: { context: 'https://schema.org/', type: 'Article' },
+	schema: { context: 'https://schema.org/', type: 'Article' },
 	metadataPredicates: [
 		'authoredBy',
 		'publisher',
@@ -20,7 +20,7 @@ export const article: ClassificationSpec = {
 	fields: [
 		{
 			key: 'headline',
-			schemaOrgProperty: 'headline',
+			schemaProperty: 'headline',
 			label: 'Headline',
 			description: 'The title or headline of the article.',
 			fieldType: 'string',
@@ -29,7 +29,7 @@ export const article: ClassificationSpec = {
 		},
 		{
 			key: 'description',
-			schemaOrgProperty: 'description',
+			schemaProperty: 'description',
 			label: 'Description',
 			description: 'A short summary of the article.',
 			fieldType: 'string',
@@ -38,7 +38,7 @@ export const article: ClassificationSpec = {
 		},
 		{
 			key: 'url',
-			schemaOrgProperty: 'url',
+			schemaProperty: 'url',
 			label: 'Article URL',
 			description: 'The canonical article URL.',
 			fieldType: 'url',
