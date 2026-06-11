@@ -221,7 +221,34 @@ describe('metadata predicate matrix', () => {
 		).toEqual([{ kind: 'classification', slug: 'software-application' }]);
 	});
 
-	it('leaves still-unmodeled object targets unresolved until later matrix passes', () => {
-		expect(getMetadataPredicateRelation('article', 'authoredBy')).toBeUndefined();
+	it('covers every promoted metadata predicate with an explicit object contract', () => {
+		const modeledPairs = new Set(
+			METADATA_PREDICATE_MATRIX.map((entry) => `${entry.subjectClassification}:${entry.predicate}`)
+		);
+		const missingPairs = CLASSIFICATION_SPECS.flatMap((spec) =>
+			spec.metadataPredicates
+				.map((predicate) => `${spec.slug}:${predicate}`)
+				.filter((pair) => !modeledPairs.has(pair))
+		);
+
+		expect(missingPairs).toEqual([]);
+	});
+
+	it('uses explicit any targets instead of schema.org Thing as a catch-all', () => {
+		const schemaThingFallbacks = METADATA_PREDICATE_MATRIX.flatMap((entry) =>
+			entry.expectedObjects
+				.filter(
+					(expectedObject) =>
+						expectedObject.kind === 'schema' &&
+						expectedObject.context === SCHEMA_ORG_CONTEXT &&
+						expectedObject.type === 'Thing'
+				)
+				.map((expectedObject) => ({
+					entry,
+					expectedObject,
+				}))
+		);
+
+		expect(schemaThingFallbacks).toEqual([]);
 	});
 });
