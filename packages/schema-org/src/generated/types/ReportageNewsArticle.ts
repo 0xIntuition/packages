@@ -1,0 +1,16 @@
+import type { SchemaOrgTypeSpec } from '../../types.js';
+
+export const schemaOrgReportageNewsArticle = {
+	id: 'schema:ReportageNewsArticle',
+	name: 'ReportageNewsArticle',
+	label: 'ReportageNewsArticle',
+	comment:
+		'The [[ReportageNewsArticle]] type is a subtype of [[NewsArticle]] representing\n news articles which are the result of journalistic news reporting conventions.\n\nIn practice many news publishers produce a wide variety of article types, many of which might be considered a [[NewsArticle]] but not a [[ReportageNewsArticle]]. For example, opinion pieces, reviews, analysis, sponsored or satirical articles, or articles that combine several of these elements.\n\nThe [[ReportageNewsArticle]] type is based on a stricter ideal for "news" as a work of journalism, with articles based on factual information either observed or verified by the author, or reported and verified from knowledgeable sources.  This often includes perspectives from multiple viewpoints on a particular issue (distinguishing news reports from public relations or propaganda).  News reports in the [[ReportageNewsArticle]] sense de-emphasize the opinion of the author, with commentary and value judgements typically expressed elsewhere.\n\nA [[ReportageNewsArticle]] which goes deeper into analysis can also be marked with an additional type of [[AnalysisNewsArticle]].\n',
+	subClassOf: ['NewsArticle', 'Article', 'CreativeWork', 'Thing'],
+	properties: [],
+} as const satisfies SchemaOrgTypeSpec;
+
+export const spec = schemaOrgReportageNewsArticle;
+export const ReportageNewsArticle = schemaOrgReportageNewsArticle;
+
+export default schemaOrgReportageNewsArticle;

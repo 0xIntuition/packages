@@ -9,6 +9,7 @@ const packageOrder = [
 	'deployments',
 	'curves',
 	'ids',
+	'schema-org',
 	'classifications',
 	'predicates',
 	'primitives',

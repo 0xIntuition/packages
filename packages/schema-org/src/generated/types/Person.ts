@@ -1,0 +1,516 @@
+import type { SchemaOrgTypeSpec } from '../../types.js';
+
+export const schemaOrgPerson = {
+	id: 'schema:Person',
+	name: 'Person',
+	label: 'Person',
+	comment: 'A person (alive, dead, undead, or fictional).',
+	subClassOf: ['Thing'],
+	properties: [
+		{
+			id: 'schema:additionalName',
+			name: 'additionalName',
+			label: 'additionalName',
+			comment: 'An additional name for a Person, can be used for a middle name.',
+			rangeIncludes: ['Text'],
+		},
+		{
+			id: 'schema:address',
+			name: 'address',
+			label: 'address',
+			comment: 'Physical address of the item.',
+			rangeIncludes: ['PostalAddress', 'Text'],
+		},
+		{
+			id: 'schema:affiliation',
+			name: 'affiliation',
+			label: 'affiliation',
+			comment:
+				'An organization that this person is affiliated with. For example, a school/university, a club, or a team.',
+			rangeIncludes: ['Organization'],
+		},
+		{
+			id: 'schema:agentInteractionStatistic',
+			name: 'agentInteractionStatistic',
+			label: 'agentInteractionStatistic',
+			comment:
+				"The number of completed interactions for this entity, in a particular role (the 'agent'), in a particular action (indicated in the statistic), and in a particular context (i.e. interactionService).",
+			rangeIncludes: ['InteractionCounter'],
+		},
+		{
+			id: 'schema:alumniOf',
+			name: 'alumniOf',
+			label: 'alumniOf',
+			comment: 'An organization that the person is an alumni of.',
+			rangeIncludes: ['EducationalOrganization', 'Organization'],
+		},
+		{
+			id: 'schema:award',
+			name: 'award',
+			label: 'award',
+			comment: 'An award won by or for this item.',
+			rangeIncludes: ['Text'],
+		},
+		{
+			id: 'schema:awards',
+			name: 'awards',
+			label: 'awards',
+			comment: 'Awards won by or for this item.',
+			rangeIncludes: ['Text'],
+		},
+		{
+			id: 'schema:birthDate',
+			name: 'birthDate',
+			label: 'birthDate',
+			comment: 'Date of birth.',
+			rangeIncludes: ['Date'],
+		},
+		{
+			id: 'schema:birthPlace',
+			name: 'birthPlace',
+			label: 'birthPlace',
+			comment: 'The place where the person was born.',
+			rangeIncludes: ['Place'],
+		},
+		{
+			id: 'schema:brand',
+			name: 'brand',
+			label: 'brand',
+			comment:
+				'The brand(s) associated with a product or service, or the brand(s) maintained by an organization or business person.',
+			rangeIncludes: ['Brand', 'Organization'],
+		},
+		{
+			id: 'schema:callSign',
+			name: 'callSign',
+			label: 'callSign',
+			comment:
+				'A [callsign](https://en.wikipedia.org/wiki/Call_sign), as used in broadcasting and radio communications to identify people, radio and TV stations, or vehicles.',
+			rangeIncludes: ['Text'],
+		},
+		{
+			id: 'schema:children',
+			name: 'children',
+			label: 'children',
+			comment: 'A child of the person.',
+			rangeIncludes: ['Person'],
+		},
+		{
+			id: 'schema:colleague',
+			name: 'colleague',
+			label: 'colleague',
+			comment: 'A colleague of the person.',
+			rangeIncludes: ['Person', 'URL'],
+		},
+		{
+			id: 'schema:colleagues',
+			name: 'colleagues',
+			label: 'colleagues',
+			comment: 'A colleague of the person.',
+			rangeIncludes: ['Person'],
+		},
+		{
+			id: 'schema:contactPoint',
+			name: 'contactPoint',
+			label: 'contactPoint',
+			comment: 'A contact point for a person or organization.',
+			rangeIncludes: ['ContactPoint'],
+		},
+		{
+			id: 'schema:contactPoints',
+			name: 'contactPoints',
+			label: 'contactPoints',
+			comment: 'A contact point for a person or organization.',
+			rangeIncludes: ['ContactPoint'],
+		},
+		{
+			id: 'schema:deathDate',
+			name: 'deathDate',
+			label: 'deathDate',
+			comment: 'Date of death.',
+			rangeIncludes: ['Date'],
+		},
+		{
+			id: 'schema:deathPlace',
+			name: 'deathPlace',
+			label: 'deathPlace',
+			comment: 'The place where the person died.',
+			rangeIncludes: ['Place'],
+		},
+		{
+			id: 'schema:duns',
+			name: 'duns',
+			label: 'duns',
+			comment:
+				'The Dun & Bradstreet DUNS number for identifying an organization or business person.',
+			rangeIncludes: ['Text'],
+		},
+		{
+			id: 'schema:email',
+			name: 'email',
+			label: 'email',
+			comment: 'Email address.',
+			rangeIncludes: ['Text'],
+		},
+		{
+			id: 'schema:familyName',
+			name: 'familyName',
+			label: 'familyName',
+			comment: 'Family name. In the U.S., the last name of a Person.',
+			rangeIncludes: ['Text'],
+		},
+		{
+			id: 'schema:faxNumber',
+			name: 'faxNumber',
+			label: 'faxNumber',
+			comment: 'The fax number.',
+			rangeIncludes: ['Text'],
+		},
+		{
+			id: 'schema:follows',
+			name: 'follows',
+			label: 'follows',
+			comment: 'The most generic uni-directional social relation.',
+			rangeIncludes: ['Person'],
+		},
+		{
+			id: 'schema:funder',
+			name: 'funder',
+			label: 'funder',
+			comment:
+				'A person or organization that supports (sponsors) something through some kind of financial contribution.',
+			rangeIncludes: ['Organization', 'Person'],
+		},
+		{
+			id: 'schema:funding',
+			name: 'funding',
+			label: 'funding',
+			comment:
+				'A [[Grant]] that directly or indirectly provide funding or sponsorship for this item. See also [[ownershipFundingInfo]].',
+			rangeIncludes: ['Grant'],
+		},
+		{
+			id: 'schema:gender',
+			name: 'gender',
+			label: 'gender',
+			comment:
+				'Gender of something, typically a [[Person]], but possibly also fictional characters, animals, etc. While https://schema.org/Male and https://schema.org/Female may be used, text strings are also acceptable for people who are not a binary gender. The [[gender]] property can also be used in an extended sense to cover e.g. the gender of sports teams. As with the gender of individuals, we do not try to enumerate all possibilities. A mixed-gender [[SportsTeam]] can be indicated with a text value of "Mixed".',
+			rangeIncludes: ['GenderType', 'Text'],
+		},
+		{
+			id: 'schema:givenName',
+			name: 'givenName',
+			label: 'givenName',
+			comment: 'Given name. In the U.S., the first name of a Person.',
+			rangeIncludes: ['Text'],
+		},
+		{
+			id: 'schema:globalLocationNumber',
+			name: 'globalLocationNumber',
+			label: 'globalLocationNumber',
+			comment:
+				'The [Global Location Number](http://www.gs1.org/gln) (GLN, sometimes also referred to as International Location Number or ILN) of the respective organization, person, or place. The GLN is a 13-digit number used to identify parties and physical locations.',
+			rangeIncludes: ['Text'],
+		},
+		{
+			id: 'schema:hasCertification',
+			name: 'hasCertification',
+			label: 'hasCertification',
+			comment:
+				'Certification information about a product, organization, service, place, or person.',
+			rangeIncludes: ['Certification'],
+		},
+		{
+			id: 'schema:hasCredential',
+			name: 'hasCredential',
+			label: 'hasCredential',
+			comment: 'A credential awarded to the Person or Organization.',
+			rangeIncludes: ['Credential'],
+		},
+		{
+			id: 'schema:hasOccupation',
+			name: 'hasOccupation',
+			label: 'hasOccupation',
+			comment: "The Person's occupation. For past professions, use Role for expressing dates.",
+			rangeIncludes: ['Occupation'],
+		},
+		{
+			id: 'schema:hasOfferCatalog',
+			name: 'hasOfferCatalog',
+			label: 'hasOfferCatalog',
+			comment: 'Indicates an OfferCatalog listing for this Organization, Person, or Service.',
+			rangeIncludes: ['OfferCatalog'],
+		},
+		{
+			id: 'schema:hasPOS',
+			name: 'hasPOS',
+			label: 'hasPOS',
+			comment: 'Points-of-Sales operated by the organization or person.',
+			rangeIncludes: ['Place'],
+		},
+		{
+			id: 'schema:height',
+			name: 'height',
+			label: 'height',
+			comment: 'The height of the item.',
+			rangeIncludes: ['Distance', 'QuantitativeValue'],
+		},
+		{
+			id: 'schema:homeLocation',
+			name: 'homeLocation',
+			label: 'homeLocation',
+			comment: "A contact location for a person's residence.",
+			rangeIncludes: ['ContactPoint', 'Place'],
+		},
+		{
+			id: 'schema:honorificPrefix',
+			name: 'honorificPrefix',
+			label: 'honorificPrefix',
+			comment: "An honorific prefix preceding a Person's name such as Dr/Mrs/Mr.",
+			rangeIncludes: ['Text'],
+		},
+		{
+			id: 'schema:honorificSuffix',
+			name: 'honorificSuffix',
+			label: 'honorificSuffix',
+			comment: "An honorific suffix following a Person's name such as M.D./PhD/MSCSW.",
+			rangeIncludes: ['Text'],
+		},
+		{
+			id: 'schema:interactionStatistic',
+			name: 'interactionStatistic',
+			label: 'interactionStatistic',
+			comment:
+				'The number of interactions for the CreativeWork using the WebSite or SoftwareApplication. The most specific child type of InteractionCounter should be used.',
+			rangeIncludes: ['InteractionCounter'],
+		},
+		{
+			id: 'schema:isicV4',
+			name: 'isicV4',
+			label: 'isicV4',
+			comment:
+				'The International Standard of Industrial Classification of All Economic Activities (ISIC), Revision 4 code for a particular organization, business person, or place.',
+			rangeIncludes: ['Text'],
+		},
+		{
+			id: 'schema:jobTitle',
+			name: 'jobTitle',
+			label: 'jobTitle',
+			comment: 'The job title of the person (for example, Financial Manager).',
+			rangeIncludes: ['DefinedTerm', 'Text'],
+		},
+		{
+			id: 'schema:knows',
+			name: 'knows',
+			label: 'knows',
+			comment: 'The most generic bi-directional social/work relation.',
+			rangeIncludes: ['Person'],
+		},
+		{
+			id: 'schema:knowsAbout',
+			name: 'knowsAbout',
+			label: 'knowsAbout',
+			comment:
+				'Of a [[Person]], and less typically of an [[Organization]], to indicate a topic that is known about - suggesting possible expertise but not implying it. We do not distinguish skill levels here, or relate this to educational content, events, objectives or [[JobPosting]] descriptions.',
+			rangeIncludes: ['Text', 'Thing', 'URL'],
+		},
+		{
+			id: 'schema:knowsLanguage',
+			name: 'knowsLanguage',
+			label: 'knowsLanguage',
+			comment:
+				'Of a [[Person]], and less typically of an [[Organization]], to indicate a known language. We do not distinguish skill levels or reading/writing/speaking/signing here. Use language codes from the [IETF BCP 47 standard](http://tools.ietf.org/html/bcp47).',
+			rangeIncludes: ['Language', 'Text'],
+		},
+		{
+			id: 'schema:lifeEvent',
+			name: 'lifeEvent',
+			label: 'lifeEvent',
+			comment:
+				'A life event like baptism, communions, Bar Mitzvahs, Aqiqah, Namakarana, Miyamairi, burial, ....',
+			rangeIncludes: ['Event'],
+		},
+		{
+			id: 'schema:makesOffer',
+			name: 'makesOffer',
+			label: 'makesOffer',
+			comment: 'A pointer to products or services offered by the organization or person.',
+			rangeIncludes: ['Offer'],
+		},
+		{
+			id: 'schema:memberOf',
+			name: 'memberOf',
+			label: 'memberOf',
+			comment:
+				'An Organization (or ProgramMembership) to which this Person or Organization belongs.',
+			rangeIncludes: ['MemberProgramTier', 'Organization', 'ProgramMembership'],
+		},
+		{
+			id: 'schema:naics',
+			name: 'naics',
+			label: 'naics',
+			comment:
+				'The North American Industry Classification System (NAICS) code for a particular organization or business person.',
+			rangeIncludes: ['Text'],
+		},
+		{
+			id: 'schema:nationality',
+			name: 'nationality',
+			label: 'nationality',
+			comment: 'Nationality of the person.',
+			rangeIncludes: ['Country'],
+		},
+		{
+			id: 'schema:netWorth',
+			name: 'netWorth',
+			label: 'netWorth',
+			comment:
+				'The total financial value of the person as calculated by subtracting the total value of liabilities from the total value of assets.',
+			rangeIncludes: ['MonetaryAmount', 'PriceSpecification'],
+		},
+		{
+			id: 'schema:owns',
+			name: 'owns',
+			label: 'owns',
+			comment: 'Things owned by the organization or person.',
+			rangeIncludes: ['Thing'],
+		},
+		{
+			id: 'schema:parent',
+			name: 'parent',
+			label: 'parent',
+			comment: 'A parent of this person.',
+			rangeIncludes: ['Person'],
+		},
+		{
+			id: 'schema:parents',
+			name: 'parents',
+			label: 'parents',
+			comment: 'A parents of the person.',
+			rangeIncludes: ['Person'],
+		},
+		{
+			id: 'schema:performerIn',
+			name: 'performerIn',
+			label: 'performerIn',
+			comment: 'Event that this person is a performer or participant in.',
+			rangeIncludes: ['Event'],
+		},
+		{
+			id: 'schema:pronouns',
+			name: 'pronouns',
+			label: 'pronouns',
+			comment:
+				'A short string listing or describing pronouns for a person. Typically the person concerned is the best authority as pronouns are a critical part of personal identity and expression. Publishers and consumers of this information are reminded to treat this data responsibly, take country-specific laws related to gender expression into account, and be wary of out-of-date data and drawing unwarranted inferences about the person being described.\n\nIn English, formulations such as "they/them", "she/her", and "he/him" are commonly used online and can also be used here. We do not intend to enumerate all possible micro-syntaxes in all languages. More structured and well-defined external values for pronouns can be referenced using the [[StructuredValue]] or [[DefinedTerm]] values.\n',
+			rangeIncludes: ['DefinedTerm', 'StructuredValue', 'Text'],
+		},
+		{
+			id: 'schema:publishingPrinciples',
+			name: 'publishingPrinciples',
+			label: 'publishingPrinciples',
+			comment:
+				'The publishingPrinciples property indicates (typically via [[URL]]) a document describing the editorial principles of an [[Organization]] (or individual, e.g. a [[Person]] writing a blog) that relate to their activities as a publisher, e.g. ethics or diversity policies. When applied to a [[CreativeWork]] (e.g. [[NewsArticle]]) the principles are those of the party primarily responsible for the creation of the [[CreativeWork]].\n\nWhile such policies are most typically expressed in natural language, sometimes related information (e.g. indicating a [[funder]]) can be expressed using schema.org terminology.\n',
+			rangeIncludes: ['CreativeWork', 'URL'],
+		},
+		{
+			id: 'schema:relatedTo',
+			name: 'relatedTo',
+			label: 'relatedTo',
+			comment: 'The most generic familial relation.',
+			rangeIncludes: ['Person'],
+		},
+		{
+			id: 'schema:seeks',
+			name: 'seeks',
+			label: 'seeks',
+			comment: 'A pointer to products or services sought by the organization or person (demand).',
+			rangeIncludes: ['Demand'],
+		},
+		{
+			id: 'schema:sibling',
+			name: 'sibling',
+			label: 'sibling',
+			comment: 'A sibling of the person.',
+			rangeIncludes: ['Person'],
+		},
+		{
+			id: 'schema:siblings',
+			name: 'siblings',
+			label: 'siblings',
+			comment: 'A sibling of the person.',
+			rangeIncludes: ['Person'],
+		},
+		{
+			id: 'schema:skills',
+			name: 'skills',
+			label: 'skills',
+			comment:
+				'A statement of knowledge, skill, ability, task or any other assertion expressing a competency that is either claimed by a person, an organization or desired or required to fulfill a role or to work in an occupation.',
+			rangeIncludes: ['DefinedTerm', 'Text'],
+		},
+		{
+			id: 'schema:sponsor',
+			name: 'sponsor',
+			label: 'sponsor',
+			comment:
+				'A person or organization that supports a thing through a pledge, promise, or financial contribution. E.g. a sponsor of a Medical Study or a corporate sponsor of an event.',
+			rangeIncludes: ['Organization', 'Person'],
+		},
+		{
+			id: 'schema:spouse',
+			name: 'spouse',
+			label: 'spouse',
+			comment: "The person's spouse.",
+			rangeIncludes: ['Person'],
+		},
+		{
+			id: 'schema:taxID',
+			name: 'taxID',
+			label: 'taxID',
+			comment:
+				'The Tax / Fiscal ID of the organization or person, e.g. the TIN in the US or the CIF/NIF in Spain.',
+			rangeIncludes: ['Text'],
+		},
+		{
+			id: 'schema:telephone',
+			name: 'telephone',
+			label: 'telephone',
+			comment: 'The telephone number.',
+			rangeIncludes: ['Text'],
+		},
+		{
+			id: 'schema:vatID',
+			name: 'vatID',
+			label: 'vatID',
+			comment:
+				'The value-added Tax ID of the organization or person with national prefix (for example IT123456789). Can also be described as [[iso6523Code]] with proper prefix.',
+			rangeIncludes: ['Text'],
+		},
+		{
+			id: 'schema:weight',
+			name: 'weight',
+			label: 'weight',
+			comment: 'The weight of the product or person.',
+			rangeIncludes: ['Mass', 'QuantitativeValue'],
+		},
+		{
+			id: 'schema:workLocation',
+			name: 'workLocation',
+			label: 'workLocation',
+			comment: "A contact location for a person's place of work.",
+			rangeIncludes: ['ContactPoint', 'Place'],
+		},
+		{
+			id: 'schema:worksFor',
+			name: 'worksFor',
+			label: 'worksFor',
+			comment: 'Organizations that the person works for.',
+			rangeIncludes: ['Organization'],
+		},
+	],
+} as const satisfies SchemaOrgTypeSpec;
+
+export const spec = schemaOrgPerson;
+export const Person = schemaOrgPerson;
+
+export default schemaOrgPerson;
