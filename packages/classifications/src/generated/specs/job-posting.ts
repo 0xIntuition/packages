@@ -6,10 +6,12 @@ export const jobPosting: ClassificationSpec = {
 	displayName: 'Job Posting',
 	description: 'A job opening with title and hiring organization as the durable identity.',
 	category: 'Other',
-	schemaOrg: { context: 'https://schema.org/', type: 'JobPosting' },
+	schema: { context: 'https://schema.org/', type: 'JobPosting' },
+	metadataPredicates: ['hiringOrganization', 'jobLocation', 'url', 'hasTag', 'sameAs'] as const,
 	fields: [
 		{
 			key: 'title',
+			schemaProperty: 'title',
 			label: 'Job Title',
 			description: 'The title of the role.',
 			fieldType: 'string',
@@ -18,6 +20,7 @@ export const jobPosting: ClassificationSpec = {
 		},
 		{
 			key: 'hiringOrganization',
+			schemaProperty: 'hiringOrganization',
 			label: 'Hiring Organization',
 			description: 'The organization hiring for the role.',
 			fieldType: 'string',
@@ -26,6 +29,7 @@ export const jobPosting: ClassificationSpec = {
 		},
 		{
 			key: 'jobLocation',
+			schemaProperty: 'jobLocation',
 			label: 'Job Location',
 			description: 'The location of the role if needed.',
 			fieldType: 'string',
@@ -34,6 +38,7 @@ export const jobPosting: ClassificationSpec = {
 		},
 		{
 			key: 'datePosted',
+			schemaProperty: 'datePosted',
 			label: 'Date Posted',
 			description: 'The date the job was posted.',
 			fieldType: 'iso-date',
@@ -42,11 +47,21 @@ export const jobPosting: ClassificationSpec = {
 		},
 		{
 			key: 'url',
+			schemaProperty: 'url',
 			label: 'Job URL',
 			description: 'The canonical job posting URL.',
 			fieldType: 'url',
 			required: false,
 			placeholder: 'https://example.com/jobs/senior-protocol-engineer',
+		},
+		{
+			key: 'sameAs',
+			schemaProperty: 'sameAs',
+			label: 'Canonical References',
+			description: 'Canonical URLs that identify the same job posting.',
+			fieldType: 'string[]',
+			required: false,
+			placeholder: 'https://example.com/...',
 		},
 	],
 	defaults: { pluginId: 'job-posting', provider: 'opengraph' },

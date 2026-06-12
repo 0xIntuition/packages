@@ -6,10 +6,12 @@ export const review: ClassificationSpec = {
 	displayName: 'Review',
 	description: 'A review identity linked to a durable target reference.',
 	category: 'Creative Work',
-	schemaOrg: { context: 'https://schema.org/', type: 'Review' },
+	schema: { context: 'https://schema.org/', type: 'Review' },
+	metadataPredicates: ['itemReviewed', 'authoredBy', 'sameAs'] as const,
 	fields: [
 		{
 			key: 'name',
+			schemaProperty: 'name',
 			label: 'Review Title',
 			description: 'The review title when needed.',
 			fieldType: 'string',
@@ -18,6 +20,7 @@ export const review: ClassificationSpec = {
 		},
 		{
 			key: 'reviewBody',
+			schemaProperty: 'reviewBody',
 			label: 'Review Text',
 			description: 'The main review text.',
 			fieldType: 'string',
@@ -26,6 +29,7 @@ export const review: ClassificationSpec = {
 		},
 		{
 			key: 'itemReviewed',
+			schemaProperty: 'itemReviewed',
 			label: 'Reviewed Item',
 			description: 'The identifier or URL of the item being reviewed.',
 			fieldType: 'string',
@@ -34,6 +38,7 @@ export const review: ClassificationSpec = {
 		},
 		{
 			key: 'sameAs',
+			schemaProperty: 'sameAs',
 			label: 'Canonical References',
 			description: 'Canonical URLs for the same review.',
 			fieldType: 'string[]',

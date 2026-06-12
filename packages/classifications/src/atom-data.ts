@@ -23,8 +23,8 @@ export function buildAtomDataObject(
 
 	const dataEntries: Array<[string, unknown]> = [];
 
-	if (spec.schemaOrg) {
-		dataEntries.push(['@context', spec.schemaOrg.context], ['@type', spec.type]);
+	if (spec.schema) {
+		dataEntries.push(['@context', spec.schema.context], ['@type', spec.type]);
 	}
 
 	for (const field of spec.fields) {

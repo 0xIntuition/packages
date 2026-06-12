@@ -1,0 +1,9 @@
+{
+	"@context": {
+		"@version": 1.1,
+		"SocialMediaAccount": "https://schema.intuition.systems/v1/social-media-account.jsonld#SocialMediaAccount",
+		"username": "https://schema.intuition.systems/v1/social-media-account.jsonld#username",
+		"platform": "https://schema.intuition.systems/v1/social-media-account.jsonld#platform",
+		"url": "https://schema.org/url"
+	}
+}

@@ -284,6 +284,7 @@ describe('convenience builders', () => {
 			name: 'One More Time',
 			byArtist: 'Daft Punk',
 			inAlbum: 'Discovery',
+			sameAs: ['https://open.spotify.com/track/0DiWol3AO6WpXZgp0goxAV'],
 		});
 
 		expect(result.success).toBe(true);
@@ -293,6 +294,10 @@ describe('convenience builders', () => {
 		}
 
 		expect(result.value.classification).toBe('music-recording');
+
+		const parsed = JSON.parse(result.value.data);
+
+		expect(parsed.sameAs).toEqual(['https://open.spotify.com/track/0DiWol3AO6WpXZgp0goxAV']);
 	});
 
 	it('buildArticle builds a valid article atom', () => {

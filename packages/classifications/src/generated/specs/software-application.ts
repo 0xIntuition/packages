@@ -6,10 +6,19 @@ export const softwareApplication: ClassificationSpec = {
 	displayName: 'Software Application',
 	description: 'A software application identity with optional category and platform metadata.',
 	category: 'Product',
-	schemaOrg: { context: 'https://schema.org/', type: 'SoftwareApplication' },
+	schema: { context: 'https://schema.org/', type: 'SoftwareApplication' },
+	metadataPredicates: [
+		'url',
+		'imgUrl',
+		'hasCategory',
+		'compatibleWith',
+		'softwareAddOn',
+		'sameAs',
+	] as const,
 	fields: [
 		{
 			key: 'name',
+			schemaProperty: 'name',
 			label: 'Application Name',
 			description: 'The software application name.',
 			fieldType: 'string',
@@ -18,6 +27,7 @@ export const softwareApplication: ClassificationSpec = {
 		},
 		{
 			key: 'applicationCategory',
+			schemaProperty: 'applicationCategory',
 			label: 'Application Category',
 			description: 'The application category when needed.',
 			fieldType: 'string',
@@ -26,6 +36,7 @@ export const softwareApplication: ClassificationSpec = {
 		},
 		{
 			key: 'operatingSystem',
+			schemaProperty: 'operatingSystem',
 			label: 'Operating System',
 			description: 'The target operating system when needed.',
 			fieldType: 'string',
@@ -34,11 +45,21 @@ export const softwareApplication: ClassificationSpec = {
 		},
 		{
 			key: 'url',
+			schemaProperty: 'url',
 			label: 'Application URL',
 			description: 'The canonical app URL.',
 			fieldType: 'url',
 			required: false,
 			placeholder: 'https://www.notion.so',
+		},
+		{
+			key: 'sameAs',
+			schemaProperty: 'sameAs',
+			label: 'Canonical References',
+			description: 'Canonical URLs that identify the same software application.',
+			fieldType: 'string[]',
+			required: false,
+			placeholder: 'https://example.com/...',
 		},
 	],
 	defaults: { pluginId: 'software-application', provider: 'opengraph' },

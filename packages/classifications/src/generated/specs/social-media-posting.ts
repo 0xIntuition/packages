@@ -6,10 +6,12 @@ export const socialMediaPosting: ClassificationSpec = {
 	displayName: 'Social Media Posting',
 	description: 'A social media post with name, text, and canonical URL.',
 	category: 'Web',
-	schemaOrg: { context: 'https://schema.org/', type: 'SocialMediaPosting' },
+	schema: { context: 'https://schema.org/', type: 'SocialMediaPosting' },
+	metadataPredicates: ['authoredBy', 'reference', 'url', 'hasTag'] as const,
 	fields: [
 		{
 			key: 'name',
+			schemaProperty: 'name',
 			label: 'Post Title',
 			description: 'A short title or name for the post.',
 			fieldType: 'string',
@@ -18,6 +20,7 @@ export const socialMediaPosting: ClassificationSpec = {
 		},
 		{
 			key: 'text',
+			schemaProperty: 'text',
 			label: 'Post Text',
 			description: 'The main text of the post.',
 			fieldType: 'string',
@@ -26,6 +29,7 @@ export const socialMediaPosting: ClassificationSpec = {
 		},
 		{
 			key: 'url',
+			schemaProperty: 'url',
 			label: 'Post URL',
 			description: 'The canonical post URL.',
 			fieldType: 'url',

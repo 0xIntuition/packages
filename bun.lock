@@ -16,6 +16,8 @@
       "name": "@0xintuition/classifications",
       "version": "0.1.0-alpha.0",
       "devDependencies": {
+        "@0xintuition/predicates": "workspace:*",
+        "@0xintuition/schema-org": "workspace:*",
         "typescript": "catalog:",
         "vitest": "catalog:",
       },

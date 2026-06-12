@@ -6,10 +6,12 @@ export const mobileApplication: ClassificationSpec = {
 	displayName: 'Mobile Application',
 	description: 'A mobile app identity with the app name and target platforms.',
 	category: 'Product',
-	schemaOrg: { context: 'https://schema.org/', type: 'MobileApplication' },
+	schema: { context: 'https://schema.org/', type: 'MobileApplication' },
+	metadataPredicates: ['availableOn', 'url', 'imgUrl', 'hasCategory', 'sameAs'] as const,
 	fields: [
 		{
 			key: 'name',
+			schemaProperty: 'name',
 			label: 'Application Name',
 			description: 'The mobile application name.',
 			fieldType: 'string',
@@ -18,6 +20,7 @@ export const mobileApplication: ClassificationSpec = {
 		},
 		{
 			key: 'operatingSystem',
+			schemaProperty: 'operatingSystem',
 			label: 'Operating System',
 			description: 'The supported operating systems.',
 			fieldType: 'string',
@@ -26,6 +29,7 @@ export const mobileApplication: ClassificationSpec = {
 		},
 		{
 			key: 'applicationCategory',
+			schemaProperty: 'applicationCategory',
 			label: 'Application Category',
 			description: 'The app category when needed.',
 			fieldType: 'string',
@@ -34,11 +38,21 @@ export const mobileApplication: ClassificationSpec = {
 		},
 		{
 			key: 'downloadUrl',
+			schemaProperty: 'downloadUrl',
 			label: 'Download URL',
 			description: 'The store or download URL.',
 			fieldType: 'url',
 			required: false,
 			placeholder: 'https://apps.apple.com/app/spotify/id324684580',
+		},
+		{
+			key: 'sameAs',
+			schemaProperty: 'sameAs',
+			label: 'Canonical References',
+			description: 'Canonical URLs that identify the same mobile application.',
+			fieldType: 'string[]',
+			required: false,
+			placeholder: 'https://example.com/...',
 		},
 	],
 	defaults: { pluginId: 'mobile-application', provider: 'opengraph' },

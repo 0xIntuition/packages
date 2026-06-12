@@ -6,10 +6,12 @@ export const dataset: ClassificationSpec = {
 	displayName: 'Dataset',
 	description: 'A dataset identity with a canonical dataset URL.',
 	category: 'Creative Work',
-	schemaOrg: { context: 'https://schema.org/', type: 'Dataset' },
+	schema: { context: 'https://schema.org/', type: 'Dataset' },
+	metadataPredicates: ['createdBy', 'publisher', 'reference', 'url', 'sameAs'] as const,
 	fields: [
 		{
 			key: 'name',
+			schemaProperty: 'name',
 			label: 'Dataset Name',
 			description: 'The name of the dataset.',
 			fieldType: 'string',
@@ -18,6 +20,7 @@ export const dataset: ClassificationSpec = {
 		},
 		{
 			key: 'url',
+			schemaProperty: 'url',
 			label: 'Dataset URL',
 			description: 'The canonical dataset URL.',
 			fieldType: 'url',
@@ -26,6 +29,7 @@ export const dataset: ClassificationSpec = {
 		},
 		{
 			key: 'sameAs',
+			schemaProperty: 'sameAs',
 			label: 'Canonical References',
 			description: 'Canonical references such as DOI links.',
 			fieldType: 'string[]',

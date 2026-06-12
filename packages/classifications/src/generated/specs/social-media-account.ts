@@ -6,7 +6,11 @@ export const socialMediaAccount: ClassificationSpec = {
 	displayName: 'Social Media Account',
 	description: 'A social profile identity keyed by username and platform.',
 	category: 'Web',
-	schemaOrg: { context: 'https://schema.org/', type: 'SocialMediaAccount' },
+	schema: {
+		context: 'https://schema.intuition.systems/v1/social-media-account.jsonld',
+		type: 'SocialMediaAccount',
+	},
+	metadataPredicates: ['linkedAccount', 'url', 'availableOn'] as const,
 	fields: [
 		{
 			key: 'username',

@@ -6,10 +6,23 @@ export const company: ClassificationSpec = {
 	displayName: 'Company',
 	description: 'An organization identity with optional canonical references.',
 	category: 'Entity',
-	schemaOrg: { context: 'https://schema.org/', type: 'Organization' },
+	schema: { context: 'https://schema.org/', type: 'Organization' },
+	metadataPredicates: [
+		'founder',
+		'founded',
+		'memberOf',
+		'parentOrganization',
+		'subOrganization',
+		'brand',
+		'locatedIn',
+		'sponsoredBy',
+		'url',
+		'sameAs',
+	] as const,
 	fields: [
 		{
 			key: 'name',
+			schemaProperty: 'name',
 			label: 'Company Name',
 			description: 'The official or common company name.',
 			fieldType: 'string',
@@ -18,6 +31,7 @@ export const company: ClassificationSpec = {
 		},
 		{
 			key: 'url',
+			schemaProperty: 'url',
 			label: 'Official Website',
 			description: 'The official company website when needed.',
 			fieldType: 'url',
@@ -26,6 +40,7 @@ export const company: ClassificationSpec = {
 		},
 		{
 			key: 'sameAs',
+			schemaProperty: 'sameAs',
 			label: 'Canonical References',
 			description: 'Canonical URLs for the same organization.',
 			fieldType: 'string[]',

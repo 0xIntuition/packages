@@ -3,6 +3,7 @@
 const schemaUrls = [
 	'https://schema.intuition.systems/v1/oauth-atom.jsonld',
 	'https://schema.intuition.systems/v1/ethereum.jsonld',
+	'https://schema.intuition.systems/v1/social-media-account.jsonld',
 ];
 
 const failures = [];
