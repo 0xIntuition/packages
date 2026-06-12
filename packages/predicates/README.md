@@ -12,7 +12,13 @@ Runtime: ESM-only. This package does not publish CommonJS `require` entrypoints.
 - Semantic metadata on every record: `isTransitive`, `isSymmetric`, `isHierarchical`, and optional `inversePredicate`
 - Launch-set constants, bootstrap helpers, and market-pattern marker atoms
 - Strategy helpers for canonical inline atom data and optional IPFS enrichment documents (IPFS documents carry the semantic flags in `additionalProperty`; inline atom data stays minimal for identity stability)
-- Entity-type recommendations plus subject-aware display and localization primitives
+- Legacy entity-type recommendations plus subject-aware display and localization primitives
+
+## Relationship Modeling
+
+`@0xintuition/predicates` owns reusable predicate vocabulary: keys, names, descriptions, deterministic IDs, launch constants, and display helpers.
+
+The legacy entity-type map remains exported for compatibility and broad discovery, but its `expectedObjectType` values are human-readable hints. New classification-specific creation UI should use `@0xintuition/classifications` metadata predicate matrix instead, where object targets are typed as classification, schema, primitive, same-classification, or any.
 
 ## Example
 

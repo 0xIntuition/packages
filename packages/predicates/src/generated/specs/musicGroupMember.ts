@@ -1,12 +1,12 @@
 import type { PredicateSpec } from '../../types.js';
 
-export const founded = {
-	key: 'founded',
-	name: 'founded',
-	description: 'The subject actor established or co-founded the object organization or project',
+export const musicGroupMember = {
+	key: 'musicGroupMember',
+	name: 'music group member',
+	description: 'The subject music group includes the object person as a member',
 	marketPattern: 'attributive',
 	conjugates: false,
 	category: 'Affiliation/Membership',
 	status: 'proposed',
-	inversePredicate: 'founder',
+	isHierarchical: true,
 } as const satisfies PredicateSpec;

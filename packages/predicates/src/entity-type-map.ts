@@ -1,6 +1,15 @@
 import { ENTITY_PREDICATE_MAP_DATA } from './generated/entity-map-data';
 import type { PredicateKey } from './predicates';
 
+/**
+ * Legacy generic entity buckets for broad predicate discovery.
+ *
+ * New classification-specific relationship contracts should live in
+ * `@0xintuition/classifications` metadata predicate matrix, keyed by
+ * `(subjectClassification, predicate)`. This map remains exported for
+ * compatibility and coarse discovery, but it should not be treated as the
+ * source of truth for expected object targets in generated creation UI.
+ */
 export type EntityType =
 	| 'Person'
 	| 'Organization'
@@ -17,6 +26,13 @@ export type EntityType =
 
 export type PredicatePriority = 'core' | 'common' | 'optional';
 
+/**
+ * Legacy generic predicate recommendation.
+ *
+ * `expectedObjectType` is intentionally a human-readable hint, not a typed
+ * object-target contract. Prefer the classifications metadata predicate matrix
+ * for typed targets such as classification/schema/primitive/same-classification.
+ */
 export interface EntityPredicateEntry {
 	predicateKey: PredicateKey;
 	expectedObjectType: string;

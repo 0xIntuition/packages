@@ -28,15 +28,15 @@ import {
 } from './index';
 
 describe('@0xintuition/predicates registry', () => {
-	it('defines the full 97-predicate registry with the expected category counts', () => {
-		expect(PREDICATE_RECORDS).toHaveLength(97);
-		expect(getPredicatesByCategory('Identity/Classification')).toHaveLength(4);
-		expect(getPredicatesByCategory('Social/Reputation')).toHaveLength(10);
-		expect(getPredicatesByCategory('Curation/Containment')).toHaveLength(8);
-		expect(getPredicatesByCategory('Authorship/Contribution')).toHaveLength(6);
-		expect(getPredicatesByCategory('Metadata/Linking')).toHaveLength(8);
-		expect(getPredicatesByCategory('Affiliation/Membership')).toHaveLength(6);
-		expect(getPredicatesByCategory('Domain-Specific')).toHaveLength(5);
+	it('defines the full 133-predicate registry with the expected category counts', () => {
+		expect(PREDICATE_RECORDS).toHaveLength(133);
+		expect(getPredicatesByCategory('Identity/Classification')).toHaveLength(5);
+		expect(getPredicatesByCategory('Social/Reputation')).toHaveLength(12);
+		expect(getPredicatesByCategory('Curation/Containment')).toHaveLength(17);
+		expect(getPredicatesByCategory('Authorship/Contribution')).toHaveLength(15);
+		expect(getPredicatesByCategory('Metadata/Linking')).toHaveLength(14);
+		expect(getPredicatesByCategory('Affiliation/Membership')).toHaveLength(14);
+		expect(getPredicatesByCategory('Domain-Specific')).toHaveLength(6);
 		expect(getPredicatesByCategory('Sentiment/Opinion')).toHaveLength(8);
 		expect(getPredicatesByCategory('Comparison/Ranking')).toHaveLength(8);
 		expect(getPredicatesByCategory('Knowledge/Expertise')).toHaveLength(8);
@@ -126,6 +126,104 @@ describe('@0xintuition/predicates registry', () => {
 		const followedBy = getPredicateRecord('followedBy');
 		expect(followedBy?.isTransitive).toBe(true);
 		expect(followedBy?.inversePredicate).toBe('preceded by');
+
+		const founder = getPredicateRecord('founder');
+		expect(founder?.inversePredicate).toBe('founded');
+
+		const founded = getPredicateRecord('founded');
+		expect(founded?.inversePredicate).toBe('founder');
+	});
+
+	it('includes the first metadata predicate backfill tranche', () => {
+		const backfillKeys = [
+			'actor',
+			'alumniOf',
+			'areaServed',
+			'branchOf',
+			'brand',
+			'byArtist',
+			'containedInPlace',
+			'containsPlace',
+			'director',
+			'founder',
+			'hiringOrganization',
+			'inAlbum',
+			'inPlaylist',
+			'itemReviewed',
+			'jobLocation',
+			'manufacturer',
+			'musicBy',
+			'musicGroupMember',
+			'organizer',
+			'parentOrganization',
+			'parentItem',
+			'partOfSeries',
+			'performer',
+			'photo',
+			'productionCompany',
+			'primaryImageOfPage',
+			'provider',
+			'publisher',
+			'reviewedBy',
+			'softwareAddOn',
+			'subEvent',
+			'subOrganization',
+			'superEvent',
+			'targetProduct',
+			'track',
+			'trailer',
+		] as const;
+
+		const registryKeys = new Set(PREDICATE_RECORDS.map((predicate) => predicate.key));
+
+		for (const key of backfillKeys) {
+			expect(registryKeys.has(key)).toBe(true);
+			expect(getPredicateStatus(key)).toBe('proposed');
+		}
+	});
+
+	it('records semantic flags for hierarchical backfill predicates', () => {
+		const containsPlace = getPredicateRecord('containsPlace');
+		expect(containsPlace?.isTransitive).toBe(true);
+		expect(containsPlace?.isHierarchical).toBe(true);
+		expect(containsPlace?.inversePredicate).toBe('contained in place');
+
+		const containedInPlace = getPredicateRecord('containedInPlace');
+		expect(containedInPlace?.isTransitive).toBe(true);
+		expect(containedInPlace?.isHierarchical).toBe(true);
+		expect(containedInPlace?.inversePredicate).toBe('contains place');
+
+		const parentOrganization = getPredicateRecord('parentOrganization');
+		expect(parentOrganization?.isTransitive).toBe(true);
+		expect(parentOrganization?.isHierarchical).toBe(true);
+		expect(parentOrganization?.inversePredicate).toBe('sub organization');
+
+		const subOrganization = getPredicateRecord('subOrganization');
+		expect(subOrganization?.isTransitive).toBe(true);
+		expect(subOrganization?.isHierarchical).toBe(true);
+		expect(subOrganization?.inversePredicate).toBe('parent organization');
+
+		const subEvent = getPredicateRecord('subEvent');
+		expect(subEvent?.isTransitive).toBe(true);
+		expect(subEvent?.isHierarchical).toBe(true);
+		expect(subEvent?.inversePredicate).toBe('super event');
+
+		const superEvent = getPredicateRecord('superEvent');
+		expect(superEvent?.isTransitive).toBe(true);
+		expect(superEvent?.isHierarchical).toBe(true);
+		expect(superEvent?.inversePredicate).toBe('sub event');
+
+		const parentItem = getPredicateRecord('parentItem');
+		expect(parentItem?.isHierarchical).toBe(true);
+
+		const branchOf = getPredicateRecord('branchOf');
+		expect(branchOf?.isHierarchical).toBe(true);
+
+		const musicGroupMember = getPredicateRecord('musicGroupMember');
+		expect(musicGroupMember?.isHierarchical).toBe(true);
+
+		const track = getPredicateRecord('track');
+		expect(track?.isHierarchical).toBe(true);
 	});
 
 	it('includes concrete usage examples for every Identity/Classification predicate', () => {
@@ -133,7 +231,7 @@ describe('@0xintuition/predicates registry', () => {
 			(predicate) => predicate.category === 'Identity/Classification'
 		);
 
-		expect(identityPredicates).toHaveLength(4);
+		expect(identityPredicates).toHaveLength(5);
 
 		for (const predicate of identityPredicates) {
 			expect(predicate.examples?.length ?? 0).toBeGreaterThan(0);
