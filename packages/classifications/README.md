@@ -44,6 +44,29 @@ sources can be supported later. For schema.org-backed classifications,
 copy inheritance or provenance into the classification; consumers can derive that
 from `@0xintuition/schema-org`.
 
+## Browser Creation UIs
+
+Use Creation Profiles for known frontend create flows. They are generated plain
+data artifacts that compose the classification fields, schema property
+provenance, metadata predicate matrix rows, and predicate IDs/labels without
+importing the full schema.org registry at runtime:
+
+```ts
+import { musicRecordingCreationProfile } from '@0xintuition/classifications/creation/music-recording'
+
+musicRecordingCreationProfile.fields.map((field) => field.schema?.originType)
+// ['Thing', 'MusicRecording', 'MusicRecording', 'Thing']
+
+musicRecordingCreationProfile.relationships.map(({ predicate }) => predicate.label)
+// ['by artist', 'in album', 'in playlist', 'has category', 'same as']
+```
+
+Root registry helpers such as `getClassification(...)`,
+`getMetadataPredicateMatrixFor(...)`, and schema.org `getPropertiesFor(...)`
+remain the dynamic server/admin/explorer/build-time APIs. Prefer Creation
+Profiles in browser-hot paths when the create flow targets a known
+classification.
+
 The optional matrix layer adds object-target semantics for promoted metadata
 predicates without putting classification-specific relationships into
 `@0xintuition/predicates`:

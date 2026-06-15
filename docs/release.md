@@ -18,6 +18,7 @@ bun run typecheck
 bun run test
 bun run check
 bun run schema:validate
+bun run classifications:check-creation-profiles
 bun run predicates:check-generated
 bun run guard:supply-chain
 bun run pack:dry-run
