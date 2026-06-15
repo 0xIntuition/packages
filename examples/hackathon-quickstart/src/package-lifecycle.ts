@@ -1,12 +1,7 @@
-import {
-	buildAtomDataObject,
-	getClassification,
-	getMetadataPredicateMatrixFor,
-} from '@0xintuition/classifications';
-import { PREDICATE_IDS, PREDICATE_RECORDS } from '@0xintuition/predicates';
-import { getPropertiesFor } from '@0xintuition/schema-org';
+import { buildAtomDataObject } from '@0xintuition/classifications';
+import { musicRecordingCreationProfile } from '@0xintuition/classifications/creation/music-recording';
 
-const SUBJECT_CLASSIFICATION = 'music-recording';
+const SUBJECT_CLASSIFICATION = musicRecordingCreationProfile.classification.slug;
 
 export const sampleValues = {
 	name: 'One More Time',
@@ -22,57 +17,50 @@ export const sampleObjectsByPredicate = {
 	sameAs: 'One More Time on Apple Music',
 } as const;
 
-const classification = getRequiredClassification(SUBJECT_CLASSIFICATION);
-const schemaProperties = classification.schema ? getPropertiesFor(classification.schema.type) : [];
-const recommendedSchemaProperties = new Set(
-	classification.fields.flatMap((field) => (field.schemaProperty ? [field.schemaProperty] : []))
+const schemaHighlights = musicRecordingCreationProfile.fields.flatMap((field) =>
+	field.schema
+		? [
+				{
+					id: field.schema.propertyId,
+					name: field.schema.property,
+					originType: field.schema.originType,
+				},
+			]
+		: []
 );
-const matrix = getMetadataPredicateMatrixFor(classification.slug);
 
 export const lifecycle = {
 	subjectClassification: SUBJECT_CLASSIFICATION,
-	classification,
+	classification: musicRecordingCreationProfile.classification,
+	fields: musicRecordingCreationProfile.fields,
 	atomData: buildAtomDataObject(SUBJECT_CLASSIFICATION, sampleValues),
-	availableSchemaProperties: schemaProperties,
-	recommendedSchemaProperties,
-	availableButNotRecommended: schemaProperties.filter(
-		(property) => !recommendedSchemaProperties.has(property.name)
-	),
-	metadataPredicates: matrix.map((entry) => {
-		const predicateRecord = PREDICATE_RECORDS.find((record) => record.key === entry.predicate);
-		const predicateId = PREDICATE_IDS[entry.predicate as keyof typeof PREDICATE_IDS];
+	availableSchemaFieldCount:
+		musicRecordingCreationProfile.availableFieldCount ??
+		musicRecordingCreationProfile.fields.length,
+	schemaHighlights,
+	metadataPredicates: musicRecordingCreationProfile.relationships.map((relationship) => {
+		const predicateKey = relationship.predicate.key;
 		const objectLabel =
-			sampleObjectsByPredicate[entry.predicate as keyof typeof sampleObjectsByPredicate] ??
+			sampleObjectsByPredicate[predicateKey as keyof typeof sampleObjectsByPredicate] ??
 			'Target atom';
 
 		return {
-			...entry,
-			predicateKey: entry.predicate,
-			predicateRecord,
-			predicateId,
+			...relationship,
+			predicateKey,
+			predicateRecord: relationship.predicate,
+			predicateId: relationship.predicate.id,
 			objectLabel,
 			triplePreview: {
 				subject: 'Spotify song atom',
-				predicate: entry.predicate,
+				predicate: predicateKey,
 				object: objectLabel,
 			},
 		};
 	}),
 };
 
-export const codeExample = `import {
-  buildAtomDataObject,
-  getClassification,
-  getMetadataPredicateMatrixFor,
-} from '@0xintuition/classifications';
-import { getPredicateId } from '@0xintuition/predicates';
-import { getPropertiesFor } from '@0xintuition/schema-org';
-
-const classification = getClassification('music-recording');
-
-if (!classification?.schema) {
-  throw new Error('Missing schema-backed music-recording classification.');
-}
+export const codeExample = `import { buildAtomDataObject } from '@0xintuition/classifications';
+import { musicRecordingCreationProfile } from '@0xintuition/classifications/creation/music-recording';
 
 const atomData = buildAtomDataObject('music-recording', {
   name: 'One More Time',
@@ -80,20 +68,17 @@ const atomData = buildAtomDataObject('music-recording', {
   inAlbum: 'Discovery',
 });
 
-const availableFields = getPropertiesFor(classification.schema.type);
-const metadataRelations = getMetadataPredicateMatrixFor('music-recording');
-
-const triples = metadataRelations.map((relation) => ({
+const triples = musicRecordingCreationProfile.relationships.map((relationship) => ({
   subject: 'Spotify song atom',
-  predicate: getPredicateId(relation.predicate),
+  predicate: relationship.predicate.id,
   object: 'target atom selected by your app',
+  expectedObjects: relationship.expectedObjects,
 }));`;
 
 export const packageCallouts = {
-	fields: `import { getClassification } from '@0xintuition/classifications';
+	fields: `import { musicRecordingCreationProfile } from '@0xintuition/classifications/creation/music-recording';
 
-const classification = getClassification('music-recording');
-const fields = classification?.fields ?? [];`,
+const fields = musicRecordingCreationProfile.fields;`,
 	atomData: `import { buildAtomDataObject } from '@0xintuition/classifications';
 
 const atomData = buildAtomDataObject('music-recording', {
@@ -101,28 +86,18 @@ const atomData = buildAtomDataObject('music-recording', {
   byArtist: 'Daft Punk',
   inAlbum: 'Discovery',
 });`,
-	schemaSuperset: `import { getPropertiesFor } from '@0xintuition/schema-org';
+	schemaSuperset: `import { musicRecordingCreationProfile } from '@0xintuition/classifications/creation/music-recording';
 
-const availableFields = getPropertiesFor('MusicRecording');
-const inherited = availableFields.filter(
-  (property) => property.originType !== 'MusicRecording'
-);`,
-	metadataPredicates: `import { getMetadataPredicateMatrixFor } from '@0xintuition/classifications';
-import { PREDICATE_IDS } from '@0xintuition/predicates';
+const schemaProvenance = musicRecordingCreationProfile.fields.map(
+  (field) => field.schema
+);
 
-const relations = getMetadataPredicateMatrixFor('music-recording');
-const triples = relations.map((relation) => ({
-  predicateId: PREDICATE_IDS[relation.predicate],
-  expectedObjects: relation.expectedObjects,
+const availableFieldCount =
+  musicRecordingCreationProfile.availableFieldCount;`,
+	metadataPredicates: `import { musicRecordingCreationProfile } from '@0xintuition/classifications/creation/music-recording';
+
+const triples = musicRecordingCreationProfile.relationships.map((relationship) => ({
+  predicateId: relationship.predicate.id,
+  expectedObjects: relationship.expectedObjects,
 }));`,
 };
-
-function getRequiredClassification(slug: string) {
-	const spec = getClassification(slug);
-
-	if (!spec) {
-		throw new Error(`Missing classification "${slug}".`);
-	}
-
-	return spec;
-}

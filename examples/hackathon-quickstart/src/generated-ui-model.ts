@@ -1,11 +1,14 @@
-import type { ExpectedObject } from '@0xintuition/classifications';
-import {
-	type ClassificationFieldSpec,
-	getClassification,
-	getMetadataPredicateMatrixFor,
+import type {
+	CreationField,
+	CreationProfile,
+	CreationRelationship,
+	ExpectedObject,
 } from '@0xintuition/classifications';
-import { PREDICATE_IDS, PREDICATE_RECORDS } from '@0xintuition/predicates';
-import { getPropertiesFor } from '@0xintuition/schema-org';
+import { bookCreationProfile } from '@0xintuition/classifications/creation/book';
+import { movieCreationProfile } from '@0xintuition/classifications/creation/movie';
+import { musicRecordingCreationProfile } from '@0xintuition/classifications/creation/music-recording';
+import { personCreationProfile } from '@0xintuition/classifications/creation/person';
+import { softwareApplicationCreationProfile } from '@0xintuition/classifications/creation/software-application';
 
 export const generatedUiExampleSlugs = [
 	'music-recording',
@@ -98,7 +101,7 @@ export interface GeneratedRelationshipControl {
 	targetHint: string;
 }
 
-export interface GeneratedCreationContract {
+export interface GeneratedCreationModel {
 	classification: {
 		slug: string;
 		displayName: string;
@@ -111,91 +114,53 @@ export interface GeneratedCreationContract {
 	promotedPredicateCount: number;
 }
 
-export const generatedCreationContracts = Object.fromEntries(
-	generatedUiExamples.map((example) => [example.slug, getCreationContract(example.slug)])
-) as Record<GeneratedUiExampleSlug, GeneratedCreationContract>;
+const creationProfilesBySlug = {
+	'music-recording': musicRecordingCreationProfile,
+	book: bookCreationProfile,
+	person: personCreationProfile,
+	movie: movieCreationProfile,
+	'software-application': softwareApplicationCreationProfile,
+} satisfies Record<GeneratedUiExampleSlug, CreationProfile>;
 
-export const generatedUiCodeExample = `import {
-  getClassification,
-  getMetadataPredicateMatrixFor,
-} from '@0xintuition/classifications';
-import { getPredicateId, PREDICATE_RECORDS } from '@0xintuition/predicates';
-import { getPropertiesFor } from '@0xintuition/schema-org';
+export const generatedCreationModels = Object.fromEntries(
+	generatedUiExampleSlugs.map((slug) => [slug, getCreationModel(slug)])
+) as Record<GeneratedUiExampleSlug, GeneratedCreationModel>;
 
-function getCreationContract(slug: string) {
-  const classification = getClassification(slug);
+export const generatedUiCodeExample = `import { musicRecordingCreationProfile } from '@0xintuition/classifications/creation/music-recording';
 
-  if (!classification?.schema) {
-    throw new Error(\`Missing schema-backed classification "\${slug}".\`);
-  }
+const fields = musicRecordingCreationProfile.fields.map((field) => ({
+  key: field.key,
+  label: field.label,
+  required: field.required,
+  schemaOrigin: field.schema?.originType,
+}));
 
-  const properties = getPropertiesFor(classification.schema.type);
-  const matrix = getMetadataPredicateMatrixFor(slug);
+const relationships = musicRecordingCreationProfile.relationships.map(
+  (relationship) => ({
+    predicateId: relationship.predicate.id,
+    label: relationship.predicate.label,
+    expectedObjects: relationship.expectedObjects,
+  })
+);`;
 
-  return {
-    fields: classification.fields.map((field) => ({
-      ...field,
-      schemaOrigin: properties.find(
-        (property) => property.name === field.schemaProperty
-      )?.originType,
-    })),
-    relationships: matrix.map((relation) => ({
-      predicate: relation.predicate,
-      predicateId: getPredicateId(relation.predicate),
-      expectedObjects: relation.expectedObjects,
-      label: PREDICATE_RECORDS.find(
-        (record) => record.key === relation.predicate
-      )?.name,
-    })),
-  };
-}`;
-
-export function getCreationContract(slug: string): GeneratedCreationContract {
-	const classification = getClassification(slug);
-
-	if (!classification) {
-		throw new Error(`Missing classification "${slug}".`);
-	}
-
-	const schemaProperties = classification.schema
-		? getPropertiesFor(classification.schema.type)
-		: [];
-	const propertiesByName = new Map(schemaProperties.map((property) => [property.name, property]));
-	const matrix = getMetadataPredicateMatrixFor(slug);
+export function getCreationModel(slug: GeneratedUiExampleSlug): GeneratedCreationModel {
+	const profile = creationProfilesBySlug[slug];
 
 	return {
 		classification: {
-			slug: classification.slug,
-			displayName: classification.displayName,
-			description: classification.description,
-			schemaType: classification.schema?.type,
+			slug: profile.classification.slug,
+			displayName: profile.classification.displayName,
+			description: profile.classification.description,
+			schemaType: profile.classification.schema?.type,
 		},
-		fields: classification.fields.map((field) => toFieldControl(field, propertiesByName)),
-		relationships: matrix.map((relation) => {
-			const predicateRecord = PREDICATE_RECORDS.find((record) => record.key === relation.predicate);
-
-			return {
-				key: relation.predicate,
-				label: predicateRecord?.name ?? relation.predicate,
-				description: predicateRecord?.description,
-				predicateId: PREDICATE_IDS[relation.predicate as keyof typeof PREDICATE_IDS],
-				priority: relation.priority ?? 'recommended',
-				control: inferRelationshipControl(relation.expectedObjects),
-				expectedObjects: relation.expectedObjects,
-				targetHint: formatExpectedObjects(relation.expectedObjects),
-			};
-		}),
-		availableFieldCount: schemaProperties.length,
-		promotedPredicateCount: classification.metadataPredicates.length,
+		fields: profile.fields.map(toFieldControl),
+		relationships: profile.relationships.map(toRelationshipControl),
+		availableFieldCount: profile.availableFieldCount,
+		promotedPredicateCount: profile.relationships.length,
 	};
 }
 
-function toFieldControl(
-	field: ClassificationFieldSpec,
-	propertiesByName: Map<string, { name: string; originType?: string }>
-): GeneratedFieldControl {
-	const property = field.schemaProperty ? propertiesByName.get(field.schemaProperty) : undefined;
-
+function toFieldControl(field: CreationField): GeneratedFieldControl {
 	return {
 		key: field.key,
 		label: field.label,
@@ -206,13 +171,26 @@ function toFieldControl(
 		schemaProperty: field.schemaProperty
 			? {
 					name: field.schemaProperty,
-					originType: property?.originType,
+					originType: field.schema?.originType,
 				}
 			: undefined,
 	};
 }
 
-function inferFieldControl(field: ClassificationFieldSpec): FieldControlKind {
+function toRelationshipControl(relationship: CreationRelationship): GeneratedRelationshipControl {
+	return {
+		key: relationship.predicate.key,
+		label: relationship.predicate.label,
+		description: relationship.predicate.description,
+		predicateId: relationship.predicate.id,
+		priority: relationship.priority ?? 'recommended',
+		control: inferRelationshipControl(relationship.expectedObjects),
+		expectedObjects: relationship.expectedObjects,
+		targetHint: formatExpectedObjects(relationship.expectedObjects),
+	};
+}
+
+function inferFieldControl(field: CreationField): FieldControlKind {
 	switch (field.fieldType) {
 		case 'string[]':
 			return field.key === 'sameAs' ? 'url-list' : 'text';

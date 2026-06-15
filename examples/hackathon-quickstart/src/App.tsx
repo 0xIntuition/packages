@@ -6,21 +6,18 @@ import { IdentityLinkingPage } from './IdentityLinkingPage.js';
 import { Playground } from './Playground.js';
 import { codeExample, lifecycle, packageCallouts } from './package-lifecycle.js';
 
-const schemaSampleNames = ['duration', 'sameAs', 'url', 'datePublished', 'isrcCode'];
 type DemoPage = 'lifecycle' | 'generated-ui' | 'identity';
 
 export function App() {
 	const [page, setPage] = useState<DemoPage>('lifecycle');
-	const schemaSample = lifecycle.availableButNotRecommended
-		.filter((property) => schemaSampleNames.includes(property.name))
-		.slice(0, 5);
+	const schemaSample = lifecycle.schemaHighlights.slice(0, 5);
 
 	return (
 		<main className="app-shell">
 			<section className="intro">
 				<div>
 					<p className="section-label">Hackathon quickstart</p>
-					<h1>Build a Spotify song atom from the package contracts.</h1>
+					<h1>Build a Spotify song atom from a Creation Profile.</h1>
 					<p className="intro-copy">
 						No API key or wallet is needed for this dry run. The app shows the payload and triple
 						plan a builder can derive from the packages before wiring a live submit path.
@@ -80,11 +77,7 @@ export function App() {
 	);
 }
 
-function LifecycleOverview({
-	schemaSample,
-}: {
-	schemaSample: typeof lifecycle.availableButNotRecommended;
-}) {
+function LifecycleOverview({ schemaSample }: { schemaSample: typeof lifecycle.schemaHighlights }) {
 	return (
 		<>
 			<Playground />
@@ -94,15 +87,15 @@ function LifecycleOverview({
 					<p className="section-label">Package calls</p>
 					<h2>Each visible surface maps to a small importable API call.</h2>
 					<p>
-						Use these as the copyable pieces: ask classifications for recommended atom fields,
-						schema-org for the full available field set, and the matrix for relationship targets.
+						Use these as the copyable pieces: import one Creation Profile for known browser flows,
+						then use root registry helpers later for open-ended exploration.
 					</p>
 				</div>
 
 				<div className="callout-grid">
 					<CodePair title="Recommended atom fields" code={packageCallouts.fields}>
 						<div className="field-list compact">
-							{lifecycle.classification.fields.map((field) => (
+							{lifecycle.fields.map((field) => (
 								<div className="field-row" key={field.key}>
 									<div>
 										<strong>{field.label}</strong>
@@ -118,7 +111,7 @@ function LifecycleOverview({
 						<CodeBlock value={JSON.stringify(lifecycle.atomData, null, 2)} />
 					</CodePair>
 
-					<CodePair title="Schema.org available fields" code={packageCallouts.schemaSuperset}>
+					<CodePair title="Schema provenance" code={packageCallouts.schemaSuperset}>
 						<div className="schema-list compact">
 							{schemaSample.map((property) => (
 								<div className="schema-row" key={property.id}>
@@ -154,7 +147,7 @@ function LifecycleOverview({
 
 				<Panel index="02" title="Recommended atom fields">
 					<div className="field-list">
-						{lifecycle.classification.fields.map((field) => (
+						{lifecycle.fields.map((field) => (
 							<div className="field-row" key={field.key}>
 								<div>
 									<strong>{field.label}</strong>
@@ -173,11 +166,11 @@ function LifecycleOverview({
 					<CodeBlock value={JSON.stringify(lifecycle.atomData, null, 2)} />
 				</Panel>
 
-				<Panel index="04" title="Schema.org superset">
+				<Panel index="04" title="Schema provenance">
 					<p className="panel-copy">
-						{lifecycle.availableSchemaProperties.length} inherited properties are available for{' '}
-						{lifecycle.classification.schema?.type}; classifications only recommend the fields
-						Intuition wants on the atom.
+						{lifecycle.availableSchemaFieldCount} schema fields are available for{' '}
+						{lifecycle.classification.schema?.type}; this Creation Profile carries the recommended
+						atom fields with their schema provenance.
 					</p>
 					<div className="schema-list">
 						{schemaSample.map((property) => (
@@ -195,7 +188,7 @@ function LifecycleOverview({
 					<p className="section-label">Metadata predicates</p>
 					<h2>Recommended triples stay outside the atom data.</h2>
 					<p>
-						The matrix turns each promoted predicate into a usable object-target contract for app
+						The profile turns each promoted predicate into a usable object-target model for app
 						builders.
 					</p>
 				</div>
@@ -227,8 +220,9 @@ function LifecycleOverview({
 					<p className="section-label">Developer surface</p>
 					<h2>The core package calls fit in one flow.</h2>
 					<p>
-						This is the code path to copy into a real app. Replace the sample objects with atoms
-						selected or created by your UI, then pass the generated plan into the submit layer.
+						This is the browser-light code path to copy into a real app. Replace the sample objects
+						with atoms selected or created by your UI, then pass the generated plan into the submit
+						layer.
 					</p>
 				</div>
 				<CodeBlock value={codeExample} />

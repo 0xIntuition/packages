@@ -4,10 +4,10 @@ import {
 	type GeneratedFieldControl,
 	type GeneratedRelationshipControl,
 	type GeneratedUiExampleSlug,
-	generatedCreationContracts,
+	generatedCreationModels,
 	generatedUiCodeExample,
 	generatedUiExamples,
-} from './generated-ui-contract.js';
+} from './generated-ui-model.js';
 
 export function GeneratedUiPage() {
 	const [selectedSlug, setSelectedSlug] = useState<GeneratedUiExampleSlug>('music-recording');
@@ -16,28 +16,27 @@ export function GeneratedUiPage() {
 	if (!selectedExample) {
 		throw new Error('Missing generated UI examples.');
 	}
-	const contract = generatedCreationContracts[selectedSlug];
+	const model = generatedCreationModels[selectedSlug];
 
 	return (
-		<section className="generated-ui-page" aria-label="Generated UI contract preview">
+		<section className="generated-ui-page" aria-label="Generated UI profile preview">
 			<div className="generated-hero">
 				<div>
 					<p className="section-label">Generated UI</p>
 					<h2>Let the packages describe the creation surface.</h2>
 					<p>
-						This tab sketches the contract a creation flow could consume: atom fields from the
-						classification package, relationship targets from the metadata predicate matrix, and
-						provenance from schema.org.
+						This tab sketches the browser model a creation flow can consume: atom fields,
+						relationship targets, predicate IDs, and schema provenance from a Creation Profile.
 					</p>
 				</div>
 				<div className="generated-stat-grid">
-					<Stat label="Classification" value={contract.classification.slug} />
-					<Stat label="Atom fields" value={String(contract.fields.length)} />
+					<Stat label="Classification" value={model.classification.slug} />
+					<Stat label="Atom fields" value={String(model.fields.length)} />
 					<Stat
 						label="Modeled relationships"
-						value={`${contract.relationships.length}/${contract.promotedPredicateCount}`}
+						value={`${model.relationships.length}/${model.promotedPredicateCount}`}
 					/>
-					<Stat label="Available schema fields" value={String(contract.availableFieldCount)} />
+					<Stat label="Available schema fields" value={String(model.availableFieldCount)} />
 				</div>
 			</div>
 
@@ -60,13 +59,13 @@ export function GeneratedUiPage() {
 					<div className="generated-panel-header">
 						<div>
 							<span>Generated preview</span>
-							<h3>{contract.classification.displayName}</h3>
+							<h3>{model.classification.displayName}</h3>
 						</div>
-						<code>{contract.classification.schemaType}</code>
+						<code>{model.classification.schemaType}</code>
 					</div>
 
 					<div className="generated-form">
-						{contract.fields.map((field) => (
+						{model.fields.map((field) => (
 							<GeneratedField key={field.key} field={field} />
 						))}
 					</div>
@@ -82,7 +81,7 @@ export function GeneratedUiPage() {
 					</div>
 
 					<div className="relationship-control-list">
-						{contract.relationships.map((relationship) => (
+						{model.relationships.map((relationship) => (
 							<RelationshipControl
 								key={relationship.key}
 								relationship={relationship}
@@ -91,9 +90,9 @@ export function GeneratedUiPage() {
 						))}
 					</div>
 					<p className="generated-note">
-						The matrix models {contract.relationships.length} of {contract.promotedPredicateCount}{' '}
+						The profile models {model.relationships.length} of {model.promotedPredicateCount}{' '}
 						promoted metadata predicates for this classification, so a builder can generate controls
-						from the same contract used for validation.
+						from the same package data used for validation.
 					</p>
 				</section>
 			</div>
@@ -101,14 +100,14 @@ export function GeneratedUiPage() {
 			<section className="generated-panel generated-code-panel">
 				<div className="generated-panel-header">
 					<div>
-						<span>Package composition</span>
-						<h3>One helper can assemble the UI contract.</h3>
+						<span>Creation Profile</span>
+						<h3>One subpath import can drive the UI model.</h3>
 					</div>
-					<code>contract</code>
+					<code>profile</code>
 				</div>
 				<div className="generated-code-grid">
 					<pre className="code-block">{generatedUiCodeExample}</pre>
-					<pre className="code-block">{JSON.stringify(contract, null, 2)}</pre>
+					<pre className="code-block">{JSON.stringify(model, null, 2)}</pre>
 				</div>
 			</section>
 		</section>

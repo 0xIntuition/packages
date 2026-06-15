@@ -25,7 +25,7 @@ export function IdentityLinkingPage() {
 					<p className="section-label">Identity linking</p>
 					<h2>Use sameAs carefully across the atom lifecycle.</h2>
 					<p>
-						The package contracts support both payload-level external references and graph-level
+						The package data supports both payload-level external references and graph-level
 						identity triples. The app decides which surface is correct based on timing, confidence,
 						and whether the atom has already been activated.
 					</p>

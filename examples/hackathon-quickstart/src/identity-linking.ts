@@ -1,7 +1,9 @@
 import { buildAtomData, buildAtomDataObject } from '@0xintuition/classifications';
+import { musicRecordingCreationProfile } from '@0xintuition/classifications/creation/music-recording';
 import { calculateAtomId, calculateTripleId } from '@0xintuition/ids';
-import { PREDICATE_IDS } from '@0xintuition/predicates';
 import { sampleValues } from './package-lifecycle.js';
+
+type HexString = `0x${string}`;
 
 export const identityCandidates = [
 	{
@@ -66,7 +68,7 @@ const appleMusicAtomData = buildAtomData('music-recording', {
 });
 const spotifyAtomId = calculateAtomId(spotifyAtomData);
 const appleMusicAtomId = calculateAtomId(appleMusicAtomData);
-const sameAsPredicateId = PREDICATE_IDS.sameAs;
+const sameAsPredicateId = getRequiredPredicateId('sameAs');
 
 export const postActivationIdentity = {
 	spotifyAtom: {
@@ -103,16 +105,36 @@ const atomData = buildAtomData('music-recording', {
 
 const atomId = calculateAtomId(atomData);`,
 	postActivation: `import { calculateTripleId } from '@0xintuition/ids';
-import { PREDICATE_IDS } from '@0xintuition/predicates';
+import { musicRecordingCreationProfile } from '@0xintuition/classifications/creation/music-recording';
+
+const sameAsPredicate = musicRecordingCreationProfile.relationships.find(
+  (relationship) => relationship.predicate.key === 'sameAs'
+);
+
+if (!sameAsPredicate) {
+  throw new Error('Missing sameAs relationship.');
+}
 
 const sameAsTriple = {
   subject: spotifyAtomId,
-  predicate: PREDICATE_IDS.sameAs,
+  predicate: sameAsPredicate.predicate.id,
   object: appleMusicAtomId,
   id: calculateTripleId(
     spotifyAtomId,
-    PREDICATE_IDS.sameAs,
+    sameAsPredicate.predicate.id,
     appleMusicAtomId
   ),
 };`,
 };
+
+function getRequiredPredicateId(predicateKey: string): HexString {
+	const relationship = musicRecordingCreationProfile.relationships.find(
+		(candidate) => candidate.predicate.key === predicateKey
+	);
+
+	if (!relationship) {
+		throw new Error(`Missing relationship "${predicateKey}" on music-recording Creation Profile.`);
+	}
+
+	return relationship.predicate.id as HexString;
+}

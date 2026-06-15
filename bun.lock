@@ -18,8 +18,6 @@
       "dependencies": {
         "@0xintuition/classifications": "workspace:*",
         "@0xintuition/ids": "workspace:*",
-        "@0xintuition/predicates": "workspace:*",
-        "@0xintuition/schema-org": "workspace:*",
         "react": "catalog:",
         "react-dom": "catalog:",
       },

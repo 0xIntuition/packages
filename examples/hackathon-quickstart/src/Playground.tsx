@@ -6,7 +6,7 @@ import { lifecycle, sampleObjectsByPredicate, sampleValues } from './package-lif
 type StringMap = Record<string, string>;
 
 const initialFieldValues = Object.fromEntries(
-	lifecycle.classification.fields.map((field) => [
+	lifecycle.fields.map((field) => [
 		field.key,
 		String(sampleValues[field.key as keyof typeof sampleValues] ?? ''),
 	])
@@ -66,7 +66,7 @@ export function Playground() {
 						<span>{validationIssues.length === 0 ? 'valid' : 'needs input'}</span>
 					</div>
 					<div className="input-list">
-						{lifecycle.classification.fields.map((field) => (
+						{lifecycle.fields.map((field) => (
 							<label className="input-row" key={field.key}>
 								<span>
 									{field.label}
@@ -83,7 +83,9 @@ export function Playground() {
 										}))
 									}
 								/>
-								<small>{field.schemaProperty ? `schema:${field.schemaProperty}` : field.key}</small>
+								<small>
+									{field.schemaProperty ? `schema:${field.schemaProperty}` : 'local field'}
+								</small>
 							</label>
 						))}
 					</div>
@@ -150,7 +152,7 @@ export function Playground() {
 function normalizeFieldValues(values: StringMap): Record<string, string | string[]> {
 	const normalizedEntries: Array<[string, string | string[]]> = [];
 
-	for (const field of lifecycle.classification.fields) {
+	for (const field of lifecycle.fields) {
 		const value = values[field.key]?.trim();
 
 		if (!value) {
