@@ -6,13 +6,18 @@
 	"license": "MIT",
 	"type": "module",
 	"sideEffects": false,
-	"types": "./src/index.ts",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
 	"files": [
-		"src",
-		"README.md"
+		"dist",
+		"README.md",
+		"LICENSE"
 	],
 	"exports": {
-		".": "./src/index.ts",
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
 		"./package.json": "./package.json"
 	},
 	"keywords": [
@@ -38,10 +43,10 @@
 		"build": "node ../../scripts/clean-dist.mjs && tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
 		"clean": "git clean -xdf .cache .turbo dist node_modules",
 		"dev": "tsc --watch",
-		"pack:dry-run": "bun run build && node ../../scripts/pack-release.mjs --dry-run --json --dist-entrypoints --rewrite-workspace-deps",
-		"pack:release": "bun run build && node ../../scripts/pack-release.mjs --dist-entrypoints --rewrite-workspace-deps",
+		"pack:dry-run": "bun run build && npm pack --ignore-scripts --dry-run --json",
+		"pack:release": "bun run build && node ../../scripts/pack-release.mjs",
 		"prepack": "bun run build",
-		"prepublishOnly": "node ../../scripts/guard-direct-publish.mjs",
+		"prepublishOnly": "bun run build && node ../../scripts/guard-direct-publish.mjs",
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"typecheck": "tsc --noEmit",
@@ -55,9 +60,9 @@
 		"check:unsafe:write": "biome check --write --unsafe"
 	},
 	"dependencies": {
-		"@0xintuition/deployments": "workspace:*",
-		"@0xintuition/ids": "workspace:*",
-		"@0xintuition/protocol": "workspace:*"
+		"@0xintuition/deployments": "0.1.0-alpha.0",
+		"@0xintuition/ids": "0.1.0-alpha.0",
+		"@0xintuition/protocol": "3.0.0"
 	},
 	"peerDependencies": {
 		"@tanstack/react-query": ">=5",
@@ -66,15 +71,15 @@
 		"wagmi": ">=2"
 	},
 	"devDependencies": {
-		"typescript": "catalog:",
-		"vitest": "catalog:",
-		"@tanstack/react-query": "catalog:",
-		"@testing-library/react": "catalog:",
-		"@types/react": "catalog:",
-		"jsdom": "catalog:",
-		"react": "catalog:",
-		"react-dom": "catalog:",
-		"viem": "catalog:",
-		"wagmi": "catalog:"
+		"typescript": "^5.9.3",
+		"vitest": "^4.0.16",
+		"@tanstack/react-query": "^5.90.2",
+		"@testing-library/react": "^16.3.0",
+		"@types/react": "19.1.10",
+		"jsdom": "^26.1.0",
+		"react": "19.1.0",
+		"react-dom": "19.1.0",
+		"viem": "^2.31.4",
+		"wagmi": "^2.15.4"
 	}
 }
