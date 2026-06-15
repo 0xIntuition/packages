@@ -45,7 +45,7 @@ export function App() {
 					<p>The JSON and triple previews are what an SDK/API submit layer would consume later.</p>
 				</div>
 				<div>
-					<span>Not included yet</span>
+					<span>Out of scope</span>
 					<strong>Live writes</strong>
 					<p>
 						Wallet, RPC, API keys, and transaction submission stay out of this package showcase.

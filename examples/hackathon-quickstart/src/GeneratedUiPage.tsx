@@ -19,10 +19,10 @@ export function GeneratedUiPage() {
 	const contract = generatedCreationContracts[selectedSlug];
 
 	return (
-		<section className="generated-ui-page" aria-label="Generated UI contract proof of concept">
+		<section className="generated-ui-page" aria-label="Generated UI contract preview">
 			<div className="generated-hero">
 				<div>
-					<p className="section-label">Generative UI POC</p>
+					<p className="section-label">Generated UI</p>
 					<h2>Let the packages describe the creation surface.</h2>
 					<p>
 						This tab sketches the contract a creation flow could consume: atom fields from the
@@ -104,7 +104,7 @@ export function GeneratedUiPage() {
 						<span>Package composition</span>
 						<h3>One helper can assemble the UI contract.</h3>
 					</div>
-					<code>POC</code>
+					<code>contract</code>
 				</div>
 				<div className="generated-code-grid">
 					<pre className="code-block">{generatedUiCodeExample}</pre>
