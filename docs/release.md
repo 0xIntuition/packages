@@ -18,6 +18,7 @@ bun run typecheck
 bun run test
 bun run check
 bun run schema:validate
+bun run schema-org:check-generated
 bun run classifications:check-creation-profiles
 bun run predicates:check-generated
 bun run guard:supply-chain
@@ -29,28 +30,37 @@ bun run smoke:tarballs
 
 1. `@0xintuition/deployments@0.1.0-alpha.0` - no internal dependencies; owns protocol deployment addresses and chain metadata.
 2. `@0xintuition/curves@0.1.0-alpha.0` - no internal dependencies.
-3. `@0xintuition/ids@0.1.0-alpha.0` - schema-host-gated for `https://schema.intuition.systems/v1/oauth-atom.jsonld`.
-4. `@0xintuition/classifications@0.1.0-alpha.0` - schema-host-gated for `https://schema.intuition.systems/v1/ethereum.jsonld`.
-5. `@0xintuition/predicates@0.1.0-alpha.0` - depends on ids.
-6. `@0xintuition/primitives@0.1.0-alpha.0` - depends on classifications, ids, and predicates.
-7. `@0xintuition/protocol@3.0.0` - depends on curves; v3 (major) because deployment exports were extracted in this copy. Publishes on `latest`, superseding legacy `2.0.2`.
-8. `@0xintuition/periphery@0.1.0-alpha.0` - depends on deployments for shared Intuition chain IDs; keeps periphery bridge/router addresses in periphery.
-9. `@0xintuition/react@0.1.0-alpha.0` - depends on deployments, ids, and protocol; does not depend on the deferred SDK.
+3. `@0xintuition/schema-org@0.1.0-alpha.0` - no internal dependencies; owns the pinned schema.org V30.0 vocabulary.
+4. `@0xintuition/ids@0.1.0-alpha.0` - schema-host-gated for `https://schema.intuition.systems/v1/oauth-atom.jsonld`.
+5. `@0xintuition/classifications@0.1.0-alpha.0` - schema-host-gated for `https://schema.intuition.systems/v1/ethereum.jsonld`.
+6. `@0xintuition/predicates@0.1.0-alpha.0` - depends on ids.
+7. `@0xintuition/primitives@0.1.0-alpha.0` - depends on classifications, ids, and predicates.
+8. `@0xintuition/protocol@3.0.0` - depends on curves; v3 (major) because deployment exports were extracted in this copy. Publishes on `latest`, superseding legacy `2.0.2`.
+9. `@0xintuition/periphery@0.1.0-alpha.0` - depends on deployments for shared Intuition chain IDs; keeps periphery bridge/router addresses in periphery.
+10. `@0xintuition/react@0.1.0-alpha.0` - depends on deployments, ids, and protocol; does not depend on the deferred SDK.
 
-Publish the eight fresh packages with `--tag alpha`; publish `@0xintuition/protocol@3.0.0` to the default `latest` tag (supersedes legacy `2.0.2`). If protocol deployment extraction is reverted or slips, do not publish protocol as v3. Heads-up: stable `protocol@3.0.0` pins `@0xintuition/curves@0.1.0-alpha.0` (a prerelease) at pack time — intentional, for the deprecated curve re-exports; the exact pin resolves on install.
+Publish the nine fresh packages with `--tag alpha`; publish `@0xintuition/protocol@3.0.0` to the default `latest` tag (supersedes legacy `2.0.2`). If protocol deployment extraction is reverted or slips, do not publish protocol as v3. Heads-up: stable `protocol@3.0.0` pins `@0xintuition/curves@0.1.0-alpha.0` (a prerelease) — intentional, for the deprecated curve re-exports; the exact pin resolves on install.
 
-## Staged Tarball Flow
+## Direct Package-Root Flow
 
-Package roots intentionally keep source entrypoints for workspace development. The release flow builds `dist/`, stages a temporary package, rewrites entrypoints to `dist/index.js` and `dist/index.d.ts`, strips dev-only metadata, rewrites `workspace:*` dependencies to concrete versions, and packs from the staged copy.
+Package roots are publishable npm artifacts. Their checked-in manifests point public entrypoints at `dist`, include only `dist`, `README.md`, and `LICENSE` in `files`, and use concrete internal package versions instead of workspace-only dependency protocols.
 
 ```bash
 bun run pack:dry-run
 bun run smoke:tarballs
 ```
 
-Direct `npm publish` from package roots is blocked by `prepublishOnly`. Publish only the staged tarballs produced by `bun run --cwd packages/<name> pack:release` after review.
+After review, publish from each package root in the graph order above:
 
-Internal workspace dependencies are pinned to the exact packed package versions in staged tarballs. Keep that lockstep policy for the first coordinated publication unless the release owner explicitly chooses semver ranges before publishing.
+```bash
+cd packages/deployments && npm publish --access public --tag alpha
+```
+
+Use `npm publish --access public` for `@0xintuition/protocol`; its manifest intentionally has no `alpha` publish tag. `prepublishOnly` builds the package and validates that the root manifest is publish-safe before npm packs it.
+
+`bun run --cwd packages/<name> pack:release` remains available as an audit helper. It builds the package, validates the same direct-publish guard, runs `npm pack` from the package root, and prints the produced tarball path.
+
+Internal package dependencies are pinned to the exact package versions in checked-in manifests. Keep that lockstep policy for the first coordinated publication unless the release owner explicitly chooses semver ranges before publishing.
 
 ## Schema Host Gate
 
@@ -104,11 +114,11 @@ Decision required before publishing `ids` and `classifications`:
 
 ## Pre-Publish Human Checks
 
-- Confirm npm org access, package publish permissions, and 2FA before packing release tarballs.
+- Confirm npm org access, package publish permissions, and 2FA before publishing package roots.
 - Human-verify every address in `@0xintuition/deployments` for each supported chain; automated smoke only checks address shape.
 - Confirm the `@0xintuition/deployments` API surface intentionally includes small address lookup helpers.
-- DECIDED (2026-05-28, JP): the eight fresh packages stay on prerelease `0.1.0-alpha.0` with the `alpha` dist-tag. Consumers install with `@alpha`; a bare `npm i`/`bun add` will not resolve until a stable release. Revisit before any stable cut.
-- DECIDED (2026-05-28, JP): `@0xintuition/protocol` publishes as `3.0.0` on `latest` (supersedes legacy `2.0.2`). Accepted trade-offs: protocol installs bare while the eight fresh packages need `@alpha`, and stable `3.0.0` pins alpha `@0xintuition/curves`.
+- DECIDED (2026-05-28, JP): the fresh packages stay on prerelease `0.1.0-alpha.0` with the `alpha` dist-tag. Consumers install with `@alpha`; a bare `npm i`/`bun add` will not resolve until a stable release. Revisit before any stable cut.
+- DECIDED (2026-05-28, JP): `@0xintuition/protocol` publishes as `3.0.0` on `latest` (supersedes legacy `2.0.2`). Accepted trade-offs: protocol installs bare while the fresh alpha packages need `@alpha`, and stable `3.0.0` pins alpha `@0xintuition/curves`.
 - Confirm the `viem` peer range. Source manifests allow `^2.0.0`; release smoke tests currently install `viem@2.31.4`.
 
 ## Rollback Notes

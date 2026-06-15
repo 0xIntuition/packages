@@ -44,16 +44,30 @@ function readTarballPackageJson(tarballPath) {
 	return JSON.parse(run('tar', ['-xOf', tarballPath, 'package/package.json']));
 }
 
+const workspacePackageVersions = new Map(
+	packageOrder.map((packageName) => {
+		const packageJson = JSON.parse(
+			run('node', ['-p', 'JSON.stringify(require("./package.json"))'], packageRoot(packageName))
+		);
+		return [packageJson.name, packageJson.version];
+	})
+);
+
 function assertNoWorkspaceProtocol(packageJson, packageName) {
 	assert.doesNotMatch(
 		JSON.stringify(packageJson),
-		/workspace:/,
-		`${packageName} tarball package.json must not contain workspace protocol specs.`
+		/workspace:|catalog:/,
+		`${packageName} tarball package.json must not contain workspace-only dependency specs.`
 	);
 }
 
 function assertInternalDependencyVersions(packageJson, packageName) {
-	for (const fieldName of ['dependencies', 'peerDependencies', 'optionalDependencies']) {
+	for (const fieldName of [
+		'dependencies',
+		'devDependencies',
+		'peerDependencies',
+		'optionalDependencies',
+	]) {
 		const dependencies = packageJson[fieldName];
 		if (!dependencies || typeof dependencies !== 'object') {
 			continue;
@@ -64,7 +78,9 @@ function assertInternalDependencyVersions(packageJson, packageName) {
 				continue;
 			}
 
-			const expectedVersion = tarballPackageJsons.get(dependencyName)?.version;
+			const expectedVersion =
+				tarballPackageJsons.get(dependencyName)?.version ??
+				workspacePackageVersions.get(dependencyName);
 			assert.equal(
 				versionRange,
 				expectedVersion,
@@ -78,19 +94,7 @@ try {
 	for (const packageName of packageOrder) {
 		const cwd = packageRoot(packageName);
 		run('bun', ['run', 'build'], cwd);
-		const dryRun = JSON.parse(
-			run(
-				'node',
-				[
-					'../../scripts/pack-release.mjs',
-					'--dry-run',
-					'--json',
-					'--dist-entrypoints',
-					'--rewrite-workspace-deps',
-				],
-				cwd
-			)
-		);
+		const dryRun = JSON.parse(run('npm', ['pack', '--ignore-scripts', '--dry-run', '--json'], cwd));
 		const packedFiles = new Set(dryRun[0]?.files?.map((entry) => entry.path));
 		for (const filePath of ['dist/index.js', 'dist/index.d.ts', 'README.md', 'LICENSE']) {
 			assert(packedFiles.has(filePath), `${packageName} tarball is missing ${filePath}`);
@@ -98,11 +102,10 @@ try {
 		for (const filePath of packedFiles) {
 			assert(!filePath.startsWith('src/'), `${packageName} tarball leaked source file ${filePath}`);
 		}
-		const tarballPath = run(
-			'node',
-			['../../scripts/pack-release.mjs', '--dist-entrypoints', '--rewrite-workspace-deps'],
-			cwd
-		).trim();
+		const tarballPath = run('bun', ['run', 'pack:release'], cwd)
+			.trim()
+			.split('\n')
+			.at(-1);
 		assert.ok(tarballPath, `${packageName} release pack did not return a tarball path`);
 		tarballPaths.push(tarballPath);
 		const tarballPackageJson = readTarballPackageJson(tarballPath);

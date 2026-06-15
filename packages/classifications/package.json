@@ -6,17 +6,31 @@
 	"license": "MIT",
 	"type": "module",
 	"sideEffects": false,
-	"types": "./src/index.ts",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
 	"files": [
-		"src",
-		"README.md"
+		"dist",
+		"README.md",
+		"LICENSE"
 	],
 	"exports": {
-		".": "./src/index.ts",
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
 		"./package.json": "./package.json",
-		"./creation": "./src/generated/creation/index.ts",
-		"./creation/*": "./src/generated/creation/*.ts",
-		"./*": "./src/generated/specs/*.ts"
+		"./creation": {
+			"types": "./dist/generated/creation/index.d.ts",
+			"import": "./dist/generated/creation/index.js"
+		},
+		"./creation/*": {
+			"types": "./dist/generated/creation/*.d.ts",
+			"import": "./dist/generated/creation/*.js"
+		},
+		"./*": {
+			"types": "./dist/generated/specs/*.d.ts",
+			"import": "./dist/generated/specs/*.js"
+		}
 	},
 	"keywords": [
 		"intuition",
@@ -43,10 +57,10 @@
 		"creation-profiles:generate": "bun ../../scripts/generate-classification-creation-profiles.mjs",
 		"creation-profiles:check-generated": "node ../../scripts/check-classification-creation-profiles.mjs",
 		"dev": "tsc --watch",
-		"pack:dry-run": "bun run build && node ../../scripts/pack-release.mjs --dry-run --json --dist-entrypoints --rewrite-workspace-deps",
-		"pack:release": "bun run build && node ../../scripts/pack-release.mjs --dist-entrypoints --rewrite-workspace-deps",
+		"pack:dry-run": "bun run build && npm pack --ignore-scripts --dry-run --json",
+		"pack:release": "bun run build && node ../../scripts/pack-release.mjs",
 		"prepack": "bun run build",
-		"prepublishOnly": "node ../../scripts/guard-direct-publish.mjs",
+		"prepublishOnly": "bun run build && node ../../scripts/guard-direct-publish.mjs",
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"typecheck": "tsc --noEmit",
@@ -60,9 +74,9 @@
 		"check:unsafe:write": "biome check --write --unsafe"
 	},
 	"devDependencies": {
-		"@0xintuition/predicates": "workspace:*",
-		"@0xintuition/schema-org": "workspace:*",
-		"typescript": "catalog:",
-		"vitest": "catalog:"
+		"@0xintuition/predicates": "0.1.0-alpha.0",
+		"@0xintuition/schema-org": "0.1.0-alpha.0",
+		"typescript": "^5.9.3",
+		"vitest": "^4.0.16"
 	}
 }

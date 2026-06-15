@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 const packageJson = JSON.parse(
 	readFileSync(new URL('../package.json', import.meta.url), 'utf8')
 ) as {
+	main: string;
 	types: string;
 	files: string[];
 	exports: Record<string, unknown>;
@@ -12,20 +13,32 @@ const packageJson = JSON.parse(
 };
 
 describe('@0xintuition/schema-org package manifest', () => {
-	it('exports source entrypoints for workspace consumers', () => {
-		expect(packageJson.types).toBe('./src/index.ts');
-		expect(packageJson.files).toEqual(['src', 'README.md']);
+	it('exports built entrypoints for npm consumers', () => {
+		expect(packageJson.main).toBe('./dist/index.js');
+		expect(packageJson.types).toBe('./dist/index.d.ts');
+		expect(packageJson.files).toEqual(['dist', 'README.md', 'LICENSE']);
 		expect(packageJson.exports).toMatchObject({
-			'.': './src/index.ts',
+			'.': {
+				types: './dist/index.d.ts',
+				import: './dist/index.js',
+			},
 			'./package.json': './package.json',
-			'./*': './src/generated/types/*.ts',
+			'./*': {
+				types: './dist/generated/types/*.d.ts',
+				import: './dist/generated/types/*.js',
+			},
 		});
 	});
 
-	it('uses the staged release packer for publishable tarballs', () => {
-		expect(packageJson.scripts['pack:dry-run']).toContain('../../scripts/pack-release.mjs');
-		expect(packageJson.scripts['pack:dry-run']).toContain('--dist-entrypoints');
-		expect(packageJson.scripts['pack:dry-run']).toContain('--rewrite-workspace-deps');
-		expect(packageJson.scripts.prepublishOnly).toBe('node ../../scripts/guard-direct-publish.mjs');
+	it('packs directly from the package root', () => {
+		expect(packageJson.scripts['pack:dry-run']).toBe(
+			'bun run build && npm pack --ignore-scripts --dry-run --json'
+		);
+		expect(packageJson.scripts['pack:release']).toBe(
+			'bun run build && node ../../scripts/pack-release.mjs'
+		);
+		expect(packageJson.scripts.prepublishOnly).toBe(
+			'bun run build && node ../../scripts/guard-direct-publish.mjs'
+		);
 	});
 });
