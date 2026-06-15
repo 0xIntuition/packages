@@ -70,6 +70,10 @@ import { getPropertiesFor } from '@0xintuition/schema-org';
 
 const classification = getClassification('music-recording');
 
+if (!classification?.schema) {
+  throw new Error('Missing schema-backed music-recording classification.');
+}
+
 const atomData = buildAtomDataObject('music-recording', {
   name: 'One More Time',
   byArtist: 'Daft Punk',
