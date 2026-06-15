@@ -146,6 +146,12 @@ try {
 		results.classification = classifications.getClassification('ethereum-account')?.type;
 		const ethereumAccountClassification = await import('@0xintuition/classifications/ethereum-account');
 		results.classificationSubpath = ethereumAccountClassification.ethereumAccount.type;
+		const musicRecordingCreation = await import('@0xintuition/classifications/creation/music-recording');
+		results.musicRecordingCreationProfile = musicRecordingCreation.musicRecordingCreationProfile.classification.slug;
+		results.musicRecordingCreationRelationshipCount = musicRecordingCreation.musicRecordingCreationProfile.relationships.length;
+		const creationProfiles = await import('@0xintuition/classifications/creation');
+		results.creationProfileCount = creationProfiles.CREATION_PROFILES.length;
+		results.creationProfileIncludesMusicRecording = creationProfiles.CREATION_PROFILE_SLUGS.includes('music-recording');
 		const predicates = await import('@0xintuition/predicates');
 		results.predicate = predicates.getPredicateRecord('follow')?.name;
 		results.followId = predicates.getPredicateId('follow');
@@ -193,6 +199,10 @@ try {
 	assert.equal(nodeResult.schemaOrgBookSubpath, 'Book');
 	assert.equal(nodeResult.classification, 'EthereumAccount');
 	assert.equal(nodeResult.classificationSubpath, 'EthereumAccount');
+	assert.equal(nodeResult.musicRecordingCreationProfile, 'music-recording');
+	assert.equal(nodeResult.musicRecordingCreationRelationshipCount, 5);
+	assert.equal(nodeResult.creationProfileCount, 37);
+	assert.equal(nodeResult.creationProfileIncludesMusicRecording, true);
 	assert.equal(nodeResult.predicate, 'follow');
 	assert.match(nodeResult.followId, /^0x[0-9a-f]{64}$/i);
 	assert.equal(nodeResult.launchHasFollow, true);
@@ -214,6 +224,8 @@ try {
 	assert.equal(nodeResult.react, 'function');
 
 	const bunResult = JSON.parse(run('bun', ['--eval', importProgram]).trim());
+	assert.equal(bunResult.musicRecordingCreationProfile, 'music-recording');
+	assert.equal(bunResult.creationProfileIncludesMusicRecording, true);
 	assert.equal(bunResult.followSubpath, 'follow');
 	assert.equal(bunResult.primitiveAtomSubpath, 'function');
 	assert.equal(bunResult.hasProtocolDeployments, false);
