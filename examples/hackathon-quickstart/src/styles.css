@@ -297,7 +297,8 @@ h3 {
 .playground-section,
 .same-as-section,
 .package-callouts,
-.code-section {
+.code-section,
+.generated-ui-page {
 	margin-top: 40px;
 }
 
@@ -665,9 +666,220 @@ h3 {
 	white-space: pre;
 }
 
+.generated-hero,
+.generated-panel {
+	border: 1px solid #d9ded2;
+	background: #ffffff;
+	box-shadow: 0 14px 38px rgba(40, 52, 43, 0.08);
+}
+
+.generated-hero {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+	gap: 22px;
+	margin-bottom: 16px;
+	padding: 26px;
+}
+
+.generated-hero h2 {
+	max-width: 720px;
+	font-size: clamp(32px, 4vw, 52px);
+	line-height: 1;
+}
+
+.generated-hero p {
+	max-width: 760px;
+	margin-bottom: 0;
+	color: #58655d;
+	font-size: 16px;
+	line-height: 1.6;
+}
+
+.generated-stat-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
+	align-content: stretch;
+}
+
+.generated-stat {
+	display: grid;
+	align-content: end;
+	gap: 8px;
+	min-width: 0;
+	padding: 14px;
+	background: #edf2e8;
+	border: 1px solid #d8e3d2;
+}
+
+.generated-stat span,
+.generated-panel-header span,
+.relationship-control span {
+	color: #6a766f;
+	font-size: 12px;
+	font-weight: 800;
+	text-transform: uppercase;
+}
+
+.generated-stat strong {
+	overflow-wrap: anywhere;
+	font-size: 18px;
+	line-height: 1.05;
+}
+
+.entity-example-tabs {
+	display: grid;
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+	gap: 10px;
+	margin-bottom: 16px;
+}
+
+.entity-example-tabs button {
+	display: grid;
+	gap: 8px;
+	min-height: 116px;
+	border: 1px solid #d9ded2;
+	background: #ffffff;
+	color: #25312c;
+	padding: 14px;
+	text-align: left;
+	cursor: pointer;
+	box-shadow: 0 10px 28px rgba(40, 52, 43, 0.05);
+}
+
+.entity-example-tabs button[data-active="true"] {
+	border-color: #18221f;
+	background: #18221f;
+	color: #ffffff;
+}
+
+.entity-example-tabs strong {
+	font-size: 14px;
+	line-height: 1.15;
+}
+
+.entity-example-tabs span {
+	color: #6a766f;
+	font-size: 12px;
+	line-height: 1.35;
+}
+
+.entity-example-tabs button[data-active="true"] span {
+	color: #dce7d8;
+}
+
+.generated-layout {
+	display: grid;
+	grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+	gap: 16px;
+}
+
+.generated-panel {
+	display: grid;
+	align-content: start;
+	gap: 18px;
+	padding: 22px;
+}
+
+.generated-panel-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+}
+
+.generated-panel-header div {
+	display: grid;
+	gap: 6px;
+}
+
+.generated-panel-header h3 {
+	margin-bottom: 0;
+}
+
+.generated-panel-header code {
+	overflow-wrap: anywhere;
+	padding: 7px 9px;
+	background: #eef2ec;
+	color: #526057;
+	font-size: 12px;
+}
+
+.generated-form,
+.relationship-control-list {
+	display: grid;
+	gap: 14px;
+}
+
+.generated-field,
+.relationship-control {
+	display: grid;
+	gap: 8px;
+	padding: 12px;
+	border: 1px solid #e2e7de;
+	background: #fbfcf8;
+}
+
+.generated-field span,
+.relationship-control strong {
+	color: #25312c;
+	font-size: 14px;
+	font-weight: 800;
+}
+
+.generated-field input,
+.relationship-control input {
+	width: 100%;
+	border: 1px solid #cfd7ca;
+	background: #ffffff;
+	color: #18221f;
+	padding: 11px 12px;
+	font-size: 14px;
+	outline: none;
+}
+
+.generated-field input:focus,
+.relationship-control input:focus {
+	border-color: #78946f;
+	box-shadow: 0 0 0 3px rgba(120, 148, 111, 0.18);
+}
+
+.generated-field small,
+.relationship-control small {
+	color: #6a766f;
+	font-size: 12px;
+	line-height: 1.35;
+}
+
+.relationship-control > div:first-child {
+	display: grid;
+	gap: 4px;
+}
+
+.generated-note {
+	margin: 0;
+	padding: 12px;
+	background: #fff7df;
+	border: 1px solid #ead9a6;
+	color: #66572c;
+	font-size: 13px;
+	line-height: 1.45;
+}
+
+.generated-code-panel {
+	margin-top: 16px;
+}
+
+.generated-code-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 12px;
+}
+
 @media (max-width: 1040px) {
 	.intro,
 	.identity-hero,
+	.generated-hero,
 	.workflow-grid,
 	.demo-strip,
 	.playground-grid,
@@ -675,6 +887,9 @@ h3 {
 	.code-pair,
 	.inline-code-pair,
 	.identity-grid,
+	.generated-layout,
+	.generated-code-grid,
+	.entity-example-tabs,
 	.relation-grid {
 		grid-template-columns: 1fr 1fr;
 	}
@@ -692,6 +907,7 @@ h3 {
 
 	.intro,
 	.identity-hero,
+	.generated-hero,
 	.workflow-grid,
 	.demo-strip,
 	.playground-grid,
@@ -699,6 +915,9 @@ h3 {
 	.code-pair,
 	.inline-code-pair,
 	.identity-grid,
+	.generated-layout,
+	.generated-code-grid,
+	.entity-example-tabs,
 	.relation-grid {
 		grid-template-columns: 1fr;
 	}

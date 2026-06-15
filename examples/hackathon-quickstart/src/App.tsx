@@ -1,12 +1,13 @@
 import type { ExpectedObject } from '@0xintuition/classifications';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
+import { GeneratedUiPage } from './GeneratedUiPage.js';
 import { IdentityLinkingPage } from './IdentityLinkingPage.js';
 import { Playground } from './Playground.js';
 import { codeExample, lifecycle, packageCallouts } from './package-lifecycle.js';
 
 const schemaSampleNames = ['duration', 'sameAs', 'url', 'datePublished', 'isrcCode'];
-type DemoPage = 'lifecycle' | 'identity';
+type DemoPage = 'lifecycle' | 'generated-ui' | 'identity';
 
 export function App() {
 	const [page, setPage] = useState<DemoPage>('lifecycle');
@@ -63,10 +64,18 @@ export function App() {
 				<button type="button" data-active={page === 'identity'} onClick={() => setPage('identity')}>
 					Identity linking
 				</button>
+				<button
+					type="button"
+					data-active={page === 'generated-ui'}
+					onClick={() => setPage('generated-ui')}
+				>
+					Generated UI
+				</button>
 			</nav>
 
 			{page === 'lifecycle' ? <LifecycleOverview schemaSample={schemaSample} /> : null}
 			{page === 'identity' ? <IdentityLinkingPage /> : null}
+			{page === 'generated-ui' ? <GeneratedUiPage /> : null}
 		</main>
 	);
 }
