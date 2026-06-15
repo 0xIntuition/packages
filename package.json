@@ -22,6 +22,8 @@
 		"schema-org:generate": "node scripts/generate-schema-org-package.mjs",
 		"schema-org:refresh": "node scripts/generate-schema-org-package.mjs --refresh",
 		"schema-org:check-generated": "node scripts/check-schema-org-generation.mjs",
+		"classifications:generate-creation-profiles": "bun scripts/generate-classification-creation-profiles.mjs",
+		"classifications:check-creation-profiles": "node scripts/check-classification-creation-profiles.mjs",
 		"predicates:check-generated": "node scripts/check-predicate-generation.mjs",
 		"pack:dry-run": "node scripts/pack-dry-run.mjs",
 		"smoke:tarballs": "node scripts/smoke-tarballs.mjs",

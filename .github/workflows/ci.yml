@@ -39,6 +39,9 @@ jobs:
       - name: Check generated schema.org vocabulary
         run: bun run schema-org:check-generated
 
+      - name: Check generated classification creation profiles
+        run: bun run classifications:check-creation-profiles
+
       - name: Check generated predicate modules
         run: bun run predicates:check-generated
 

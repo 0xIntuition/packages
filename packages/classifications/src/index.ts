@@ -8,6 +8,16 @@ export {
 	hasClassification,
 } from './classifications.js';
 export type {
+	CreationField,
+	CreationFieldSchemaProvenance,
+	CreationPredicateMarketPattern,
+	CreationPredicateStatus,
+	CreationPredicateSummary,
+	CreationProfile,
+	CreationProfileClassification,
+	CreationRelationship,
+} from './creation-profile.js';
+export type {
 	ExpectedObject,
 	MetadataPredicateMatrixEntry,
 	MetadataPredicatePriority,

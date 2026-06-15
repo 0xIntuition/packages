@@ -18,8 +18,19 @@ describe('@0xintuition/classifications package manifest', () => {
 		expect(packageJson.exports).toMatchObject({
 			'.': './src/index.ts',
 			'./package.json': './package.json',
+			'./creation': './src/generated/creation/index.ts',
+			'./creation/*': './src/generated/creation/*.ts',
 			'./*': './src/generated/specs/*.ts',
 		});
+	});
+
+	it('checks generated creation profile artifacts', () => {
+		expect(packageJson.scripts['creation-profiles:generate']).toBe(
+			'bun ../../scripts/generate-classification-creation-profiles.mjs'
+		);
+		expect(packageJson.scripts['creation-profiles:check-generated']).toBe(
+			'node ../../scripts/check-classification-creation-profiles.mjs'
+		);
 	});
 
 	it('uses the staged release packer for publishable tarballs', () => {

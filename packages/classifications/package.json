@@ -14,6 +14,8 @@
 	"exports": {
 		".": "./src/index.ts",
 		"./package.json": "./package.json",
+		"./creation": "./src/generated/creation/index.ts",
+		"./creation/*": "./src/generated/creation/*.ts",
 		"./*": "./src/generated/specs/*.ts"
 	},
 	"keywords": [
@@ -38,6 +40,8 @@
 	"scripts": {
 		"build": "node ../../scripts/clean-dist.mjs && tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
 		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"creation-profiles:generate": "bun ../../scripts/generate-classification-creation-profiles.mjs",
+		"creation-profiles:check-generated": "node ../../scripts/check-classification-creation-profiles.mjs",
 		"dev": "tsc --watch",
 		"pack:dry-run": "bun run build && node ../../scripts/pack-release.mjs --dry-run --json --dist-entrypoints --rewrite-workspace-deps",
 		"pack:release": "bun run build && node ../../scripts/pack-release.mjs --dist-entrypoints --rewrite-workspace-deps",
