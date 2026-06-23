@@ -26,4 +26,4 @@ function App() {
 }
 ```
 
-This alpha package intentionally excludes the deferred SDK dependency.
+This alpha package intentionally stays focused on React hooks for protocol interactions. Higher-level SDK flows are outside this package.
