@@ -1,15 +1,90 @@
-# Alpha Release Runbook
+# Release Strategy and Runbook
 
-## Hard Gates
+This repository publishes the public `@0xintuition/*` package family. Treat
+release metadata, package exports, schema URLs, and npm dist-tags as part of the
+product contract.
 
-- Do not publish to npm before formal team review.
-- Do not make the GitHub repository public before the agreed review point.
-- Do not push or open a PR from an agent run unless explicitly requested.
-- Do not copy or publish `@0xintuition/cli`, `@0xintuition/sdk`, or `@0xintuition/stacks` in this round.
-- Do not remove packages or deployment exports from the product codebase in this round.
-- Do not publish `@0xintuition/ids` or `@0xintuition/classifications` until the atom identity versus canonical schema URL decision is resolved.
+## Current Policy
+
+- `main` is the integration branch.
+- Package roots are directly publishable npm artifacts.
+- Release work should happen in dedicated release PRs unless the change is a
+  docs-only correction.
+- Ordinary feature/fix PRs should not bump versions.
+- Published versions must never be reused. Supersede with a new version.
+- Do not publish `@0xintuition/cli`, `@0xintuition/sdk`, or
+  `@0xintuition/stacks` from this repo unless that scope is explicitly added.
+
+## Dist-Tag Policy
+
+The first public package set has two release tracks:
+
+| Package family | Current version line | Intended dist-tags |
+| --- | --- | --- |
+| Fresh public packages | `0.1.0-alpha.*` | `alpha` and `latest` can both point at the current alpha while no stable line exists |
+| `@0xintuition/protocol` | `3.x` | `latest` should point at the current v3 release; `alpha` may also point at v3 while the package family remains alpha-oriented |
+
+For new packages, using both `alpha` and `latest` is acceptable because there is
+no previous stable public line to protect. Consumer docs may still prefer
+`@alpha` while the API is settling.
+
+For `@0xintuition/protocol`, do not leave `latest` on the legacy `2.0.2` line
+once `3.0.0` is the intended public protocol package. The legacy version remains
+installable by exact version.
+
+Known registry check from 2026-06-22:
+
+```txt
+@0xintuition/deployments latest = 0.1.0-alpha.0, alpha = 0.1.0-alpha.0
+@0xintuition/classifications latest = 0.1.0-alpha.0, alpha = 0.1.0-alpha.0
+@0xintuition/protocol latest = 2.0.2, alpha = 3.0.0
+```
+
+If `@0xintuition/protocol@3.0.0` is still the accepted current release, correct
+the protocol dist-tag with:
+
+```bash
+npm dist-tag add @0xintuition/protocol@3.0.0 latest
+```
+
+Use a temp npm cache if the local npm cache has ownership issues:
+
+```bash
+NPM_CONFIG_CACHE=/tmp/npm-cache-intuition-packages npm dist-tag add @0xintuition/protocol@3.0.0 latest
+```
+
+## Versioning Rules
+
+Version by externally visible package behavior.
+
+### Alpha Packages
+
+Most fresh packages currently use `0.1.0-alpha.0`.
+
+Use the next alpha prerelease for changes before a stable release:
+
+- `0.1.0-alpha.1`
+- `0.1.0-alpha.2`
+- and so on
+
+Breaking API changes are acceptable during alpha, but they still need clear
+release notes because downstream builders may already be testing against the
+packages.
+
+### Stable / Major Packages
+
+`@0xintuition/protocol` follows normal semver because it supersedes an existing
+`2.x` line.
+
+- Patch: compatible fixes and clarifications.
+- Minor: backward-compatible API additions.
+- Major: breaking API changes, removed exports, changed install/runtime
+  prerequisites, or behavior that invalidates existing consumers.
 
 ## Required Validation
+
+Run the full gate before publishing or changing release-critical package
+surfaces:
 
 ```bash
 bun install --frozen-lockfile
@@ -26,101 +101,167 @@ bun run pack:dry-run
 bun run smoke:tarballs
 ```
 
-## Package Graph And Publish Order
+For docs-only release-strategy edits, at minimum run:
 
-1. `@0xintuition/deployments@0.1.0-alpha.0` - no internal dependencies; owns protocol deployment addresses and chain metadata.
-2. `@0xintuition/curves@0.1.0-alpha.0` - no internal dependencies.
-3. `@0xintuition/schema-org@0.1.0-alpha.0` - no internal dependencies; owns the pinned schema.org V30.0 vocabulary.
-4. `@0xintuition/ids@0.1.0-alpha.0` - schema-host-gated for `https://schema.intuition.systems/v1/oauth-atom.jsonld`.
-5. `@0xintuition/classifications@0.1.0-alpha.0` - schema-host-gated for `https://schema.intuition.systems/v1/ethereum.jsonld`.
-6. `@0xintuition/predicates@0.1.0-alpha.0` - depends on ids.
-7. `@0xintuition/primitives@0.1.0-alpha.0` - depends on classifications, ids, and predicates.
-8. `@0xintuition/protocol@3.0.0` - depends on curves; v3 (major) because deployment exports were extracted in this copy. Publishes on `latest`, superseding legacy `2.0.2`.
-9. `@0xintuition/periphery@0.1.0-alpha.0` - depends on deployments for shared Intuition chain IDs; keeps periphery bridge/router addresses in periphery.
-10. `@0xintuition/react@0.1.0-alpha.0` - depends on deployments, ids, and protocol; does not depend on the deferred SDK.
+```bash
+git diff --check
+```
 
-Publish the nine fresh packages with `--tag alpha`; publish `@0xintuition/protocol@3.0.0` to the default `latest` tag (supersedes legacy `2.0.2`). If protocol deployment extraction is reverted or slips, do not publish protocol as v3. Heads-up: stable `protocol@3.0.0` pins `@0xintuition/curves@0.1.0-alpha.0` (a prerelease) — intentional, for the deprecated curve re-exports; the exact pin resolves on install.
+## Package Graph and Publish Order
+
+Publish in dependency order:
+
+1. `@0xintuition/deployments`
+2. `@0xintuition/curves`
+3. `@0xintuition/ids`
+4. `@0xintuition/schema-org`
+5. `@0xintuition/classifications`
+6. `@0xintuition/predicates`
+7. `@0xintuition/primitives`
+8. `@0xintuition/protocol`
+9. `@0xintuition/periphery`
+10. `@0xintuition/react`
+
+This order matches the release packing/smoke scripts and keeps internal
+dependency pins resolvable as each package is published.
+
+## Updating Individual Packages
+
+Release the changed package plus any package whose checked-in manifest,
+generated output, or public behavior must change as a result.
+
+Because internal `@0xintuition/*` dependency versions are exact pins during
+alpha, some focused changes cascade:
+
+| Changed package | Usually publish | Why |
+| --- | --- | --- |
+| `deployments` | `deployments`, then `periphery` and `react` if their pins or behavior should consume the new deployment data | Runtime dependents pin deployments exactly |
+| `curves` | `curves`, then `protocol` if protocol should consume the new curve version | Protocol re-exports/uses curve helpers |
+| `schema-org` | `schema-org`; also `classifications` if generated creation profiles or schema validation output changes | Schema.org is a foundation/dev input for classifications |
+| `ids` | `ids`, then `predicates`, `primitives`, and `react` if their pins or ID behavior should move together | ID helpers sit below predicate, primitive, and React flows |
+| `classifications` | `classifications`, then `primitives` if primitive builders or pins should consume the new classification version | Primitives compose classification specs |
+| `predicates` | `predicates`, then `primitives`; also `classifications` if metadata predicates or creation profiles change | Predicates feed primitive builders and classification creation profiles |
+| `primitives` | `primitives` only, unless downstream docs/examples need updates | High-level builders sit above the data packages |
+| `protocol` | `protocol`, then `react` if React should consume the new protocol version | React depends on protocol |
+| `periphery` | `periphery` only, unless shared deployment data changed | Periphery is a leaf package |
+| `react` | `react` only | React is a leaf package |
+
+Use the dependency graph as the starting point, but validate with the diff:
+
+1. If only implementation inside one leaf package changed, release that package.
+2. If a lower-level package changed and dependents need the new exact pin, bump
+   and publish the dependents in graph order.
+3. If generated artifacts changed, publish the package that owns the generated
+   artifacts even if the source change lives elsewhere.
+4. If package behavior changes but no dependent needs to move yet, document that
+   decision in the release PR.
+
+Keep release PRs small when possible. A package-specific release PR is fine; a
+coordinated release PR is better when exact pins or generated outputs must move
+together.
 
 ## Direct Package-Root Flow
 
-Package roots are publishable npm artifacts. Their checked-in manifests point public entrypoints at `dist`, include only `dist`, `README.md`, and `LICENSE` in `files`, and use concrete internal package versions instead of workspace-only dependency protocols.
+Package roots are publishable npm artifacts. Their manifests point public
+entrypoints at `dist`, include only the intended tarball files, and use concrete
+internal package versions instead of workspace-only dependency protocols.
+
+Before publishing:
 
 ```bash
 bun run pack:dry-run
 bun run smoke:tarballs
 ```
 
-After review, publish from each package root in the graph order above:
+Then publish from each package root in the graph order above:
 
 ```bash
-cd packages/deployments && npm publish --access public --tag alpha
+cd packages/deployments
+npm publish --access public
 ```
 
-Use `npm publish --access public` for `@0xintuition/protocol`; its manifest intentionally has no `alpha` publish tag. `prepublishOnly` builds the package and validates that the root manifest is publish-safe before npm packs it.
+Package manifests own their `publishConfig.tag` values. Fresh alpha packages set
+`publishConfig.tag = "alpha"`. `@0xintuition/protocol` intentionally omits a
+tag in its manifest so npm publishes it to the default `latest` tag unless a
+release owner passes an explicit tag.
 
-`bun run --cwd packages/<name> pack:release` remains available as an audit helper. It builds the package, validates the same direct-publish guard, runs `npm pack` from the package root, and prints the produced tarball path.
+`bun run --cwd packages/<name> pack:release` remains available as an audit
+helper. It builds the package, validates the direct-publish guard, runs
+`npm pack` from the package root, and prints the produced tarball path.
 
-Internal package dependencies are pinned to the exact package versions in checked-in manifests. Keep that lockstep policy for the first coordinated publication unless the release owner explicitly chooses semver ranges before publishing.
+Internal package dependencies are pinned to exact package versions in checked-in
+manifests. Keep that lockstep policy until the release owner explicitly chooses
+semver ranges.
 
-## Schema Host Gate
+## Registry Verification
 
-GitHub Pages must serve:
+Before publishing:
+
+```bash
+npm whoami
+npm org ls 0xintuition
+```
+
+After publishing or changing dist-tags:
+
+```bash
+npm view @0xintuition/deployments dist-tags version --json
+npm view @0xintuition/classifications dist-tags version --json
+npm view @0xintuition/protocol dist-tags version --json
+```
+
+If local npm cache ownership blocks registry commands, use:
+
+```bash
+NPM_CONFIG_CACHE=/tmp/npm-cache-intuition-packages npm view @0xintuition/protocol dist-tags version --json
+```
+
+## Schema Host Policy
+
+The schema host must serve JSON-compatible content types for:
 
 - `https://schema.intuition.systems/v1/oauth-atom.jsonld`
 - `https://schema.intuition.systems/v1/ethereum.jsonld`
 
-This repo includes a separate least-privilege Pages workflow that uploads `schema/` as the artifact root. After Pages and DNS are wired, verify the live host with:
+Verify live schema hosting with:
 
 ```bash
 bun run schema:verify-live
 ```
 
-The live verifier intentionally requires a JSON-compatible response content type: `application/ld+json`, `application/json`, or another `application/*+json` media type. Do not loosen this to accept `text/plain` or `application/octet-stream`; that would make the gate pass for fetch-based consumers while strict JSON-LD processors may reject the remote context.
+The live verifier intentionally requires a JSON-compatible response content
+type: `application/ld+json`, `application/json`, or another
+`application/*+json` media type. Do not loosen this to accept `text/plain` or
+`application/octet-stream`.
 
-Measure the served header after DNS is live:
+Treat `/v1/*` schema URLs as identity-sensitive. Breaking schema changes go to
+`/v2/*` and require package constants, tests, and migration notes to change
+together.
 
-```bash
-curl -sI https://schema.intuition.systems/v1/oauth-atom.jsonld | grep -i content-type
-curl -sI https://schema.intuition.systems/v1/ethereum.jsonld | grep -i content-type
-```
+## Identity-Sensitive Changes
 
-If the chosen canonical URLs keep the `.jsonld` extension and GitHub Pages does not serve a JSON-compatible content type, fix serving at the edge or host layer, for example with a Cloudflare response-header rule for `/v1/*.jsonld`. Renaming files to `.json` can also fix content type on static hosts, but that changes the `@context` URL string and must be decided together with the atom identity gate below.
+Schema URL strings and serialized predicate atom data participate in
+deterministic IDs.
 
-Treat `/v1/*` as immutable. Breaking schema changes go to `/v2/*` and require package constants and tests to change together.
+Examples of release-sensitive changes:
 
-## Atom Identity Gate
+- changing OAuth atom `@context` URLs,
+- changing Ethereum classification context URLs,
+- changing predicate names or descriptions used in atom data,
+- changing triple subject/predicate/object order,
+- changing public classification slugs or predicate keys.
 
-Schema URL strings are part of serialized atom data, and atom IDs are derived from the exact serialized bytes. Changing a JSON-LD `@context` URL therefore changes on-chain atom identity even when the user-facing entity is the same.
+If a release intentionally changes identity, document the fork, expected
+dedupe/reconciliation behavior, and downstream migration path before publishing.
 
-This repo currently uses re-canonicalized self-hosted contexts for OAuth atoms and Ethereum classifications:
+## Rollback and Recovery
 
-| Surface | Current live implementation | This repo |
-| --- | --- | --- |
-| OAuth atom | `https://schema.0xintuition.com/v1/metadata.jsonld` | `https://schema.intuition.systems/v1/oauth-atom.jsonld` |
-| Ethereum classifications | `https://schemas.intuition.systems/v1` | `https://schema.intuition.systems/v1/ethereum.jsonld` |
+Prefer deprecation and superseding releases over unpublish.
 
-Affected package surfaces:
-
-- `@0xintuition/ids`: OAuth atom helpers and derived OAuth atom IDs.
-- `@0xintuition/classifications`: `ethereum-account`, `ethereum-erc20`, and `ethereum-smart-contract`.
-- `@0xintuition/primitives`: Ethereum atom builders that consume those classification specs.
-
-The remaining schema.org classifications are unaffected.
-
-Decision required before publishing `ids` and `classifications`:
-
-- Preserve identity: restore the exact current serialized forms so package-derived IDs match already-created atoms.
-- Re-canonicalize intentionally: accept the identity fork, publish the new URLs, and document migration/dedupe expectations before consumers adopt the packages.
-
-## Pre-Publish Human Checks
-
-- Confirm npm org access, package publish permissions, and 2FA before publishing package roots.
-- Human-verify every address in `@0xintuition/deployments` for each supported chain; automated smoke only checks address shape.
-- Confirm the `@0xintuition/deployments` API surface intentionally includes small address lookup helpers.
-- DECIDED (2026-05-28, JP): the fresh packages stay on prerelease `0.1.0-alpha.0` with the `alpha` dist-tag. Consumers install with `@alpha`; a bare `npm i`/`bun add` will not resolve until a stable release. Revisit before any stable cut.
-- DECIDED (2026-05-28, JP): `@0xintuition/protocol` publishes as `3.0.0` on `latest` (supersedes legacy `2.0.2`). Accepted trade-offs: protocol installs bare while the fresh alpha packages need `@alpha`, and stable `3.0.0` pins alpha `@0xintuition/curves`.
-- Confirm the `viem` peer range. Source manifests allow `^2.0.0`; release smoke tests currently install `viem@2.31.4`.
-
-## Rollback Notes
-
-Alpha packages can be deprecated or superseded with a later alpha tag. Do not reuse versions. If a package publishes with incorrect schema URLs or leaked workspace dependency specs, deprecate that exact version and publish a new alpha after the tarball smoke passes.
+- Do not reuse a published version.
+- If an alpha package ships incorrect metadata, publish the next alpha and
+  deprecate the bad version with a clear message.
+- If a dist-tag points at the wrong version, fix the tag directly with
+  `npm dist-tag add`.
+- If a schema URL or deterministic ID surface is wrong, stop adoption, publish a
+  corrected version, and document the identity impact.

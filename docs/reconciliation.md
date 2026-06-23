@@ -1,12 +1,13 @@
 # Source Reconciliation
 
-This workspace is a duplicate-only staging area for public package publication.
+This workspace is the public package workspace for the `@0xintuition/*`
+package artifacts.
 
-Reconciliation decision for this alpha package repo:
+Reconciliation decisions for this alpha package repo:
 
-- Publishable package directories were copied into this repository rather than consumed from the product codebase.
-- Deployment extraction and publish metadata changes happen only in this copy.
+- Package sources in this repository are the public package sources.
+- Deployment extraction and publish metadata changes happen in this public package workspace.
 - Predicate specs live in one source module per predicate under `packages/predicates/src/generated/specs/`; `generated/index.ts` and standalone public modules are generated from those source modules.
 - Classification specs live in one source module per classification and are exposed as direct package subpaths; generated Creation Profiles compose those specs with schema provenance, metadata predicate matrix rows, and predicate IDs/labels for known frontend creation flows; `@0xintuition/primitives` stays grouped by builder domain rather than duplicating catalog entries.
-- The self-hosted JSON-LD context recanonicalization in `ids` and the Ethereum classification specs is an unresolved atom-identity decision; do not publish those surfaces until the release owner chooses preserve-identity versus intentional recanonicalization.
+- The self-hosted JSON-LD contexts in `ids` and the Ethereum classification specs are identity-sensitive. Do not change those URLs or serialized atom-data shapes without an explicit release/identity review.
 - Detailed provenance is maintained outside public repository docs.
