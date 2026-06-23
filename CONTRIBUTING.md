@@ -25,8 +25,9 @@ Use an issue-first workflow.
 4. Keep the PR scoped to one package layer or one cross-cutting concern.
 5. Include validation commands in the PR description.
 
-Small typo fixes can go straight to PR. Anything that affects package behavior,
-generated data, package exports, or npm artifacts should have an issue.
+Small typo fixes or documentation-only changes can go straight to PR. Anything
+that affects package behavior, generated data, package exports, or npm artifacts
+should have an issue.
 
 ## Package Boundaries
 
@@ -45,8 +46,10 @@ Prefer extending the package that owns the concept:
 | `@0xintuition/periphery` | Periphery contract addresses and helpers |
 | `@0xintuition/react` | React providers and hooks |
 
-Avoid package cycles. Lower-level packages should not depend on product-specific
-apps or higher-level composition packages.
+Keep package dependencies one-way. Focused foundation packages should stay
+usable on their own; for example, `ids` should not import `primitives`, and
+`predicates` should not import `classifications`. Put cross-package composition
+in the package or app layer that needs both.
 
 ## Semantic Contributions
 
