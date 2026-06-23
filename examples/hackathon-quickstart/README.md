@@ -13,7 +13,7 @@ The example intentionally focuses on one lifecycle:
 4. Resolve promoted metadata predicates from the profile relationships.
 5. Use relationship expected-object targets to plan triples.
 
-It includes four review surfaces:
+It includes five review surfaces:
 
 - a local playground where changing sample values updates package-derived atom data and triple previews
 - an identity-linking page that keeps strict `sameAs` matches separate from low-confidence candidates and shows pre-activation payload links vs post-activation triples
@@ -31,8 +31,7 @@ bun --filter @0xintuition/hackathon-quickstart-example dev
 Open the printed local Vite URL, usually `http://localhost:5173`.
 
 While this example lives in the monorepo it depends on the packages through `workspace:*`.
-After the packages are published, a standalone community template should switch those to the
-published npm versions.
+A standalone community template should use the published npm package versions instead.
 
 For browser create flows, the example imports direct Creation Profile subpaths such as
 `@0xintuition/classifications/creation/music-recording`. That gives the UI the recommended
@@ -60,5 +59,5 @@ The generated output is the plan a submit layer would consume:
 - strict identity previews such as `Spotify song atom -> sameAs -> Apple Music song atom`
 - deterministic ID examples showing why payload growth and graph growth are different lifecycle choices
 
-This template is dry-run only. Protocol/API submission can be layered in once the packages
-are published.
+This template is dry-run only. Protocol/API submission can be layered on top by an app or
+service that owns live writes.

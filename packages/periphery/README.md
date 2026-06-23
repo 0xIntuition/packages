@@ -2,7 +2,7 @@
 
 TypeScript helpers for Intuition periphery contracts, currently focused on `TrustSwapAndBridgeRouter` and direct meta-bridge wrappers.
 
-Alpha status: publish under the alpha dist-tag after review. Periphery bridge/router addresses stay in this package; shared Intuition chain IDs come from `@0xintuition/deployments`.
+Alpha status: published under the alpha dist-tag. Periphery bridge/router addresses stay in this package; shared Intuition chain IDs come from `@0xintuition/deployments`.
 
 Runtime: ESM-only. This package does not publish CommonJS `require` entrypoints.
 

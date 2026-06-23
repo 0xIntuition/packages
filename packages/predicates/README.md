@@ -2,13 +2,13 @@
 
 Canonical Intuition predicate registry, launch constants, entity mappings, and display helpers.
 
-Alpha status: publish under the alpha dist-tag after release review. Predicate standalone modules are generated from per-predicate source specs.
+Alpha status: published under the alpha dist-tag. Predicate standalone modules are generated from per-predicate source specs.
 
 Runtime: ESM-only. This package does not publish CommonJS `require` entrypoints.
 
 ## Included
 
-- 97-predicate registry with deterministic inline `DefinedTerm` atom data and atom IDs
+- Generated predicate registry with deterministic inline `DefinedTerm` atom data and atom IDs
 - Semantic metadata on every record: `isTransitive`, `isSymmetric`, `isHierarchical`, and optional `inversePredicate`
 - Launch-set constants, bootstrap helpers, and market-pattern marker atoms
 - Strategy helpers for canonical inline atom data and optional IPFS enrichment documents (IPFS documents carry the semantic flags in `additionalProperty`; inline atom data stays minimal for identity stability)

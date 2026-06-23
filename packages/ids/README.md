@@ -2,7 +2,7 @@
 
 Deterministic content-addressable ID utilities for Intuition atoms, triples, counter-triples, OAuth atoms, and canonical predicate atom data.
 
-Alpha status: publish under the alpha dist-tag after review. OAuth atom helpers are schema-host-gated on https://schema.intuition.systems/v1/oauth-atom.jsonld.
+Alpha status: published under the alpha dist-tag. OAuth atom helpers use the identity-sensitive schema context at https://schema.intuition.systems/v1/oauth-atom.jsonld.
 
 Runtime: ESM-only. This package does not publish CommonJS `require` entrypoints.
 
