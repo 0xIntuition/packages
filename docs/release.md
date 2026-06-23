@@ -1,19 +1,18 @@
 # Release Strategy and Runbook
 
-This repository publishes the public `@0xintuition/*` package family. Treat
-release metadata, package exports, schema URLs, and npm dist-tags as part of the
-product contract.
+This repository publishes the public `@0xintuition/*` packages. When a release
+changes how developers install packages, import files, resolve schema URLs, or
+receive default npm versions, call that out clearly in the release notes.
 
 ## Current Policy
 
 - `main` is the integration branch.
 - Package roots are directly publishable npm artifacts.
 - Release work should happen in dedicated release PRs unless the change is a
-  docs-only correction.
-- Ordinary feature/fix PRs should not bump versions.
+  docs-only correction or the PR is explicitly scoped as a package release.
+- Feature/fix PRs should call out package-impacting changes, but package version
+  bumps normally happen in the release PR.
 - Published versions must never be reused. Supersede with a new version.
-- Do not publish `@0xintuition/cli`, `@0xintuition/sdk`, or
-  `@0xintuition/stacks` from this repo unless that scope is explicitly added.
 
 ## Dist-Tag Policy
 
@@ -28,30 +27,10 @@ For new packages, using both `alpha` and `latest` is acceptable because there is
 no previous stable public line to protect. Consumer docs may still prefer
 `@alpha` while the API is settling.
 
-For `@0xintuition/protocol`, do not leave `latest` on the legacy `2.0.2` line
-once `3.0.0` is the intended public protocol package. The legacy version remains
-installable by exact version.
-
-Known registry check from 2026-06-22:
-
-```txt
-@0xintuition/deployments latest = 0.1.0-alpha.0, alpha = 0.1.0-alpha.0
-@0xintuition/classifications latest = 0.1.0-alpha.0, alpha = 0.1.0-alpha.0
-@0xintuition/protocol latest = 2.0.2, alpha = 3.0.0
-```
-
-If `@0xintuition/protocol@3.0.0` is still the accepted current release, correct
-the protocol dist-tag with:
-
-```bash
-npm dist-tag add @0xintuition/protocol@3.0.0 latest
-```
-
-Use a temp npm cache if the local npm cache has ownership issues:
-
-```bash
-NPM_CONFIG_CACHE=/tmp/npm-cache-intuition-packages npm dist-tag add @0xintuition/protocol@3.0.0 latest
-```
+For packages with an existing stable line, keep `latest` pointed at the current
+recommended public version. Older versions remain installable by exact version.
+If a release changes which version should be the default install, update the
+dist-tag during the release and call it out in the release notes.
 
 ## Versioning Rules
 
@@ -131,20 +110,29 @@ Release the changed package plus any package whose checked-in manifest,
 generated output, or public behavior must change as a result.
 
 Because internal `@0xintuition/*` dependency versions are exact pins during
-alpha, some focused changes cascade:
+alpha, a lower-level package release may need matching releases for dependents.
+Not every lower-level release forces every dependent to move; bump a dependent
+when its manifest, generated output, or public behavior should consume the new
+version.
 
-| Changed package | Usually publish | Why |
-| --- | --- | --- |
-| `deployments` | `deployments`, then `periphery` and `react` if their pins or behavior should consume the new deployment data | Runtime dependents pin deployments exactly |
-| `curves` | `curves`, then `protocol` if protocol should consume the new curve version | Protocol re-exports/uses curve helpers |
-| `schema-org` | `schema-org`; also `classifications` if generated creation profiles or schema validation output changes | Schema.org is a foundation/dev input for classifications |
-| `ids` | `ids`, then `predicates`, `primitives`, and `react` if their pins or ID behavior should move together | ID helpers sit below predicate, primitive, and React flows |
-| `classifications` | `classifications`, then `primitives` if primitive builders or pins should consume the new classification version | Primitives compose classification specs |
-| `predicates` | `predicates`, then `primitives`; also `classifications` if metadata predicates or creation profiles change | Predicates feed primitive builders and classification creation profiles |
-| `primitives` | `primitives` only, unless downstream docs/examples need updates | High-level builders sit above the data packages |
-| `protocol` | `protocol`, then `react` if React should consume the new protocol version | React depends on protocol |
-| `periphery` | `periphery` only, unless shared deployment data changed | Periphery is a leaf package |
-| `react` | `react` only | React is a leaf package |
+Common cascades:
+
+- `deployments`: also release `periphery` and `react` when their address helpers
+  or package pins should consume the new deployment data.
+- `curves`: also release `protocol` when protocol should consume the new curve
+  version.
+- `schema-org`: also release `classifications` when schema validation, Creation
+  Profiles, or generated classification output changes.
+- `ids`: also release `predicates`, `primitives`, or `react` when their ID
+  behavior or exact pins should move with the ID package.
+- `classifications`: also release `primitives` when primitive builders or pins
+  should consume the new classification data.
+- `predicates`: also release `primitives`; also release `classifications` when
+  metadata predicate refs, matrix rows, or Creation Profiles change.
+- `protocol`: also release `react` when React should consume the new protocol
+  version.
+- Leaf packages such as `primitives`, `periphery`, and `react` usually release
+  on their own unless shared data, examples, or docs need to move with them.
 
 Use the dependency graph as the starting point, but validate with the diff:
 
@@ -208,12 +196,6 @@ After publishing or changing dist-tags:
 npm view @0xintuition/deployments dist-tags version --json
 npm view @0xintuition/classifications dist-tags version --json
 npm view @0xintuition/protocol dist-tags version --json
-```
-
-If local npm cache ownership blocks registry commands, use:
-
-```bash
-NPM_CONFIG_CACHE=/tmp/npm-cache-intuition-packages npm view @0xintuition/protocol dist-tags version --json
 ```
 
 ## Schema Host Policy

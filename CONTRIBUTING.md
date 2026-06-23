@@ -161,8 +161,9 @@ PRs are reviewed against:
 
 ## Versioning and Releases
 
-Do not bump package versions in ordinary feature or fix PRs unless the PR is
-explicitly a release PR.
+Feature and fix PRs should call out package-impacting changes. Package version
+bumps normally happen in release PRs unless the PR is explicitly scoped as a
+package release.
 
 Release PRs should:
 
