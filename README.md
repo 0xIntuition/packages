@@ -89,4 +89,9 @@ bun run pack:dry-run
 bun run smoke:tarballs
 ```
 
-Package roots are npm-publishable artifacts. Release and publishing guidance lives in [docs/release.md](./docs/release.md).
+## Contributing and Releases
+
+- [Contributing guide](./CONTRIBUTING.md)
+- [Release strategy and runbook](./docs/release.md)
+
+Package roots are npm-publishable artifacts. Release PRs should follow the validation gate, dist-tag policy, and publish order documented in [docs/release.md](./docs/release.md).

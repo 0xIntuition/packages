@@ -2,7 +2,7 @@
 
 Core Intuition protocol contract ABIs, event parsers, and interaction helpers for MultiVault, Trust, TrustBonding, WrappedTrust, and emissions controllers.
 
-Versioned as `3.0.0`. The major bump (vs the legacy `2.x` line) reflects deployment addresses and chain metadata being extracted into `@0xintuition/deployments`.
+Versioned as `3.0.0`. The major bump (vs the legacy `2.x` line) reflects deployment addresses and chain metadata being extracted into `@0xintuition/deployments`. See the root release runbook for the current `latest` / `alpha` dist-tag policy.
 
 Runtime: ESM-only. This package does not publish CommonJS `require` entrypoints.
 
