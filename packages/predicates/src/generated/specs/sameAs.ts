@@ -13,4 +13,15 @@ export const sameAs = {
 	isTransitive: true,
 	isSymmetric: true,
 	inversePredicate: 'same as',
+	behavior: {
+		canonicalDirection: 'subject-to-object',
+		subjectRole: 'identity representation',
+		objectRole: 'equivalent identity representation',
+		relationshipShape: 'one-to-one',
+		actor: { required: false, source: 'statement', role: 'identity attestor' },
+		display: {
+			forward: 'same as',
+			reverse: 'same as',
+		},
+	},
 } as const satisfies PredicateSpec;

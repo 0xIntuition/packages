@@ -1,7 +1,12 @@
 import { calculateAtomId, createPredicateAtomData } from '@0xintuition/ids';
 import { PREDICATE_SPECS } from './generated/index.js';
 import { definePredicateRecord } from './record.js';
-import type { PredicateDefinition, PredicateRecord, PredicateStatus } from './types';
+import type {
+	PredicateBehavior,
+	PredicateDefinition,
+	PredicateRecord,
+	PredicateStatus,
+} from './types';
 
 type PredicateSpec = (typeof PREDICATE_SPECS)[number];
 
@@ -18,6 +23,12 @@ export const PREDICATE_DEFS = Object.fromEntries(
 export const PREDICATE_STATUSES = Object.fromEntries(
 	PREDICATE_RECORDS.map(({ key, status }) => [key, status])
 ) as Record<PredicateKey, PredicateStatus>;
+
+export const PREDICATE_BEHAVIORS = Object.fromEntries(
+	PREDICATE_RECORDS.flatMap((predicate) =>
+		predicate.behavior ? [[predicate.key, predicate.behavior]] : []
+	)
+) as Partial<Record<PredicateKey, PredicateBehavior>>;
 
 export const PREDICATE_NAME_TO_KEY = Object.fromEntries(
 	PREDICATE_RECORDS.map(({ key, name }) => [name.toLowerCase(), key])
@@ -70,6 +81,10 @@ export function getPredicateById(predicateId: string) {
 
 export function getPredicateStatus(key: PredicateKey) {
 	return PREDICATE_STATUSES[key];
+}
+
+export function getPredicateBehavior(key: PredicateKey | string) {
+	return PREDICATE_BEHAVIORS[key as PredicateKey];
 }
 
 export function getPredicatesByStatus(status: PredicateStatus) {

@@ -17,5 +17,6 @@ export function definePredicateRecord<const TSpec extends PredicateSpec>(
 		...(spec.thirdPerson ? { thirdPerson: spec.thirdPerson } : {}),
 		...(spec.examples ? { examples: spec.examples } : {}),
 		...(spec.inversePredicate ? { inversePredicate: spec.inversePredicate } : {}),
+		...(spec.behavior ? { behavior: spec.behavior } : {}),
 	};
 }

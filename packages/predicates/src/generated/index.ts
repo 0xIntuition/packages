@@ -13,6 +13,7 @@ import { backedBy } from './specs/backedBy.js';
 import { bearishOn } from './specs/bearishOn.js';
 import { betterThan } from './specs/betterThan.js';
 import { blocked } from './specs/blocked.js';
+import { bookmark } from './specs/bookmark.js';
 import { branchOf } from './specs/branchOf.js';
 import { brand } from './specs/brand.js';
 import { bullishOn } from './specs/bullishOn.js';
@@ -147,6 +148,7 @@ export { backedBy } from './specs/backedBy.js';
 export { bearishOn } from './specs/bearishOn.js';
 export { betterThan } from './specs/betterThan.js';
 export { blocked } from './specs/blocked.js';
+export { bookmark } from './specs/bookmark.js';
 export { branchOf } from './specs/branchOf.js';
 export { brand } from './specs/brand.js';
 export { bullishOn } from './specs/bullishOn.js';
@@ -401,4 +403,5 @@ export const PREDICATE_SPECS = [
 	targetProduct,
 	track,
 	trailer,
+	bookmark,
 ] as const satisfies readonly PredicateSpec[];

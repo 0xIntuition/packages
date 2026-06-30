@@ -31,9 +31,71 @@ export interface PredicateDefinition {
 	isSymmetric: boolean;
 	isHierarchical: boolean;
 	inversePredicate?: string;
+	behavior?: PredicateBehavior;
 }
 
 export type PredicateStatus = 'enshrined' | 'proposed' | 'deprecated';
+export type PredicateCanonicalDirection = 'subject-to-object';
+export type PredicateRelationshipShape =
+	| 'one-to-one'
+	| 'one-to-many'
+	| 'many-to-one'
+	| 'many-to-many';
+export type PredicateActorSource =
+	| 'subject'
+	| 'object'
+	| 'statement'
+	| 'position'
+	| 'deposit'
+	| 'creator'
+	| 'content'
+	| 'external';
+export type PredicateBehaviorTarget =
+	| {
+			kind: 'classification';
+			slugs: readonly string[];
+			label?: string;
+	  }
+	| {
+			kind: 'atom';
+			id: string;
+			label?: string;
+	  }
+	| {
+			kind: 'same-classification';
+			label?: string;
+	  }
+	| {
+			kind: 'schema';
+			type: string;
+			context?: string;
+			label?: string;
+	  }
+	| {
+			kind: 'any';
+			reason?: string;
+			label?: string;
+	  };
+
+export interface PredicateBehavior {
+	canonicalDirection: PredicateCanonicalDirection;
+	subjectRole: string;
+	objectRole: string;
+	relationshipShape?: PredicateRelationshipShape;
+	expectedSubject?: PredicateBehaviorTarget;
+	expectedObject?: PredicateBehaviorTarget;
+	actor?: {
+		required: boolean;
+		source: PredicateActorSource;
+		role?: string;
+	};
+	display?: {
+		forward: string;
+		reverse?: string;
+		thirdPerson?: string;
+		pastParticiple?: string;
+	};
+}
 
 export interface PredicateSpec {
 	key: string;
@@ -49,6 +111,7 @@ export interface PredicateSpec {
 	isSymmetric?: boolean;
 	isHierarchical?: boolean;
 	inversePredicate?: string;
+	behavior?: PredicateBehavior;
 }
 
 export type PredicateRecord<TSpec extends PredicateSpec = PredicateSpec> = PredicateDefinition & {

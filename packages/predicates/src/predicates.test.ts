@@ -6,6 +6,7 @@ import {
 	ENTITY_PREDICATE_MAP,
 	getEntityTypesForPredicate,
 	getPredicateAtomData,
+	getPredicateBehavior,
 	getPredicateByKey,
 	getPredicateByName,
 	getPredicateDisplayName,
@@ -20,6 +21,7 @@ import {
 	LAUNCH_PREDICATE_DEFS,
 	LAUNCH_PREDICATE_IDS,
 	LAUNCH_PREDICATE_KEYS,
+	PREDICATE_BEHAVIORS,
 	PREDICATE_DEFS,
 	PREDICATE_IDS,
 	PREDICATE_RECORDS,
@@ -28,11 +30,11 @@ import {
 } from './index';
 
 describe('@0xintuition/predicates registry', () => {
-	it('defines the full 133-predicate registry with the expected category counts', () => {
-		expect(PREDICATE_RECORDS).toHaveLength(133);
+	it('defines the full 134-predicate registry with the expected category counts', () => {
+		expect(PREDICATE_RECORDS).toHaveLength(134);
 		expect(getPredicatesByCategory('Identity/Classification')).toHaveLength(5);
 		expect(getPredicatesByCategory('Social/Reputation')).toHaveLength(12);
-		expect(getPredicatesByCategory('Curation/Containment')).toHaveLength(17);
+		expect(getPredicatesByCategory('Curation/Containment')).toHaveLength(18);
 		expect(getPredicatesByCategory('Authorship/Contribution')).toHaveLength(15);
 		expect(getPredicatesByCategory('Metadata/Linking')).toHaveLength(14);
 		expect(getPredicatesByCategory('Affiliation/Membership')).toHaveLength(14);
@@ -63,6 +65,26 @@ describe('@0xintuition/predicates registry', () => {
 		);
 		expect(getPredicatesByMarketPattern('comparative')).toContainEqual(
 			expect.objectContaining({ key: 'betterThan' })
+		);
+	});
+
+	it('exposes predicate behavior metadata for behavior-aware predicates', () => {
+		expect(getPredicateRecord('bookmark')).toEqual(
+			expect.objectContaining({ key: 'bookmark', status: 'proposed' })
+		);
+		expect(getPredicateBehavior('bookmark')).toEqual(
+			expect.objectContaining({
+				canonicalDirection: 'subject-to-object',
+				subjectRole: 'bookmarker',
+				objectRole: 'bookmarked target',
+				actor: expect.objectContaining({ source: 'subject', role: 'bookmarker' }),
+			})
+		);
+		expect(PREDICATE_BEHAVIORS.follow).toEqual(
+			expect.objectContaining({
+				subjectRole: 'first-person actor placeholder',
+				actor: expect.objectContaining({ source: 'position', role: 'follower' }),
+			})
 		);
 	});
 
