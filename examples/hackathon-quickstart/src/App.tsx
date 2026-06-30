@@ -1,19 +1,85 @@
 import type { ExpectedObject } from '@0xintuition/classifications';
 import type { ReactNode } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GeneratedUiPage } from './GeneratedUiPage.js';
 import { IdentityLinkingPage } from './IdentityLinkingPage.js';
 import { Playground } from './Playground.js';
+import { PredicateBehaviorPage } from './PredicateBehaviorPage.js';
 import { codeExample, lifecycle, packageCallouts } from './package-lifecycle.js';
 
-type DemoPage = 'lifecycle' | 'generated-ui' | 'identity';
+type DemoPage = 'lifecycle' | 'generated-ui' | 'identity' | 'predicate-behavior';
 
 export function App() {
-	const [page, setPage] = useState<DemoPage>('lifecycle');
+	const [page, setPage] = useState<DemoPage>(() => getInitialPage());
 	const schemaSample = lifecycle.schemaHighlights.slice(0, 5);
+	const showQuickstartIntro = page !== 'predicate-behavior';
+
+	useEffect(() => {
+		const handleHashChange = () => {
+			setPage(getInitialPage());
+		};
+
+		window.addEventListener('hashchange', handleHashChange);
+
+		return () => {
+			window.removeEventListener('hashchange', handleHashChange);
+		};
+	}, []);
+
+	const navigateToPage = (nextPage: DemoPage) => {
+		setPage(nextPage);
+
+		if (window.location.hash !== `#${nextPage}`) {
+			window.location.hash = nextPage;
+		}
+	};
 
 	return (
 		<main className="app-shell">
+			{showQuickstartIntro ? <QuickstartIntro /> : null}
+
+			<nav className="page-nav" aria-label="Quickstart pages">
+				<button
+					type="button"
+					data-active={page === 'lifecycle'}
+					onClick={() => navigateToPage('lifecycle')}
+				>
+					Package lifecycle
+				</button>
+				<button
+					type="button"
+					data-active={page === 'identity'}
+					onClick={() => navigateToPage('identity')}
+				>
+					Identity linking
+				</button>
+				<button
+					type="button"
+					data-active={page === 'generated-ui'}
+					onClick={() => navigateToPage('generated-ui')}
+				>
+					Generated UI
+				</button>
+				<button
+					type="button"
+					data-active={page === 'predicate-behavior'}
+					onClick={() => navigateToPage('predicate-behavior')}
+				>
+					Predicate behavior
+				</button>
+			</nav>
+
+			{page === 'lifecycle' ? <LifecycleOverview schemaSample={schemaSample} /> : null}
+			{page === 'identity' ? <IdentityLinkingPage /> : null}
+			{page === 'generated-ui' ? <GeneratedUiPage /> : null}
+			{page === 'predicate-behavior' ? <PredicateBehaviorPage /> : null}
+		</main>
+	);
+}
+
+function QuickstartIntro() {
+	return (
+		<>
 			<section className="intro">
 				<div>
 					<p className="section-label">Hackathon quickstart</p>
@@ -49,32 +115,31 @@ export function App() {
 					</p>
 				</div>
 			</section>
-
-			<nav className="page-nav" aria-label="Quickstart pages">
-				<button
-					type="button"
-					data-active={page === 'lifecycle'}
-					onClick={() => setPage('lifecycle')}
-				>
-					Package lifecycle
-				</button>
-				<button type="button" data-active={page === 'identity'} onClick={() => setPage('identity')}>
-					Identity linking
-				</button>
-				<button
-					type="button"
-					data-active={page === 'generated-ui'}
-					onClick={() => setPage('generated-ui')}
-				>
-					Generated UI
-				</button>
-			</nav>
-
-			{page === 'lifecycle' ? <LifecycleOverview schemaSample={schemaSample} /> : null}
-			{page === 'identity' ? <IdentityLinkingPage /> : null}
-			{page === 'generated-ui' ? <GeneratedUiPage /> : null}
-		</main>
+		</>
 	);
+}
+
+function getInitialPage(): DemoPage {
+	if (typeof window === 'undefined') {
+		return 'predicate-behavior';
+	}
+
+	return getDemoPageFromHash(window.location.hash) ?? 'predicate-behavior';
+}
+
+function getDemoPageFromHash(hash: string): DemoPage | null {
+	const page = hash.replace(/^#\/?/, '');
+
+	if (
+		page === 'lifecycle' ||
+		page === 'generated-ui' ||
+		page === 'identity' ||
+		page === 'predicate-behavior'
+	) {
+		return page;
+	}
+
+	return null;
 }
 
 function LifecycleOverview({ schemaSample }: { schemaSample: typeof lifecycle.schemaHighlights }) {

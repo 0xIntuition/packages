@@ -15,8 +15,11 @@
 	"dependencies": {
 		"@0xintuition/classifications": "workspace:*",
 		"@0xintuition/ids": "workspace:*",
+		"@0xintuition/predicates": "workspace:*",
+		"@0xintuition/primitives": "workspace:*",
 		"react": "catalog:",
-		"react-dom": "catalog:"
+		"react-dom": "catalog:",
+		"viem": "catalog:"
 	},
 	"devDependencies": {
 		"@types/react": "catalog:",
