@@ -1,4 +1,4 @@
-import { PREDICATE_IDS } from '@0xintuition/predicates';
+import { I_SUBJECT_ID, PREDICATE_IDS } from '@0xintuition/predicates';
 import type { Hex } from 'viem';
 import { describe, expect, it } from 'vitest';
 import {
@@ -8,6 +8,8 @@ import {
 	buildTripleByName,
 	calculateCounterTripleId,
 	calculateTripleId,
+	explainTriple,
+	guidedBuildTriple,
 } from '../index';
 
 // Build some test atoms to use as subjects/objects
@@ -210,6 +212,117 @@ describe('buildTripleByName', () => {
 
 		expect(byName.value.id).toBe(byKey.value.id);
 		expect(byName.value.predicateId).toBe(byKey.value.predicateId);
+	});
+});
+
+describe('guidedBuildTriple', () => {
+	it('builds a bookmark triple with behavior interpretation', () => {
+		const subjectId = getTestAtomId('ethereum-account', {
+			address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+		});
+		const objectId = getTestAtomId('thing', { name: 'Predicate behavior note' });
+
+		const result = guidedBuildTriple({
+			subjectId,
+			predicateKey: 'bookmark',
+			objectId,
+			subjectLabel: '0x742d...f44e',
+			objectLabel: 'Predicate behavior note',
+			actorSource: 'subject',
+			subjectClassification: 'ethereum-account',
+			objectClassification: 'thing',
+		});
+
+		expect(result.success).toBe(true);
+
+		if (!result.success) {
+			return;
+		}
+
+		expect(result.value.predicateKey).toBe('bookmark');
+		expect(result.value.behavior?.subjectRole).toBe('bookmarker');
+		expect(result.value.interpretation).toMatchObject({
+			subjectRole: 'bookmarker',
+			objectRole: 'bookmarked target',
+			actorSource: 'subject',
+			plainEnglish: '0x742d...f44e bookmarks Predicate behavior note',
+		});
+		expect(result.value.warnings).toEqual([]);
+	});
+
+	it('rejects an inverted bookmark triple when classification context is supplied', () => {
+		const subjectId = getTestAtomId('thing', { name: 'Predicate behavior note' });
+		const objectId = getTestAtomId('ethereum-account', {
+			address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+		});
+
+		const result = guidedBuildTriple({
+			subjectId,
+			predicateKey: 'bookmark',
+			objectId,
+			subjectLabel: 'Predicate behavior note',
+			objectLabel: '0x742d...f44e',
+			actorSource: 'subject',
+			subjectClassification: 'thing',
+			objectClassification: 'ethereum-account',
+		});
+
+		expect(result.success).toBe(false);
+
+		if (result.success) {
+			return;
+		}
+
+		expect(result.errors).toContain(
+			'Invalid subject placement: expected classification:ethereum-account or classification:person or classification:social-media-account, received classification:thing.'
+		);
+	});
+
+	it('explains follow as a position-backed canonical claim', () => {
+		const result = explainTriple({
+			predicateKey: 'follow',
+			subjectLabel: 'I',
+			objectLabel: 'Geo Browser',
+			actorLabel: '0x742d...f44e',
+			actorSource: 'position',
+		});
+
+		expect(result.success).toBe(true);
+
+		if (!result.success) {
+			return;
+		}
+
+		expect(result.value).toMatchObject({
+			subjectRole: 'first-person actor placeholder',
+			objectRole: 'followed target',
+			actorSource: 'position',
+			actorRole: 'follower',
+			plainEnglish: '0x742d...f44e via position: I follows Geo Browser',
+		});
+	});
+
+	it('warns when the supplied actor source does not match predicate behavior', () => {
+		const objectId = getTestAtomId('thing', { name: 'Geo Browser' });
+
+		const result = guidedBuildTriple({
+			subjectId: I_SUBJECT_ID,
+			predicateKey: 'follow',
+			objectId,
+			subjectLabel: 'I',
+			objectLabel: 'Geo Browser',
+			actorSource: 'subject',
+		});
+
+		expect(result.success).toBe(true);
+
+		if (!result.success) {
+			return;
+		}
+
+		expect(result.value.warnings).toContain(
+			'Actor source "subject" does not match canonical source "position".'
+		);
 	});
 });
 

@@ -93,7 +93,13 @@ export {
 // Predicate helpers
 export { buildCustomPredicate, getPredicateInfo, listPredicates } from './predicate.js';
 // Triple builders
-export { buildCounterTriple, buildTriple, buildTripleByName } from './triple.js';
+export {
+	buildCounterTriple,
+	buildTriple,
+	buildTripleByName,
+	explainTriple,
+	guidedBuildTriple,
+} from './triple.js';
 // Types
 export type {
 	AtomBlueprint,
@@ -101,8 +107,11 @@ export type {
 	ClassificationSummary,
 	CounterTripleBlueprint,
 	FieldInfo,
+	GuidedTripleBlueprint,
 	PredicateInfo,
 	TripleBlueprint,
+	TripleIntent,
+	TripleInterpretation,
 	ValidationResult,
 } from './types.js';
 // Validation helpers

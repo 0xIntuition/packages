@@ -1,3 +1,4 @@
+import type { PredicateActorSource, PredicateBehavior } from '@0xintuition/predicates';
 import type { Hex } from 'viem';
 
 /**
@@ -30,6 +31,65 @@ export interface TripleBlueprint {
 	objectId: Hex;
 	/** The deterministic triple ID derived from subject, predicate, and object IDs. */
 	id: Hex;
+}
+
+/**
+ * Input for behavior-aware triple helpers. These helpers still use deterministic
+ * IDs, but attach labels and actor context for UI/API interpretation.
+ */
+export interface TripleIntent {
+	/** The atom ID of the subject. */
+	subjectId: Hex;
+	/** The predicate key from the predicate registry. */
+	predicateKey: string;
+	/** The atom ID of the object. */
+	objectId: Hex;
+	/** Human-readable subject label for plain-English rendering. */
+	subjectLabel?: string;
+	/** Human-readable object label for plain-English rendering. */
+	objectLabel?: string;
+	/** Human-readable actor label when the actor is not the subject. */
+	actorLabel?: string;
+	/** Where the concrete actor lives for this product action. */
+	actorSource?: PredicateActorSource;
+	/** Classification slug for the subject atom, when known by the caller. */
+	subjectClassification?: string;
+	/** Classification slug for the object atom, when known by the caller. */
+	objectClassification?: string;
+}
+
+/**
+ * Human- and machine-readable interpretation derived from predicate behavior.
+ */
+export interface TripleInterpretation {
+	/** The predicate key from the predicate registry. */
+	predicateKey: string;
+	/** The behavior role assigned to the subject. */
+	subjectRole: string;
+	/** The behavior role assigned to the object. */
+	objectRole: string;
+	/** Where the concrete actor is expected to live, when known. */
+	actorSource?: PredicateActorSource;
+	/** The actor's role in the relationship, when known. */
+	actorRole?: string;
+	/** Forward plain-English rendering for the canonical triple. */
+	plainEnglish: string;
+	/** Reverse plain-English rendering, when defined by the predicate behavior. */
+	reversePlainEnglish?: string;
+	/** Non-fatal issues that make the interpretation less canonical. */
+	warnings: string[];
+}
+
+/**
+ * A deterministic triple blueprint plus behavior metadata and interpretation.
+ */
+export interface GuidedTripleBlueprint extends TripleBlueprint {
+	/** Predicate behavior metadata, when available. */
+	behavior?: PredicateBehavior;
+	/** Human- and machine-readable interpretation derived from behavior metadata. */
+	interpretation: TripleInterpretation;
+	/** Non-fatal issues that make this plan less canonical. */
+	warnings: string[];
 }
 
 /**
