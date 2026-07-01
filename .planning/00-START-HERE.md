@@ -57,6 +57,11 @@ reasoning profile and don't encode inference we can't compute at scale.
 7. **`predicate-backend-implementation-plan.md`** — the ticket-ready build plan: 7 workstreams
    (package → schema → seed → query features → API → consumers → tests), phased P0–P5 with dependencies,
    acceptance criteria, and rough sizing. Start here when we're ready to execute.
+8. **`predicate-query-optimization-spec.md`** — deep dive on the hardest read path: gathering metadata &
+   resolving identity by traversing connected triples from a root item (the Spotify→Apple Music case).
+   Predicate registry/parsing, the exact `kg.triples` indexes, the equivalence-class engine (query-time
+   vs materialized union-find), and the batched gather algorithm. **Headline:** identity/metadata is
+   moving from embedded JSON-LD (`data_resolved.sameAs`) to triple-native edges; this makes that fast.
 
 If you read only one: **`predicate-spec-decisions.md`**.
 
