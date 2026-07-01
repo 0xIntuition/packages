@@ -56,8 +56,9 @@ The indexer synthesizes the reverse direction instead of forcing users to mint t
 
 This is the problem classical fact-graphs never had and the one most worth being cutting-edge on. A
 belief/trust graph is *valuable precisely because it can represent and price disagreement.*
-**Needs:** `contradicts` (trust ⊥ distrust), `isAsymmetric` (one-directional relations).
-**Consumer:** reputation/markets (emerging) + frontend (conflict badges). **Verdict: ship `contradicts`; ship `isAsymmetric` as cheap metadata.**
+**Needs:** `contradicts` (trust ⊥ distrust). (`isAsymmetric` would also serve here but was deferred —
+its unique value is write-time validation, which has no consumer yet.)
+**Consumer:** reputation/markets (emerging) + frontend (conflict badges). **Verdict: ship `contradicts`.**
 
 ### P4 — Automatic frontend rendering from the predicate alone (the biggest near-term win)
 > *The UI receives an edge and, without any per-predicate hardcoding, knows: the object of `imgUrl` is an
@@ -96,7 +97,7 @@ This is served *for free* by the fields above as long as we serialize them in th
 | `specializes` | P2 roll-up query + reputation | **Ship** (needs curation) |
 | `polarity` | P2 reputation, P4 color | **Ship** |
 | `contradicts` | P3 belief markets | **Ship** (needs curation) |
-| `isAsymmetric` | P3 validation; tells indexer "don't mirror" | **Ship** (cheap, derivation-checked) |
+| `isAsymmetric` | P3 validation; tells indexer "don't mirror" | **Defer** — see note below; demoted in per-field review |
 | `objectKind` | P4 render literal/claim/entity differently | **Ship** (highest-value) |
 | `temporalNature` | P4 freshness badge, P5 lifecycle | **Ship** |
 | `marketPattern` | existing economic layer | **Keep** |
@@ -109,10 +110,16 @@ This is served *for free* by the fields above as long as we serialize them in th
 | `verifiability` | onChain/offChain | **Cut** — ~correlated with `claimType`; a redundant second axis |
 | property chains | grandparentOf from parentOf∘parentOf | **Cut for now** — most expensive axiom, no consumer |
 
-**Net change vs the original proposal:** we drop from ~7 logic booleans to **3** (`isSymmetric`,
-`isAsymmetric`, `isTransitive`), cut `equivalentTo`/`verifiability`/`isHierarchical`, defer the
-functional family and reflexivity, and simplify `claimType`. That is roughly a 40% reduction in surface
+**Net change vs the original proposal:** we drop from ~7 logic booleans to **2** (`isSymmetric`,
+`isTransitive`), cut `equivalentTo`/`verifiability`/`isHierarchical`, defer the functional family,
+reflexivity, **and `isAsymmetric`**, and simplify `claimType`. That is roughly a 45% reduction in surface
 area — and every survivor names a consumer that exists or is emerging.
+
+> **`isAsymmetric` was demoted to Defer** during the per-field review (`predicate-fields/is-asymmetric.md`,
+> score 54). Its only unique value is write-time validation, which has no consumer yet; its "don't mirror
+> the edge" signal is already implied by the *absence* of `isSymmetric` plus the presence of `inverse`. It
+> graduates alongside `isFunctional` when a validation engine ships. The active algebraic set is therefore
+> just `isSymmetric` + `isTransitive`, both with an indexer consumer today.
 
 ---
 
@@ -161,8 +168,8 @@ export interface PredicateSpec {
 
   // algebraic (OWL-aligned, flat, is* convention)
   isSymmetric?: boolean;
-  isAsymmetric?: boolean;
   isTransitive?: boolean;
+  // isAsymmetric?: boolean;  // deferred — add with the validation engine (see predicate-fields/is-asymmetric.md)
 
   // inter-predicate (typed key references — validated in definePredicateRecord)
   inverse?: PredicateKey;
@@ -176,8 +183,9 @@ export interface PredicateSpec {
 }
 ```
 
-`definePredicateRecord` stays the consistency gate: derive implications (`asymmetric ⟹ not symmetric`),
-verify inverse pairs mirror each other, and verify `contradicts` is declared symmetrically on both sides.
+`definePredicateRecord` stays the consistency gate: derive implications (`isSymmetric ⟹ inverse = self`;
+a symmetric predicate cannot also declare a different `inverse`), verify inverse pairs mirror each other's
+algebraic properties, and verify `contradicts` is declared symmetrically on both sides.
 
 ---
 

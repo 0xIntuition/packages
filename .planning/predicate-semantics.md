@@ -1,9 +1,14 @@
 # Design: Machine-Readable Predicate Semantics
 
-**Status:** Draft for review
+**Status:** Background map — superseded on specifics by the decision record
 **Author:** Architecture
 **Date:** 2026-06-30
 **Scope:** `packages/predicates/src/types.ts`, `record.ts`, `ipfs.ts`, and the 133 specs under `src/generated/specs/`
+
+> **Reading note.** This is the original full brainstorm — the *map of what's possible*. For the **final,
+> pruned field set and the flat schema shape**, `predicate-spec-decisions.md` is canonical and overrides
+> §5 below (which still shows the earlier nested sketch and the full unpruned field list). Start with
+> `00-START-HERE.md`.
 
 ---
 
@@ -184,7 +189,12 @@ schema.org `domain`/`range` hint for export is deferred.
 
 ---
 
-## 5. Proposed schema shape (hybrid nested)
+## 5. Proposed schema shape (hybrid nested) — SUPERSEDED
+
+> ⚠️ **Superseded by `predicate-spec-decisions.md` §4–5.** The team decided **flat, not nested**
+> (the serialization target and the entire OWL/RDF tradition are flat), and pruned the field set.
+> The nested sketch below is kept only to show the reasoning we moved past. Use the decision record's
+> flat `PredicateSpec` as the source of truth.
 
 Decision: keep small enum semantic fields flat (they read well and serialize trivially) and group
 the two field-rich families (`logic`, `ontology`) plus presentation (`grammar`) into nested objects
