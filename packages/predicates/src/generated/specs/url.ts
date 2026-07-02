@@ -8,4 +8,8 @@ export const url = {
 	conjugates: false,
 	category: 'Metadata/Linking',
 	status: 'enshrined',
+	objectKind: 'literal',
+	literalType: 'url',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

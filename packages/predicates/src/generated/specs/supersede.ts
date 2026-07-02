@@ -9,4 +9,7 @@ export const supersede = {
 	conjugates: false,
 	category: 'Comparison/Ranking',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

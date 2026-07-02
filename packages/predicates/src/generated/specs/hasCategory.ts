@@ -10,4 +10,7 @@ export const hasCategory = {
 	category: 'Identity/Classification',
 	status: 'enshrined',
 	examples: ['(Uniswap, has category, DeFi)', '(Aave, has category, Lending)'],
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

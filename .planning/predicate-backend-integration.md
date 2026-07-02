@@ -108,12 +108,14 @@ relying on referential integrity.
 | `isSymmetric` | ✅ `is_symmetric` column | reuse as-is |
 | `isTransitive` | ✅ `is_transitive` column | reuse as-is |
 | `inverse` | ✅ `inverse_predicate_id` column | reuse; store the **predicate atom-id**, mapped from our typed `PredicateKey` at seed time |
-| `specializes` | ❌ | add `specializes_predicate_id text` (mirrors `inverse_predicate_id`) |
-| `contradicts` | ❌ (but `is_counter_triple`/`sibling_triple_id` scaffolding exists) | add join table `kg.predicate_contradictions(predicate_id, contradicts_id)` — many-to-many, symmetric |
+| `specializes` (array, per audit B1) | ❌ | join table `kg.predicate_specializations(predicate_id, specializes_id)` — a DAG needs many-to-many; mirrors the contradictions table (a `text[]` column also works, but the join table keeps both inter-predicate relations uniform) |
+| `contradicts` | ❌ (but `is_counter_triple`/`sibling_triple_id` scaffolding exists) | add join table `kg.predicate_contradictions(predicate_id, contradicts_id)` — many-to-many, symmetric; **seeded with the hierarchy-closed set** (audit B2 rule 7: `P ⊑ Q ∧ Q ⊥ R ⟹ P ⊥ R` expanded at seed time, so the conflict join never walks `specializes` at query time) |
 | `polarity` | ❌ | **dedicated column** `polarity text` — it's a hot query/filter axis (reputation, feed) |
 | `objectKind` | ❌ | **dedicated column** `object_kind text` — drives validation + render, queried often |
+| `literalType` (audit A3) | ❌ | `metadata->>'literalType'` JSONB — rendering/validation reads it via the registry, not as a SQL filter |
 | `temporalNature` | ❌ | `metadata->>'temporalNature'` JSONB first; promote to column if it becomes a query filter |
 | `claimType` | ❌ | `metadata->>'claimType'` JSONB (soft-ship; low traffic) |
+| `supersededBy` (audit D1) | ❌ | `superseded_by_predicate_id text` (mirrors `inverse_predicate_id`; nullable, rare) |
 | `marketPattern` | ⚠️ only `is_market boolean` | add `market_pattern text` (3-value); reconcile/retire the boolean |
 | — | `is_hierarchical` exists | our spec **cut** this (derivable). Either derive it at seed (`is_transitive AND inverse_predicate_id IS NOT NULL`) or drop the column |
 | — | `is_social` exists | backend-only flag; map from our `category` at seed time or leave to backend |
@@ -161,6 +163,15 @@ This makes the package the single source of truth and the backend a projection o
 ## 5. Closing gap 3 — query optimization & performance (the payoff)
 
 ### 5.1 Reverse-edge synthesis (`isSymmetric`, `inverse`)
+
+> **Prerequisite (audit A1 — blocking):** synthesis handles the *read* side only. On the *write/mint*
+> side, `⟨A, partnerOf, B⟩` and `⟨B, partnerOf, A⟩` hash to two triple IDs → **two vaults**, splitting
+> stake on one fact; likewise inverse pairs (`employedBy`/`employs`). Primary fix is **mint-time
+> canonicalization in the package/builders** (decision record §5.2): canonical subject/object ordering
+> for symmetric predicates, canonical direction for inverse pairs. The backend's job is the **backstop**:
+> detect symmetric/inverse duplicates already minted (or arriving via raw protocol calls) and link them —
+> same `sibling_triple_id` pattern as counter-triples, plus an explicit policy for presenting their
+> aggregate stake. Without both halves, synthesis *encourages* liquidity fragmentation.
 
 Two strategies; choose per access pattern:
 
@@ -255,6 +266,14 @@ becomes common; the table is tiny (hundreds of rows), so a seq-scan there is usu
 - **Write amplification** from materialized synthesis/closure — mitigate by defaulting to query-time and
   materializing only measured-hot predicates; always tag `inferred = true` and exclude from aggregates that
   count the origin.
+- **Inferred-edge confidence decay (audit C3).** `kg.triples.confidence` exists for exactly this; the
+  policy must be explicit: an inferred edge's confidence is a **non-increasing function of its derivation
+  chain** — `min` of the constituent confidences (the conservative standard from the probabilistic-KG
+  line: PSL, Knowledge Vault) — never a copy of one constituent, never `1.0`. And inferred edges must not
+  feed further inference rounds across different rules without a depth bound, or materialization loops.
+  Skipping this paragraph is how "everything is 100% confident" graphs happen.
+- **Duplicate symmetric/inverse triples** (audit A1) — see §5.1 prerequisite; mint-time canonicalization
+  in the package is primary, backend detect-and-link is the backstop.
 - **Double-counting in reputation** — the single biggest correctness trap. Synthesized reverse edges and
   rolled-up sub-property edges must not be summed alongside their origins. Make "exclude inferred" the
   default in scoring aggregates.

@@ -72,12 +72,14 @@ interface PredicateRole {
   id: string; slug: string;
   objectKind: 'entity' | 'claim' | 'literal';   // how to handle the object during gather
   isMetadataLiteral: boolean;                    // objectKind === 'literal' → collect value
-  isEquivalence: boolean;                        // sameAs/equivalentTo → symmetric+transitive identity
+  literalType?: 'url'|'image'|'date'|'number'|'text';  // audit A3 — how to resolve/render the value
+  isEquivalence: boolean;                        // EXPLICIT allow-list (sameAs) — see note below
   isIdentityKey: boolean;                        // isInverseFunctional → shared object ⇒ same subject
   isSymmetric: boolean;
   isTransitive: boolean;
   inverseId?: string;                            // reverse-direction predicate
-  specializesId?: string;                        // parent predicate (roll-up)
+  isCanonicalDirection: boolean;                 // audit A1 — inverse pairs normalize to one direction
+  specializesIds: string[];                      // parent predicates (roll-up) — array/DAG per audit B1
   polarity?: 'positive'|'negative'|'neutral';
   temporalNature?: 'permanent'|'state'|'event';
 }
@@ -93,6 +95,15 @@ Fast lookup structures the query builder consults:
 
 This registry is the "parsed predicate" layer. Everything downstream (gather, equivalence, rewrite) is a
 function of it — so adding a predicate or changing a field is a data change, not a code change.
+
+> **Guardrail (audit C2): `isEquivalence` is an explicit allow-list, never inferred from algebra.**
+> `isSymmetric + isTransitive` mathematically characterizes an equivalence-like relation, and it's
+> tempting to let any such predicate trigger identity behavior. Don't: identity merge is the
+> highest-blast-radius inference in the system (no-UNA "smushing" — one bad edge merges two entities'
+> metadata, stake context, and reputation), and inferring the behavior from two booleans means a future
+> author can create it *by accident*. Equivalence-class membership is opt-in by predicate key — today
+> **`sameAs` only** (`equivalentTo` was cut from the spec). The symmetric+transitive combination on any
+> other predicate is a build-time lint (decision record §5.1 rule 9).
 
 > **Atom parsing note:** the atom parse/enrich workers (`kg-parse-worker`, `kg-enrichment-worker`) that
 > populate `data_resolved` should *also* be able to **emit edges from JSON-LD properties** (`url`, `sameAs`,
@@ -152,8 +163,8 @@ CREATE INDEX ix_nodes_search_text ON kg.nodes USING gin (to_tsvector('simple', s
 
 ## 5. Identity / co-reference resolution engine (Q4/Q5)
 
-The equivalence class of a node is the connected component under **equivalence predicates** (`sameAs`,
-`equivalentTo` — symmetric + transitive) plus **identity keys** (any predicate flagged
+The equivalence class of a node is the connected component under **equivalence predicates** (the explicit
+allow-list from §3 — today `sameAs` only) plus **identity keys** (any predicate flagged
 `isInverseFunctional`: two subjects with the same object are the same entity).
 
 > In the Spotify+Apple example the two URLs *differ*, so the IFP-on-url rule does **not** auto-merge them —

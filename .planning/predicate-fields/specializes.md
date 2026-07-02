@@ -1,7 +1,16 @@
 # `specializes`
 
-**Type:** `PredicateKey` (this predicate is a sub-property of the referenced one)
+**Type:** `readonly PredicateKey[]` (this predicate is a sub-property of each referenced one)
 **Confidence: 80 / 100 — Ship.**
+
+> **Type widened by the audit (`predicate-spec-audit.md` B1):** originally a single `PredicateKey`.
+> Property hierarchies are **DAGs, not trees** — RDFS `subPropertyOf`, WordNet hypernymy, and schema.org
+> all permit multiple broader terms, and real cases hit it immediately (`founder` specializes
+> `affiliatedWith` *and* a creation relation; `authoredBy` sits under both `contributedTo` and
+> provenance). Widening later is a migration; widening now is free, and it matches `contradicts`' shape.
+> Curation guidance — usually one parent, never more than two — becomes a lint warning, not a type
+> constraint. The gate also enforces acyclicity (rule 5) and closes `contradicts` down the hierarchy
+> (rule 7).
 
 > Verdict: the cheapest high-leverage inference in the whole stack — roll-up. A specific edge entails the
 > general one, so broad queries and reputation catch every specific sub-relation for free. Descends from

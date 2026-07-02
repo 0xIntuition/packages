@@ -51,13 +51,27 @@ The indexer synthesizes the reverse direction instead of forcing users to mint t
 **Consumer:** indexer (query expansion) + reputation. **Verdict: ship.**
 
 ### P3 — Surfacing contradiction (the Intuition-native problem)
-> *Alice asserts "trust Bob." Carol asserts "distrust Bob." The app surfaces the tension and opens a
-> market on it. The system rejects "A better than B" alongside "B better than A" as incoherent.*
+> *The triples `⟨DAO-X, trust, Bob⟩` and `⟨DAO-X, distrust, Bob⟩` — **same subject, same object**,
+> disjoint predicates — both exist with stake. The system recognizes a priced contradiction, routes both
+> sides into a single conflict market, and badges the pair as contested.*
 
 This is the problem classical fact-graphs never had and the one most worth being cutting-edge on. A
 belief/trust graph is *valuable precisely because it can represent and price disagreement.*
-**Needs:** `contradicts` (trust ⊥ distrust). (`isAsymmetric` would also serve here but was deferred —
-its unique value is write-time validation, which has no consumer yet.)
+
+**Precision (audit A2):** `contradicts` is strictly **pair-level disjointness** (OWL
+`propertyDisjointWith`): `⟨s, P, o⟩` and `⟨s, Q, o⟩` cannot both hold for the *same* subject/object pair.
+It is **not** the mechanism for attester-level disagreement — "Alice asserts trust Bob, Carol asserts
+distrust Bob" has *different subjects* and is not a logical contradiction; it's the graph working as
+intended. That aggregate ("how contested is Bob?") is served by **`polarity`** (signed sum over edges
+into Bob) plus the existing counter-triple mechanism. The two layers need different queries, and the
+backend's conflict-detection join (integration doc §5.4) is built on the pair-level definition.
+
+**Known gap (audit D3):** converse-pair incoherence — `⟨A, betterThan, B⟩` alongside `⟨B, betterThan, A⟩`
+— is *not* expressible by `contradicts` (same pair, different predicate ≠ reversed pair, same predicate).
+That is asymmetry violation, and it has **no shipped mechanism** while `isAsymmetric` is deferred. We
+accept the gap knowingly; comparative-predicate coherence is what graduates `isAsymmetric`.
+
+**Needs:** `contradicts` (trust ⊥ distrust).
 **Consumer:** reputation/markets (emerging) + frontend (conflict badges). **Verdict: ship `contradicts`.**
 
 ### P4 — Automatic frontend rendering from the predicate alone (the biggest near-term win)
@@ -69,7 +83,9 @@ its unique value is write-time validation, which has no consumer yet.)
 
 This is the field set with the most immediate, concrete payoff, and it's the one the user explicitly
 called out. The predicate spec becomes a **rendering contract**, eliminating a giant `switch` in the app.
-**Needs:** `objectKind` (entity | claim | literal), `polarity` (color/sentiment), `temporalNature` (freshness badge), plus existing display fields.
+**Needs:** `objectKind` (entity | claim | literal), `literalType` (audit A3 — image vs link vs date;
+without it the literal branch still switches on predicate key), `polarity` (color/sentiment),
+`temporalNature` (freshness badge), plus existing display fields.
 **Consumer:** frontend, today. **Verdict: ship — highest confidence in the whole set.**
 
 ### P5 — Data freshness and lifecycle
@@ -99,7 +115,9 @@ This is served *for free* by the fields above as long as we serialize them in th
 | `contradicts` | P3 belief markets | **Ship** (needs curation) |
 | `isAsymmetric` | P3 validation; tells indexer "don't mirror" | **Defer** — see note below; demoted in per-field review |
 | `objectKind` | P4 render literal/claim/entity differently | **Ship** (highest-value) |
+| `literalType` *(audit A3)* | P4 — a literal alone doesn't say image vs link vs date; typed literals complete the rendering contract | **Ship** (~85) |
 | `temporalNature` | P4 freshness badge, P5 lifecycle | **Ship** |
+| `supersededBy` *(audit D1)* | deprecation forwarding — pickers redirect, old edges render "superseded" (Wikidata "replaced by") | **Soft-ship** (~70) |
 | `marketPattern` | existing economic layer | **Keep** |
 | `claimType` (factual/evaluative) | market-design + "opinion vs fact" badge | **Ship, simplified** — drop the `normative` value until a consumer needs it |
 | `isHierarchical` | — derivable from `transitive + asymmetric + inverse` | **Cut** (redundant) |
@@ -114,6 +132,10 @@ This is served *for free* by the fields above as long as we serialize them in th
 `isTransitive`), cut `equivalentTo`/`verifiability`/`isHierarchical`, defer the functional family,
 reflexivity, **and `isAsymmetric`**, and simplify `claimType`. That is roughly a 45% reduction in surface
 area — and every survivor names a consumer that exists or is emerging.
+
+**Audit pass (2026-07-01, `predicate-spec-audit.md`) added:** `literalType` (ship, ~85 — completes the
+rendering contract for literals), `supersededBy` (soft-ship, ~70 — deprecation forwarding), widened
+`specializes` to an array (DAG, not tree), and left every cut/deferral standing. Zero removals.
 
 > **`isAsymmetric` was demoted to Defer** during the per-field review (`predicate-fields/is-asymmetric.md`,
 > score 54). Its only unique value is write-time validation, which has no consumer yet; its "don't mirror
@@ -156,12 +178,14 @@ export interface PredicateSpec {
   description: string;
   category: PredicateCategory;
   status: PredicateStatus;
+  supersededBy?: PredicateKey;  // audit D1 — required-when status==='deprecated' has a successor
 
   // economic (Intuition-native)
   marketPattern: MarketPattern;
 
   // rendering contract (frontend reads these directly)
   objectKind?: 'entity' | 'claim' | 'literal';
+  literalType?: 'url' | 'image' | 'date' | 'number' | 'text';  // audit A3 — only when objectKind==='literal'
   polarity?: 'positive' | 'negative' | 'neutral';
   temporalNature?: 'permanent' | 'state' | 'event';
   claimType?: 'factual' | 'evaluative';
@@ -173,7 +197,7 @@ export interface PredicateSpec {
 
   // inter-predicate (typed key references — validated in definePredicateRecord)
   inverse?: PredicateKey;
-  specializes?: PredicateKey;
+  specializes?: readonly PredicateKey[];  // audit B1 — array: property hierarchies are DAGs, not trees
   contradicts?: readonly PredicateKey[];
 
   // display
@@ -183,9 +207,67 @@ export interface PredicateSpec {
 }
 ```
 
-`definePredicateRecord` stays the consistency gate: derive implications (`isSymmetric ⟹ inverse = self`;
-a symmetric predicate cannot also declare a different `inverse`), verify inverse pairs mirror each other's
-algebraic properties, and verify `contradicts` is declared symmetrically on both sides.
+### 5.1 The complete validation/derivation rule set (audit B2)
+
+`definePredicateRecord` stays the single consistency gate. The DL literature gives the **complete** rule
+set for our fields — enforce all of it, not just the obvious three:
+
+| # | Rule | Kind |
+|---|---|---|
+| 1 | `isSymmetric` ⟹ no distinct `inverse` (inverse = self) | error |
+| 2 | Inverse mirroring: `P.inverse = Q ⟺ Q.inverse = P` | error |
+| 3 | `contradicts` symmetric: `B ∈ A.contradicts ⟺ A ∈ B.contradicts` | error |
+| 4 | `contradicts` irreflexive: `P ∉ P.contradicts` | error |
+| 5 | `specializes` acyclic (no `P ⊑ … ⊑ P`) | error |
+| 6 | P may not contradict its own `specializes` ancestor/descendant (`P ⊑ Q` ∧ `P ⊥ Q` ⟹ P unsatisfiable) | error |
+| 7 | **Derive contradiction closure** down the hierarchy: `P ⊑ Q` ∧ `Q ⊥ R` ⟹ `P ⊥ R`, expanded at build time (else `vouchFor ⊑ trust`, `trust ⊥ distrust` leaves a `vouchFor`/`distrust` conflict undetected) | derivation |
+| 8 | Inverse pairs mirror algebra: `isTransitive` equal (theorem), `temporalNature`/`claimType` equal; `polarity` equal | error / polarity=lint |
+| 9 | `isSymmetric && isTransitive` ⟹ equivalence-relation behavior — allowed only for the explicit identity allow-list (`sameAs`); warn otherwise | lint |
+| 10 | `polarity` present (sentiment predicate) ∧ `isTransitive` ⟹ error — sentiment is never transitive (Guha 2004; see `is-transitive.md`) | error |
+| 11 | `isTransitive` is **not** inherited via `specializes` — documented invariant so the indexer never expands closure over sub-properties | doc guard |
+| 12 | `literalType` present ⟹ `objectKind === 'literal'` | error |
+| 13 | `objectKind === 'claim'` ∧ `inverse` present ⟹ warn (the inverse's subject would be a claim — near-always a modeling smell) | lint |
+| 14 | `supersededBy` points at a non-deprecated spec; only valid when `status === 'deprecated'` | error |
+
+Rules 6, 7, and 11 are the silent-bug ones — contradiction × hierarchy interaction is invisible until a
+conflict query misses, and "transitive-ish inheritance" is the most natural indexer bug to write.
+
+### 5.2 Mint-time canonicalization for symmetric & inverse predicates (audit A1 — blocking)
+
+OWL assumes reverse-edge synthesis is a free inference. **Intuition triples have deterministic IDs and
+their own vaults** — so `⟨Acme, partnerOf, BigCo⟩` and `⟨BigCo, partnerOf, Acme⟩` are the *same fact*
+hashing to **two triple IDs → two markets**, splitting stake. Same for inverse pairs
+(`⟨Alice, employedBy, Acme⟩` vs `⟨Acme, employs, Alice⟩`). Wikidata's operational lesson is exactly this:
+inverse pairs demanded permanent bot-sync, and the community's answer was canonical directions. We fix it
+at mint, not with bots:
+
+1. **Symmetric predicates:** builders (`primitives`) canonically order subject/object (by atom ID) before
+   computing the triple ID — both user intents resolve to one triple, one market.
+2. **Inverse pairs:** `definePredicateRecord` derives a **canonical direction** per pair (deterministic
+   rule, e.g. lexicographically smaller key is canonical); builders normalize an assertion in the
+   non-canonical direction to the canonical triple. The non-canonical predicate remains fully usable in
+   UI/queries — it's a *view*, not a second fact.
+3. **Indexer backstop:** duplicates minted before the rule (or via raw protocol calls) are detected and
+   linked (the `sibling_triple_id` pattern, as for counter-triples), with an explicit aggregate-stake
+   presentation policy.
+
+Without this, edge synthesis *encourages* liquidity fragmentation — it's the one place the proposal was
+economically unsound, and it's why canonicalization ships with the fields, not after them.
+
+### 5.3 Normative serialization mapping (audit B3 — makes P6 real)
+
+Interoperability is only "for free" if the field↔IRI mapping is pinned and implemented exactly:
+
+| Spec field | Serialized as | Standard |
+|---|---|---|
+| `isSymmetric: true` | `rdf:type owl:SymmetricProperty` | OWL 2 |
+| `isTransitive: true` | `rdf:type owl:TransitiveProperty` | OWL 2 |
+| `inverse` | `owl:inverseOf` | OWL 2 |
+| `specializes` | `rdfs:subPropertyOf` (one entry per parent) | RDFS |
+| `contradicts` | `owl:propertyDisjointWith` | OWL 2 |
+| `supersededBy` | `schema:supersededBy` | schema.org |
+| `literalType` | XSD datatype on the range (`xsd:anyURI`, `xsd:date`, `xsd:decimal`, …) | RDF/XSD |
+| `objectKind` / `polarity` / `temporalNature` / `claimType` / `marketPattern` | Intuition-namespaced `PropertyValue` entries — our pragmatic extensions, no standard equivalent (that's fine) | — |
 
 ---
 
@@ -226,6 +308,13 @@ more than that.*
   the expensive end of the frontier and we can add them the day a reasoner exists.
 - **Not** nesting — the data's destination and the entire standards tradition are flat.
 - **Not** asserting global, timeless truth so hard we can't add Cyc-style context-scoping later.
+- **Not (yet) putting the metadata in the graph itself — but never designing that out.** Wikidata models
+  property metadata as ordinary statements *on the property entities*, which is why its community can
+  extend and contest property semantics without a software release. Our metadata lives in the TS package +
+  IPFS docs for now (deterministic, reviewable, ships with code) — but the end-state for a permissionless
+  graph is **self-description**: `⟨trust, contradicts, distrust⟩` as an actual, stakeable triple. The
+  design is compatible (predicates are atoms; the meta-relations are just more predicates); "the community
+  disagrees with our curation" eventually gets an on-protocol answer, not a GitHub issue. (Audit D2.)
 
 Restraint here is the design. The graph that ships the *minimal sufficient* property set — and computes all
 of it — beats the graph that declares axioms it can never run.

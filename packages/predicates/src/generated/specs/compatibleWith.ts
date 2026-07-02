@@ -10,4 +10,7 @@ export const compatibleWith = {
 	category: 'Domain-Specific',
 	status: 'proposed',
 	isSymmetric: true,
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

@@ -9,4 +9,7 @@ export const featuredIn = {
 	category: 'Curation/Containment',
 	status: 'proposed',
 	isHierarchical: true,
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

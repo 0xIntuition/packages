@@ -20,11 +20,19 @@ declares those disjoint pairs so the system can *detect* conflict instead of sil
 
 ## Examples across the value axes
 
-1. **[ECON] Disagreement markets — the differentiator.** Alice stakes `trust Bob`; Carol stakes
-   `distrust Bob`. Because the predicates are declared `contradicts`, the system recognizes a *priced
-   disagreement* and can route both into a single conflict market rather than two unrelated claims. No
-   classical fact-graph (DBpedia, Wikidata, Google KG) was built to model this; it is the cutting-edge
-   capability the whole effort is aiming at.
+1. **[ECON] Disagreement markets — the differentiator.** The triples `⟨DAO-X, trust, Bob⟩` and
+   `⟨DAO-X, distrust, Bob⟩` — **same subject, same object** — both accrue stake. Because the predicates
+   are declared `contradicts`, the system recognizes a *priced contradiction* and routes both into a
+   single conflict market rather than two unrelated claims. No classical fact-graph (DBpedia, Wikidata,
+   Google KG) was built to model this; it is the cutting-edge capability the whole effort is aiming at.
+
+   > **Precision (audit A2): pair-level only.** "Alice asserts trust Bob, Carol asserts distrust Bob"
+   > is **not** a contradiction — the subjects differ; that's ordinary disagreement, and the aggregate
+   > ("how contested is Bob?") is served by `polarity` (signed sum over edges into Bob) plus
+   > counter-triples. `contradicts` fires only on the same ⟨subject, object⟩ pair with disjoint
+   > predicates, exactly as OWL `propertyDisjointWith` defines it — and that's what the backend's
+   > conflict-detection join keys on. Conflating the two layers produces a conflict query that matches
+   > everything or nothing.
 
 2. **[RENDER] Conflict surfacing in the UI.** An entity page can render a "Contested" badge and show the
    opposing camps side by side when contradictory predicates both have stake. The frontend finds the
@@ -56,6 +64,15 @@ to per-pair hardcoding in each consumer.
 Moderate — it needs **human curation** (which pairs truly oppose) and must be declared symmetrically, which
 the derivation layer enforces (`A.contradicts ∋ B ⟺ B.contradicts ∋ A`). Forward-chainable / cheap to
 check. The curation set is small (sentiment pairs).
+
+Two additional gate rules from the audit (decision record §5.1): a predicate may not contradict its own
+`specializes` ancestor/descendant (`P ⊑ Q` ∧ `P ⊥ Q` makes P unsatisfiable), and the contradiction set is
+**closed down the hierarchy at build time** (`vouchFor ⊑ trust` ∧ `trust ⊥ distrust` ⟹ `vouchFor ⊥
+distrust`) — otherwise conflict detection silently misses every sub-predicate pair.
+
+**What it cannot express (audit D3):** converse-pair incoherence — `⟨A, betterThan, B⟩` alongside
+`⟨B, betterThan, A⟩` is a *reversed pair with the same predicate*, i.e. asymmetry violation, not
+disjointness. That has no shipped mechanism while `isAsymmetric` is deferred; we accept the gap knowingly.
 
 ## Pruning check
 

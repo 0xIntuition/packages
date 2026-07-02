@@ -11,4 +11,8 @@ export const reference = {
 	category: 'Provenance/Evidence',
 	status: 'proposed',
 	inversePredicate: 'cited by',
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
+	inverse: 'citedBy',
 } as const satisfies PredicateSpec;

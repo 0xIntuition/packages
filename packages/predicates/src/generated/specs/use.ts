@@ -10,4 +10,7 @@ export const use = {
 	thirdPerson: 'uses',
 	category: 'Domain-Specific',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

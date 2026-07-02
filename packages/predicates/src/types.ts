@@ -3,6 +3,29 @@ export type PredicateStorageStrategy = 'inline' | 'ipfs';
 export type PredicateForm = 'base' | 'thirdPerson' | 'pastParticiple' | 'displayName';
 export type TextDirection = 'ltr' | 'rtl';
 
+/**
+ * Machine-readable relationship semantics added per `.planning/predicate-spec-decisions.md`.
+ * All optional and additive — a predicate omitting them behaves exactly as before.
+ */
+
+/** What the object of an edge is, so a consumer can render/traverse it without per-predicate code. */
+export type PredicateObjectKind = 'entity' | 'claim' | 'literal';
+/** Refines `objectKind: 'literal'` into a concrete datatype (RDF/XSD-aligned). Only meaningful when objectKind === 'literal'. */
+export type PredicateLiteralType = 'url' | 'image' | 'date' | 'number' | 'text';
+/** Sign of the edge from subject toward object; signed aggregation accrues to the object. */
+export type PredicatePolarity = 'positive' | 'negative' | 'neutral';
+/** Freshness/lifecycle model — which edges silently decay, which are write-once. */
+export type PredicateTemporalNature = 'permanent' | 'state' | 'event';
+/** Fact vs. opinion, for market design and UI semantics. */
+export type PredicateClaimType = 'factual' | 'evaluative';
+/**
+ * A reference to another predicate by its `key`. Existence and cross-referential consistency
+ * (inverse mirroring, contradicts symmetry, specializes acyclicity) are validated over the full
+ * set in `validate.ts`; the raw type is `string` to avoid a circular dependency on the derived
+ * `PredicateKey` union (which is computed from the spec array).
+ */
+export type PredicateKeyRef = string;
+
 export type PredicateCategory =
 	| 'Identity/Classification'
 	| 'Social/Reputation'
@@ -31,6 +54,16 @@ export interface PredicateDefinition {
 	isSymmetric: boolean;
 	isHierarchical: boolean;
 	inversePredicate?: string;
+	// machine-readable semantics (see PredicateSpec)
+	objectKind?: PredicateObjectKind;
+	literalType?: PredicateLiteralType;
+	polarity?: PredicatePolarity;
+	temporalNature?: PredicateTemporalNature;
+	claimType?: PredicateClaimType;
+	inverse?: PredicateKeyRef;
+	specializes?: readonly PredicateKeyRef[];
+	contradicts?: readonly PredicateKeyRef[];
+	supersededBy?: PredicateKeyRef;
 }
 
 export type PredicateStatus = 'enshrined' | 'proposed' | 'deprecated';
@@ -45,10 +78,32 @@ export interface PredicateSpec {
 	category: PredicateCategory;
 	status: PredicateStatus;
 	examples?: readonly string[];
+
+	// algebraic (OWL-aligned, flat, is* convention)
 	isTransitive?: boolean;
 	isSymmetric?: boolean;
+	/** @deprecated Legacy display-name of the inverse. Prefer the typed-key `inverse`; kept for back-compat. */
 	isHierarchical?: boolean;
+	/** @deprecated Display-name of the inverse predicate. Prefer the typed-key `inverse`; kept for back-compat. */
 	inversePredicate?: string;
+
+	// rendering contract (frontend reads these directly)
+	objectKind?: PredicateObjectKind;
+	/** Only meaningful when `objectKind === 'literal'` (validated). */
+	literalType?: PredicateLiteralType;
+	polarity?: PredicatePolarity;
+	temporalNature?: PredicateTemporalNature;
+	claimType?: PredicateClaimType;
+
+	// inter-predicate (typed key references — validated over the full set in validate.ts)
+	/** The reverse-direction predicate's `key` (different predicate). Omit for symmetric predicates (inverse = self). */
+	inverse?: PredicateKeyRef;
+	/** Parent predicate `key`(s) this one is a sub-property of. A DAG: usually one, occasionally two. */
+	specializes?: readonly PredicateKeyRef[];
+	/** Predicate `key`(s) that are pair-level disjoint with this one (declared symmetrically). */
+	contradicts?: readonly PredicateKeyRef[];
+	/** Successor predicate `key`; only valid when `status === 'deprecated'`. */
+	supersededBy?: PredicateKeyRef;
 }
 
 export type PredicateRecord<TSpec extends PredicateSpec = PredicateSpec> = PredicateDefinition & {
@@ -99,6 +154,15 @@ export interface PredicateIpfsOptions {
 	isSymmetric?: boolean;
 	isHierarchical?: boolean;
 	inversePredicate?: string;
+	objectKind?: PredicateObjectKind;
+	literalType?: PredicateLiteralType;
+	polarity?: PredicatePolarity;
+	temporalNature?: PredicateTemporalNature;
+	claimType?: PredicateClaimType;
+	inverse?: PredicateKeyRef;
+	specializes?: readonly PredicateKeyRef[];
+	contradicts?: readonly PredicateKeyRef[];
+	supersededBy?: PredicateKeyRef;
 }
 
 export type PredicateIpfsPropertyName =
@@ -108,7 +172,16 @@ export type PredicateIpfsPropertyName =
 	| 'isTransitive'
 	| 'isSymmetric'
 	| 'isHierarchical'
-	| 'inversePredicate';
+	| 'inversePredicate'
+	| 'objectKind'
+	| 'literalType'
+	| 'polarity'
+	| 'temporalNature'
+	| 'claimType'
+	| 'inverse'
+	| 'specializes'
+	| 'contradicts'
+	| 'supersededBy';
 
 export interface PredicateIpfsDocument extends PredicateAtomDocument {
 	inDefinedTermSet: string;

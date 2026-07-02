@@ -9,4 +9,7 @@ export const brand = {
 	category: 'Identity/Classification',
 	status: 'proposed',
 	examples: ['(iPhone, brand, Apple)', '(AWS, brand, Amazon Web Services)'],
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

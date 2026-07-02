@@ -9,4 +9,7 @@ export const listedOn = {
 	conjugates: false,
 	category: 'Economic/Market',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

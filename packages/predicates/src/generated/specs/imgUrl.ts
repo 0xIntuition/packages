@@ -9,4 +9,8 @@ export const imgUrl = {
 	conjugates: false,
 	category: 'Metadata/Linking',
 	status: 'enshrined',
+	objectKind: 'literal',
+	literalType: 'image',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

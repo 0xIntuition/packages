@@ -10,4 +10,7 @@ export const follow = {
 	thirdPerson: 'follows',
 	category: 'Social/Reputation',
 	status: 'enshrined',
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

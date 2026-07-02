@@ -8,4 +8,8 @@ export const primaryImageOfPage = {
 	conjugates: false,
 	category: 'Metadata/Linking',
 	status: 'proposed',
+	objectKind: 'literal',
+	literalType: 'image',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

@@ -10,4 +10,9 @@ export const vouchFor = {
 	thirdPerson: 'vouches for',
 	category: 'Social/Reputation',
 	status: 'enshrined',
+	objectKind: 'entity',
+	polarity: 'positive',
+	temporalNature: 'state',
+	claimType: 'evaluative',
+	specializes: ['support'],
 } as const satisfies PredicateSpec;

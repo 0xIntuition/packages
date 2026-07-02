@@ -37,6 +37,19 @@ re-hardcoding "trust is good, distrust is bad":
    research (Leskovec, Huttenlocher & Kleinberg, 2010) shows these signs are predictable and meaningful —
    we're encoding a quantity with 75 years of theory behind it (Heider 1946).
 
+## Direction of aggregation — the precise definition (audit D4)
+
+One sentence prevents a class of reputation bugs: **polarity is the sign of the edge from subject toward
+object; signed aggregation accrues to the *object*** (the Heider/Leskovec signed-network convention). So
+`reported` is negative *about the thing reported*, not about the reporter. Two corollaries the gate and
+indexer enforce:
+
+- **Inverse pairs share polarity** (gate rule 8, lint): `trust`/`trustedBy` are both positive. But for the
+  inverse direction the aggregation target flips to the triple's *subject* — the indexer handles this by
+  normalizing through the canonical direction (decision record §5.2) before aggregating, so every signed
+  edge is summed exactly once, onto the right node.
+- Never mark a sentiment predicate transitive (gate rule 10; see `is-transitive.md`).
+
 ## Why `neutral` is kept (and absent is different)
 
 `neutralOn` is a *deliberate* zero — "I have considered this and have no lean," which is information.

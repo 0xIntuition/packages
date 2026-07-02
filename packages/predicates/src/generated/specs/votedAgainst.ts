@@ -8,4 +8,9 @@ export const votedAgainst = {
 	conjugates: false,
 	category: 'Governance/Policy',
 	status: 'proposed',
+	objectKind: 'entity',
+	polarity: 'negative',
+	temporalNature: 'event',
+	claimType: 'factual',
+	contradicts: ['votedFor'],
 } as const satisfies PredicateSpec;

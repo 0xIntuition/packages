@@ -39,6 +39,17 @@ separately:
    'subOrganization'` *and* `subOrganization.inverse === 'parentOrganization'`, and that the pair mirror
    each other's algebraic properties (both transitive, etc.). A one-sided inverse fails the build.
 
+## Canonical direction (audit A1 — ships with the field)
+
+Under content-addressed IDs, an inverse pair is a duplicate-fact hazard: `⟨Alice, employedBy, Acme⟩` and
+`⟨Acme, employs, Alice⟩` are one fact, two mintable triples, **two vaults** — split stake. Wikidata hit the
+analogous problem and needed permanent bot-sync for inverse pairs; their considered fix was canonical
+directions. Ours (decision record §5.2): `definePredicateRecord` derives a **canonical direction** per
+pair (deterministic rule, e.g. lexicographically smaller key); builders normalize assertions in the
+non-canonical direction to the canonical triple. The non-canonical predicate stays fully usable in UI and
+queries — it's a *view* over the canonical edge, not a second fact. The indexer links stray duplicates as
+a backstop.
+
 ## Why typed key, not string
 
 Today the codebase has `inversePredicate: 'sub organization'` — a *display name*. Display names get

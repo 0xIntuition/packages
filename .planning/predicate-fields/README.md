@@ -45,10 +45,12 @@ Every example in these docs is tagged with which axis it serves:
 | `polarity` | [polarity.md](polarity.md) | **88** | Ship |
 | `isSymmetric` | [is-symmetric.md](is-symmetric.md) | **85** | Ship |
 | `temporalNature` | [temporal-nature.md](temporal-nature.md) | **85** | Ship |
+| `literalType` *(audit)* | [literal-type.md](literal-type.md) | **85** | Ship |
 | `marketPattern` | [market-pattern.md](market-pattern.md) | **84** | Ship (grandfathered) |
 | `contradicts` | [contradicts.md](contradicts.md) | **82** | Ship |
 | `isTransitive` | [is-transitive.md](is-transitive.md) | **80** | Ship |
-| `specializes` | [specializes.md](specializes.md) | **80** | Ship |
+| `specializes` (array) | [specializes.md](specializes.md) | **80** | Ship |
+| `supersededBy` *(audit)* | [superseded-by.md](superseded-by.md) | **70** | Soft-ship |
 | `claimType` | [claim-type.md](claim-type.md) | **64** | Soft-ship |
 | `isAsymmetric` | [is-asymmetric.md](is-asymmetric.md) | **54** | **Defer** (demoted) |
 | `isInverseFunctional` | [deferred-and-cut.md](deferred-and-cut.md) | 50 | Defer |
@@ -67,6 +69,15 @@ Every example in these docs is tagged with which axis it serves:
 - **`claimType` lands at Soft-ship (64),** not full ship — define it, populate where obvious, but no
   consumer branches on it yet.
 
-**Final ship list (9 new/active semantic fields):** `objectKind`, `inverse`, `polarity`,
+### What the audit pass added (`../predicate-spec-audit.md`, 2026-07-01)
+
+- **`literalType` (85, Ship)** — typed literals complete the rendering contract; `objectKind: 'literal'`
+  alone can't distinguish image/link/date/number/text.
+- **`supersededBy` (70, Soft-ship)** — deprecation forwarding (Wikidata "replaced by").
+- **`specializes` widened to `readonly PredicateKey[]`** — hierarchies are DAGs, not trees. Score unchanged.
+- Blocking process findings (mint-time canonicalization for symmetric/inverse; pair-level `contradicts`
+  definition) and the complete 14-rule validation set live in the decision record §5.1–5.3.
+
+**Final ship list (10 new/active semantic fields):** `objectKind`, `literalType`, `inverse`, `polarity`,
 `isSymmetric`, `temporalNature`, `contradicts`, `isTransitive`, `specializes` + grandfathered
-`marketPattern`; plus `claimType` as soft-ship.
+`marketPattern`; plus `claimType` and `supersededBy` as soft-ship.

@@ -9,4 +9,7 @@ export const rankedAbove = {
 	conjugates: false,
 	category: 'Curation/Containment',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'evaluative',
 } as const satisfies PredicateSpec;

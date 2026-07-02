@@ -44,6 +44,19 @@ can render it, traverse it, or reason about it. Today that knowledge is implicit
 5. **[DATA] Validation at authoring.** "You attached an entity where this predicate expects a literal"
    is catchable the moment the field is known. `url`'s object should be a URL literal, not an atom.
 
+## Two refinements from the audit
+
+- **`literalType` companion (audit A3).** "Render `imgUrl` as `<img>`, `url` as `<a>`" — that switch is
+  on the predicate key, not on `objectKind`; knowing "it's a literal" doesn't distinguish image / link /
+  date / number / prose. The companion field `literalType: 'url' | 'image' | 'date' | 'number' | 'text'`
+  (see `literal-type.md`, ships at ~85) completes the rendering contract for the literal branch — RDF's
+  typed-literals lesson applied here.
+- **Mixed-kind policy (audit D5).** schema.org's `rangeIncludes` is famously multi-valued, and a few
+  predicates will have objects that are legitimately entity-or-literal (`hasSource`: URL or an entity).
+  The single-value enum is still right — the rendering contract needs one answer — with this tie-break:
+  assign the **dominant** kind; if genuinely mixed, leave the field **absent** (absent = "sniff the atom,"
+  today's behavior) rather than guessing.
+
 ## What breaks without it
 
 Every consumer re-implements object-type detection by sniffing the atom data or hardcoding predicate

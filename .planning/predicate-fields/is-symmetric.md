@@ -33,10 +33,23 @@ the same predicate*. `isSymmetric` declares this so the reverse edge is synthesi
 4. **[DATA] Consistency.** The derivation layer sets `inverse = self` for symmetric predicates and rejects
    a spec that declares both `isSymmetric` and a *different* `inverse` — a contradiction.
 
+## The Intuition-specific requirement: mint-time canonicalization (audit A1 — blocking)
+
+OWL's world has no cost to a duplicate edge. Ours does: every triple has a **deterministic ID and its own
+vault**, so `⟨Acme, partnerOf, BigCo⟩` and `⟨BigCo, partnerOf, Acme⟩` — the *same fact* — hash to two
+triple IDs and **two markets**, splitting stake. The flag alone doesn't prevent this; nothing stops two
+users independently minting both directions.
+
+Therefore `isSymmetric` ships **with** canonicalization (decision record §5.2): builders in `primitives`
+canonically order subject/object (by atom ID) before computing the triple ID, so both user intents resolve
+to one triple and one market. The indexer detects-and-links pre-existing duplicates as a backstop
+(`sibling_triple_id` pattern). Without this, symmetric synthesis *encourages* liquidity fragmentation.
+
 ## What breaks without it
 
-Either users mint two atoms per mutual relationship (friction + storage + drift between the two), or the
-indexer can't safely answer reverse queries because it doesn't know the relation is mutual.
+Either users mint two atoms per mutual relationship (friction + storage + drift between the two — and
+under content-addressed IDs, **split stake across two markets for one fact**), or the indexer can't safely
+answer reverse queries because it doesn't know the relation is mutual.
 
 ## Cost / complexity
 

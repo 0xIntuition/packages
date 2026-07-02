@@ -11,4 +11,8 @@ export const contain = {
 	status: 'enshrined',
 	isHierarchical: true,
 	inversePredicate: 'listed in',
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
+	inverse: 'listedIn',
 } as const satisfies PredicateSpec;

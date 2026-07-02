@@ -9,4 +9,8 @@ export const worseThan = {
 	conjugates: false,
 	category: 'Comparison/Ranking',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'evaluative',
+	contradicts: ['betterThan'],
 } as const satisfies PredicateSpec;

@@ -10,4 +10,8 @@ export const citedBy = {
 	category: 'Provenance/Evidence',
 	status: 'proposed',
 	inversePredicate: 'reference',
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
+	inverse: 'reference',
 } as const satisfies PredicateSpec;

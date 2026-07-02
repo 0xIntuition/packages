@@ -9,4 +9,8 @@ export const partnerOf = {
 	category: 'Affiliation/Membership',
 	status: 'proposed',
 	isSymmetric: true,
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
+	specializes: ['affiliatedWith'],
 } as const satisfies PredicateSpec;

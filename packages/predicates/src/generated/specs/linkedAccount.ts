@@ -8,4 +8,7 @@ export const linkedAccount = {
 	conjugates: false,
 	category: 'Metadata/Linking',
 	status: 'enshrined',
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

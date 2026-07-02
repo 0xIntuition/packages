@@ -9,4 +9,9 @@ export const disagreeWith = {
 	thirdPerson: 'disagrees with',
 	category: 'Sentiment/Opinion',
 	status: 'enshrined',
+	objectKind: 'entity',
+	polarity: 'negative',
+	temporalNature: 'state',
+	claimType: 'evaluative',
+	contradicts: ['agreeWith'],
 } as const satisfies PredicateSpec;

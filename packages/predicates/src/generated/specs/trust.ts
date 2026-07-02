@@ -10,4 +10,9 @@ export const trust = {
 	thirdPerson: 'trusts',
 	category: 'Social/Reputation',
 	status: 'enshrined',
+	objectKind: 'entity',
+	polarity: 'positive',
+	temporalNature: 'state',
+	claimType: 'evaluative',
+	contradicts: ['distrust'],
 } as const satisfies PredicateSpec;

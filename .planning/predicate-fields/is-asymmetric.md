@@ -38,11 +38,21 @@
    same reason (validation-only, no consumer). Shipping `isAsymmetric` while deferring those would be
    incoherent — it sits in the same bucket.
 
+## The gap the deferral leaves open (audit D3)
+
+Be explicit about what we're living without: converse-pair incoherence — `⟨A, betterThan, B⟩` alongside
+`⟨B, betterThan, A⟩` — has **no shipped mechanism**. `contradicts` cannot express it (it's a reversed
+pair with the *same* predicate, not a same-pair with disjoint predicates). The decision record's P3 now
+states this gap rather than implying `contradicts` covers it. Comparative-predicate coherence is the
+concrete scenario that graduates this field.
+
 ## When to promote
 
 Pull it in (likely alongside `isFunctional`/reflexivity) the moment write-time edge validation or a
 consistency-checking pass becomes a real consumer. At that point all the "reject incoherent edges" fields
-graduate together as a coherent validation layer.
+graduate together as a coherent validation layer. Note that the mint-time canonicalization machinery for
+symmetric/inverse predicates (audit A1, decision record §5.2) builds direction-aware handling into the
+builders — once that exists, activating `isAsymmetric` becomes materially cheaper.
 
 ## Confidence breakdown
 

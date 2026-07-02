@@ -9,4 +9,7 @@ export const governedBy = {
 	conjugates: false,
 	category: 'Domain-Specific',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

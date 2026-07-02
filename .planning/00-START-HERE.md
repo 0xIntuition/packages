@@ -11,20 +11,22 @@ research, pruned hard to stay simple.
 
 ## TL;DR — what we're proposing
 
-Add **8 new fields** to `PredicateSpec` (flat, all optional, additive/non-breaking), plus one soft-ship
-(`claimType`), plus the existing `marketPattern`:
+Add **9 new fields** to `PredicateSpec` (flat, all optional, additive/non-breaking), plus two soft-ships
+(`claimType`, `supersededBy`), plus the existing `marketPattern`:
 
 | Field | Type | What it unlocks |
 |---|---|---|
 | `objectKind` | `entity \| claim \| literal` | frontend renders any edge with no per-predicate code; makes reification visible |
+| `literalType` *(audit)* | `url \| image \| date \| number \| text` | completes the rendering contract for literals (RDF typed-literals lesson) |
 | `polarity` | `positive \| negative \| neutral` | one signed reputation score across all predicates; sentiment-colored UI |
-| `inverse` | `PredicateKey` | store one edge, serve both directions (different reverse predicate) |
-| `isSymmetric` | `boolean` | store one edge, serve both directions (same predicate) |
+| `inverse` | `PredicateKey` | store one edge, serve both directions (different reverse predicate) — with a **canonical direction** per pair |
+| `isSymmetric` | `boolean` | store one edge, serve both directions (same predicate) — with **mint-time canonical ordering** |
 | `temporalNature` | `permanent \| state \| event` | freshness model — which edges rot, which are forever |
-| `contradicts` | `PredicateKey[]` | detect & price disagreement (trust ⊥ distrust) — the differentiator |
-| `isTransitive` | `boolean` | closure/reachability queries (containment trees, org charts) |
-| `specializes` | `PredicateKey` | roll-up queries & reputation (employedBy ⊑ affiliatedWith) |
+| `contradicts` | `PredicateKey[]` | detect & price disagreement (trust ⊥ distrust, **same subject/object pair**) — the differentiator |
+| `isTransitive` | `boolean` | closure/reachability queries (containment trees, org charts) — never sentiment |
+| `specializes` | `readonly PredicateKey[]` | roll-up queries & reputation (employedBy ⊑ affiliatedWith); DAG, not tree |
 | `claimType` *(soft-ship)* | `factual \| evaluative` | fact-vs-opinion market & UI semantics |
+| `supersededBy` *(soft-ship, audit)* | `PredicateKey` | deprecation forwarding — pickers redirect, old edges stay legible |
 | `marketPattern` *(exists)* | `depositional \| attributive \| comparative` | per-predicate market mechanics |
 
 **Deliberately deferred or cut** (no consumer yet / redundant): `isAsymmetric`, `isFunctional`,
@@ -42,6 +44,12 @@ reasoning profile and don't encode inference we can't compute at scale.
 1. **`00-START-HERE.md`** (this file) — the summary and reading order.
 2. **`predicate-spec-decisions.md`** — ⭐ *canonical.* The pruned field set, flat-vs-nested decision, the
    final `PredicateSpec`, pros/cons, and what we're explicitly not doing.
+   ✅ Read together with **`predicate-spec-audit.md`** — the adversarial review pass, **all findings now
+   folded into the docs** (2026-07-01). It confirmed the overall shape and drove: mint-time
+   canonicalization for symmetric/inverse triples (§5.2 — the blocking economic fix), the precise
+   pair-level definition of `contradicts` (P3), the `literalType` + `supersededBy` fields, `specializes`
+   widened to an array, the complete 14-rule validation set (§5.1), and the normative OWL/RDF
+   serialization table (§5.3).
 3. **`predicate-fields/`** — one document per field with multiple use cases and a confidence score
    (see `predicate-fields/README.md` for the rubric and the score table). This is where each field earns
    its place; the scoring overturned one earlier decision (`isAsymmetric`).

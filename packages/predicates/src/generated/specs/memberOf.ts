@@ -9,4 +9,8 @@ export const memberOf = {
 	category: 'Affiliation/Membership',
 	status: 'proposed',
 	isHierarchical: true,
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
+	specializes: ['affiliatedWith'],
 } as const satisfies PredicateSpec;

@@ -10,4 +10,7 @@ export const track = {
 	category: 'Curation/Containment',
 	status: 'proposed',
 	isHierarchical: true,
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

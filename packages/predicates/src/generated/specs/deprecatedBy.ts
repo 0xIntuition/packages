@@ -9,4 +9,7 @@ export const deprecatedBy = {
 	conjugates: false,
 	category: 'Temporal/Lifecycle',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

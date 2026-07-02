@@ -43,6 +43,25 @@ decidability), and transitive closure is more expensive than the other RL-core i
 flag, but the *computation* of closure is an indexer/query-time decision (materialize vs. compute on
 demand), and we should bound depth for ranking chains that could be long. This is a known, manageable cost.
 
+## ⚠️ Sentiment is never transitive (audit C1 — enforced as gate rule 10)
+
+The single most tempting authoring mistake is "if Alice trusts Bob and Bob trusts Carol, Alice trusts
+Carol." The canonical result — Guha et al. (2004), *Propagation of Trust and Distrust* — debunks it:
+trust decays sharply with path length, and **distrust does not propagate transitively at all** (one-step
+only; two distrust hops arguably flip sign, per structural balance). Marking a sentiment predicate
+transitive lets the indexer synthesize edges the theory says are false, and closure over a social graph is
+also a combinatorial explosion. So `definePredicateRecord` **errors on `polarity` present ∧
+`isTransitive`**. Transitivity belongs to structural containment (`containedInPlace`, `partOfSeries`,
+`parentOrganization`, `dependOn`) and `sameAs` — never to `trust`, `endorse`, `distrust`, or kin.
+
+Related caution on comparatives: per-attester chains of `betterThan`/`rankedAbove` are transitive, but the
+**community aggregate is not** — pairwise majority preferences famously cycle (Condorcet). Closure over
+comparative predicates should operate within one attester's assertions, not across the aggregate.
+
+Also note (gate rule 11): transitivity is **not inherited** via `specializes` — a sub-property of a
+transitive property is not itself transitive (RDFS/OWL semantics). The indexer must never expand closure
+over the sub-property hierarchy.
+
 ## What breaks without it
 
 Closure/reachability queries become per-predicate special cases or are simply unavailable; tree/breadcrumb

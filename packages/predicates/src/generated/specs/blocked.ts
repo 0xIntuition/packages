@@ -8,4 +8,8 @@ export const blocked = {
 	conjugates: false,
 	category: 'Social/Reputation',
 	status: 'proposed',
+	objectKind: 'entity',
+	polarity: 'negative',
+	temporalNature: 'state',
+	claimType: 'evaluative',
 } as const satisfies PredicateSpec;

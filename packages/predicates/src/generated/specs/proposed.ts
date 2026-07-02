@@ -9,4 +9,7 @@ export const proposed = {
 	conjugates: false,
 	category: 'Governance/Policy',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'event',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

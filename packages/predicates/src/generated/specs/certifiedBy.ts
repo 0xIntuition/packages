@@ -9,4 +9,7 @@ export const certifiedBy = {
 	conjugates: false,
 	category: 'Knowledge/Expertise',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

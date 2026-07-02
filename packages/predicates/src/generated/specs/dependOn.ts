@@ -10,4 +10,7 @@ export const dependOn = {
 	category: 'Curation/Containment',
 	status: 'proposed',
 	isTransitive: true,
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

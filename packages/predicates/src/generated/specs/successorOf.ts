@@ -9,4 +9,8 @@ export const successorOf = {
 	category: 'Comparison/Ranking',
 	status: 'proposed',
 	inversePredicate: 'predecessor of',
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
+	inverse: 'predecessorOf',
 } as const satisfies PredicateSpec;

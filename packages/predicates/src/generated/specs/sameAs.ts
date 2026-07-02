@@ -13,4 +13,7 @@ export const sameAs = {
 	isTransitive: true,
 	isSymmetric: true,
 	inversePredicate: 'same as',
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

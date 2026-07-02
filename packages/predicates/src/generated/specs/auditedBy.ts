@@ -9,4 +9,7 @@ export const auditedBy = {
 	conjugates: false,
 	category: 'Provenance/Evidence',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;
