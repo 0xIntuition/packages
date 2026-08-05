@@ -63,4 +63,11 @@ export const softwareApplication: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'software-application', provider: 'opengraph' },
+	identity: {
+		identifies: 'an end-user application',
+		ladder: [
+			{ kind: 'scheme', scheme: 'url', source: { kind: 'field', key: 'url' } },
+			{ kind: 'gen1', tag: 4, recipe: [{ key: 'name', from: 'field' }] },
+		],
+	},
 };

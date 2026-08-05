@@ -36,6 +36,22 @@ export const socialMediaAccount: ClassificationSpec = {
 			required: false,
 			placeholder: 'https://x.com/karpathy',
 		},
+		{
+			key: 'platformUserId',
+			label: 'Platform User ID',
+			description: 'The immutable platform-assigned user ID (survives handle renames).',
+			fieldType: 'string',
+			required: false,
+			placeholder: '295218901',
+		},
 	],
 	defaults: { pluginId: 'social-media-account' },
+	identity: {
+		identifies: 'an account on a platform (the person behind it is a separate atom)',
+		ladder: [
+			{ kind: 'scheme', scheme: 'acct', source: { kind: 'derivation', name: 'acct-strong' } },
+			// handles rename and get recycled; ranks below the immutable user id
+			{ kind: 'scheme', scheme: 'acct', source: { kind: 'derivation', name: 'acct-weak' } },
+		],
+	},
 };

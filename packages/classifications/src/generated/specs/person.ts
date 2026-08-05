@@ -45,4 +45,21 @@ export const person: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'person', provider: 'wikidata' },
+	identity: {
+		identifies: 'an individual human',
+		ladder: [
+			{ kind: 'scheme', scheme: 'isni', source: { kind: 'same-as' } },
+			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' } },
+			{
+				kind: 'gen1',
+				tag: 4,
+				recipe: [
+					{ key: 'givenName', from: 'field' },
+					{ key: 'familyName', from: 'field' },
+				],
+			},
+			// D25: mononyms
+			{ kind: 'gen1', tag: 5, recipe: [{ key: 'givenName', from: 'field' }] },
+		],
+	},
 };

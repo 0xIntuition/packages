@@ -28,6 +28,14 @@ export const software: ClassificationSpec = {
 			placeholder: 'https://github.com/0xintuition/intuition-data-structure',
 		},
 		{
+			key: 'packageUrl',
+			label: 'Package URL',
+			description: 'The purl package coordinate, version-free.',
+			fieldType: 'string',
+			required: false,
+			placeholder: 'pkg:npm/react',
+		},
+		{
 			key: 'sameAs',
 			schemaProperty: 'sameAs',
 			label: 'Canonical References',
@@ -38,4 +46,13 @@ export const software: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'software', provider: 'github' },
+	identity: {
+		identifies:
+			'the package/project, version-free — purl (open spec) first; repo URLs migrate (F5)',
+		ladder: [
+			{ kind: 'scheme', scheme: 'purl', source: { kind: 'field', key: 'packageUrl' } },
+			{ kind: 'scheme', scheme: 'url', source: { kind: 'field', key: 'codeRepository' } },
+			{ kind: 'gen1', tag: 3, recipe: [{ key: 'name', from: 'field' }] },
+		],
+	},
 };

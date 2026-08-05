@@ -38,4 +38,8 @@ export const webSite: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'web-site', provider: 'opengraph' },
+	identity: {
+		identifies: 'a site (origin level)',
+		ladder: [{ kind: 'scheme', scheme: 'url', source: { kind: 'url-origin', key: 'url' } }],
+	},
 };

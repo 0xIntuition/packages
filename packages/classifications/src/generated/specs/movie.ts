@@ -46,4 +46,22 @@ export const movie: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'movie' },
+	identity: {
+		identifies: 'a film (work level)',
+		ladder: [
+			// D27: open registries first — wd (CC0), tmdb (daily ID exports), then imdb (closed)
+			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' } },
+			{ kind: 'scheme', scheme: 'tmdb', source: { kind: 'same-as' } },
+			{ kind: 'scheme', scheme: 'imdb', source: { kind: 'same-as' } },
+			{
+				kind: 'gen1',
+				tag: 4,
+				recipe: [
+					{ key: 'name', from: 'field' },
+					{ key: 'yearPublished', from: 'year', of: 'datePublished' },
+				],
+			},
+			{ kind: 'gen1', tag: 5, recipe: [{ key: 'name', from: 'field' }] },
+		],
+	},
 };

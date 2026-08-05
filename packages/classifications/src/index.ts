@@ -17,6 +17,12 @@ export type {
 	CreationProfileClassification,
 	CreationRelationship,
 } from './creation-profile.js';
+export {
+	IDENTITY_SCHEME_CLASS,
+	IDENTITY_SCHEME_TYPING,
+	rungClass,
+	topRungAnchorEligible,
+} from './identity.js';
 export type {
 	ExpectedObject,
 	MetadataPredicateMatrixEntry,
@@ -37,5 +43,12 @@ export type {
 	ClassificationValidationIssue,
 	ClassificationValueMap,
 	FieldType,
+	IdentityClass,
+	IdentityDerivationName,
+	IdentityRecipeField,
+	IdentityRung,
+	IdentitySchemeName,
+	IdentitySpec,
+	IdentityValueSource,
 	PredicateKeyReference,
 } from './types.js';

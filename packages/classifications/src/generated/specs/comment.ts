@@ -47,4 +47,8 @@ export const comment: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'comment', provider: 'social-media-posting' },
+	identity: {
+		identifies: 'one comment on one subject (relational entity)',
+		ladder: [{ kind: 'scheme', scheme: 'url', source: { kind: 'same-as' } }],
+	},
 };

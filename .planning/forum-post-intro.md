@@ -14,6 +14,11 @@ This post is a proper introduction — what the packages are, the concepts behin
 them — plus a peek at where we're taking them next. It's long-ish because there's a real mental model here,
 but each piece is simple on its own. Grab a coffee.
 
+One thing up front so nobody's surprised: what's out today is the *packages* — the client-side TypeScript
+layer you build against. The backend that indexes and serves the graph isn't open source yet. It's coming,
+and soon, but I didn't want to bury it: everything I describe below runs without it, which is kind of the
+whole point.
+
 ## The shift: off-chain first
 
 If you've built on-chain before, you know the tax: **every piece of data costs a transaction.** Put a fact
@@ -43,9 +48,9 @@ Intuition's knowledge graph is built from a tiny, composable vocabulary:
 Two more ideas that matter a lot:
 
 - **Deterministic IDs.** Every atom, predicate, and triple has a **content-addressable ID** you can compute
-  *before* anything touches a chain. Same content → same ID, everywhere, forever. This is the quiet
-  superpower: your off-chain graph and the eventual on-chain graph speak the same identifiers, so there's no
-  "import/sync" cliff — you're always building the real thing.
+  *before* anything touches a chain. Same content → same ID, everywhere, forever. This is the part that
+  quietly makes everything else work: your off-chain graph and the eventual on-chain graph speak the same
+  identifiers, so there's no "import/sync" cliff later. You're always building the real thing.
 - **`sameAs` identity.** Different atoms can point at the same real-world thing (the same song on Spotify
   and Apple Music, the same person across two profiles). `sameAs` links them so the graph can treat them as
   one identity without forcing everyone to agree on a single canonical atom up front.
@@ -88,8 +93,11 @@ converging on shared vocabulary and IDs. Here's the map and how to think about e
 - **`@0xintuition/curves`** — bonding-curve math for the market/staking side.
 - **`@0xintuition/react`** — React hooks for the core protocol interactions.
 
-The beauty of the layering: you can live entirely in the top three layers while prototyping, and only pull
-in the protocol layer when your app owns wallet + submission flow.
+The nice thing about splitting it this way: you can live entirely in the top three layers while prototyping,
+and only reach for the protocol layer once your app actually owns a wallet and a submission flow. (Reading
+the *global* graph back — everyone's atoms and triples, not just the ones you built locally — is the job of
+the indexing backend, which, as mentioned, is still on its way. For now you're modeling and settling; the
+querying side lands when that opens up.)
 
 ## How they work together (a tiny walkthrough)
 

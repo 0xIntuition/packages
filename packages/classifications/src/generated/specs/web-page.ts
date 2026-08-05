@@ -47,4 +47,8 @@ export const webPage: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'web-page', provider: 'opengraph' },
+	identity: {
+		identifies: 'a page at a canonical URL',
+		ladder: [{ kind: 'scheme', scheme: 'url', source: { kind: 'field', key: 'url' } }],
+	},
 };

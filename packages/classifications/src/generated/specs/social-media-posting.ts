@@ -38,4 +38,11 @@ export const socialMediaPosting: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'social-media-posting' },
+	identity: {
+		identifies: 'one post',
+		ladder: [
+			{ kind: 'scheme', scheme: 'url', source: { kind: 'field', key: 'url' } },
+			{ kind: 'gen1', tag: 2, recipe: [{ key: 'textHash', from: 'text-hash', of: 'text' }] },
+		],
+	},
 };

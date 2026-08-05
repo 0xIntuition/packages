@@ -47,4 +47,7 @@ export const aggregateRating: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'aggregate-rating', provider: 'opengraph' },
+	// D23: withdrawn from IID scope — remodeled as a triple
+	// (subject —hasAggregateRating→ provider atom).
+	identity: null,
 };

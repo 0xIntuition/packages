@@ -55,4 +55,20 @@ export const event: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'event' },
+	identity: {
+		identifies: 'an event occurrence',
+		ladder: [
+			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' } },
+			{ kind: 'scheme', scheme: 'url', source: { kind: 'same-as' } },
+			{
+				kind: 'gen1',
+				tag: 3,
+				recipe: [
+					{ key: 'name', from: 'field' },
+					{ key: 'startDate', from: 'field' },
+				],
+			},
+			{ kind: 'gen1', tag: 4, recipe: [{ key: 'name', from: 'field' }] },
+		],
+	},
 };

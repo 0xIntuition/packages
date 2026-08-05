@@ -65,4 +65,20 @@ export const jobPosting: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'job-posting', provider: 'opengraph' },
+	identity: {
+		identifies: 'one posting',
+		ladder: [
+			{ kind: 'scheme', scheme: 'url', source: { kind: 'field', key: 'url' } },
+			// D21: hiringOrganization omitted — employer linkage is a triple
+			{
+				kind: 'gen1',
+				tag: 2,
+				recipe: [
+					{ key: 'title', from: 'field' },
+					{ key: 'datePosted', from: 'field' },
+				],
+			},
+			{ kind: 'gen1', tag: 3, recipe: [{ key: 'title', from: 'field' }] },
+		],
+	},
 };

@@ -38,4 +38,12 @@ export const thing: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'thing', provider: 'wikidata' },
+	identity: {
+		identifies: 'anything not covered by a specific classification (weakest IDs by design)',
+		ladder: [
+			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' } },
+			{ kind: 'scheme', scheme: 'url', source: { kind: 'same-as' } },
+			{ kind: 'gen1', tag: 3, recipe: [{ key: 'name', from: 'field' }] },
+		],
+	},
 };
