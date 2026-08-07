@@ -9,4 +9,9 @@ export const bearishOn = {
 	conjugates: false,
 	category: 'Sentiment/Opinion',
 	status: 'enshrined',
+	objectKind: 'entity',
+	polarity: 'negative',
+	temporalNature: 'state',
+	claimType: 'evaluative',
+	contradicts: ['bullishOn'],
 } as const satisfies PredicateSpec;

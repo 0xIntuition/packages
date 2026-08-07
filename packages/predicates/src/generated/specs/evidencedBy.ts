@@ -8,4 +8,7 @@ export const evidencedBy = {
 	conjugates: false,
 	category: 'Provenance/Evidence',
 	status: 'proposed',
+	objectKind: 'claim',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

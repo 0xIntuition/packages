@@ -53,6 +53,24 @@ export const localBusiness: ClassificationSpec = {
 			placeholder: 'https://bluebottlecoffee.com',
 		},
 		{
+			key: 'latitude',
+			schemaProperty: 'latitude',
+			label: 'Latitude',
+			description: 'The latitude coordinate when known.',
+			fieldType: 'number',
+			required: false,
+			placeholder: '37.7823',
+		},
+		{
+			key: 'longitude',
+			schemaProperty: 'longitude',
+			label: 'Longitude',
+			description: 'The longitude coordinate when known.',
+			fieldType: 'number',
+			required: false,
+			placeholder: '-122.4076',
+		},
+		{
 			key: 'sameAs',
 			schemaProperty: 'sameAs',
 			label: 'Canonical References',
@@ -63,4 +81,19 @@ export const localBusiness: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'local-business', provider: 'places' },
+	identity: {
+		identifies: 'one business at one place (instance level)',
+		ladder: [
+			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' } },
+			{
+				kind: 'gen1',
+				tag: 2,
+				recipe: [
+					{ key: 'name', from: 'field' },
+					{ key: 'geo7', from: 'geohash', precision: 7 },
+				],
+			},
+			{ kind: 'gen1', tag: 4, recipe: [{ key: 'name', from: 'field' }] },
+		],
+	},
 };

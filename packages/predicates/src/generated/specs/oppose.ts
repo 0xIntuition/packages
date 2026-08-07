@@ -10,4 +10,9 @@ export const oppose = {
 	thirdPerson: 'opposes',
 	category: 'Sentiment/Opinion',
 	status: 'proposed',
+	objectKind: 'entity',
+	polarity: 'negative',
+	temporalNature: 'state',
+	claimType: 'evaluative',
+	contradicts: ['support'],
 } as const satisfies PredicateSpec;

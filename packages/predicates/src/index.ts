@@ -7,3 +7,4 @@ export * from './ipfs';
 export * from './launch';
 export * from './predicates';
 export * from './types';
+export * from './validate';

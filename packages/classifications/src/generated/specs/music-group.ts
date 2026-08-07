@@ -29,4 +29,13 @@ export const musicGroup: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'song', provider: 'musicbrainz' },
+	identity: {
+		identifies: 'an artist/band public identity',
+		ladder: [
+			{ kind: 'scheme', scheme: 'isni', source: { kind: 'same-as' } },
+			{ kind: 'scheme', scheme: 'mbid', source: { kind: 'same-as' } },
+			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' } },
+			{ kind: 'gen1', tag: 4, recipe: [{ key: 'name', from: 'field' }] },
+		],
+	},
 };

@@ -10,4 +10,7 @@ export const competeWith = {
 	category: 'Comparison/Ranking',
 	status: 'proposed',
 	isSymmetric: true,
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

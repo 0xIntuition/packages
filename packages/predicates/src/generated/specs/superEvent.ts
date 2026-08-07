@@ -11,4 +11,8 @@ export const superEvent = {
 	isTransitive: true,
 	isHierarchical: true,
 	inversePredicate: 'sub event',
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
+	inverse: 'subEvent',
 } as const satisfies PredicateSpec;

@@ -8,4 +8,8 @@ export const alumniOf = {
 	conjugates: false,
 	category: 'Affiliation/Membership',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
+	specializes: ['affiliatedWith'],
 } as const satisfies PredicateSpec;

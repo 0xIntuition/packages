@@ -9,4 +9,7 @@ export const provider = {
 	conjugates: false,
 	category: 'Authorship/Contribution',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

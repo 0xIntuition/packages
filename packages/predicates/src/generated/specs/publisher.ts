@@ -9,4 +9,7 @@ export const publisher = {
 	conjugates: false,
 	category: 'Authorship/Contribution',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

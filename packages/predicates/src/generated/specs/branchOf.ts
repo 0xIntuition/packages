@@ -9,4 +9,8 @@ export const branchOf = {
 	category: 'Affiliation/Membership',
 	status: 'proposed',
 	isHierarchical: true,
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
+	specializes: ['affiliatedWith'],
 } as const satisfies PredicateSpec;

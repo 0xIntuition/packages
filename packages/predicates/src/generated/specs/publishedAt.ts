@@ -9,4 +9,7 @@ export const publishedAt = {
 	conjugates: false,
 	category: 'Metadata/Linking',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

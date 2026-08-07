@@ -9,4 +9,7 @@ export const compliantWith = {
 	conjugates: false,
 	category: 'Governance/Policy',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

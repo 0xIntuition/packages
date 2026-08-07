@@ -9,4 +9,7 @@ export const musicGroupMember = {
 	category: 'Affiliation/Membership',
 	status: 'proposed',
 	isHierarchical: true,
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

@@ -35,6 +35,24 @@ export const location: ClassificationSpec = {
 			placeholder: 'San Francisco, CA 94129',
 		},
 		{
+			key: 'latitude',
+			schemaProperty: 'latitude',
+			label: 'Latitude',
+			description: 'The latitude coordinate when known.',
+			fieldType: 'number',
+			required: false,
+			placeholder: '48.8584',
+		},
+		{
+			key: 'longitude',
+			schemaProperty: 'longitude',
+			label: 'Longitude',
+			description: 'The longitude coordinate when known.',
+			fieldType: 'number',
+			required: false,
+			placeholder: '2.2945',
+		},
+		{
 			key: 'sameAs',
 			schemaProperty: 'sameAs',
 			label: 'Canonical References',
@@ -45,4 +63,12 @@ export const location: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'location' },
+	identity: {
+		identifies: 'a named place or coordinate point',
+		ladder: [
+			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' } },
+			{ kind: 'scheme', scheme: 'geo', source: { kind: 'geohash', precision: 8 } },
+			{ kind: 'gen1', tag: 3, recipe: [{ key: 'name', from: 'field' }] },
+		],
+	},
 };

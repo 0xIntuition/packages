@@ -30,4 +30,10 @@ export const ethereumSmartContract: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'ethereum-smart-contract', provider: 'etherscan' },
+	identity: {
+		identifies: 'a deployed contract',
+		ladder: [
+			{ kind: 'scheme', scheme: 'caip10', source: { kind: 'derivation', name: 'caip10-contract' } },
+		],
+	},
 };

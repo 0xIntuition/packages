@@ -11,4 +11,8 @@ export const parentOrganization = {
 	isTransitive: true,
 	isHierarchical: true,
 	inversePredicate: 'sub organization',
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
+	inverse: 'subOrganization',
 } as const satisfies PredicateSpec;

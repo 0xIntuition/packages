@@ -8,4 +8,6 @@ export const hasSource = {
 	conjugates: false,
 	category: 'Metadata/Linking',
 	status: 'proposed',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

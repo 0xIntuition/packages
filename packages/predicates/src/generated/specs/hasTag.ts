@@ -10,4 +10,7 @@ export const hasTag = {
 	category: 'Identity/Classification',
 	status: 'enshrined',
 	examples: ['(ETHGlobal, has tag, hackathon)', '(Rust, has tag, systems-programming)'],
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

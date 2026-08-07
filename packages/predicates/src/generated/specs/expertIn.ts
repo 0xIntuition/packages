@@ -9,4 +9,7 @@ export const expertIn = {
 	conjugates: false,
 	category: 'Knowledge/Expertise',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'evaluative',
 } as const satisfies PredicateSpec;

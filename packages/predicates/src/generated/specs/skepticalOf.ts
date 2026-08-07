@@ -9,4 +9,8 @@ export const skepticalOf = {
 	conjugates: false,
 	category: 'Sentiment/Opinion',
 	status: 'proposed',
+	objectKind: 'entity',
+	polarity: 'negative',
+	temporalNature: 'state',
+	claimType: 'evaluative',
 } as const satisfies PredicateSpec;

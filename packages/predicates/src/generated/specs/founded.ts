@@ -9,4 +9,9 @@ export const founded = {
 	category: 'Affiliation/Membership',
 	status: 'proposed',
 	inversePredicate: 'founder',
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
+	inverse: 'founder',
+	specializes: ['affiliatedWith'],
 } as const satisfies PredicateSpec;

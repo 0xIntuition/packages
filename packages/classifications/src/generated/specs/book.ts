@@ -54,4 +54,15 @@ export const book: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'book' },
+	identity: {
+		identifies: 'the work; isbn identifies editions, bridged via equivalence',
+		ladder: [
+			{ kind: 'scheme', scheme: 'isbn', source: { kind: 'field', key: 'isbn' } },
+			// D27: T2 community open data
+			{ kind: 'scheme', scheme: 'olid', source: { kind: 'same-as' } },
+			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' } },
+			// D21: author omitted — authorship is an authoredBy triple
+			{ kind: 'gen1', tag: 3, recipe: [{ key: 'name', from: 'field' }] },
+		],
+	},
 };

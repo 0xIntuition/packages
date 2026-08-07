@@ -22,4 +22,10 @@ export const ethereumAccount: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'ethereum-account', provider: 'etherscan' },
+	identity: {
+		identifies: 'an EOA/keypair (D24: fixed eip155:1)',
+		ladder: [
+			{ kind: 'scheme', scheme: 'caip10', source: { kind: 'derivation', name: 'caip10-eoa' } },
+		],
+	},
 };

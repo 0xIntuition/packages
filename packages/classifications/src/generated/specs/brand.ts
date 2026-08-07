@@ -38,4 +38,11 @@ export const brand: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'brand', provider: 'company-profile' },
+	identity: {
+		identifies: 'a brand/concept (instance businesses are local-business atoms)',
+		ladder: [
+			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' } },
+			{ kind: 'gen1', tag: 2, recipe: [{ key: 'name', from: 'field' }] },
+		],
+	},
 };

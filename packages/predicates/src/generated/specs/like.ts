@@ -9,4 +9,8 @@ export const like = {
 	thirdPerson: 'likes',
 	category: 'Social/Reputation',
 	status: 'enshrined',
+	objectKind: 'entity',
+	polarity: 'positive',
+	temporalNature: 'state',
+	claimType: 'evaluative',
 } as const satisfies PredicateSpec;

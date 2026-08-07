@@ -37,6 +37,15 @@ export const musicRecording: ClassificationSpec = {
 			placeholder: 'Discovery',
 		},
 		{
+			key: 'isrc',
+			schemaProperty: 'isrcCode',
+			label: 'ISRC',
+			description: 'The International Standard Recording Code when known.',
+			fieldType: 'string',
+			required: false,
+			placeholder: 'USSM10007459',
+		},
+		{
 			key: 'sameAs',
 			schemaProperty: 'sameAs',
 			label: 'Canonical References',
@@ -47,4 +56,13 @@ export const musicRecording: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'song', provider: 'musicbrainz' },
+	identity: {
+		identifies: 'the recording (isrc level; compositions are iswc territory)',
+		ladder: [
+			{ kind: 'scheme', scheme: 'isrc', source: { kind: 'field', key: 'isrc' } },
+			{ kind: 'scheme', scheme: 'mbid', source: { kind: 'same-as' } },
+			// D21: byArtist omitted (feat.-credit formatting forks); inAlbum was never identity
+			{ kind: 'gen1', tag: 3, recipe: [{ key: 'name', from: 'field' }] },
+		],
+	},
 };

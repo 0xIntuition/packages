@@ -68,6 +68,27 @@ export function buildPredicateIpfsDocument(
 		});
 	}
 
+	// Machine-readable semantics (serialized per predicate-spec-decisions.md §5.3). Only emitted when set.
+	const optionalProperties: Array<
+		[PredicateIpfsDocument['additionalProperty'][number]['name'], unknown]
+	> = [
+		['objectKind', options.objectKind],
+		['literalType', options.literalType],
+		['polarity', options.polarity],
+		['temporalNature', options.temporalNature],
+		['claimType', options.claimType],
+		['inverse', options.inverse],
+		['specializes', options.specializes],
+		['contradicts', options.contradicts],
+		['supersededBy', options.supersededBy],
+	];
+
+	for (const [name, value] of optionalProperties) {
+		if (value === undefined) continue;
+		if (Array.isArray(value) && value.length === 0) continue;
+		additionalProperty.push({ '@type': 'PropertyValue', name, value });
+	}
+
 	const document: PredicateIpfsDocument = {
 		'@context': 'https://schema.org/',
 		'@type': 'DefinedTerm',

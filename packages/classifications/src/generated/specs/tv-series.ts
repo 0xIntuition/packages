@@ -47,4 +47,22 @@ export const tvSeries: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'tv-series' },
+	identity: {
+		identifies: 'the series (seasons/episodes are unmodeled levels)',
+		ladder: [
+			// D27: open registries first
+			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' } },
+			{ kind: 'scheme', scheme: 'tmdb', source: { kind: 'same-as' } },
+			{ kind: 'scheme', scheme: 'imdb', source: { kind: 'same-as' } },
+			{
+				kind: 'gen1',
+				tag: 4,
+				recipe: [
+					{ key: 'name', from: 'field' },
+					{ key: 'startYear', from: 'year', of: 'startDate' },
+				],
+			},
+			{ kind: 'gen1', tag: 5, recipe: [{ key: 'name', from: 'field' }] },
+		],
+	},
 };

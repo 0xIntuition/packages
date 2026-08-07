@@ -10,4 +10,7 @@ export const affiliatedWith = {
 	category: 'Affiliation/Membership',
 	status: 'proposed',
 	isSymmetric: true,
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

@@ -54,4 +54,10 @@ export const ethereumErc20: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'ethereum-smart-contract', provider: 'etherscan' },
+	identity: {
+		identifies: 'a token asset on a chain',
+		ladder: [
+			{ kind: 'scheme', scheme: 'caip19', source: { kind: 'derivation', name: 'caip19-erc20' } },
+		],
+	},
 };

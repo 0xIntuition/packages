@@ -10,4 +10,8 @@ export const reward = {
 	thirdPerson: 'rewards',
 	category: 'Economic/Market',
 	status: 'proposed',
+	objectKind: 'entity',
+	polarity: 'positive',
+	temporalNature: 'state',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

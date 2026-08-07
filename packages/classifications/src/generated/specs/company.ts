@@ -49,4 +49,12 @@ export const company: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'company' },
+	identity: {
+		identifies: 'a legal entity',
+		ladder: [
+			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' } },
+			{ kind: 'scheme', scheme: 'url', source: { kind: 'field', key: 'url' } },
+			{ kind: 'gen1', tag: 4, recipe: [{ key: 'name', from: 'field' }] },
+		],
+	},
 };

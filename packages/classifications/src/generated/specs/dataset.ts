@@ -38,4 +38,12 @@ export const dataset: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'dataset', provider: 'opengraph' },
+	identity: {
+		identifies: 'a dataset (version lineage out of ID scope)',
+		ladder: [
+			{ kind: 'scheme', scheme: 'doi', source: { kind: 'same-as' } },
+			{ kind: 'scheme', scheme: 'url', source: { kind: 'field', key: 'url' } },
+			{ kind: 'gen1', tag: 3, recipe: [{ key: 'name', from: 'field' }] },
+		],
+	},
 };

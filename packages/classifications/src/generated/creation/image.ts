@@ -92,6 +92,15 @@ export const imageCreationProfile = {
 			},
 		},
 		{
+			key: 'contentHash',
+			label: 'Content Hash',
+			description: 'Hash of the image bytes as alg:hex, e.g. sha256:<hex>.',
+			fieldType: 'string',
+			required: false,
+			placeholder: 'sha256:9f86d081884c7d65…',
+			schema: null,
+		},
+		{
 			key: 'sameAs',
 			label: 'Canonical References',
 			description: 'Canonical URLs that identify the same image.',

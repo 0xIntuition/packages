@@ -11,4 +11,8 @@ export const precededBy = {
 	status: 'proposed',
 	isTransitive: true,
 	inversePredicate: 'followed by',
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
+	inverse: 'followedBy',
 } as const satisfies PredicateSpec;

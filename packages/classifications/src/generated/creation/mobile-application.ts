@@ -90,6 +90,15 @@ export const mobileApplicationCreationProfile = {
 			},
 		},
 		{
+			key: 'bundleId',
+			label: 'Bundle / Package ID',
+			description: 'The store bundle identifier or Android package name.',
+			fieldType: 'string',
+			required: false,
+			placeholder: 'com.spotify.music',
+			schema: null,
+		},
+		{
 			key: 'sameAs',
 			label: 'Canonical References',
 			description: 'Canonical URLs that identify the same mobile application.',

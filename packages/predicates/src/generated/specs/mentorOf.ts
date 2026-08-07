@@ -9,4 +9,8 @@ export const mentorOf = {
 	category: 'Knowledge/Expertise',
 	status: 'proposed',
 	inversePredicate: 'student of',
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
+	inverse: 'studentOf',
 } as const satisfies PredicateSpec;

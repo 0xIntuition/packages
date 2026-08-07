@@ -8,4 +8,7 @@ export const trailer = {
 	conjugates: false,
 	category: 'Metadata/Linking',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

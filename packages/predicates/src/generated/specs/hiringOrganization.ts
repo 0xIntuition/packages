@@ -8,4 +8,7 @@ export const hiringOrganization = {
 	conjugates: false,
 	category: 'Affiliation/Membership',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

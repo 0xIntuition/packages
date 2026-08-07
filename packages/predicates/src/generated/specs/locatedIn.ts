@@ -11,4 +11,7 @@ export const locatedIn = {
 	status: 'proposed',
 	isTransitive: true,
 	isHierarchical: true,
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

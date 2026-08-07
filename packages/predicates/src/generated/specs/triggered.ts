@@ -9,4 +9,7 @@ export const triggered = {
 	conjugates: false,
 	category: 'Temporal/Lifecycle',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'event',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

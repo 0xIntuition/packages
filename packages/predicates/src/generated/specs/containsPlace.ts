@@ -11,4 +11,8 @@ export const containsPlace = {
 	isTransitive: true,
 	isHierarchical: true,
 	inversePredicate: 'contained in place',
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
+	inverse: 'containedInPlace',
 } as const satisfies PredicateSpec;

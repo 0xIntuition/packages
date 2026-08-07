@@ -10,4 +10,7 @@ export const speak = {
 	thirdPerson: 'speaks',
 	category: 'Knowledge/Expertise',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

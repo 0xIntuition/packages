@@ -10,4 +10,7 @@ export const implement = {
 	thirdPerson: 'implements',
 	category: 'Domain-Specific',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

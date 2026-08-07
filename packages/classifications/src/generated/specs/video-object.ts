@@ -46,6 +46,14 @@ export const videoObject: ClassificationSpec = {
 			placeholder: 'https://example.com/videos/how-intuition-works',
 		},
 		{
+			key: 'contentHash',
+			label: 'Content Hash',
+			description: 'Hash of the video bytes as alg:hex, e.g. sha256:<hex>.',
+			fieldType: 'string',
+			required: false,
+			placeholder: 'sha256:9f86d081884c7d65…',
+		},
+		{
 			key: 'sameAs',
 			schemaProperty: 'sameAs',
 			label: 'Canonical References',
@@ -56,4 +64,13 @@ export const videoObject: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'video-object' },
+	identity: {
+		identifies: 'a video — byte-identity first; platform URLs are manifestation fallbacks (F4)',
+		ladder: [
+			{ kind: 'scheme', scheme: 'hash', source: { kind: 'field', key: 'contentHash' } },
+			{ kind: 'scheme', scheme: 'url', source: { kind: 'field', key: 'contentUrl' } },
+			{ kind: 'scheme', scheme: 'url', source: { kind: 'same-as' } },
+			{ kind: 'gen1', tag: 3, recipe: [{ key: 'name', from: 'field' }] },
+		],
+	},
 };

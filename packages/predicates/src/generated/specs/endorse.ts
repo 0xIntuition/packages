@@ -10,4 +10,9 @@ export const endorse = {
 	thirdPerson: 'endorses',
 	category: 'Social/Reputation',
 	status: 'enshrined',
+	objectKind: 'entity',
+	polarity: 'positive',
+	temporalNature: 'state',
+	claimType: 'evaluative',
+	specializes: ['support'],
 } as const satisfies PredicateSpec;

@@ -37,6 +37,7 @@ describe('creation profiles', () => {
 			'name',
 			'byArtist',
 			'inAlbum',
+			'isrc',
 			'sameAs',
 		]);
 		expect(musicRecordingCreationProfile.fields[0]?.schema).toMatchObject({

@@ -46,6 +46,14 @@ export const mobileApplication: ClassificationSpec = {
 			placeholder: 'https://apps.apple.com/app/spotify/id324684580',
 		},
 		{
+			key: 'bundleId',
+			label: 'Bundle / Package ID',
+			description: 'The store bundle identifier or Android package name.',
+			fieldType: 'string',
+			required: false,
+			placeholder: 'com.spotify.music',
+		},
+		{
 			key: 'sameAs',
 			schemaProperty: 'sameAs',
 			label: 'Canonical References',
@@ -56,4 +64,19 @@ export const mobileApplication: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'mobile-application', provider: 'opengraph' },
+	identity: {
+		identifies: 'a mobile app per store ecosystem',
+		ladder: [
+			{ kind: 'scheme', scheme: 'appid', source: { kind: 'derivation', name: 'appid-bundle' } },
+			{ kind: 'scheme', scheme: 'url', source: { kind: 'field', key: 'downloadUrl' } },
+			{
+				kind: 'gen1',
+				tag: 3,
+				recipe: [
+					{ key: 'name', from: 'field' },
+					{ key: 'operatingSystem', from: 'field' },
+				],
+			},
+		],
+	},
 };

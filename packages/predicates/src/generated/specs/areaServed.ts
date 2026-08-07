@@ -8,4 +8,7 @@ export const areaServed = {
 	conjugates: false,
 	category: 'Metadata/Linking',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

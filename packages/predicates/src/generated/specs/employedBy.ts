@@ -8,4 +8,8 @@ export const employedBy = {
 	conjugates: false,
 	category: 'Affiliation/Membership',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
+	specializes: ['affiliatedWith'],
 } as const satisfies PredicateSpec;

@@ -50,8 +50,10 @@ describe('classification references', () => {
 			);
 
 			for (const field of spec.fields) {
+				// Fields without a schemaProperty are Intuition extension fields
+				// (e.g. Podcasting 2.0 GUIDs, purl coordinates, content hashes)
+				// and carry no schema.org provenance.
 				if (!field.schemaProperty) {
-					issues.push(`${spec.slug}.${field.key}: missing schemaProperty pointer`);
 					continue;
 				}
 

@@ -38,4 +38,13 @@ export const musicAlbum: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'song', provider: 'musicbrainz' },
+	identity: {
+		identifies: 'the release-group (the album as a work)',
+		ladder: [
+			{ kind: 'scheme', scheme: 'mbid', source: { kind: 'same-as' } },
+			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' } },
+			// D21: byArtist omitted — artist linkage is a triple
+			{ kind: 'gen1', tag: 4, recipe: [{ key: 'name', from: 'field' }] },
+		],
+	},
 };

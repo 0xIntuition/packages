@@ -9,4 +9,7 @@ export const curatedBy = {
 	conjugates: false,
 	category: 'Curation/Containment',
 	status: 'enshrined',
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

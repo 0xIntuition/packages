@@ -28,6 +28,24 @@ export const definedTerm: ClassificationSpec = {
 			placeholder: 'Structured, semantic network that organizes data.',
 		},
 		{
+			key: 'inDefinedTermSet',
+			schemaProperty: 'inDefinedTermSet',
+			label: 'Term Set',
+			description: 'The glossary or vocabulary the term belongs to.',
+			fieldType: 'string',
+			required: false,
+			placeholder: 'https://schema.org',
+		},
+		{
+			key: 'termCode',
+			schemaProperty: 'termCode',
+			label: 'Term Code',
+			description: 'The code identifying the term within its set.',
+			fieldType: 'string',
+			required: false,
+			placeholder: 'merkle-tree',
+		},
+		{
 			key: 'sameAs',
 			schemaProperty: 'sameAs',
 			label: 'Canonical References',
@@ -38,4 +56,11 @@ export const definedTerm: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'defined-term', provider: 'dictionary' },
+	identity: {
+		identifies: 'a term within a term set',
+		ladder: [
+			{ kind: 'scheme', scheme: 'termset', source: { kind: 'derivation', name: 'termset-term' } },
+			{ kind: 'gen1', tag: 2, recipe: [{ key: 'name', from: 'field' }] },
+		],
+	},
 };

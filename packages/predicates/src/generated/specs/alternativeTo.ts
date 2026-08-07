@@ -9,4 +9,7 @@ export const alternativeTo = {
 	category: 'Curation/Containment',
 	status: 'enshrined',
 	isSymmetric: true,
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

@@ -55,4 +55,20 @@ export const newsArticle: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'news-article', provider: 'opengraph' },
+	identity: {
+		identifies: 'a news story as published (URL-anchored)',
+		ladder: [
+			{ kind: 'scheme', scheme: 'url', source: { kind: 'field', key: 'url' } },
+			{ kind: 'scheme', scheme: 'url', source: { kind: 'same-as' } },
+			{
+				kind: 'gen1',
+				tag: 2,
+				recipe: [
+					{ key: 'headline', from: 'field' },
+					{ key: 'datePublished', from: 'field' },
+				],
+			},
+			{ kind: 'gen1', tag: 3, recipe: [{ key: 'headline', from: 'field' }] },
+		],
+	},
 };

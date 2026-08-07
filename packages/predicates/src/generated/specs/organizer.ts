@@ -8,4 +8,7 @@ export const organizer = {
 	conjugates: false,
 	category: 'Affiliation/Membership',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

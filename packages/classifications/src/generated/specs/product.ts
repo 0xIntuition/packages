@@ -56,4 +56,12 @@ export const product: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'product' },
+	identity: {
+		identifies: 'the product model (not individual units)',
+		ladder: [
+			{ kind: 'scheme', scheme: 'gtin', source: { kind: 'field', key: 'gtin' } },
+			// D21: brand and SKU omitted — brand linkage is a triple
+			{ kind: 'gen1', tag: 2, recipe: [{ key: 'name', from: 'field' }] },
+		],
+	},
 };

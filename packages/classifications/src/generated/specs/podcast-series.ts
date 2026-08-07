@@ -28,6 +28,23 @@ export const podcastSeries: ClassificationSpec = {
 			placeholder: 'https://www.bankless.com/podcast',
 		},
 		{
+			key: 'feedUrl',
+			schemaProperty: 'webFeed',
+			label: 'RSS Feed URL',
+			description: 'The RSS feed URL; used to derive the Podcasting 2.0 GUID.',
+			fieldType: 'url',
+			required: false,
+			placeholder: 'https://feeds.example.com/show.xml',
+		},
+		{
+			key: 'podcastGuid',
+			label: 'Podcast GUID',
+			description: 'The declared Podcasting 2.0 <podcast:guid> value; survives feed migrations.',
+			fieldType: 'string',
+			required: false,
+			placeholder: '917393e3-1b1e-5cef-ace4-edaa54e1f810',
+		},
+		{
 			key: 'sameAs',
 			schemaProperty: 'sameAs',
 			label: 'Canonical References',
@@ -38,4 +55,15 @@ export const podcastSeries: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'podcast-series', provider: 'opengraph' },
+	identity: {
+		identifies: 'the show (feed level)',
+		ladder: [
+			// D26: the declared <podcast:guid> survives feed migrations
+			{ kind: 'scheme', scheme: 'podcastguid', source: { kind: 'field', key: 'podcastGuid' } },
+			// derived from the feed URL — forks on migration, fallback only
+			{ kind: 'scheme', scheme: 'podcastguid', source: { kind: 'podcast-guid', key: 'feedUrl' } },
+			{ kind: 'scheme', scheme: 'url', source: { kind: 'field', key: 'url' } },
+			{ kind: 'gen1', tag: 3, recipe: [{ key: 'name', from: 'field' }] },
+		],
+	},
 };

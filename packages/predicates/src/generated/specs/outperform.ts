@@ -10,4 +10,7 @@ export const outperform = {
 	thirdPerson: 'outperforms',
 	category: 'Comparison/Ranking',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'evaluative',
 } as const satisfies PredicateSpec;

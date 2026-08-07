@@ -47,4 +47,11 @@ export const review: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'review', provider: 'opengraph' },
+	identity: {
+		identifies: 'one review of one subject (relational entity)',
+		ladder: [
+			// gen1 recipe needs the subject's IID; awaits IID-typed reference fields
+			{ kind: 'scheme', scheme: 'url', source: { kind: 'same-as' } },
+		],
+	},
 };

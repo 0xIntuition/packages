@@ -8,4 +8,8 @@ export const hasDescription = {
 	conjugates: false,
 	category: 'Metadata/Linking',
 	status: 'enshrined',
+	objectKind: 'literal',
+	literalType: 'text',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

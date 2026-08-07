@@ -9,4 +9,7 @@ export const availableOn = {
 	conjugates: false,
 	category: 'Metadata/Linking',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'state',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

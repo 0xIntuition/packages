@@ -56,4 +56,12 @@ export const article: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'article', provider: 'dictionary' },
+	identity: {
+		identifies: 'an article',
+		ladder: [
+			{ kind: 'scheme', scheme: 'doi', source: { kind: 'field', key: 'url' } },
+			{ kind: 'scheme', scheme: 'url', source: { kind: 'field', key: 'url' } },
+			{ kind: 'gen1', tag: 3, recipe: [{ key: 'headline', from: 'field' }] },
+		],
+	},
 };

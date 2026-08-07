@@ -11,4 +11,7 @@ export const equivalentTo = {
 	status: 'proposed',
 	isTransitive: true,
 	isSymmetric: true,
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

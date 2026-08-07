@@ -8,4 +8,8 @@ export const reviewed = {
 	conjugates: false,
 	category: 'Social/Reputation',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'event',
+	claimType: 'evaluative',
+	inverse: 'reviewedBy',
 } as const satisfies PredicateSpec;

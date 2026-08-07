@@ -8,4 +8,7 @@ export const partOfSeries = {
 	conjugates: false,
 	category: 'Curation/Containment',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

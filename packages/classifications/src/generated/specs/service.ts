@@ -47,4 +47,12 @@ export const service: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'service' },
+	identity: {
+		identifies: 'a service offering',
+		ladder: [
+			{ kind: 'scheme', scheme: 'url', source: { kind: 'same-as' } },
+			// D21: provider omitted — provider linkage is a triple
+			{ kind: 'gen1', tag: 2, recipe: [{ key: 'name', from: 'field' }] },
+		],
+	},
 };

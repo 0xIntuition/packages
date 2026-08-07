@@ -9,4 +9,7 @@ export const studied = {
 	conjugates: false,
 	category: 'Knowledge/Expertise',
 	status: 'proposed',
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

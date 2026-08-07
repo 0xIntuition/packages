@@ -10,4 +10,7 @@ export const hasType = {
 	category: 'Identity/Classification',
 	status: 'enshrined',
 	examples: ['(Uniswap, has type, Decentralized Exchange)', '(Ethereum, has type, Blockchain)'],
+	objectKind: 'entity',
+	temporalNature: 'permanent',
+	claimType: 'factual',
 } as const satisfies PredicateSpec;

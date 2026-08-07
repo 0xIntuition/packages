@@ -54,6 +54,14 @@ export const image: ClassificationSpec = {
 			placeholder: 'knowledge-graph',
 		},
 		{
+			key: 'contentHash',
+			label: 'Content Hash',
+			description: 'Hash of the image bytes as alg:hex, e.g. sha256:<hex>.',
+			fieldType: 'string',
+			required: false,
+			placeholder: 'sha256:9f86d081884c7d65…',
+		},
+		{
 			key: 'sameAs',
 			schemaProperty: 'sameAs',
 			label: 'Canonical References',
@@ -64,4 +72,12 @@ export const image: ClassificationSpec = {
 		},
 	],
 	defaults: { pluginId: 'image', provider: 'github' },
+	identity: {
+		identifies: 'an image — byte-identity first; url is a mutable manifestation fallback (F4)',
+		ladder: [
+			{ kind: 'scheme', scheme: 'hash', source: { kind: 'field', key: 'contentHash' } },
+			{ kind: 'scheme', scheme: 'url', source: { kind: 'field', key: 'url' } },
+			{ kind: 'gen1', tag: 3, recipe: [{ key: 'name', from: 'field' }] },
+		],
+	},
 };
