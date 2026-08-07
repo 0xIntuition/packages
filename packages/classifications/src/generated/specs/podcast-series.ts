@@ -29,6 +29,7 @@ export const podcastSeries: ClassificationSpec = {
 		},
 		{
 			key: 'feedUrl',
+			schemaProperty: 'webFeed',
 			label: 'RSS Feed URL',
 			description: 'The RSS feed URL; used to derive the Podcasting 2.0 GUID.',
 			fieldType: 'url',

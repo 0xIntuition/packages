@@ -53,6 +53,15 @@ export const softwareCreationProfile = {
 			},
 		},
 		{
+			key: 'packageUrl',
+			label: 'Package URL',
+			description: 'The purl package coordinate, version-free.',
+			fieldType: 'string',
+			required: false,
+			placeholder: 'pkg:npm/react',
+			schema: null,
+		},
+		{
 			key: 'sameAs',
 			label: 'Canonical References',
 			description: 'Canonical URLs that identify the same software.',

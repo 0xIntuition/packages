@@ -38,7 +38,7 @@ export const musicRecording: ClassificationSpec = {
 		},
 		{
 			key: 'isrc',
-			schemaProperty: 'isrc',
+			schemaProperty: 'isrcCode',
 			label: 'ISRC',
 			description: 'The International Standard Recording Code when known.',
 			fieldType: 'string',

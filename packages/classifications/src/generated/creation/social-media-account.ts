@@ -40,6 +40,15 @@ export const socialMediaAccountCreationProfile = {
 			placeholder: 'https://x.com/karpathy',
 			schema: null,
 		},
+		{
+			key: 'platformUserId',
+			label: 'Platform User ID',
+			description: 'The immutable platform-assigned user ID (survives handle renames).',
+			fieldType: 'string',
+			required: false,
+			placeholder: '295218901',
+			schema: null,
+		},
 	],
 	relationships: [
 		{
@@ -107,7 +116,7 @@ export const socialMediaAccountCreationProfile = {
 			],
 		},
 	],
-	availableFieldCount: 3,
+	availableFieldCount: 4,
 } as const satisfies CreationProfile;
 
 export const creationProfile = socialMediaAccountCreationProfile;
