@@ -71,6 +71,19 @@
         "viem": "^2.0.0",
       },
     },
+    "packages/iid": {
+      "name": "@0xintuition/iid",
+      "version": "0.1.0-alpha.0",
+      "devDependencies": {
+        "@0xintuition/iid-spec": "0.1.0-alpha.0",
+        "typescript": "^5.9.3",
+        "viem": "^2.31.4",
+        "vitest": "^4.0.16",
+      },
+      "peerDependencies": {
+        "viem": "^2.0.0",
+      },
+    },
     "packages/iid-spec": {
       "name": "@0xintuition/iid-spec",
       "version": "0.1.0-alpha.0",
@@ -201,6 +214,8 @@
     "@0xintuition/hackathon-quickstart-example": ["@0xintuition/hackathon-quickstart-example@workspace:examples/hackathon-quickstart"],
 
     "@0xintuition/ids": ["@0xintuition/ids@workspace:packages/ids"],
+
+    "@0xintuition/iid": ["@0xintuition/iid@workspace:packages/iid"],
 
     "@0xintuition/iid-spec": ["@0xintuition/iid-spec@workspace:packages/iid-spec"],
 
