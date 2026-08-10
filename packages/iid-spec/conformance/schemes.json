@@ -1,0 +1,111 @@
+{
+	"specVersion": "0.1.0",
+	"fixtureVersion": 1,
+	"kind": "schemes",
+	"schemes": {
+		"acct": {
+			"class": "B",
+			"typing": "unambiguous"
+		},
+		"appid": {
+			"class": "B",
+			"typing": "unambiguous"
+		},
+		"caip10": {
+			"class": "B",
+			"typing": "polymorphic"
+		},
+		"caip19": {
+			"class": "B",
+			"typing": "unambiguous"
+		},
+		"doi": {
+			"class": "A",
+			"typing": "polymorphic"
+		},
+		"eidr": {
+			"class": "A",
+			"typing": "unambiguous"
+		},
+		"gen1": {
+			"class": "C",
+			"typing": "unambiguous"
+		},
+		"geo": {
+			"class": "B",
+			"typing": "polymorphic"
+		},
+		"gtin": {
+			"class": "A",
+			"typing": "unambiguous"
+		},
+		"hash": {
+			"class": "B",
+			"typing": "polymorphic"
+		},
+		"imdb": {
+			"class": "A",
+			"typing": "polymorphic"
+		},
+		"isbn": {
+			"class": "A",
+			"typing": "unambiguous"
+		},
+		"isni": {
+			"class": "A",
+			"typing": "polymorphic"
+		},
+		"isrc": {
+			"class": "A",
+			"typing": "unambiguous"
+		},
+		"iswc": {
+			"class": "A",
+			"typing": "unambiguous"
+		},
+		"lei": {
+			"class": "A",
+			"typing": "unambiguous"
+		},
+		"mbid": {
+			"class": "A",
+			"typing": "unambiguous"
+		},
+		"olid": {
+			"class": "A",
+			"typing": "unambiguous"
+		},
+		"orcid": {
+			"class": "A",
+			"typing": "polymorphic"
+		},
+		"podcastguid": {
+			"class": "A",
+			"typing": "unambiguous"
+		},
+		"purl": {
+			"class": "B",
+			"typing": "unambiguous"
+		},
+		"rssitem": {
+			"class": "B",
+			"typing": "unambiguous"
+		},
+		"termset": {
+			"class": "B",
+			"typing": "unambiguous"
+		},
+		"tmdb": {
+			"class": "A",
+			"typing": "polymorphic"
+		},
+		"url": {
+			"class": "B",
+			"typing": "polymorphic"
+		},
+		"wd": {
+			"class": "A",
+			"typing": "polymorphic"
+		}
+	}
+}

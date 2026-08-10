@@ -71,6 +71,10 @@
         "viem": "^2.0.0",
       },
     },
+    "packages/iid-spec": {
+      "name": "@0xintuition/iid-spec",
+      "version": "0.1.0-alpha.0",
+    },
     "packages/periphery": {
       "name": "@0xintuition/periphery",
       "version": "0.1.0-alpha.0",
@@ -197,6 +201,8 @@
     "@0xintuition/hackathon-quickstart-example": ["@0xintuition/hackathon-quickstart-example@workspace:examples/hackathon-quickstart"],
 
     "@0xintuition/ids": ["@0xintuition/ids@workspace:packages/ids"],
+
+    "@0xintuition/iid-spec": ["@0xintuition/iid-spec@workspace:packages/iid-spec"],
 
     "@0xintuition/periphery": ["@0xintuition/periphery@workspace:packages/periphery"],
 

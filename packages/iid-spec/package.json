@@ -1,0 +1,60 @@
+{
+	"name": "@0xintuition/iid-spec",
+	"version": "0.1.0-alpha.0",
+	"description": "The Intuition ID (IID) specification: a deterministic, canonical identifier for real-world entities, with normative per-scheme rules and machine-readable conformance vectors",
+	"private": false,
+	"license": "MIT",
+	"type": "module",
+	"sideEffects": false,
+	"files": [
+		"README.md",
+		"explainer.md",
+		"implementation-notes.md",
+		"spec",
+		"schemes",
+		"conformance",
+		"LICENSE"
+	],
+	"exports": {
+		"./conformance/*.json": "./conformance/*.json",
+		"./package.json": "./package.json"
+	},
+	"keywords": [
+		"intuition",
+		"iid",
+		"identifier",
+		"identity",
+		"knowledge-graph",
+		"deduplication",
+		"specification",
+		"conformance"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/0xIntuition/packages.git",
+		"directory": "packages/iid-spec"
+	},
+	"bugs": {
+		"url": "https://github.com/0xIntuition/packages/issues"
+	},
+	"homepage": "https://github.com/0xIntuition/packages/tree/main/packages/iid-spec#readme",
+	"publishConfig": {
+		"access": "public",
+		"tag": "alpha"
+	},
+	"scripts": {
+		"clean": "git clean -xdf .cache .turbo node_modules",
+		"pack:dry-run": "npm pack --ignore-scripts --dry-run --json",
+		"pack:release": "node ../../scripts/pack-release.mjs",
+		"prepublishOnly": "node ../../scripts/guard-direct-publish.mjs",
+		"test": "node test/validate-fixtures.mjs",
+		"ci": "biome check",
+		"lint": "biome lint",
+		"format": "biome format",
+		"check": "biome check",
+		"lint:write": "biome lint --write",
+		"format:write": "biome format --write",
+		"check:write": "biome check --write",
+		"check:unsafe:write": "biome check --write --unsafe"
+	}
+}

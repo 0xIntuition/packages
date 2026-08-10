@@ -1,0 +1,84 @@
+{
+	"specVersion": "0.1.0",
+	"fixtureVersion": 1,
+	"kind": "parse",
+	"vectors": [
+		{
+			"id": "parse-001",
+			"input": "int:isbn:9780684832722",
+			"scheme": "isbn",
+			"value": "9780684832722",
+			"note": "simple two-part value"
+		},
+		{
+			"id": "parse-002",
+			"input": "int:caip10:eip155:1:0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+			"scheme": "caip10",
+			"value": "eip155:1:0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+			"note": "colon-bearing value survives first-two-colon split"
+		},
+		{
+			"id": "parse-003",
+			"input": "int:doi:10.1000/182",
+			"scheme": "doi",
+			"value": "10.1000/182",
+			"note": "slash-bearing value"
+		},
+		{
+			"id": "parse-004",
+			"input": "int:gen1:movie:r4:fb681afe7d438cad73ae90a70f1cc55a",
+			"scheme": "gen1",
+			"value": "movie:r4:fb681afe7d438cad73ae90a70f1cc55a",
+			"note": "gen1 value contains two colons"
+		},
+		{
+			"id": "parse-005",
+			"input": "int:src:some-value",
+			"scheme": null,
+			"value": null,
+			"note": "unregistered scheme rejects (closed registry)"
+		},
+		{
+			"id": "parse-006",
+			"input": "int:isbn:",
+			"scheme": null,
+			"value": null,
+			"note": "empty value rejects"
+		},
+		{
+			"id": "parse-007",
+			"input": "INT:isbn:9780684832722",
+			"scheme": null,
+			"value": null,
+			"note": "namespace is case-sensitive"
+		},
+		{
+			"id": "parse-008",
+			"input": "isbn:9780684832722",
+			"scheme": null,
+			"value": null,
+			"note": "missing namespace"
+		},
+		{
+			"id": "parse-009",
+			"input": "int:isbn:97806848 32722",
+			"scheme": null,
+			"value": null,
+			"note": "space is not a value character (grammar %x21-7E)"
+		},
+		{
+			"id": "parse-010",
+			"input": "int:isbn:9780684832722é",
+			"scheme": null,
+			"value": null,
+			"note": "non-ASCII is not a value character (grammar %x21-7E)"
+		},
+		{
+			"id": "parse-011",
+			"input": "int:url:https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			"scheme": null,
+			"value": null,
+			"note": "value exceeds 220-char limit"
+		}
+	]
+}

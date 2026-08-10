@@ -21,6 +21,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 export const PACKAGES = [
+	{ dirName: 'iid-spec', kind: 'docs-only' },
 	{ dirName: 'deployments', kind: 'compiled' },
 	{ dirName: 'curves', kind: 'compiled' },
 	{ dirName: 'ids', kind: 'compiled' },
