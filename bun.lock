@@ -31,12 +31,19 @@
     },
     "packages/classifications": {
       "name": "@0xintuition/classifications",
-      "version": "0.1.0-alpha.0",
+      "version": "0.1.0-alpha.1",
+      "dependencies": {
+        "@0xintuition/iid": "0.1.0-alpha.0",
+      },
       "devDependencies": {
         "@0xintuition/predicates": "0.1.0-alpha.0",
         "@0xintuition/schema-org": "0.1.0-alpha.0",
         "typescript": "^5.9.3",
+        "viem": "^2.31.4",
         "vitest": "^4.0.16",
+      },
+      "peerDependencies": {
+        "viem": "^2.0.0",
       },
     },
     "packages/curves": {
@@ -120,7 +127,7 @@
     },
     "packages/primitives": {
       "name": "@0xintuition/primitives",
-      "version": "0.1.0-alpha.0",
+      "version": "0.1.0-alpha.1",
       "dependencies": {
         "@0xintuition/classifications": "0.1.0-alpha.0",
         "@0xintuition/ids": "0.1.0-alpha.0",
