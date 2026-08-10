@@ -22,6 +22,7 @@ import { resolve } from 'node:path';
 
 export const PACKAGES = [
 	{ dirName: 'iid-spec', kind: 'docs-only' },
+	{ dirName: 'iid', kind: 'compiled' },
 	{ dirName: 'deployments', kind: 'compiled' },
 	{ dirName: 'curves', kind: 'compiled' },
 	{ dirName: 'ids', kind: 'compiled' },
