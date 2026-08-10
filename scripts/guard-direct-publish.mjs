@@ -1,11 +1,15 @@
 #!/usr/bin/env node
 
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { basename, resolve } from 'node:path';
+import { PACKAGES } from './package-registry.mjs';
 
 const packageRoot = process.cwd();
 const packageJsonPath = resolve(packageRoot, 'package.json');
 const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+const packageKind =
+	PACKAGES.find((entry) => entry.dirName === basename(packageRoot))?.kind ?? 'compiled';
+const isDocsOnly = packageKind === 'docs-only';
 const failures = [];
 
 function addFailure(message) {
@@ -93,7 +97,12 @@ function assertEntrypoint(path, label) {
 		return;
 	}
 
-	if (!path.startsWith('./dist/') && path !== './package.json') {
+	if (isDocsOnly) {
+		if (path.startsWith('./dist/') || path.startsWith('./src/')) {
+			addFailure(`${label} must not point at dist or src in a docs-only package, got ${path}`);
+			return;
+		}
+	} else if (!path.startsWith('./dist/') && path !== './package.json') {
 		addFailure(`${label} must point at dist or package.json, got ${path}`);
 		return;
 	}
@@ -115,19 +124,29 @@ if (packageJson.license !== 'MIT') {
 	addFailure('license must be MIT');
 }
 
-assertEntrypoint(packageJson.main, 'main');
-assertEntrypoint(packageJson.types, 'types');
+if (isDocsOnly) {
+	if (packageJson.main !== undefined || packageJson.types !== undefined) {
+		addFailure('docs-only packages must not declare main or types entrypoints');
+	}
+} else {
+	assertEntrypoint(packageJson.main, 'main');
+	assertEntrypoint(packageJson.types, 'types');
+}
 
 if (!Array.isArray(packageJson.files)) {
 	addFailure('files must be an array');
 } else {
-	for (const requiredFile of ['dist', 'README.md', 'LICENSE']) {
+	const requiredFiles = isDocsOnly ? ['README.md', 'LICENSE'] : ['dist', 'README.md', 'LICENSE'];
+	for (const requiredFile of requiredFiles) {
 		if (!packageJson.files.includes(requiredFile)) {
 			addFailure(`files must include ${requiredFile}`);
 		}
 	}
 	if (packageJson.files.includes('src')) {
 		addFailure('files must not include src');
+	}
+	if (isDocsOnly && packageJson.files.includes('dist')) {
+		addFailure('docs-only packages must not ship dist');
 	}
 }
 
@@ -151,12 +170,14 @@ for (const requiredFile of ['README.md', 'LICENSE']) {
 	}
 }
 
-if (!existsSync(resolve(packageRoot, 'dist/index.js'))) {
-	addFailure('missing dist/index.js; run the package build first');
-}
+if (!isDocsOnly) {
+	if (!existsSync(resolve(packageRoot, 'dist/index.js'))) {
+		addFailure('missing dist/index.js; run the package build first');
+	}
 
-if (!existsSync(resolve(packageRoot, 'dist/index.d.ts'))) {
-	addFailure('missing dist/index.d.ts; run the package build first');
+	if (!existsSync(resolve(packageRoot, 'dist/index.d.ts'))) {
+		addFailure('missing dist/index.d.ts; run the package build first');
+	}
 }
 
 if (failures.length > 0) {

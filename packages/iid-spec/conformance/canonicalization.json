@@ -1,0 +1,714 @@
+{
+	"specVersion": "0.1.0",
+	"fixtureVersion": 1,
+	"kind": "canonicalization",
+	"vectors": [
+		{
+			"id": "canon-isbn-001",
+			"scheme": "isbn",
+			"raw": "0-684-83272-0",
+			"canonical": "9780684832722",
+			"note": "ISBN-10 with hyphens upconverts to ISBN-13"
+		},
+		{
+			"id": "canon-isbn-002",
+			"scheme": "isbn",
+			"raw": "9780684832722",
+			"canonical": "9780684832722",
+			"note": "canonical ISBN-13 is idempotent"
+		},
+		{
+			"id": "canon-isbn-003",
+			"scheme": "isbn",
+			"raw": "978-0-14-044913-6",
+			"canonical": "9780140449136",
+			"note": "hyphenated ISBN-13 strips separators"
+		},
+		{
+			"id": "canon-isbn-004",
+			"scheme": "isbn",
+			"raw": "0-306-40615-3",
+			"canonical": null,
+			"note": "ISBN-10 check digit fails (expected 2)"
+		},
+		{
+			"id": "canon-isbn-005",
+			"scheme": "isbn",
+			"raw": "9780684832723",
+			"canonical": null,
+			"note": "ISBN-13 check digit fails"
+		},
+		{
+			"id": "canon-isbn-006",
+			"scheme": "isbn",
+			"raw": "12345",
+			"canonical": null,
+			"note": "wrong length"
+		},
+		{
+			"id": "canon-isrc-007",
+			"scheme": "isrc",
+			"raw": "US-RC1-76-07839",
+			"canonical": "USRC17607839",
+			"note": "formatted ISRC strips separators and uppercases"
+		},
+		{
+			"id": "canon-isrc-008",
+			"scheme": "isrc",
+			"raw": "usrc17607839",
+			"canonical": "USRC17607839",
+			"note": "lowercase ISRC uppercases"
+		},
+		{
+			"id": "canon-isrc-009",
+			"scheme": "isrc",
+			"raw": "USRC17607839",
+			"canonical": "USRC17607839",
+			"note": "canonical ISRC is idempotent"
+		},
+		{
+			"id": "canon-isrc-010",
+			"scheme": "isrc",
+			"raw": "USRC1760783",
+			"canonical": null,
+			"note": "wrong length"
+		},
+		{
+			"id": "canon-isrc-011",
+			"scheme": "isrc",
+			"raw": "1SRC17607839",
+			"canonical": null,
+			"note": "country prefix must be alphabetic"
+		},
+		{
+			"id": "canon-iswc-012",
+			"scheme": "iswc",
+			"raw": "T-034.524.680-1",
+			"canonical": "T0345246801",
+			"note": "formatted ISWC strips separators"
+		},
+		{
+			"id": "canon-iswc-013",
+			"scheme": "iswc",
+			"raw": "T0345246801",
+			"canonical": "T0345246801",
+			"note": "canonical ISWC is idempotent"
+		},
+		{
+			"id": "canon-iswc-014",
+			"scheme": "iswc",
+			"raw": "T0345246802",
+			"canonical": null,
+			"note": "check digit fails"
+		},
+		{
+			"id": "canon-iswc-015",
+			"scheme": "iswc",
+			"raw": "0345246801",
+			"canonical": null,
+			"note": "missing T prefix"
+		},
+		{
+			"id": "canon-isni-016",
+			"scheme": "isni",
+			"raw": "0000 0001 2103 2683",
+			"canonical": "0000000121032683",
+			"note": "spaced ISNI strips separators"
+		},
+		{
+			"id": "canon-isni-017",
+			"scheme": "isni",
+			"raw": "0000000121032683",
+			"canonical": "0000000121032683",
+			"note": "canonical ISNI is idempotent"
+		},
+		{
+			"id": "canon-isni-018",
+			"scheme": "isni",
+			"raw": "0000000121032684",
+			"canonical": null,
+			"note": "check character fails"
+		},
+		{
+			"id": "canon-isni-019",
+			"scheme": "isni",
+			"raw": "000000012103268",
+			"canonical": null,
+			"note": "wrong length"
+		},
+		{
+			"id": "canon-orcid-020",
+			"scheme": "orcid",
+			"raw": "0000-0002-1825-0097",
+			"canonical": "0000000218250097",
+			"note": "hyphenated ORCID strips separators"
+		},
+		{
+			"id": "canon-orcid-021",
+			"scheme": "orcid",
+			"raw": "0000000218250097",
+			"canonical": "0000000218250097",
+			"note": "canonical ORCID is idempotent"
+		},
+		{
+			"id": "canon-orcid-022",
+			"scheme": "orcid",
+			"raw": "0000-0002-1825-0098",
+			"canonical": null,
+			"note": "check character fails"
+		},
+		{
+			"id": "canon-lei-023",
+			"scheme": "lei",
+			"raw": "5493 00B2 N3T1 CIB4 3O74",
+			"canonical": null,
+			"note": "letter O in what must be digits region"
+		},
+		{
+			"id": "canon-lei-024",
+			"scheme": "lei",
+			"raw": "529900T8BM49AURSDO55",
+			"canonical": "529900T8BM49AURSDO55",
+			"note": "canonical LEI is idempotent"
+		},
+		{
+			"id": "canon-lei-025",
+			"scheme": "lei",
+			"raw": "529900t8bm49aursdo55",
+			"canonical": "529900T8BM49AURSDO55",
+			"note": "lowercase LEI uppercases"
+		},
+		{
+			"id": "canon-lei-026",
+			"scheme": "lei",
+			"raw": "529900T8BM49AURSDO54",
+			"canonical": null,
+			"note": "mod 97-10 validation fails"
+		},
+		{
+			"id": "canon-gtin-027",
+			"scheme": "gtin",
+			"raw": "036000291452",
+			"canonical": "00036000291452",
+			"note": "UPC-A pads to 14 digits"
+		},
+		{
+			"id": "canon-gtin-028",
+			"scheme": "gtin",
+			"raw": "4006381333931",
+			"canonical": "04006381333931",
+			"note": "EAN-13 pads to 14 digits"
+		},
+		{
+			"id": "canon-gtin-029",
+			"scheme": "gtin",
+			"raw": "00036000291452",
+			"canonical": "00036000291452",
+			"note": "canonical GTIN-14 is idempotent"
+		},
+		{
+			"id": "canon-gtin-030",
+			"scheme": "gtin",
+			"raw": "036000291453",
+			"canonical": null,
+			"note": "check digit fails"
+		},
+		{
+			"id": "canon-gtin-031",
+			"scheme": "gtin",
+			"raw": "123456789",
+			"canonical": null,
+			"note": "9 digits is not a GTIN length"
+		},
+		{
+			"id": "canon-doi-032",
+			"scheme": "doi",
+			"raw": "https://doi.org/10.1000/182",
+			"canonical": "10.1000/182",
+			"note": "resolver URL form strips to bare DOI"
+		},
+		{
+			"id": "canon-doi-033",
+			"scheme": "doi",
+			"raw": "DOI:10.1000/182",
+			"canonical": "10.1000/182",
+			"note": "doi: prefix strips"
+		},
+		{
+			"id": "canon-doi-034",
+			"scheme": "doi",
+			"raw": "10.1000/182",
+			"canonical": "10.1000/182",
+			"note": "canonical DOI is idempotent"
+		},
+		{
+			"id": "canon-doi-035",
+			"scheme": "doi",
+			"raw": "10.1000/ABC",
+			"canonical": "10.1000/abc",
+			"note": "DOI suffix lowercases"
+		},
+		{
+			"id": "canon-doi-036",
+			"scheme": "doi",
+			"raw": "11.1000/182",
+			"canonical": null,
+			"note": "directory indicator must be 10"
+		},
+		{
+			"id": "canon-eidr-037",
+			"scheme": "eidr",
+			"raw": "https://doi.org/10.5240/7791-8534-2C23-9030-8610-5",
+			"canonical": "10.5240/7791-8534-2C23-9030-8610-5",
+			"note": "resolver URL form strips to bare EIDR"
+		},
+		{
+			"id": "canon-eidr-038",
+			"scheme": "eidr",
+			"raw": "10.5240/7791-8534-2c23-9030-8610-5",
+			"canonical": "10.5240/7791-8534-2C23-9030-8610-5",
+			"note": "lowercase EIDR uppercases"
+		},
+		{
+			"id": "canon-eidr-039",
+			"scheme": "eidr",
+			"raw": "10.5240/7791-8534-2C23-9030-8610",
+			"canonical": null,
+			"note": "missing check segment"
+		},
+		{
+			"id": "canon-wd-040",
+			"scheme": "wd",
+			"raw": "https://www.wikidata.org/wiki/Q42",
+			"canonical": "Q42",
+			"note": "wiki URL form strips to QID"
+		},
+		{
+			"id": "canon-wd-041",
+			"scheme": "wd",
+			"raw": "q42",
+			"canonical": "Q42",
+			"note": "lowercase QID uppercases"
+		},
+		{
+			"id": "canon-wd-042",
+			"scheme": "wd",
+			"raw": "Q42",
+			"canonical": "Q42",
+			"note": "canonical QID is idempotent"
+		},
+		{
+			"id": "canon-wd-043",
+			"scheme": "wd",
+			"raw": "Q042",
+			"canonical": null,
+			"note": "leading zero not canonical"
+		},
+		{
+			"id": "canon-wd-044",
+			"scheme": "wd",
+			"raw": "P31",
+			"canonical": null,
+			"note": "properties are not entities"
+		},
+		{
+			"id": "canon-mbid-045",
+			"scheme": "mbid",
+			"raw": "https://musicbrainz.org/artist/056e4f3e-d505-4dad-8ec1-d04f521cbb56",
+			"canonical": "artist:056e4f3e-d505-4dad-8ec1-d04f521cbb56",
+			"note": "URL form strips to type-scoped UUID"
+		},
+		{
+			"id": "canon-mbid-046",
+			"scheme": "mbid",
+			"raw": "recording:B1A9C0E9-D987-4042-AE91-78D6A3267D69",
+			"canonical": "recording:b1a9c0e9-d987-4042-ae91-78d6a3267d69",
+			"note": "uppercase UUID lowercases"
+		},
+		{
+			"id": "canon-mbid-047",
+			"scheme": "mbid",
+			"raw": "label:83eca2b3-5ae1-43f5-a732-56fa9a8591b1",
+			"canonical": "label:83eca2b3-5ae1-43f5-a732-56fa9a8591b1",
+			"note": "label entity type is registered"
+		},
+		{
+			"id": "canon-mbid-048",
+			"scheme": "mbid",
+			"raw": "work:39fb6ed0-a0d1-3a3d-9f77-4e0fcdadfa5e",
+			"canonical": "work:39fb6ed0-a0d1-3a3d-9f77-4e0fcdadfa5e",
+			"note": "work entity type is registered"
+		},
+		{
+			"id": "canon-mbid-049",
+			"scheme": "mbid",
+			"raw": "venue:056e4f3e-d505-4dad-8ec1-d04f521cbb56",
+			"canonical": null,
+			"note": "venue is not a registered MBID entity type"
+		},
+		{
+			"id": "canon-mbid-050",
+			"scheme": "mbid",
+			"raw": "artist:056e4f3e",
+			"canonical": null,
+			"note": "not a UUID"
+		},
+		{
+			"id": "canon-olid-051",
+			"scheme": "olid",
+			"raw": "https://openlibrary.org/works/OL45804W",
+			"canonical": "OL45804W",
+			"note": "works URL strips to OLID"
+		},
+		{
+			"id": "canon-olid-052",
+			"scheme": "olid",
+			"raw": "ol45804w",
+			"canonical": "OL45804W",
+			"note": "lowercase OLID uppercases"
+		},
+		{
+			"id": "canon-olid-053",
+			"scheme": "olid",
+			"raw": "OL7353617M",
+			"canonical": "OL7353617M",
+			"note": "edition OLID is idempotent"
+		},
+		{
+			"id": "canon-olid-054",
+			"scheme": "olid",
+			"raw": "OL34184A",
+			"canonical": "OL34184A",
+			"note": "author OLID is idempotent"
+		},
+		{
+			"id": "canon-olid-055",
+			"scheme": "olid",
+			"raw": "OL45804Z",
+			"canonical": null,
+			"note": "unknown suffix"
+		},
+		{
+			"id": "canon-imdb-056",
+			"scheme": "imdb",
+			"raw": "https://www.imdb.com/title/tt1375666/",
+			"canonical": "tt1375666",
+			"note": "title URL strips to ID"
+		},
+		{
+			"id": "canon-imdb-057",
+			"scheme": "imdb",
+			"raw": "TT1375666",
+			"canonical": "tt1375666",
+			"note": "uppercase ID lowercases"
+		},
+		{
+			"id": "canon-imdb-058",
+			"scheme": "imdb",
+			"raw": "nm0000138",
+			"canonical": "nm0000138",
+			"note": "name ID is idempotent"
+		},
+		{
+			"id": "canon-imdb-059",
+			"scheme": "imdb",
+			"raw": "tt123",
+			"canonical": null,
+			"note": "fewer than 6 digits"
+		},
+		{
+			"id": "canon-tmdb-060",
+			"scheme": "tmdb",
+			"raw": "https://www.themoviedb.org/movie/27205-inception",
+			"canonical": "movie:27205",
+			"note": "URL with slug strips to type-scoped ID"
+		},
+		{
+			"id": "canon-tmdb-061",
+			"scheme": "tmdb",
+			"raw": "tv/1399",
+			"canonical": "tv:1399",
+			"note": "slash separator canonicalizes to colon"
+		},
+		{
+			"id": "canon-tmdb-062",
+			"scheme": "tmdb",
+			"raw": "person:6193",
+			"canonical": "person:6193",
+			"note": "person ID is idempotent"
+		},
+		{
+			"id": "canon-tmdb-063",
+			"scheme": "tmdb",
+			"raw": "collection:10",
+			"canonical": null,
+			"note": "collection is not a registered TMDB type"
+		},
+		{
+			"id": "canon-podcastguid-064",
+			"scheme": "podcastguid",
+			"raw": "917393E3-1B1E-5CEF-ACE4-EDAA54E1F810",
+			"canonical": "917393e3-1b1e-5cef-ace4-edaa54e1f810",
+			"note": "uppercase GUID lowercases"
+		},
+		{
+			"id": "canon-podcastguid-065",
+			"scheme": "podcastguid",
+			"raw": "not-a-uuid",
+			"canonical": null,
+			"note": "not a UUID"
+		},
+		{
+			"id": "canon-url-066",
+			"scheme": "url",
+			"raw": "http://www.Example.com:80/path/?utm_source=x&b=2&a=1#frag",
+			"canonical": "https://example.com/path?a=1&b=2",
+			"note": "folds scheme, strips www/port/fragment/tracking, sorts query, trims trailing slash"
+		},
+		{
+			"id": "canon-url-067",
+			"scheme": "url",
+			"raw": "https://en.wikipedia.org/wiki/Brad_Pitt",
+			"canonical": "https://en.wikipedia.org/wiki/Brad_Pitt",
+			"note": "path case is preserved"
+		},
+		{
+			"id": "canon-url-068",
+			"scheme": "url",
+			"raw": "https://example.com/",
+			"canonical": "https://example.com",
+			"note": "root trailing slash strips"
+		},
+		{
+			"id": "canon-url-069",
+			"scheme": "url",
+			"raw": "ftp://example.com/file",
+			"canonical": null,
+			"note": "non-http(s) scheme"
+		},
+		{
+			"id": "canon-url-070",
+			"scheme": "url",
+			"raw": "not a url",
+			"canonical": null,
+			"note": "unparseable"
+		},
+		{
+			"id": "canon-caip10-071",
+			"scheme": "caip10",
+			"raw": "eip155:1:0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+			"canonical": "eip155:1:0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+			"note": "eip155 address lowercases (no EIP-55 at the ID layer)"
+		},
+		{
+			"id": "canon-caip10-072",
+			"scheme": "caip10",
+			"raw": "cosmos:cosmoshub-4:cosmos1t2uflqwqe0fsj0shcfkrvpukewcw40yjj6hdc0",
+			"canonical": "cosmos:cosmoshub-4:cosmos1t2uflqwqe0fsj0shcfkrvpukewcw40yjj6hdc0",
+			"note": "non-eip155 namespaces pass through"
+		},
+		{
+			"id": "canon-caip10-073",
+			"scheme": "caip10",
+			"raw": "eip155:1:0xd8da6bf2",
+			"canonical": null,
+			"note": "eip155 address must be 20 bytes"
+		},
+		{
+			"id": "canon-caip19-074",
+			"scheme": "caip19",
+			"raw": "eip155:1/erc20:0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+			"canonical": "eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+			"note": "erc20 asset reference lowercases"
+		},
+		{
+			"id": "canon-caip19-075",
+			"scheme": "caip19",
+			"raw": "eip155:1/erc721:0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D",
+			"canonical": "eip155:1/erc721:0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d",
+			"note": "erc721 canonicalizes; classification narrowing is a registry concern"
+		},
+		{
+			"id": "canon-caip19-076",
+			"scheme": "caip19",
+			"raw": "eip155:1:erc20:0xA0b8",
+			"canonical": null,
+			"note": "missing slash separator"
+		},
+		{
+			"id": "canon-hash-077",
+			"scheme": "hash",
+			"raw": "sha256:0x9F86D081884C7D659A2FEAA0C55AD015A3BF4F1B2B0B822CD15D6C15B0F00A08",
+			"canonical": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+			"note": "0x prefix strips, digest lowercases"
+		},
+		{
+			"id": "canon-hash-078",
+			"scheme": "hash",
+			"raw": "keccak256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+			"canonical": "keccak256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+			"note": "keccak256 is a registered algorithm"
+		},
+		{
+			"id": "canon-hash-079",
+			"scheme": "hash",
+			"raw": "md5:9f86d081884c7d659a2feaa0c55ad015",
+			"canonical": null,
+			"note": "md5 is not a registered algorithm"
+		},
+		{
+			"id": "canon-appid-080",
+			"scheme": "appid",
+			"raw": "ios:com.Spotify.Client",
+			"canonical": "ios:com.spotify.client",
+			"note": "bundle ID lowercases"
+		},
+		{
+			"id": "canon-appid-081",
+			"scheme": "appid",
+			"raw": "android:com.spotify.music",
+			"canonical": "android:com.spotify.music",
+			"note": "android package name"
+		},
+		{
+			"id": "canon-appid-082",
+			"scheme": "appid",
+			"raw": "windows:spotify",
+			"canonical": null,
+			"note": "unregistered store"
+		},
+		{
+			"id": "canon-purl-083",
+			"scheme": "purl",
+			"raw": "pkg:npm/react@18.2.0",
+			"canonical": "npm/react",
+			"note": "pkg: prefix and version strip"
+		},
+		{
+			"id": "canon-purl-084",
+			"scheme": "purl",
+			"raw": "npm/react",
+			"canonical": "npm/react",
+			"note": "canonical purl is idempotent"
+		},
+		{
+			"id": "canon-purl-085",
+			"scheme": "purl",
+			"raw": "pkg:golang/github.com/gorilla/mux",
+			"canonical": "golang/github.com/gorilla/mux",
+			"note": "nested path purl"
+		},
+		{
+			"id": "canon-purl-086",
+			"scheme": "purl",
+			"raw": "react",
+			"canonical": null,
+			"note": "missing ecosystem"
+		},
+		{
+			"id": "canon-geo-087",
+			"scheme": "geo",
+			"raw": "9q8yyk8y",
+			"canonical": "9q8yyk8y",
+			"note": "canonical geohash is idempotent"
+		},
+		{
+			"id": "canon-geo-088",
+			"scheme": "geo",
+			"raw": "9Q8YYK8Y",
+			"canonical": "9q8yyk8y",
+			"note": "uppercase geohash lowercases"
+		},
+		{
+			"id": "canon-geo-089",
+			"scheme": "geo",
+			"raw": "9q8yyk8a",
+			"canonical": null,
+			"note": "a is not in the geohash alphabet"
+		},
+		{
+			"id": "canon-acct-090",
+			"scheme": "acct",
+			"raw": "github:583231",
+			"canonical": "github:583231",
+			"note": "strong form: immutable numeric ID, case preserved"
+		},
+		{
+			"id": "canon-acct-091",
+			"scheme": "acct",
+			"raw": "twitter:@Jack",
+			"canonical": "twitter:@jack",
+			"note": "weak handle form applies NORM-1"
+		},
+		{
+			"id": "canon-acct-092",
+			"scheme": "acct",
+			"raw": "GitHub:MonaLisa",
+			"canonical": "github:MonaLisa",
+			"note": "platform lowercases; strong ID case preserved"
+		},
+		{
+			"id": "canon-acct-093",
+			"scheme": "acct",
+			"raw": "github:",
+			"canonical": null,
+			"note": "empty identifier"
+		},
+		{
+			"id": "canon-rssitem-094",
+			"scheme": "rssitem",
+			"raw": "917393E3-1B1E-5CEF-ACE4-EDAA54E1F810:1A2B3C4D5E6F7A8B9C0D1E2F3A4B5C6D",
+			"canonical": "917393e3-1b1e-5cef-ace4-edaa54e1f810:1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d",
+			"note": "feed GUID + item hash lowercase"
+		},
+		{
+			"id": "canon-rssitem-095",
+			"scheme": "rssitem",
+			"raw": "not-a-uuid:1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d",
+			"canonical": null,
+			"note": "feed GUID must be a UUID"
+		},
+		{
+			"id": "canon-termset-096",
+			"scheme": "termset",
+			"raw": "1A2B3C4D5E6F7A8B9C0D1E2F3A4B5C6D:follow",
+			"canonical": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d:follow",
+			"note": "set hash lowercases, term code preserved"
+		},
+		{
+			"id": "canon-termset-097",
+			"scheme": "termset",
+			"raw": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d:Follow",
+			"canonical": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d:follow",
+			"note": "term code case folds"
+		},
+		{
+			"id": "canon-termset-098",
+			"scheme": "termset",
+			"raw": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d:-follow",
+			"canonical": null,
+			"note": "term code must start alphanumeric"
+		},
+		{
+			"id": "canon-gen1-099",
+			"scheme": "gen1",
+			"raw": "movie:r4:fb681afe7d438cad73ae90a70f1cc55a",
+			"canonical": "movie:r4:fb681afe7d438cad73ae90a70f1cc55a",
+			"note": "well-formed gen1 value is accepted as-is"
+		},
+		{
+			"id": "canon-gen1-100",
+			"scheme": "gen1",
+			"raw": "movie:r0:fb681afe7d438cad73ae90a70f1cc55a",
+			"canonical": null,
+			"note": "rung tags start at 1"
+		},
+		{
+			"id": "canon-gen1-101",
+			"scheme": "gen1",
+			"raw": "movie:r4:FB681AFE7D438CAD73AE90A70F1CC55A",
+			"canonical": null,
+			"note": "hash must be lowercase"
+		}
+	]
+}

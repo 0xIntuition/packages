@@ -1,0 +1,85 @@
+{
+	"specVersion": "0.1.0",
+	"fixtureVersion": 1,
+	"kind": "norm1",
+	"vectors": [
+		{
+			"id": "norm1-001",
+			"input": "  Inception  ",
+			"output": "inception",
+			"note": "trim and case fold"
+		},
+		{
+			"id": "norm1-002",
+			"input": "Don’t Stop Me Now",
+			"output": "don't stop me now",
+			"note": "curly apostrophe folds"
+		},
+		{
+			"id": "norm1-003",
+			"input": "STRAẞE",
+			"output": "strasse",
+			"note": "capital sharp s full-folds to ss"
+		},
+		{
+			"id": "norm1-004",
+			"input": "Straße",
+			"output": "strasse",
+			"note": "sharp s full-folds to ss"
+		},
+		{
+			"id": "norm1-005",
+			"input": "Sigur Rós",
+			"output": "sigur rós",
+			"note": "diacritics preserved"
+		},
+		{
+			"id": "norm1-006",
+			"input": "Björk",
+			"output": "björk",
+			"note": "no diacritic stripping — Björk and Bjork differ"
+		},
+		{
+			"id": "norm1-007",
+			"input": "The\tBeatles",
+			"output": "the beatles",
+			"note": "internal whitespace collapses"
+		},
+		{
+			"id": "norm1-008",
+			"input": "Ｍｅｔａ",
+			"output": "meta",
+			"note": "full-width forms fold via NFKC"
+		},
+		{
+			"id": "norm1-009",
+			"input": "Jay–Z",
+			"output": "jay-z",
+			"note": "en dash folds to hyphen"
+		},
+		{
+			"id": "norm1-010",
+			"input": "“Quoted”",
+			"output": "\"quoted\"",
+			"note": "curly double quotes fold"
+		},
+		{
+			"id": "norm1-011",
+			"input": "οδός",
+			"output": "οδόσ",
+			"note": "Greek final sigma folds to sigma"
+		},
+		{
+			"id": "norm1-012",
+			"input": "café",
+			"output": "café",
+			"note": "NFC composed form is stable"
+		},
+		{
+			"id": "norm1-013",
+			"input": "café",
+			"output": "café",
+			"note": "decomposed accent composes via NFKC"
+		}
+	]
+}

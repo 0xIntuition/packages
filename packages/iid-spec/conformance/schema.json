@@ -1,0 +1,211 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://github.com/0xIntuition/packages/tree/main/packages/iid-spec/conformance/schema.json",
+	"title": "IID conformance fixture file",
+	"description": "Schema for the versioned machine-readable conformance vectors shipped with @0xintuition/iid-spec. Vectors are normative: a conforming implementation must reproduce every vector exactly.",
+	"type": "object",
+	"required": ["specVersion", "fixtureVersion", "kind"],
+	"properties": {
+		"specVersion": {
+			"type": "string",
+			"pattern": "^\\d+\\.\\d+\\.\\d+$",
+			"description": "The IID specification version these vectors were ratified against."
+		},
+		"fixtureVersion": {
+			"type": "integer",
+			"minimum": 1,
+			"description": "Monotonic fixture-file revision. Vectors are append-only; changing an existing vector's expected output is an identity-impacting change requiring explicit migration approval."
+		},
+		"kind": {
+			"enum": ["canonicalization", "norm1", "gen1", "parse", "validation", "schemes"]
+		}
+	},
+	"oneOf": [
+		{
+			"properties": {
+				"kind": { "const": "canonicalization" },
+				"vectors": {
+					"type": "array",
+					"minItems": 1,
+					"items": {
+						"type": "object",
+						"required": ["id", "scheme", "raw", "canonical"],
+						"additionalProperties": false,
+						"properties": {
+							"id": { "$ref": "#/$defs/vectorId" },
+							"scheme": { "$ref": "#/$defs/schemeName" },
+							"raw": { "type": "string", "minLength": 1 },
+							"canonical": {
+								"type": ["string", "null"],
+								"description": "The scheme's canonical value, or null when the raw input must be rejected."
+							},
+							"note": { "type": "string" }
+						}
+					}
+				}
+			},
+			"required": ["vectors"]
+		},
+		{
+			"properties": {
+				"kind": { "const": "norm1" },
+				"vectors": {
+					"type": "array",
+					"minItems": 1,
+					"items": {
+						"type": "object",
+						"required": ["id", "input", "output"],
+						"additionalProperties": false,
+						"properties": {
+							"id": { "$ref": "#/$defs/vectorId" },
+							"input": { "type": "string" },
+							"output": { "type": "string" },
+							"note": { "type": "string" }
+						}
+					}
+				}
+			},
+			"required": ["vectors"]
+		},
+		{
+			"properties": {
+				"kind": { "const": "gen1" },
+				"vectors": {
+					"type": "array",
+					"minItems": 1,
+					"items": {
+						"type": "object",
+						"required": ["id", "slug", "tag", "fields", "preimage", "iid"],
+						"additionalProperties": false,
+						"properties": {
+							"id": { "$ref": "#/$defs/vectorId" },
+							"slug": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+							"tag": { "type": "integer", "minimum": 1 },
+							"fields": {
+								"type": "object",
+								"minProperties": 1,
+								"additionalProperties": { "type": "string" }
+							},
+							"preimage": {
+								"type": "string",
+								"description": "The exact UTF-8 JSON preimage hashed by keccak-256 (spec §6.3 step 3)."
+							},
+							"iid": {
+								"type": "string",
+								"pattern": "^int:gen1:[a-z0-9-]+:r[1-9][0-9]*:[0-9a-f]{32}$"
+							},
+							"note": { "type": "string" }
+						}
+					}
+				}
+			},
+			"required": ["vectors"]
+		},
+		{
+			"properties": {
+				"kind": { "const": "parse" },
+				"vectors": {
+					"type": "array",
+					"minItems": 1,
+					"items": {
+						"type": "object",
+						"required": ["id", "input", "scheme", "value"],
+						"additionalProperties": false,
+						"properties": {
+							"id": { "$ref": "#/$defs/vectorId" },
+							"input": { "type": "string" },
+							"scheme": {
+								"type": ["string", "null"],
+								"description": "Expected parsed scheme, or null when parsing must reject."
+							},
+							"value": { "type": ["string", "null"] },
+							"note": { "type": "string" }
+						}
+					}
+				}
+			},
+			"required": ["vectors"]
+		},
+		{
+			"properties": {
+				"kind": { "const": "validation" },
+				"vectors": {
+					"type": "array",
+					"minItems": 1,
+					"items": {
+						"type": "object",
+						"required": ["id", "iid", "valid", "anchorEligible"],
+						"additionalProperties": false,
+						"properties": {
+							"id": { "$ref": "#/$defs/vectorId" },
+							"iid": { "type": "string" },
+							"valid": { "type": "boolean" },
+							"anchorEligible": {
+								"type": "boolean",
+								"description": "Whether the IID may be minted as a bare P0 anchor (spec §7.2)."
+							},
+							"note": { "type": "string" }
+						}
+					}
+				}
+			},
+			"required": ["vectors"]
+		},
+		{
+			"properties": {
+				"kind": { "const": "schemes" },
+				"schemes": {
+					"type": "object",
+					"minProperties": 26,
+					"additionalProperties": {
+						"type": "object",
+						"required": ["class", "typing"],
+						"additionalProperties": false,
+						"properties": {
+							"class": { "enum": ["A", "B", "C"] },
+							"typing": { "enum": ["unambiguous", "polymorphic"] }
+						}
+					}
+				}
+			},
+			"required": ["schemes"]
+		}
+	],
+	"$defs": {
+		"vectorId": {
+			"type": "string",
+			"pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+			"description": "Stable fixture ID, unique across all conformance files."
+		},
+		"schemeName": {
+			"enum": [
+				"isbn",
+				"isrc",
+				"iswc",
+				"isni",
+				"orcid",
+				"lei",
+				"gtin",
+				"doi",
+				"eidr",
+				"wd",
+				"mbid",
+				"olid",
+				"imdb",
+				"tmdb",
+				"podcastguid",
+				"url",
+				"caip10",
+				"caip19",
+				"hash",
+				"appid",
+				"purl",
+				"geo",
+				"acct",
+				"rssitem",
+				"termset",
+				"gen1"
+			]
+		}
+	}
+}
