@@ -1,6 +1,6 @@
 {
 	"name": "@0xintuition/packages-monorepo",
-	"version": "0.0.0",
+	"version": "v1.1.0-alpha",
 	"private": true,
 	"description": "Public Intuition packages monorepo for alpha package publication.",
 	"license": "MIT",
