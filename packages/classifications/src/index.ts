@@ -5,6 +5,7 @@ export {
 	getClassification,
 	getClassificationsByCategory,
 	getMetadataPredicatesFor,
+	identityLadderFor,
 	hasClassification,
 } from './classifications.js';
 export type {
