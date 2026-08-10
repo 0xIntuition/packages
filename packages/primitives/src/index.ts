@@ -41,6 +41,8 @@ export {
 	shortenHex,
 	TRIPLE_SALT,
 } from '@0xintuition/ids';
+// Predicate helpers
+export { buildIidAnchor, DEFAULT_URI_LIMITS } from './anchor.js';
 // Atom builders
 export {
 	buildAggregateRating,
@@ -89,21 +91,23 @@ export {
 	listClassifications,
 	suggestClassification,
 } from './discover.js';
-
-// Predicate helpers
 export { buildCustomPredicate, getPredicateInfo, listPredicates } from './predicate.js';
 // Triple builders
 export { buildCounterTriple, buildTriple, buildTripleByName } from './triple.js';
 // Types
 export type {
+	AnchorProfile,
+	AtomAnchor,
 	AtomBlueprint,
 	BuildResult,
 	ClassificationSummary,
 	CounterTripleBlueprint,
 	FieldInfo,
+	IidAnchorOptions,
 	PredicateInfo,
 	TripleBlueprint,
+	UriLimits,
 	ValidationResult,
 } from './types.js';
 // Validation helpers
-export { isValidAtomData, validateAtom } from './validate.js';
+export { isValidAtomData, recognizeAtomData, validateAtom } from './validate.js';
