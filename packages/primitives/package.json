@@ -42,6 +42,10 @@
 		"./types": {
 			"types": "./dist/types.d.ts",
 			"import": "./dist/types.js"
+		},
+		"./anchor": {
+			"types": "./dist/anchor.d.ts",
+			"import": "./dist/anchor.js"
 		}
 	},
 	"keywords": [
@@ -86,6 +90,8 @@
 	"dependencies": {
 		"@0xintuition/classifications": "0.1.0-alpha.1",
 		"@0xintuition/ids": "0.1.0-alpha.0",
+		"@0xintuition/iid": "0.1.0-alpha.0",
+		"@0xintuition/iid-registry": "0.1.0-alpha.0",
 		"@0xintuition/predicates": "0.1.0-alpha.0"
 	},
 	"peerDependencies": {
