@@ -1,8 +1,8 @@
 {
 	"name": "@0xintuition/packages-monorepo",
-	"version": "v1.1.0-alpha",
+	"version": "0.0.0",
 	"private": true,
-	"description": "Public Intuition packages monorepo for alpha package publication.",
+	"description": "Public Intuition packages monorepo for alpha package publication. The root package is private and never published; release trains are labeled by branch/PR name, not by this version.",
 	"license": "MIT",
 	"type": "module",
 	"packageManager": "bun@1.3.3",
@@ -26,6 +26,7 @@
 		"classifications:generate-creation-profiles": "bun scripts/generate-classification-creation-profiles.mjs",
 		"classifications:check-creation-profiles": "node scripts/check-classification-creation-profiles.mjs",
 		"predicates:check-generated": "node scripts/check-predicate-generation.mjs",
+		"registry:check": "node scripts/package-registry.mjs",
 		"pack:dry-run": "node scripts/pack-dry-run.mjs",
 		"smoke:tarballs": "node scripts/smoke-tarballs.mjs",
 		"guard:supply-chain": "node scripts/guard-supply-chain-policy.mjs",

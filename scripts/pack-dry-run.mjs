@@ -3,23 +3,14 @@
 import { execFileSync } from 'node:child_process';
 import { statSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { PACKAGE_ORDER, assertRegistryIntegrity, packageRootFor } from './package-registry.mjs';
 
 const repoRoot = resolve(new URL('..', import.meta.url).pathname);
-const packageOrder = [
-	'deployments',
-	'curves',
-	'ids',
-	'schema-org',
-	'classifications',
-	'predicates',
-	'primitives',
-	'protocol',
-	'periphery',
-	'react',
-];
 
-for (const packageName of packageOrder) {
-	const packageRoot = resolve(repoRoot, 'packages', packageName);
+assertRegistryIntegrity(repoRoot);
+
+for (const packageName of PACKAGE_ORDER) {
+	const packageRoot = packageRootFor(repoRoot, packageName);
 	if (!statSync(packageRoot).isDirectory()) {
 		throw new Error(`Missing package directory: ${packageName}`);
 	}

@@ -5,21 +5,16 @@ import { execFileSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import {
+	PACKAGES,
+	assertRegistryIntegrity,
+	packageRootFor,
+	requiredTarballFiles,
+} from './package-registry.mjs';
 
 const repoRoot = resolve(new URL('..', import.meta.url).pathname);
 const tempRoot = mkdtempSync(join(tmpdir(), 'intuition-packages-smoke-'));
-const packageOrder = [
-	'deployments',
-	'curves',
-	'ids',
-	'schema-org',
-	'classifications',
-	'predicates',
-	'primitives',
-	'protocol',
-	'periphery',
-	'react',
-];
+const workspaceManifests = assertRegistryIntegrity(repoRoot);
 const tarballPaths = [];
 const tarballPackageJsons = new Map();
 
@@ -37,7 +32,7 @@ function run(command, args, cwd = tempRoot) {
 }
 
 function packageRoot(packageName) {
-	return resolve(repoRoot, 'packages', packageName);
+	return packageRootFor(repoRoot, packageName);
 }
 
 function readTarballPackageJson(tarballPath) {
@@ -45,12 +40,7 @@ function readTarballPackageJson(tarballPath) {
 }
 
 const workspacePackageVersions = new Map(
-	packageOrder.map((packageName) => {
-		const packageJson = JSON.parse(
-			run('node', ['-p', 'JSON.stringify(require("./package.json"))'], packageRoot(packageName))
-		);
-		return [packageJson.name, packageJson.version];
-	})
+	[...workspaceManifests.values()].map((manifest) => [manifest.name, manifest.version])
 );
 
 function assertNoWorkspaceProtocol(packageJson, packageName) {
@@ -91,12 +81,14 @@ function assertInternalDependencyVersions(packageJson, packageName) {
 }
 
 try {
-	for (const packageName of packageOrder) {
+	for (const { dirName: packageName, kind } of PACKAGES) {
 		const cwd = packageRoot(packageName);
-		run('bun', ['run', 'build'], cwd);
+		if (kind === 'compiled') {
+			run('bun', ['run', 'build'], cwd);
+		}
 		const dryRun = JSON.parse(run('npm', ['pack', '--ignore-scripts', '--dry-run', '--json'], cwd));
 		const packedFiles = new Set(dryRun[0]?.files?.map((entry) => entry.path));
-		for (const filePath of ['dist/index.js', 'dist/index.d.ts', 'README.md', 'LICENSE']) {
+		for (const filePath of requiredTarballFiles(kind)) {
 			assert(packedFiles.has(filePath), `${packageName} tarball is missing ${filePath}`);
 		}
 		for (const filePath of packedFiles) {
