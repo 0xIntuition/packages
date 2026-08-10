@@ -5,8 +5,8 @@ export {
 	getClassification,
 	getClassificationsByCategory,
 	getMetadataPredicatesFor,
-	identityLadderFor,
 	hasClassification,
+	identityLadderFor,
 } from './classifications.js';
 export type {
 	CreationField,
