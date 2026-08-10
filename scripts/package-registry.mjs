@@ -28,6 +28,7 @@ export const PACKAGES = [
 	{ dirName: 'ids', kind: 'compiled' },
 	{ dirName: 'schema-org', kind: 'compiled' },
 	{ dirName: 'classifications', kind: 'compiled' },
+	{ dirName: 'iid-registry', kind: 'compiled' },
 	{ dirName: 'predicates', kind: 'compiled' },
 	{ dirName: 'primitives', kind: 'compiled' },
 	{ dirName: 'protocol', kind: 'compiled' },
