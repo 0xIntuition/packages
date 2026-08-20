@@ -31,12 +31,19 @@
     },
     "packages/classifications": {
       "name": "@0xintuition/classifications",
-      "version": "0.1.0-alpha.0",
+      "version": "0.1.0-alpha.1",
+      "dependencies": {
+        "@0xintuition/iid": "0.1.0-alpha.0",
+      },
       "devDependencies": {
         "@0xintuition/predicates": "0.1.0-alpha.0",
         "@0xintuition/schema-org": "0.1.0-alpha.0",
         "typescript": "^5.9.3",
+        "viem": "^2.31.4",
         "vitest": "^4.0.16",
+      },
+      "peerDependencies": {
+        "viem": "^2.0.0",
       },
     },
     "packages/curves": {
@@ -84,6 +91,23 @@
         "viem": "^2.0.0",
       },
     },
+    "packages/iid-registry": {
+      "name": "@0xintuition/iid-registry",
+      "version": "0.1.0-alpha.0",
+      "dependencies": {
+        "@0xintuition/classifications": "0.1.0-alpha.1",
+        "@0xintuition/iid": "0.1.0-alpha.0",
+      },
+      "devDependencies": {
+        "@0xintuition/schema-org": "0.1.0-alpha.0",
+        "typescript": "^5.9.3",
+        "viem": "^2.31.4",
+        "vitest": "^4.0.16",
+      },
+      "peerDependencies": {
+        "viem": "^2.0.0",
+      },
+    },
     "packages/iid-spec": {
       "name": "@0xintuition/iid-spec",
       "version": "0.1.0-alpha.0",
@@ -120,10 +144,12 @@
     },
     "packages/primitives": {
       "name": "@0xintuition/primitives",
-      "version": "0.1.0-alpha.0",
+      "version": "0.1.0-alpha.1",
       "dependencies": {
-        "@0xintuition/classifications": "0.1.0-alpha.0",
+        "@0xintuition/classifications": "0.1.0-alpha.1",
         "@0xintuition/ids": "0.1.0-alpha.0",
+        "@0xintuition/iid": "0.1.0-alpha.0",
+        "@0xintuition/iid-registry": "0.1.0-alpha.0",
         "@0xintuition/predicates": "0.1.0-alpha.0",
       },
       "devDependencies": {
@@ -216,6 +242,8 @@
     "@0xintuition/ids": ["@0xintuition/ids@workspace:packages/ids"],
 
     "@0xintuition/iid": ["@0xintuition/iid@workspace:packages/iid"],
+
+    "@0xintuition/iid-registry": ["@0xintuition/iid-registry@workspace:packages/iid-registry"],
 
     "@0xintuition/iid-spec": ["@0xintuition/iid-spec@workspace:packages/iid-spec"],
 

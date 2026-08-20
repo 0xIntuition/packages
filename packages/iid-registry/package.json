@@ -1,7 +1,7 @@
 {
-	"name": "@0xintuition/classifications",
-	"version": "0.1.0-alpha.1",
-	"description": "Canonical Intuition classification specs and atom data builders",
+	"name": "@0xintuition/iid-registry",
+	"version": "0.1.0-alpha.0",
+	"description": "Pure scheme-to-classification and scheme-to-provider resolution for Intuition Identifiers (IIDs): the semantic bridge between the IID grammar and Intuition classifications",
 	"private": false,
 	"license": "MIT",
 	"type": "module",
@@ -18,35 +18,25 @@
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.js"
 		},
-		"./package.json": "./package.json",
-		"./creation": {
-			"types": "./dist/generated/creation/index.d.ts",
-			"import": "./dist/generated/creation/index.js"
-		},
-		"./creation/*": {
-			"types": "./dist/generated/creation/*.d.ts",
-			"import": "./dist/generated/creation/*.js"
-		},
-		"./*": {
-			"types": "./dist/generated/specs/*.d.ts",
-			"import": "./dist/generated/specs/*.js"
-		}
+		"./package.json": "./package.json"
 	},
 	"keywords": [
 		"intuition",
-		"classifications",
-		"json-ld",
-		"schema"
+		"iid",
+		"identifier",
+		"classification",
+		"enrichment",
+		"registry"
 	],
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/0xIntuition/packages.git",
-		"directory": "packages/classifications"
+		"directory": "packages/iid-registry"
 	},
 	"bugs": {
 		"url": "https://github.com/0xIntuition/packages/issues"
 	},
-	"homepage": "https://github.com/0xIntuition/packages/tree/main/packages/classifications#readme",
+	"homepage": "https://github.com/0xIntuition/packages/tree/main/packages/iid-registry#readme",
 	"publishConfig": {
 		"access": "public",
 		"tag": "alpha"
@@ -54,8 +44,6 @@
 	"scripts": {
 		"build": "node ../../scripts/clean-dist.mjs && tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
 		"clean": "git clean -xdf .cache .turbo dist node_modules",
-		"creation-profiles:generate": "bun ../../scripts/generate-classification-creation-profiles.mjs",
-		"creation-profiles:check-generated": "node ../../scripts/check-classification-creation-profiles.mjs",
 		"dev": "tsc --watch",
 		"pack:dry-run": "bun run build && npm pack --ignore-scripts --dry-run --json",
 		"pack:release": "bun run build && node ../../scripts/pack-release.mjs",
@@ -73,17 +61,17 @@
 		"check:write": "biome check --write",
 		"check:unsafe:write": "biome check --write --unsafe"
 	},
+	"peerDependencies": {
+		"viem": "^2.0.0"
+	},
 	"devDependencies": {
-		"@0xintuition/predicates": "0.1.0-alpha.0",
 		"@0xintuition/schema-org": "0.1.0-alpha.0",
 		"typescript": "^5.9.3",
 		"viem": "^2.31.4",
 		"vitest": "^4.0.16"
 	},
 	"dependencies": {
+		"@0xintuition/classifications": "0.1.0-alpha.1",
 		"@0xintuition/iid": "0.1.0-alpha.0"
-	},
-	"peerDependencies": {
-		"viem": "^2.0.0"
 	}
 }
