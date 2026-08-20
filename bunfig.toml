@@ -2,3 +2,8 @@
 # Refuse to install package versions published less than 14 days ago.
 # Defense-in-depth against supply chain attacks using compromised credentials.
 minimumReleaseAge = 1209600
+
+# Approved, version-pinned exception. Bun can exempt only by package name, so
+# scripts/guard-supply-chain-policy.mjs binds this entry to the exact version,
+# integrity, and removal date recorded in supply-chain-exceptions.json.
+minimumReleaseAgeExcludes = ["@0xintuition/contracts-v2"]

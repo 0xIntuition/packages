@@ -5,21 +5,16 @@ import { execFileSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import {
+	assertRegistryIntegrity,
+	PACKAGES,
+	packageRootFor,
+	requiredTarballFiles,
+} from './package-registry.mjs';
 
 const repoRoot = resolve(new URL('..', import.meta.url).pathname);
 const tempRoot = mkdtempSync(join(tmpdir(), 'intuition-packages-smoke-'));
-const packageOrder = [
-	'deployments',
-	'curves',
-	'ids',
-	'schema-org',
-	'classifications',
-	'predicates',
-	'primitives',
-	'protocol',
-	'periphery',
-	'react',
-];
+const workspaceManifests = assertRegistryIntegrity(repoRoot);
 const tarballPaths = [];
 const tarballPackageJsons = new Map();
 
@@ -37,7 +32,7 @@ function run(command, args, cwd = tempRoot) {
 }
 
 function packageRoot(packageName) {
-	return resolve(repoRoot, 'packages', packageName);
+	return packageRootFor(repoRoot, packageName);
 }
 
 function readTarballPackageJson(tarballPath) {
@@ -45,12 +40,7 @@ function readTarballPackageJson(tarballPath) {
 }
 
 const workspacePackageVersions = new Map(
-	packageOrder.map((packageName) => {
-		const packageJson = JSON.parse(
-			run('node', ['-p', 'JSON.stringify(require("./package.json"))'], packageRoot(packageName))
-		);
-		return [packageJson.name, packageJson.version];
-	})
+	[...workspaceManifests.values()].map((manifest) => [manifest.name, manifest.version])
 );
 
 function assertNoWorkspaceProtocol(packageJson, packageName) {
@@ -91,21 +81,20 @@ function assertInternalDependencyVersions(packageJson, packageName) {
 }
 
 try {
-	for (const packageName of packageOrder) {
+	for (const { dirName: packageName, kind } of PACKAGES) {
 		const cwd = packageRoot(packageName);
-		run('bun', ['run', 'build'], cwd);
+		if (kind === 'compiled') {
+			run('bun', ['run', 'build'], cwd);
+		}
 		const dryRun = JSON.parse(run('npm', ['pack', '--ignore-scripts', '--dry-run', '--json'], cwd));
 		const packedFiles = new Set(dryRun[0]?.files?.map((entry) => entry.path));
-		for (const filePath of ['dist/index.js', 'dist/index.d.ts', 'README.md', 'LICENSE']) {
+		for (const filePath of requiredTarballFiles(kind)) {
 			assert(packedFiles.has(filePath), `${packageName} tarball is missing ${filePath}`);
 		}
 		for (const filePath of packedFiles) {
 			assert(!filePath.startsWith('src/'), `${packageName} tarball leaked source file ${filePath}`);
 		}
-		const tarballPath = run('bun', ['run', 'pack:release'], cwd)
-			.trim()
-			.split('\n')
-			.at(-1);
+		const tarballPath = run('bun', ['run', 'pack:release'], cwd).trim().split('\n').at(-1);
 		assert.ok(tarballPath, `${packageName} release pack did not return a tarball path`);
 		tarballPaths.push(tarballPath);
 		const tarballPackageJson = readTarballPackageJson(tarballPath);
@@ -147,6 +136,9 @@ try {
 		results.schemaOrgBookSubpath = schemaOrgBook.schemaOrgBook.name;
 		const classifications = await import('@0xintuition/classifications');
 		results.classification = classifications.getClassification('ethereum-account')?.type;
+		const iidLadder = await import('@0xintuition/iid-ladder');
+		results.iidLadder = iidLadder.projectIdentifierLadder({ strongIdentifiers: { isrc: 'USUM71703861' } });
+		results.iidLadderRejectsUnregistered = iidLadder.projectIdentifierLadder({ providerCanonicalId: 'spotify:track:1kcfGBb6kSrGqNIMW7rAlB' });
 		const ethereumAccountClassification = await import('@0xintuition/classifications/ethereum-account');
 		results.classificationSubpath = ethereumAccountClassification.ethereumAccount.type;
 		const musicRecordingCreation = await import('@0xintuition/classifications/creation/music-recording');
@@ -201,6 +193,12 @@ try {
 	assert.equal(nodeResult.schemaOrgBookAuthorOrigin, 'CreativeWork');
 	assert.equal(nodeResult.schemaOrgBookSubpath, 'Book');
 	assert.equal(nodeResult.classification, 'EthereumAccount');
+	assert.deepEqual(nodeResult.iidLadder, { iid: 'int:isrc:USUM71703861', rung: 'strong' });
+	assert.deepEqual(nodeResult.iidLadderRejectsUnregistered, {
+		fallback: 'envelope',
+		iid: null,
+		reason: 'unregistered-provider',
+	});
 	assert.equal(nodeResult.classificationSubpath, 'EthereumAccount');
 	assert.equal(nodeResult.musicRecordingCreationProfile, 'music-recording');
 	assert.equal(nodeResult.musicRecordingCreationRelationshipCount, 5);
@@ -228,6 +226,7 @@ try {
 
 	const bunResult = JSON.parse(run('bun', ['--eval', importProgram]).trim());
 	assert.equal(bunResult.musicRecordingCreationProfile, 'music-recording');
+	assert.deepEqual(bunResult.iidLadder, { iid: 'int:isrc:USUM71703861', rung: 'strong' });
 	assert.equal(bunResult.creationProfileIncludesMusicRecording, true);
 	assert.equal(bunResult.followSubpath, 'follow');
 	assert.equal(bunResult.primitiveAtomSubpath, 'function');

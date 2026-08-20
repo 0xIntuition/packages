@@ -1,0 +1,105 @@
+{
+	"specVersion": "0.1.0",
+	"fixtureVersion": 1,
+	"kind": "validation",
+	"vectors": [
+		{
+			"id": "valid-001",
+			"iid": "int:isrc:USRC17607839",
+			"valid": true,
+			"anchorEligible": true,
+			"note": "golden P0 anchor: Class A, unambiguously typed"
+		},
+		{
+			"id": "valid-002",
+			"iid": "int:isbn:9780684832722",
+			"valid": true,
+			"anchorEligible": true,
+			"note": "Class A T1, unambiguous — anchor eligible"
+		},
+		{
+			"id": "valid-003",
+			"iid": "int:isbn:0-684-83272-0",
+			"valid": false,
+			"anchorEligible": false,
+			"note": "well-formed but not canonical — never a valid anchor"
+		},
+		{
+			"id": "valid-004",
+			"iid": "int:isrc:US-RC1-76-07839",
+			"valid": false,
+			"anchorEligible": false,
+			"note": "formatted ISRC is not canonical"
+		},
+		{
+			"id": "valid-005",
+			"iid": "int:caip19:eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+			"valid": true,
+			"anchorEligible": true,
+			"note": "Class B, unambiguous — anchor eligible"
+		},
+		{
+			"id": "valid-006",
+			"iid": "int:wd:Q42",
+			"valid": true,
+			"anchorEligible": false,
+			"note": "valid but polymorphic — floors at P1"
+		},
+		{
+			"id": "valid-007",
+			"iid": "int:caip10:eip155:1:0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+			"valid": true,
+			"anchorEligible": false,
+			"note": "account-or-contract: polymorphic"
+		},
+		{
+			"id": "valid-008",
+			"iid": "int:url:https://example.com/path",
+			"valid": true,
+			"anchorEligible": false,
+			"note": "URL addresses anything: polymorphic"
+		},
+		{
+			"id": "valid-009",
+			"iid": "int:gen1:movie:r4:fb681afe7d438cad73ae90a70f1cc55a",
+			"valid": true,
+			"anchorEligible": false,
+			"note": "Class C never anchors even though unambiguously typed"
+		},
+		{
+			"id": "valid-010",
+			"iid": "int:mbid:artist:056e4f3e-d505-4dad-8ec1-d04f521cbb56",
+			"valid": true,
+			"anchorEligible": true,
+			"note": "type segment in value: unambiguous"
+		},
+		{
+			"id": "valid-011",
+			"iid": "int:olid:OL45804W",
+			"valid": true,
+			"anchorEligible": true,
+			"note": "W suffix types the value"
+		},
+		{
+			"id": "valid-012",
+			"iid": "int:iswc:T0345246801",
+			"valid": true,
+			"anchorEligible": true,
+			"note": "valid ISWC — classification mapping is a registry concern"
+		},
+		{
+			"id": "valid-013",
+			"iid": "int:src:anything",
+			"valid": false,
+			"anchorEligible": false,
+			"note": "unregistered scheme"
+		},
+		{
+			"id": "valid-014",
+			"iid": "int:acct:github:583231",
+			"valid": true,
+			"anchorEligible": true,
+			"note": "strong acct form is anchor eligible"
+		}
+	]
+}

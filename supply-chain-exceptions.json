@@ -1,0 +1,13 @@
+{
+	"schemaVersion": 1,
+	"minimumReleaseAge": [
+		{
+			"package": "@0xintuition/contracts-v2",
+			"version": "1.1.0-alpha.0",
+			"integrity": "sha512-vt9GFaFXYAeigLyl/4i6hPpLO4NBrZDyWJrM2M7aHuQ39/qSpxqMmIzetoAtpBWWx4AzM5wccUsXJvVST02saA==",
+			"publishedAt": "2026-08-04T19:56:37.884Z",
+			"removeAfter": "2026-08-18T19:56:37.884Z",
+			"reason": "Approved to generate and verify the URI-aware protocol artifacts required for the Intuition Identifier migration."
+		}
+	]
+}

@@ -45,7 +45,7 @@ Use `fields` to render atom inputs and `relationships` to suggest triples such a
 | Layer | Packages | Purpose |
 | --- | --- | --- |
 | Semantic / data modeling | `schema-org`, `classifications`, `predicates` | Canonical vocabulary, schema references, recommended atom fields, metadata predicates, and relationship guardrails |
-| Identity | `ids` | Deterministic content-addressable IDs for atoms, predicates, triples, counter-triples, and OAuth atoms |
+| Identity | `iid-spec`, `iid`, `iid-registry`, `iid-ladder`, `ids` | Canonical real-world identifiers, semantic/provider resolution, deterministic input projection, and content-addressable protocol IDs |
 | Builder helpers | `primitives` | Higher-level atom, predicate, triple, discovery, and validation helpers |
 | Protocol plumbing | `protocol`, `deployments`, `periphery`, `curves`, `react` | ABIs, chain/deployment metadata, bridge/router helpers, curve math, and React hooks |
 
@@ -55,6 +55,10 @@ Use `fields` to render atom inputs and `relationships` to suggest triples such a
 - [`@0xintuition/classifications`](https://www.npmjs.com/package/@0xintuition/classifications) - Intuition classification specs, Creation Profiles, recommended atom fields, and metadata predicates.
 - [`@0xintuition/predicates`](https://www.npmjs.com/package/@0xintuition/predicates) - canonical predicate registry, deterministic predicate IDs, launch constants, and display helpers.
 - [`@0xintuition/ids`](https://www.npmjs.com/package/@0xintuition/ids) - deterministic atom, predicate, triple, counter-triple, and OAuth atom IDs.
+- [`@0xintuition/iid-spec`](https://www.npmjs.com/package/@0xintuition/iid-spec) - normative Intuition Identifier specification and conformance corpus.
+- [`@0xintuition/iid`](https://www.npmjs.com/package/@0xintuition/iid) - pure IID parsing, canonicalization, validation, and derivation.
+- [`@0xintuition/iid-registry`](https://www.npmjs.com/package/@0xintuition/iid-registry) - pure IID-to-classification, provider, and identifier-hint resolution.
+- [`@0xintuition/iid-ladder`](https://www.npmjs.com/package/@0xintuition/iid-ladder) - strong identifier, registered provider-handle, and canonical-URL projection for application and seed inputs.
 - [`@0xintuition/primitives`](https://www.npmjs.com/package/@0xintuition/primitives) - high-level builders and validators for off-chain Intuition data.
 - [`@0xintuition/protocol`](https://www.npmjs.com/package/@0xintuition/protocol) - core contract ABIs, event parsers, and protocol interaction helpers.
 - [`@0xintuition/deployments`](https://www.npmjs.com/package/@0xintuition/deployments) - Intuition chain metadata and core protocol deployment addresses.

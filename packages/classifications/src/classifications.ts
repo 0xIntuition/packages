@@ -1,3 +1,4 @@
+import type { IdentityLadder } from '@0xintuition/iid';
 import { CLASSIFICATION_SPECS as GENERATED_CLASSIFICATION_SPECS } from './generated/index.js';
 import type { ClassificationCategory, ClassificationSpec, PredicateKeyReference } from './types.js';
 
@@ -36,6 +37,26 @@ export function getMetadataPredicatesFor(
 	slug: string
 ): readonly PredicateKeyReference[] | undefined {
 	return CLASSIFICATION_MAP.get(slug)?.metadataPredicates;
+}
+
+/**
+ * A classification's identity ladder in the shape the `@0xintuition/iid`
+ * derivation engine consumes (`deriveIntuitionId(ladder, values)`), or
+ * `undefined` when the classification does not exist or declares no
+ * identity. The gen1 hash namespace is the classification slug.
+ */
+export function identityLadderFor(slug: string): IdentityLadder | undefined {
+	const spec = CLASSIFICATION_MAP.get(slug);
+
+	if (!spec?.identity) {
+		return undefined;
+	}
+
+	return {
+		slug: spec.slug,
+		identifies: spec.identity.identifies,
+		rungs: spec.identity.ladder,
+	};
 }
 
 function deepFreeze<T>(value: T): T {

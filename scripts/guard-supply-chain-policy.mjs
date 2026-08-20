@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 const scriptPath = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(scriptPath), '..');
 const minReleaseAgeSeconds = 1_209_600;
+const exceptionPolicyPath = path.join(repoRoot, 'supply-chain-exceptions.json');
 const failures = [];
 
 const dependencySections = [
@@ -60,6 +61,30 @@ const addFailure = (filePath, message) => {
 
 const readTextFile = (filePath) => fs.readFileSync(filePath, 'utf8');
 
+let cachedExceptionPolicy;
+
+const readExceptionPolicy = () => {
+	if (cachedExceptionPolicy) {
+		return cachedExceptionPolicy;
+	}
+
+	if (!fs.existsSync(exceptionPolicyPath)) {
+		cachedExceptionPolicy = { schemaVersion: 1, minimumReleaseAge: [] };
+		return cachedExceptionPolicy;
+	}
+
+	try {
+		cachedExceptionPolicy = JSON.parse(readTextFile(exceptionPolicyPath));
+	} catch {
+		addFailure(exceptionPolicyPath, 'must contain valid JSON');
+		cachedExceptionPolicy = { schemaVersion: 1, minimumReleaseAge: [] };
+	}
+
+	return cachedExceptionPolicy;
+};
+
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const listFiles = (startPath, predicate) => {
 	if (!fs.existsSync(startPath)) {
 		return [];
@@ -108,8 +133,76 @@ const checkBunPolicy = () => {
 		addFailure(bunfigPath, `minimumReleaseAge must be at least ${minReleaseAgeSeconds} seconds`);
 	}
 
-	if (/^\s*minimumReleaseAgeExcludes\s*=/.test(bunfig)) {
-		addFailure(bunfigPath, 'minimumReleaseAgeExcludes requires explicit review');
+	const excludesMatch = bunfig.match(/^\s*minimumReleaseAgeExcludes\s*=\s*(\[[^\]]*\])/m);
+	let configuredExcludes = [];
+	if (excludesMatch) {
+		try {
+			configuredExcludes = JSON.parse(excludesMatch[1]);
+		} catch {
+			addFailure(bunfigPath, 'minimumReleaseAgeExcludes must be a single-line string array');
+		}
+	}
+
+	if (!fs.existsSync(exceptionPolicyPath)) {
+		if (configuredExcludes.length > 0) {
+			addFailure(exceptionPolicyPath, 'missing exception manifest for minimumReleaseAgeExcludes');
+		}
+		return;
+	}
+
+	const policy = readExceptionPolicy();
+
+	if (policy.schemaVersion !== 1 || !Array.isArray(policy.minimumReleaseAge)) {
+		addFailure(exceptionPolicyPath, 'must use schemaVersion 1 with a minimumReleaseAge array');
+		return;
+	}
+
+	const approvedNames = policy.minimumReleaseAge.map((entry) => entry.package);
+	if (new Set(configuredExcludes).size !== configuredExcludes.length) {
+		addFailure(bunfigPath, 'minimumReleaseAgeExcludes contains duplicate package names');
+	}
+	if (new Set(approvedNames).size !== approvedNames.length) {
+		addFailure(exceptionPolicyPath, 'contains duplicate package exceptions');
+	}
+	if (
+		configuredExcludes.length !== approvedNames.length ||
+		configuredExcludes.some((name) => !approvedNames.includes(name))
+	) {
+		addFailure(
+			bunfigPath,
+			'minimumReleaseAgeExcludes must exactly match supply-chain-exceptions.json'
+		);
+	}
+
+	for (const entry of policy.minimumReleaseAge) {
+		if (
+			typeof entry.package !== 'string' ||
+			typeof entry.version !== 'string' ||
+			!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(entry.version) ||
+			typeof entry.integrity !== 'string' ||
+			!entry.integrity.startsWith('sha512-') ||
+			Number.isNaN(Date.parse(entry.publishedAt)) ||
+			Number.isNaN(Date.parse(entry.removeAfter)) ||
+			typeof entry.reason !== 'string' ||
+			entry.reason.trim().length === 0
+		) {
+			addFailure(exceptionPolicyPath, `invalid exception record for ${entry.package ?? 'unknown'}`);
+			continue;
+		}
+
+		const expectedRemoval = Date.parse(entry.publishedAt) + minReleaseAgeSeconds * 1_000;
+		if (Date.parse(entry.removeAfter) !== expectedRemoval) {
+			addFailure(
+				exceptionPolicyPath,
+				`${entry.package}@${entry.version} removeAfter must equal publishedAt + minimumReleaseAge`
+			);
+		}
+		if (Date.now() >= Date.parse(entry.removeAfter)) {
+			addFailure(
+				exceptionPolicyPath,
+				`${entry.package}@${entry.version} is now old enough; remove its release-age exception`
+			);
+		}
 	}
 };
 
@@ -129,6 +222,7 @@ const checkRootInstallPolicy = () => {
 	}
 
 	const packageJson = JSON.parse(readTextFile(rootPackagePath));
+	const exceptionPolicy = readExceptionPolicy();
 
 	if (!packageJson.packageManager?.startsWith('bun@')) {
 		addFailure(rootPackagePath, 'packageManager must pin Bun');
@@ -140,6 +234,15 @@ const checkRootInstallPolicy = () => {
 
 	if (!fs.existsSync(path.join(repoRoot, 'scripts/enforce-bun-install.mjs'))) {
 		addFailure(rootPackagePath, 'missing scripts/enforce-bun-install.mjs');
+	}
+
+	for (const entry of exceptionPolicy.minimumReleaseAge ?? []) {
+		if (packageJson.devDependencies?.[entry.package] !== entry.version) {
+			addFailure(
+				rootPackagePath,
+				`devDependencies.${entry.package} must pin approved exception version ${entry.version}`
+			);
+		}
 	}
 };
 
@@ -166,6 +269,12 @@ const getDependencyEntries = (manifest, sectionName) => {
 };
 
 const checkPackageManifests = () => {
+	const exceptionPolicy = readExceptionPolicy();
+	const approvedVersions = new Map(
+		(exceptionPolicy.minimumReleaseAge ?? []).map((entry) => [entry.package, entry.version])
+	);
+	const seenApprovedDependencies = new Set();
+
 	for (const packagePath of packageJsonFiles) {
 		const manifest = JSON.parse(readTextFile(packagePath));
 
@@ -175,10 +284,55 @@ const checkPackageManifests = () => {
 
 		for (const sectionName of dependencySections) {
 			for (const [name, version] of getDependencyEntries(manifest, sectionName)) {
+				if (approvedVersions.has(name)) {
+					seenApprovedDependencies.add(name);
+					if (version !== approvedVersions.get(name)) {
+						addFailure(
+							packagePath,
+							`${sectionName}.${name} must equal approved exception version ${approvedVersions.get(name)}`
+						);
+					}
+				}
 				if (dependencyGitPattern.test(version)) {
 					addFailure(packagePath, `${sectionName}.${name} uses a Git dependency (${version})`);
 				}
 			}
+		}
+	}
+
+	for (const packageName of approvedVersions.keys()) {
+		if (!seenApprovedDependencies.has(packageName)) {
+			addFailure(exceptionPolicyPath, `${packageName} exception has no exact manifest dependency`);
+		}
+	}
+};
+
+const checkExceptionLockfile = () => {
+	const lockfilePath = path.join(repoRoot, 'bun.lock');
+	if (!fs.existsSync(lockfilePath)) {
+		addFailure(lockfilePath, 'missing Bun lockfile');
+		return;
+	}
+
+	const lockfile = readTextFile(lockfilePath);
+	for (const entry of readExceptionPolicy().minimumReleaseAge ?? []) {
+		const packageKey = `"${entry.package}"`;
+		const resolution = `"${entry.package}@${entry.version}"`;
+		if (!lockfile.includes(packageKey) || !lockfile.includes(resolution)) {
+			addFailure(
+				lockfilePath,
+				`missing exact exception resolution ${entry.package}@${entry.version}`
+			);
+		}
+
+		const tuplePattern = new RegExp(
+			`${escapeRegExp(packageKey)}:\\s*\\[${escapeRegExp(resolution)}[\\s\\S]{0,4000}${escapeRegExp(`"${entry.integrity}"`)}\\]`
+		);
+		if (!tuplePattern.test(lockfile)) {
+			addFailure(
+				lockfilePath,
+				`${entry.package}@${entry.version} lock entry must match approved registry integrity`
+			);
 		}
 	}
 };
@@ -251,6 +405,7 @@ const checkIncidentIocs = () => {
 		path.join(repoRoot, 'tooling'),
 		path.join(repoRoot, 'bun.lock'),
 		path.join(repoRoot, 'bunfig.toml'),
+		path.join(repoRoot, 'supply-chain-exceptions.json'),
 		path.join(repoRoot, 'package.json'),
 	];
 	const filesToScan = scanRoots.flatMap((scanRoot) => {
@@ -287,6 +442,7 @@ const checkIncidentIocs = () => {
 checkBunPolicy();
 checkRootInstallPolicy();
 checkPackageManifests();
+checkExceptionLockfile();
 checkWorkflowPolicy();
 checkIncidentIocs();
 

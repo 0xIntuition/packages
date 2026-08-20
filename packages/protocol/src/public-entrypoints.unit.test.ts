@@ -16,7 +16,7 @@ const packageJson = JSON.parse(
 
 describe('@0xintuition/protocol package manifest', () => {
 	it('publishes protocol v3 on the default dist-tag', () => {
-		expect(packageJson.version).toBe('3.0.0');
+		expect(packageJson.version).toBe('3.1.0');
 		expect(packageJson.publishConfig).toEqual({ access: 'public' });
 	});
 

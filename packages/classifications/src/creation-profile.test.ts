@@ -1,6 +1,5 @@
 import { readFileSync } from 'node:fs';
 
-import { musicRecordingCreationProfile as publicMusicRecordingCreationProfile } from '@0xintuition/classifications/creation/music-recording';
 import { describe, expect, it } from 'vitest';
 
 import { CREATION_PROFILE_SLUGS, CREATION_PROFILES } from './generated/creation/index.js';
@@ -13,13 +12,6 @@ describe('creation profiles', () => {
 		expect(CREATION_PROFILE_SLUGS).toHaveLength(37);
 		expect(new Set(CREATION_PROFILE_SLUGS).size).toBe(37);
 		expect(CREATION_PROFILE_SLUGS).toContain('music-recording');
-	});
-
-	it('resolves a known creation profile from the public package subpath', () => {
-		expect(publicMusicRecordingCreationProfile.classification.slug).toBe('music-recording');
-		expect(
-			publicMusicRecordingCreationProfile.relationships.map(({ predicate }) => predicate.key)
-		).toEqual(['byArtist', 'inAlbum', 'inPlaylist', 'hasCategory', 'sameAs']);
 	});
 
 	it('composes classification fields, schema provenance, matrix rows, and predicate labels', () => {

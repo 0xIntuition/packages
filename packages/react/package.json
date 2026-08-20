@@ -1,6 +1,6 @@
 {
 	"name": "@0xintuition/react",
-	"version": "0.1.0-alpha.0",
+	"version": "0.1.0-alpha.1",
 	"description": "React hooks for core Intuition protocol interactions",
 	"private": false,
 	"license": "MIT",
@@ -62,7 +62,7 @@
 	"dependencies": {
 		"@0xintuition/deployments": "0.1.0-alpha.0",
 		"@0xintuition/ids": "0.1.0-alpha.0",
-		"@0xintuition/protocol": "3.0.0"
+		"@0xintuition/protocol": "3.1.0"
 	},
 	"peerDependencies": {
 		"@tanstack/react-query": ">=5",
