@@ -1,7 +1,7 @@
 {
-	"name": "@0xintuition/protocol",
-	"version": "3.1.0",
-	"description": "Intuition protocol contract ABIs and interaction helpers",
+	"name": "@0xintuition/iid-ladder",
+	"version": "0.1.0-alpha.0",
+	"description": "Shared strong-identifier, provider-handle, and canonical-URL projection ladder for Intuition Identifiers",
 	"private": false,
 	"license": "MIT",
 	"type": "module",
@@ -22,23 +22,23 @@
 	},
 	"keywords": [
 		"intuition",
-		"protocol",
-		"multivault",
-		"trustbonding",
-		"viem",
-		"ethereum"
+		"iid",
+		"identifier",
+		"identity",
+		"projection"
 	],
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/0xIntuition/packages.git",
-		"directory": "packages/protocol"
+		"directory": "packages/iid-ladder"
 	},
 	"bugs": {
 		"url": "https://github.com/0xIntuition/packages/issues"
 	},
-	"homepage": "https://github.com/0xIntuition/packages/tree/main/packages/protocol#readme",
+	"homepage": "https://github.com/0xIntuition/packages/tree/main/packages/iid-ladder#readme",
 	"publishConfig": {
-		"access": "public"
+		"access": "public",
+		"tag": "alpha"
 	},
 	"scripts": {
 		"build": "node ../../scripts/clean-dist.mjs && tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
@@ -48,8 +48,8 @@
 		"pack:release": "bun run build && node ../../scripts/pack-release.mjs",
 		"prepack": "bun run build",
 		"prepublishOnly": "bun run build && node ../../scripts/guard-direct-publish.mjs",
-		"test": "vitest run -c vitest.unit.config.ts",
-		"test:watch": "vitest -c vitest.unit.config.ts",
+		"test": "vitest run",
+		"test:watch": "vitest",
 		"typecheck": "tsc --noEmit",
 		"ci": "biome check",
 		"lint": "biome lint",
@@ -58,18 +58,14 @@
 		"lint:write": "biome lint --write",
 		"format:write": "biome format --write",
 		"check:write": "biome check --write",
-		"check:unsafe:write": "biome check --write --unsafe",
-		"test:unit": "vitest run -c vitest.unit.config.ts"
+		"check:unsafe:write": "biome check --write --unsafe"
 	},
 	"dependencies": {
-		"@0xintuition/curves": "0.1.0-alpha.0"
-	},
-	"peerDependencies": {
-		"viem": "^2.0.0"
+		"@0xintuition/iid": "0.1.0-alpha.0"
 	},
 	"devDependencies": {
+		"@0xintuition/iid-registry": "0.1.0-alpha.0",
 		"typescript": "^5.9.3",
-		"vitest": "^4.0.16",
-		"viem": "^2.31.4"
+		"vitest": "^4.0.16"
 	}
 }

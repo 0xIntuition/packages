@@ -6,8 +6,8 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import {
-	PACKAGES,
 	assertRegistryIntegrity,
+	PACKAGES,
 	packageRootFor,
 	requiredTarballFiles,
 } from './package-registry.mjs';
@@ -94,10 +94,7 @@ try {
 		for (const filePath of packedFiles) {
 			assert(!filePath.startsWith('src/'), `${packageName} tarball leaked source file ${filePath}`);
 		}
-		const tarballPath = run('bun', ['run', 'pack:release'], cwd)
-			.trim()
-			.split('\n')
-			.at(-1);
+		const tarballPath = run('bun', ['run', 'pack:release'], cwd).trim().split('\n').at(-1);
 		assert.ok(tarballPath, `${packageName} release pack did not return a tarball path`);
 		tarballPaths.push(tarballPath);
 		const tarballPackageJson = readTarballPackageJson(tarballPath);
@@ -139,6 +136,9 @@ try {
 		results.schemaOrgBookSubpath = schemaOrgBook.schemaOrgBook.name;
 		const classifications = await import('@0xintuition/classifications');
 		results.classification = classifications.getClassification('ethereum-account')?.type;
+		const iidLadder = await import('@0xintuition/iid-ladder');
+		results.iidLadder = iidLadder.projectIdentifierLadder({ strongIdentifiers: { isrc: 'USUM71703861' } });
+		results.iidLadderRejectsUnregistered = iidLadder.projectIdentifierLadder({ providerCanonicalId: 'spotify:track:1kcfGBb6kSrGqNIMW7rAlB' });
 		const ethereumAccountClassification = await import('@0xintuition/classifications/ethereum-account');
 		results.classificationSubpath = ethereumAccountClassification.ethereumAccount.type;
 		const musicRecordingCreation = await import('@0xintuition/classifications/creation/music-recording');
@@ -193,6 +193,12 @@ try {
 	assert.equal(nodeResult.schemaOrgBookAuthorOrigin, 'CreativeWork');
 	assert.equal(nodeResult.schemaOrgBookSubpath, 'Book');
 	assert.equal(nodeResult.classification, 'EthereumAccount');
+	assert.deepEqual(nodeResult.iidLadder, { iid: 'int:isrc:USUM71703861', rung: 'strong' });
+	assert.deepEqual(nodeResult.iidLadderRejectsUnregistered, {
+		fallback: 'envelope',
+		iid: null,
+		reason: 'unregistered-provider',
+	});
 	assert.equal(nodeResult.classificationSubpath, 'EthereumAccount');
 	assert.equal(nodeResult.musicRecordingCreationProfile, 'music-recording');
 	assert.equal(nodeResult.musicRecordingCreationRelationshipCount, 5);
@@ -220,6 +226,7 @@ try {
 
 	const bunResult = JSON.parse(run('bun', ['--eval', importProgram]).trim());
 	assert.equal(bunResult.musicRecordingCreationProfile, 'music-recording');
+	assert.deepEqual(bunResult.iidLadder, { iid: 'int:isrc:USUM71703861', rung: 'strong' });
 	assert.equal(bunResult.creationProfileIncludesMusicRecording, true);
 	assert.equal(bunResult.followSubpath, 'follow');
 	assert.equal(bunResult.primitiveAtomSubpath, 'function');

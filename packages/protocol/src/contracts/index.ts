@@ -7,10 +7,13 @@ export { BaseEmissionsControllerBytecode } from './BaseEmissionsController-bytec
 export { BeaconProxyBytecode } from './BeaconProxy-bytecode';
 export { BondingCurveRegistryAbi } from './BondingCurveRegistry-abi';
 export { BondingCurveRegistryBytecode } from './BondingCurveRegistry-bytecode';
+export { contractsV2Provenance } from './contracts-v2-provenance';
 export { LinearCurveAbi } from './LinearCurve-abi';
 export { LinearCurveBytecode } from './LinearCurve-bytecode';
 export { MultiVaultAbi } from './MultiVault-abi';
 export { MultiVaultBytecode } from './MultiVault-bytecode';
+export { MultiVaultMigrationModeAbi } from './MultiVaultMigrationMode-abi';
+export { MultiVaultMigrationModeBytecode } from './MultiVaultMigrationMode-bytecode';
 export { OffsetProgressiveCurveAbi } from './OffsetProgressiveCurve-abi';
 export { OffsetProgressiveCurveBytecode } from './OffsetProgressiveCurve-bytecode';
 export { SatelliteEmissionsControllerAbi } from './SatelliteEmissionsController-abi';

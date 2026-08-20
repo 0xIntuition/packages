@@ -29,6 +29,7 @@ export const PACKAGES = [
 	{ dirName: 'schema-org', kind: 'compiled' },
 	{ dirName: 'classifications', kind: 'compiled' },
 	{ dirName: 'iid-registry', kind: 'compiled' },
+	{ dirName: 'iid-ladder', kind: 'compiled' },
 	{ dirName: 'predicates', kind: 'compiled' },
 	{ dirName: 'primitives', kind: 'compiled' },
 	{ dirName: 'protocol', kind: 'compiled' },
@@ -38,11 +39,7 @@ export const PACKAGES = [
 
 export const PACKAGE_ORDER = PACKAGES.map((entry) => entry.dirName);
 
-const RUNTIME_DEPENDENCY_FIELDS = [
-	'dependencies',
-	'peerDependencies',
-	'optionalDependencies',
-];
+const RUNTIME_DEPENDENCY_FIELDS = ['dependencies', 'peerDependencies', 'optionalDependencies'];
 
 const ALL_DEPENDENCY_FIELDS = [...RUNTIME_DEPENDENCY_FIELDS, 'devDependencies'];
 

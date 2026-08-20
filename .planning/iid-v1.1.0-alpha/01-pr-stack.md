@@ -152,6 +152,30 @@ Gate:
 - Reordered equivalent source input produces deterministic output where the contract promises it.
 - Legacy builder snapshots remain stable.
 
+## P04b — Shared identifier projection ladder
+
+- Title: `feat(iid-ladder): share application and seed identifier projection`
+- Branch: `feat/iid-ladder`
+- Depends on: P02 and P04
+- Target package: `@0xintuition/iid-ladder@0.1.0-alpha.0`
+
+Scope:
+
+- Port the latest private strong-identifier -> provider-handle -> canonical-URL ladder into the public release train.
+- Keep the provider canonical-ID prefix inventory in one shared package for application and seed consumers.
+- Translate only handles backed by ratified IID schemes; never emit an `int:` value the public IID parser rejects.
+- Return an explicit `unregistered-provider` envelope fallback for provider-local namespaces such as Spotify until a public scheme is ratified.
+- Add clean public exports, exact package pins, pack metadata, and private/public parity fixtures.
+
+Review focus: the first private implementation accepted generic IID-shaped provider namespaces even when `parseIntuitionId` rejected them. That behavior is intentionally not copied into the public contract.
+
+Gate:
+
+- Every successful ladder result passes `validateIntuitionId`.
+- ISRC and ISBN strong identifiers win over provider and URL candidates.
+- Registered provider mappings round-trip through `iid-registry` provider expectations.
+- Provider-local and malformed provider inputs remain distinct, fail-closed outcomes.
+
 ## P06 — Contract artifact sync and provenance
 
 - Title: `chore(protocol): sync URI-enabled contract artifacts`
@@ -173,7 +197,7 @@ Non-goals: no ergonomic API helpers or React work.
 
 Supply-chain gate:
 
-- `contracts-v2@1.1.0-alpha.0` is normally eligible under the repository policy on 2026-08-18. Keep this PR draft or use a verified local artifact for development until the exact dependency can pass normal CI. Do not add a release-age bypass.
+- Leadership approved an exact, expiring exception for `contracts-v2@1.1.0-alpha.0` through its normal eligibility time on 2026-08-18. The exception must remain bound to the registry integrity in `supply-chain-exceptions.json`; the root manifest, Bun lock, frozen install, policy guard, and automatic-expiry tests must all pass. No package-wide version latitude or additional dependency exception is authorized.
 
 Gate:
 
@@ -253,12 +277,12 @@ Gate:
 
 - Title: `test(conformance): verify IID anchors through protocol encoding`
 - Branch: `test/iid-uri-conformance`
-- Depends on: P05 and P07; include P08/P09 fixtures when those PRs are in scope
+- Depends on: P04b, P05, and P07; include P08/P09 fixtures when those PRs are in scope
 
 Scope:
 
 - Extend clean-room tarball smoke to import IID spec, IID, classifications, registry, primitives, protocol, and React public exports.
-- Execute the shared fixture end to end: derive -> classify -> build -> hash -> encode -> decode.
+- Execute the shared fixture end to end: project -> derive -> classify -> build -> hash -> encode -> decode.
 - Add ABI fingerprint and atom-ID parity assertions.
 - Run under both Node and Bun from packed tarballs only.
 - Add negative fixtures for invalid scheme, noncanonical value, profile misuse, URI count/length, and legacy JSON.
@@ -314,10 +338,11 @@ Publish order:
 2. `iid`
 3. updated `classifications`
 4. `iid-registry`
-5. updated `primitives`
-6. updated `protocol`
-7. updated `react`
-8. conditional deployment/periphery packages only when changed
+5. `iid-ladder`
+6. updated `primitives`
+7. updated `protocol`
+8. updated `react`
+9. conditional deployment/periphery packages only when changed
 
 Gate:
 

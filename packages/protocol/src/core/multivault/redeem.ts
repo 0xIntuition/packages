@@ -9,7 +9,7 @@ export type RedeemConfig = {
 };
 
 export type RedeemInputs = {
-	args: ContractFunctionArgs<typeof MultiVaultAbi, 'nonpayable', 'redeem'>;
+	args: ContractFunctionArgs<typeof MultiVaultAbi, 'payable', 'redeem'>;
 };
 
 /**

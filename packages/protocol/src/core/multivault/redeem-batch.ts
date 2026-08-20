@@ -4,7 +4,7 @@ import { MultiVaultAbi } from '../../contracts';
 import type { WriteConfig } from '../../types';
 
 export type RedeemBatchInputs = {
-	args: ContractFunctionArgs<typeof MultiVaultAbi, 'nonpayable', 'redeemBatch'>;
+	args: ContractFunctionArgs<typeof MultiVaultAbi, 'payable', 'redeemBatch'>;
 };
 
 /**

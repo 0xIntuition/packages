@@ -14,6 +14,8 @@ classifications                       react
    v
 iid-registry
    |
+   +------> iid-ladder
+   |
    v
 primitives -----> ids
    |
@@ -88,6 +90,23 @@ Required behavior:
 - provider slugs are capability identifiers, not imports of provider implementations.
 
 Ratification fixtures include: EIDR -> movie, ISWC unmapped, MBID release -> music album, MBID label -> company, and CAIP-19 classification only for canonical supported ERC-20 values.
+
+## `@0xintuition/iid-ladder`
+
+Owns the shared application/seed projection from heterogeneous source identity to a canonical IID candidate:
+
+```ts
+projectIdentifierLadder({
+  strongIdentifiers,
+  strongIdentifierOrder,
+  providerCanonicalId,
+  canonicalUrl,
+})
+```
+
+The precedence order is registered strong identifier, registered provider-handle translation, canonical URL, then explicit envelope fallback. It is pure and offline. It does not own classification, provider clients, atom serialization, or URI-context enrichment.
+
+Provider-local prefixes are an audited compatibility inventory, not implicit IID scheme registrations. A successful result must always pass the public IID validator. Until a provider namespace is ratified, the ladder returns `unregistered-provider` rather than producing a value such as `int:spotify:*` that the public parser rejects.
 
 ## `@0xintuition/primitives`
 

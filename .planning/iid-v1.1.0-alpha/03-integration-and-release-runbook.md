@@ -26,7 +26,7 @@ git switch -c feat/iid
 gh pr create --base update/v1.1.0-alpha --head feat/iid
 ```
 
-Independent P01 and P06 branches can start after P00. P06 may remain draft while the exact contracts dependency ages; this should not block the semantic lane.
+Independent P01 and P06 branches can start after P00. The exact, expiring contracts-v2 exception described below now permits P06 frozen-install and artifact checks before normal eligibility; it does not change package publication authority or the semantic lane's independent ordering.
 
 ## Review ownership
 
@@ -35,6 +35,7 @@ Independent P01 and P06 branches can start after P00. P06 may remain draft while
 | P01–P02 | IID/spec owner | Core parser consumer |
 | P03 | classifications/schema owner | IID owner and primitives consumer |
 | P04 | semantic registry owner | enrichment/Core consumer |
+| P04b | application/seed identity owner | IID/spec and registry owners |
 | P05 | primitives owner | seed/application writer and IDs owner |
 | P06–P08 | protocol SDK owner | Solidity contract owner and Core indexer consumer |
 | P09 | React owner | protocol SDK owner |
@@ -70,12 +71,12 @@ eligible under 14-day policy: 2026-08-18T19:56:37.884Z
 
 Preferred implementation:
 
-- exact root dev dependency on the eligible artifact;
+- exact root dev dependency on the artifact;
 - deterministic script generating/checking the subset exported by `protocol`;
 - checked manifest with source package/version/integrity and ABI fingerprint;
 - CI fails on drift.
 
-Before the eligibility date, developers may inspect or generate from the verified local/tarball artifact without committing a bypass or a Git dependency. P06 remains draft until normal frozen install succeeds.
+Leadership approved a single exception before the eligibility date. It is recorded in `supply-chain-exceptions.json` and is enforced as an exact version/integrity binding because Bun's native exclusion is package-name scoped. The guard must fail for an unrecorded exclusion, version or integrity drift, a missing exact manifest dependency, or continued use at/after `2026-08-18T19:56:37.884Z`. `bun install --frozen-lockfile` and `protocol:check-artifacts` are required evidence. Remove the Bun exclusion, exception record, and special tests once normal eligibility is reached; this decision does not authorize exceptions for the packages produced by this release train.
 
 ## Package order and exact pins
 
@@ -86,6 +87,7 @@ iid-spec@0.1.0-alpha.0
 iid@0.1.0-alpha.0
 classifications@0.1.0-alpha.1 -> iid@0.1.0-alpha.0
 iid-registry@0.1.0-alpha.0 -> iid@0.1.0-alpha.0 + classifications@0.1.0-alpha.1
+iid-ladder@0.1.0-alpha.0 -> iid@0.1.0-alpha.0
 primitives@0.1.0-alpha.1 -> iid + iid-registry + classifications + existing ids/predicates
 protocol@3.1.0 -> existing curves pin
 react@0.1.0-alpha.1 -> protocol@3.1.0 + existing deployments/ids pins

@@ -90,16 +90,20 @@ git diff --check
 
 Publish in dependency order:
 
-1. `@0xintuition/deployments`
-2. `@0xintuition/curves`
-3. `@0xintuition/ids`
-4. `@0xintuition/schema-org`
-5. `@0xintuition/classifications`
-6. `@0xintuition/predicates`
-7. `@0xintuition/primitives`
-8. `@0xintuition/protocol`
-9. `@0xintuition/periphery`
-10. `@0xintuition/react`
+1. `@0xintuition/iid-spec`
+2. `@0xintuition/iid`
+3. `@0xintuition/deployments`
+4. `@0xintuition/curves`
+5. `@0xintuition/ids`
+6. `@0xintuition/schema-org`
+7. `@0xintuition/classifications`
+8. `@0xintuition/iid-registry`
+9. `@0xintuition/iid-ladder`
+10. `@0xintuition/predicates`
+11. `@0xintuition/primitives`
+12. `@0xintuition/protocol`
+13. `@0xintuition/periphery`
+14. `@0xintuition/react`
 
 This order matches the release packing/smoke scripts and keeps internal
 dependency pins resolvable as each package is published.
@@ -127,6 +131,10 @@ Common cascades:
   behavior or exact pins should move with the ID package.
 - `classifications`: also release `primitives` when primitive builders or pins
   should consume the new classification data.
+- `iid`: also release `classifications`, `iid-registry`, `iid-ladder`, and
+  `primitives` when their exact pins or behavior consume the change.
+- `iid-registry`: also release `iid-ladder` when its registered provider
+  translation expectations change.
 - `predicates`: also release `primitives`; also release `classifications` when
   metadata predicate refs, matrix rows, or Creation Profiles change.
 - `protocol`: also release `react` when React should consume the new protocol

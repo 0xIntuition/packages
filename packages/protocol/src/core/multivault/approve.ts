@@ -4,7 +4,7 @@ import { MultiVaultAbi } from '../../contracts';
 import type { WriteConfig } from '../../types';
 
 export type MultiVaultApproveInputs = {
-	args: ContractFunctionArgs<typeof MultiVaultAbi, 'nonpayable', 'approve'>;
+	args: ContractFunctionArgs<typeof MultiVaultAbi, 'payable', 'approve'>;
 };
 
 /**

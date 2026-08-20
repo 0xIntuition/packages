@@ -50,6 +50,7 @@ No expected deterministic value is recomputed by the same function under test an
 | `iid` | parse, canonicalize, validate, format, derive, profile eligibility, runtime parity |
 | `classifications` | ladder type compatibility, generation, source provenance, legacy output stability |
 | `iid-registry` | totality, inverse coherence, value typing, provider ordering/narrowing, hints |
+| `iid-ladder` | precedence/allowlist behavior, registered provider translations, valid-IID invariant, provider-local fail-closed outcomes |
 | `ids` | atom hash parity for IID/profile/legacy bytes; no behavior change expected |
 | `primitives` | strongest rung, profile selection, exact bytes/hash, URI manifest, structured errors |
 | `protocol` | ABI parity, calldata, simulation request, config reads, event decoding, existing API compatibility |
@@ -120,6 +121,7 @@ Consumer success does not allow private types to leak back into the public API. 
 - package graph with versions and exact pins;
 - fixture/conformance version and checksum;
 - contract artifact version, integrity, and ABI fingerprint;
+- approved supply-chain exception record, guard output, frozen-install output, and removal timestamp;
 - tarball names, integrity/shasum, file lists, and sizes;
 - Node and Bun clean-consumer output;
 - Core and private consumer compatibility reports;
