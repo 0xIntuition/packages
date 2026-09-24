@@ -1,6 +1,33 @@
 import { describe, expect, it } from 'vitest';
 
-import { inspectIntuitionId } from '../parse.js';
+import { inspectIntuitionId, isCanonicalNodeIid } from '../index.js';
+
+describe('isCanonicalNodeIid', () => {
+	it('accepts canonical registered node IIDs', () => {
+		expect(isCanonicalNodeIid('int:isbn:9780140328721')).toBe(true);
+	});
+
+	it('rejects noncanonical registered node IIDs', () => {
+		expect(isCanonicalNodeIid('int:isbn:0-14-032872-6')).toBe(false);
+	});
+
+	it('accepts bounded unregistered node IIDs without whitespace', () => {
+		expect(isCanonicalNodeIid('int:spotify:track:1kcfGBb6kSrGqNIMW7rAlB')).toBe(true);
+		expect(isCanonicalNodeIid(`int:custom:${'a'.repeat(220)}`)).toBe(true);
+		for (const input of [
+			' int:custom:value',
+			'int:custom:value ',
+			'int:custom:two words',
+			'int:custom:two\twords',
+			'int:custom:',
+			'int:custom:é',
+			`int:custom:${'a'.repeat(221)}`,
+			`int:${'a'.repeat(33)}:value`,
+		]) {
+			expect(isCanonicalNodeIid(input), input).toBe(false);
+		}
+	});
+});
 
 describe('inspectIntuitionId', () => {
 	it('reports a valid anchor-eligible IID with full metadata', () => {

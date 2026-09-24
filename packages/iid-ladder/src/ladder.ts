@@ -1,5 +1,7 @@
 import {
 	formatIntuitionId,
+	isActiveWdEntitySchemaSlug,
+	parseIntuitionId,
 	SCHEME_NAMES,
 	SCHEMES,
 	type SchemeName,
@@ -9,7 +11,7 @@ import { PROVIDER_PREFIX_MAPPINGS } from './provider-prefixes.js';
 
 export type LadderInput = {
 	strongIdentifiers?: Readonly<Record<string, string>>;
-	/** Optional strongest-first scheme order. When present it is also an allowlist. */
+	/** Optional strongest-first scheme order for a classification-specific ladder. */
 	strongIdentifierOrder?: readonly string[];
 	providerCanonicalId?: string;
 	canonicalUrl?: string;
@@ -51,15 +53,37 @@ type HandleProjection =
 	| { status: 'unregistered' };
 
 export function projectIdentifierLadder(input: LadderInput): LadderResult {
-	const strongIid = selectStrongIdentifier(input.strongIdentifiers, input.strongIdentifierOrder);
+	const providerStrong =
+		input.strongIdentifierOrder && input.providerCanonicalId
+			? strongProviderCandidate(input.providerCanonicalId)
+			: undefined;
+	const directStrongIid = selectStrongIdentifier(
+		input.strongIdentifiers,
+		input.strongIdentifierOrder
+	);
+	const strongIid = providerStrong
+		? selectStrongIdentifier(
+				{
+					...(input.strongIdentifiers ?? {}),
+					[providerStrong.scheme]: providerStrong.value,
+				},
+				input.strongIdentifierOrder
+			)
+		: directStrongIid;
 	if (strongIid) {
-		return { iid: strongIid, rung: 'strong' };
+		return {
+			iid: strongIid,
+			rung:
+				providerStrong?.iid === strongIid && directStrongIid !== strongIid
+					? providerStrong.rung
+					: 'strong',
+		};
 	}
 
 	let canonicalUrl = input.canonicalUrl;
 	const providerCanonicalId = input.providerCanonicalId;
 	if (providerCanonicalId?.startsWith('int:')) {
-		return validateIntuitionId(providerCanonicalId)
+		return validateIntuitionId(providerCanonicalId) && isMintableWdIid(providerCanonicalId)
 			? { iid: providerCanonicalId, rung: 'strong' }
 			: { fallback: 'envelope', iid: null, reason: 'invalid-handle' };
 	}
@@ -93,29 +117,111 @@ export function projectIdentifierLadder(input: LadderInput): LadderResult {
 		: { fallback: 'envelope', iid: null, reason: 'no-identifier' };
 }
 
+function strongProviderCandidate(
+	providerCanonicalId: string
+): { iid: string; rung: 'handle' | 'strong'; scheme: SchemeName; value: string } | undefined {
+	const projection = providerCanonicalId.startsWith('int:')
+		? validateIntuitionId(providerCanonicalId) && isMintableWdIid(providerCanonicalId)
+			? { iid: providerCanonicalId, status: 'mapped' as const }
+			: { status: 'invalid' as const }
+		: projectProviderHandle(providerCanonicalId);
+	if (projection.status !== 'mapped') {
+		return undefined;
+	}
+	const parsed = parseIntuitionId(projection.iid);
+	return parsed && parsed.scheme !== 'gen1' && parsed.scheme !== 'url'
+		? {
+				iid: projection.iid,
+				rung: providerCanonicalId.startsWith('int:') ? 'strong' : 'handle',
+				scheme: parsed.scheme,
+				value: parsed.value,
+			}
+		: undefined;
+}
+
 function selectStrongIdentifier(
 	strongIdentifiers: LadderInput['strongIdentifiers'],
 	strongIdentifierOrder: LadderInput['strongIdentifierOrder']
 ): string | undefined {
-	if (!strongIdentifiers) return undefined;
+	if (!strongIdentifiers) {
+		return undefined;
+	}
 
+	const rawWdSlug = strongIdentifiers.wdSlug;
+	const wdSlug = rawWdSlug && isActiveWdEntitySchemaSlug(rawWdSlug) ? rawWdSlug : undefined;
+	const wdSlugConflict =
+		(Object.hasOwn(strongIdentifiers, 'wdSlug') && !wdSlug) ||
+		hasWdSlugConflict(strongIdentifiers, wdSlug);
 	const candidates = new Map<SchemeName, string[]>();
 	for (const [key, value] of Object.entries(strongIdentifiers)) {
 		const scheme = strongSchemeForEntry(key, value);
-		if (!scheme) continue;
+		if (!scheme || (scheme === 'wd' && wdSlugConflict)) {
+			continue;
+		}
 
-		const iid = formatIntuitionId(scheme, value);
-		if (!validateIntuitionId(iid)) continue;
+		const canonical = SCHEMES[scheme].canonicalize(value);
+		if (!canonical) continue;
+		const canonicalValue =
+			scheme === 'wd' && !canonical.includes(':') && wdSlug ? `${wdSlug}:${canonical}` : canonical;
+		const iid = formatIntuitionId(scheme, canonicalValue);
+		if (!validateIntuitionId(iid)) {
+			continue;
+		}
+		if (!isMintableWdIid(iid)) {
+			continue;
+		}
 		const schemeCandidates = candidates.get(scheme) ?? [];
 		schemeCandidates.push(iid);
 		candidates.set(scheme, schemeCandidates);
 	}
 
-	for (const scheme of strongSchemeOrder(strongIdentifierOrder)) {
+	const orderedSchemes = strongSchemeOrder(strongIdentifierOrder);
+	for (const scheme of orderedSchemes) {
 		const schemeCandidates = candidates.get(scheme);
-		if (schemeCandidates?.length) return schemeCandidates.sort(compareCodepoints)[0];
+		if (schemeCandidates && schemeCandidates.length > 0) {
+			return schemeCandidates.sort(compareCodepoints)[0];
+		}
 	}
 	return undefined;
+}
+
+function hasWdSlugConflict(
+	strongIdentifiers: Readonly<Record<string, string>>,
+	wdSlug: string | undefined
+) {
+	const qids = new Set<string>();
+	const typedValues = new Set<string>();
+	for (const [key, value] of Object.entries(strongIdentifiers)) {
+		if (!WIKIDATA_IDENTIFIER_KEYS.has(key)) {
+			continue;
+		}
+		const canonical = SCHEMES.wd.canonicalize(value);
+		if (!canonical) {
+			continue;
+		}
+		const separator = canonical.indexOf(':');
+		const qid = separator === -1 ? canonical : canonical.slice(separator + 1);
+		qids.add(qid);
+		if (separator === -1) {
+			continue;
+		}
+		typedValues.add(canonical);
+		if (wdSlug && canonical.slice(0, separator) !== wdSlug) {
+			return true;
+		}
+	}
+	return qids.size > 1 || typedValues.size > 1;
+}
+
+function isMintableWdIid(iid: string): boolean {
+	const parsed = parseIntuitionId(iid);
+
+	if (parsed?.scheme !== 'wd') {
+		return true;
+	}
+
+	const separator = parsed.value.indexOf(':');
+	return separator > 0 && isActiveWdEntitySchemaSlug(parsed.value.slice(0, separator));
 }
 
 function strongSchemeOrder(order: readonly string[] | undefined): readonly SchemeName[] {
@@ -152,7 +258,9 @@ function projectProviderHandle(providerCanonicalId: string): HandleProjection {
 		if (!canonicalValue) return { status: 'invalid' };
 
 		const iid = formatIntuitionId(mapping.scheme, canonicalValue);
-		return validateIntuitionId(iid) ? { iid, status: 'mapped' } : { status: 'invalid' };
+		return validateIntuitionId(iid) && isMintableWdIid(iid)
+			? { iid, status: 'mapped' }
+			: { status: 'invalid' };
 	}
 	return { status: 'unmapped' };
 }

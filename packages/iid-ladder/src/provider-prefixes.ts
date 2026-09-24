@@ -1,17 +1,25 @@
 import type { SchemeName } from '@0xintuition/iid';
 
-type ProviderPrefixMappingBase = { providerPrefix: string };
+type ProviderPrefixMappingBase = {
+	/** Prefix emitted by an atom-classification preset plugin. */
+	providerPrefix: string;
+};
 
 export type RegisteredProviderPrefixMapping = ProviderPrefixMappingBase & {
 	kind: 'registered';
+	/** Registered IID scheme that owns canonicalization and validation. */
 	scheme: SchemeName;
+	/** Structural content prepended to the provider-local suffix before canonicalization. */
 	schemeValuePrefix: string;
+	/** npm scopes use `@scope/name`, while frozen purl v0.1 stores `scope/name`. */
 	stripLeadingAt?: true;
 };
 
 export type ProviderLocalPrefixMapping = ProviderPrefixMappingBase & {
 	kind: 'provider-local';
+	/** IID content after `int:` and before the provider-local suffix. */
 	iidPrefix: string;
+	/** Byte-exact canonical suffix accepted from that plugin prefix. */
 	valuePattern: RegExp;
 };
 
@@ -25,12 +33,22 @@ const LOWER_OPAQUE = /^[a-z0-9@#./:_-]+$/;
 const DIGITS = /^[1-9]\d*$/;
 
 /**
- * Exhaustive audit map for provider canonical IDs currently emitted by the
- * private default classification preset. Registered rows may become IIDs.
- * Provider-local rows are recognized but must remain envelope fallbacks until
- * a public IID scheme is ratified for their namespace.
+ * Exhaustive mapping for canonical ids emitted by the default classification
+ * preset. Registered rows delegate accept-then-canonicalize behavior to the
+ * frozen IID scheme implementation. Provider-local rows remain byte-exact and
+ * remain envelope fallbacks until their namespaces are registered.
+ *
+ * Default-URL canonical ids are HTTP URLs and deliberately enter the URL rung,
+ * while plain-text emits no canonical id. The engine's `term:` fallback is
+ * intentionally unmapped and pinned separately.
  */
 export const PROVIDER_PREFIX_MAPPINGS = [
+	{
+		kind: 'provider-local',
+		providerPrefix: 'podcast-index:',
+		iidPrefix: 'podcast-index:',
+		valuePattern: DIGITS,
+	},
 	{
 		kind: 'provider-local',
 		providerPrefix: 'spotify:track:',
@@ -115,15 +133,30 @@ export const PROVIDER_PREFIX_MAPPINGS = [
 		iidPrefix: 'wikipedia:',
 		valuePattern: LOWER_TOKEN,
 	},
-	{ kind: 'registered', providerPrefix: 'imdb:title:', scheme: 'imdb', schemeValuePrefix: '' },
-	{ kind: 'registered', providerPrefix: 'imdb:name:', scheme: 'imdb', schemeValuePrefix: '' },
+	{
+		kind: 'registered',
+		providerPrefix: 'imdb:title:',
+		scheme: 'imdb',
+		schemeValuePrefix: '',
+	},
+	{
+		kind: 'registered',
+		providerPrefix: 'imdb:name:',
+		scheme: 'imdb',
+		schemeValuePrefix: '',
+	},
 	{
 		kind: 'registered',
 		providerPrefix: 'tmdb:movie:',
 		scheme: 'tmdb',
 		schemeValuePrefix: 'movie:',
 	},
-	{ kind: 'registered', providerPrefix: 'tmdb:tv:', scheme: 'tmdb', schemeValuePrefix: 'tv:' },
+	{
+		kind: 'registered',
+		providerPrefix: 'tmdb:tv:',
+		scheme: 'tmdb',
+		schemeValuePrefix: 'tv:',
+	},
 	{
 		kind: 'registered',
 		providerPrefix: 'openlibrary:work:',
@@ -181,6 +214,12 @@ export const PROVIDER_PREFIX_MAPPINGS = [
 	},
 	{
 		kind: 'provider-local',
+		providerPrefix: 'letterboxd:film:',
+		iidPrefix: 'letterboxd:film:',
+		valuePattern: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+	},
+	{
+		kind: 'provider-local',
 		providerPrefix: 'amazon:store:',
 		iidPrefix: 'amazon:store:',
 		valuePattern: LOWER_TOKEN,
@@ -221,21 +260,42 @@ export const PROVIDER_PREFIX_MAPPINGS = [
 		iidPrefix: 'tiktok:video:',
 		valuePattern: DIGITS,
 	},
-	{ kind: 'registered', providerPrefix: 'x:user:', scheme: 'acct', schemeValuePrefix: 'x:@' },
+	{
+		kind: 'registered',
+		providerPrefix: 'x:user:',
+		scheme: 'acct',
+		schemeValuePrefix: 'x:@',
+	},
 	{
 		kind: 'provider-local',
 		providerPrefix: 'x:post:',
 		iidPrefix: 'x:post:',
 		valuePattern: /^\d+$/,
 	},
-	{ kind: 'registered', providerPrefix: 'isbn:', scheme: 'isbn', schemeValuePrefix: '' },
+	{
+		kind: 'registered',
+		providerPrefix: 'isbn:',
+		scheme: 'isbn',
+		schemeValuePrefix: '',
+	},
+	{
+		kind: 'registered',
+		providerPrefix: 'wd:',
+		scheme: 'wd',
+		schemeValuePrefix: '',
+	},
 	{
 		kind: 'provider-local',
 		providerPrefix: 'places:',
 		iidPrefix: 'places:',
 		valuePattern: LOWER_TOKEN,
 	},
-	{ kind: 'registered', providerPrefix: 'eip155:', scheme: 'caip10', schemeValuePrefix: 'eip155:' },
+	{
+		kind: 'registered',
+		providerPrefix: 'eip155:',
+		scheme: 'caip10',
+		schemeValuePrefix: 'eip155:',
+	},
 	{
 		kind: 'provider-local',
 		providerPrefix: 'ens:',
@@ -248,4 +308,5 @@ export const UNREGISTERED_PROVIDER_LOCAL_PREFIXES = PROVIDER_PREFIX_MAPPINGS.fil
 	(mapping) => mapping.kind === 'provider-local'
 ).map((mapping) => mapping.providerPrefix);
 
+/** Engine-level canonical-ID prefixes deliberately left without a mapping. */
 export const INTENTIONALLY_UNMAPPED_PROVIDER_PREFIXES = ['term:'] as const;

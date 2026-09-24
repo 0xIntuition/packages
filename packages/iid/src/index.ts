@@ -7,6 +7,7 @@ export {
 	formatIntuitionId,
 	inspectIntuitionId,
 	isAnchorEligible,
+	isCanonicalNodeIid,
 	isIntuitionId,
 	parseIntuitionId,
 	validateIntuitionId,
