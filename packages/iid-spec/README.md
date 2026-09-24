@@ -72,6 +72,25 @@ import vectors from '@0xintuition/iid-spec/conformance/canonicalization.json'
 **Class C — derived** (a hash of the few facts we actually have)
 [`gen1`](./schemes/gen1.md)
 
+## Typed Wikidata identifiers
+
+[`wd`](./schemes/wd.md) is a value-typed scheme: bare `int:wd:Q42` remains polymorphic and floors at P1; active `<slug>:Q…` bindings carry the type and qualify for P0. The active slugs are `film`, `television-series`, and `human`. Dormant bindings remain valid for parsing and validation but are not mintable. URLs canonicalize to bare QIDs and never infer a slug.
+
+The reference implementation reports typing per value:
+
+```ts
+import { inspectIntuitionId } from '@0xintuition/iid'
+
+inspectIntuitionId('int:wd:Q42')
+// { valid: true, typing: 'polymorphic', anchorEligible: false,
+//   anchorIneligibilityReason: 'polymorphic-scheme', … }
+
+inspectIntuitionId('int:wd:film:Q188035')
+// { valid: true, typing: 'unambiguous', anchorEligible: true, wdSlug: 'film', … }
+```
+
+The binding table and canonicalization rules are in [`schemes/wd.md`](./schemes/wd.md); per-value typing is defined in [§7.3](./spec/07-representation-profiles.md). This additive extension follows [§9.3.1](./spec/09-registry-governance.md), preserving existing bare identifiers and their eligibility.
+
 ## The conformance corpus
 
 The [`conformance/`](./conformance/) directory is the machine-readable half of this specification. Every vector is normative, generated from the reference implementation, and cross-checked against the golden values stated in the specification prose.
@@ -84,7 +103,7 @@ The [`conformance/`](./conformance/) directory is the machine-readable half of t
 | `gen1.json` | Full `gen1` derivations: recipe fields, exact preimage, and resulting IID |
 | `parse.json` | Grammar/parsing vectors, including colon-bearing values and rejections |
 | `validation.json` | Full-IID validity and P0 anchor-eligibility vectors |
-| `schemes.json` | The registry snapshot: identity class and scheme typing per scheme |
+| `schemes.json` | The registry snapshot: identity class, scheme typing, and optional `valueTyped` marker per scheme |
 
 Fixture files are versioned (`specVersion`, `fixtureVersion`) and append-only: changing an existing vector's expected output is an identity-impacting change and follows the governance process in [§9](./spec/09-registry-governance.md).
 
@@ -101,7 +120,7 @@ Every test vector in this specification is executable against the reference impl
 
 ## Status
 
-**Version 0.1.0 — Draft.** The grammar, the class system, NORM-1, and the `gen1` algorithm are stable and in production use. Scheme canonicalization rules are frozen under the [freeze rule](./spec/09-registry-governance.md): once ratified, a scheme's rules never change in place — a change ships as a new scheme name or version.
+**Version 0.1.0 — Draft.** The grammar, the class system, NORM-1, and the `gen1` algorithm are stable and in production use. Scheme canonicalization rules are frozen under the [freeze rule](./spec/09-registry-governance.md): changes to existing canonical values require a new scheme name or version; additive value-grammar extensions follow [§9.3.1](./spec/09-registry-governance.md).
 
 This specification is published for review and adoption. It is not yet submitted to any standards body.
 

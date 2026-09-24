@@ -34,3 +34,10 @@ export type {
 } from './types.js';
 export { SCHEME_NAMES } from './types.js';
 export { derivePodcastGuid, PODCAST_GUID_NAMESPACE, uuidv5 } from './uuid5.js';
+export type { WdEntitySchemaBinding, WdEntitySchemaSlug } from './wd-entityschema-bindings.js';
+export {
+	isActiveWdEntitySchemaSlug,
+	isWdEntitySchemaSlug,
+	WD_ENTITYSCHEMA_BINDINGS,
+	WD_ENTITYSCHEMA_SLUGS,
+} from './wd-entityschema-bindings.js';

@@ -709,6 +709,76 @@
 			"raw": "movie:r4:FB681AFE7D438CAD73AE90A70F1CC55A",
 			"canonical": null,
 			"note": "hash must be lowercase"
+		},
+		{
+			"id": "canon-wd-102",
+			"scheme": "wd",
+			"raw": "film:q42",
+			"canonical": "film:Q42",
+			"note": "typed QID uppercases"
+		},
+		{
+			"id": "canon-wd-103",
+			"scheme": "wd",
+			"raw": " \tfilm:q42\r\n",
+			"canonical": "film:Q42",
+			"note": "edge whitespace trims"
+		},
+		{
+			"id": "canon-wd-104",
+			"scheme": "wd",
+			"raw": "https://www.wikidata.org/wiki/Q188035",
+			"canonical": "Q188035",
+			"note": "URL remains bare; never infers a slug"
+		},
+		{
+			"id": "canon-wd-105",
+			"scheme": "wd",
+			"raw": "bogus:Q1",
+			"canonical": null,
+			"note": "unknown binding rejects"
+		},
+		{
+			"id": "canon-wd-106",
+			"scheme": "wd",
+			"raw": "written-worK:Q42",
+			"canonical": null,
+			"note": "non-ASCII slug rejects before case folding"
+		},
+		{
+			"id": "canon-wd-107",
+			"scheme": "wd",
+			"raw": "﻿film:Q42﻿",
+			"canonical": "film:Q42",
+			"note": "U+FEFF trims like other edge whitespace (base behavior preserved)"
+		},
+		{
+			"id": "canon-wd-108",
+			"scheme": "wd",
+			"raw": "film:Q042",
+			"canonical": null,
+			"note": "typed QID leading zero rejects"
+		},
+		{
+			"id": "canon-wd-109",
+			"scheme": "wd",
+			"raw": "FILM:q42",
+			"canonical": "film:Q42",
+			"note": "ASCII slug lowercases"
+		},
+		{
+			"id": "canon-wd-110",
+			"scheme": "wd",
+			"raw": "written-work:q42",
+			"canonical": "written-work:Q42",
+			"note": "dormant binding remains canonical and parse-only"
+		},
+		{
+			"id": "canon-wd-111",
+			"scheme": "wd",
+			"raw": "﻿Q42﻿",
+			"canonical": "Q42",
+			"note": "BOM-wrapped bare QID keeps its base canonicalization"
 		}
 	]
 }

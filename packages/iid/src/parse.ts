@@ -1,5 +1,6 @@
 import { getScheme, SCHEME_TYPING } from './schemes.js';
 import type { IidInspection, IntuitionId, ParsedIid, SchemeName } from './types.js';
+import { isActiveWdEntitySchemaSlug, type WdEntitySchemaSlug } from './wd-entityschema-bindings.js';
 
 /**
  * The full grammar (spec §2.2): `int:` namespace, 1-32 char lowercase
@@ -61,8 +62,9 @@ export function isIntuitionId(input: string): input is IntuitionId {
 /**
  * May this IID mint as a P0 anchor (atom data = the bare IID string)?
  * Requires: valid + canonical, Class A or B (Class C recipe fields are
- * preimage evidence and must travel in a P1 payload), and a scheme whose
- * IIDs imply their classification (spec §7.2).
+ * preimage evidence and must travel in a P1 payload), and an IID that
+ * implies its classification (spec §7.2 / §7.3). Typed `wd` values qualify
+ * only with an active EntitySchema binding; bare `wd` remains polymorphic.
  */
 export function isAnchorEligible(input: string): boolean {
 	const inspection = inspectIntuitionId(input);
@@ -71,7 +73,9 @@ export function isAnchorEligible(input: string): boolean {
 
 /**
  * Typed inspection: one call that distinguishes every failure mode a
- * caller can act on (spec §2.5 validity, §7.2 anchor eligibility).
+ * caller can act on (spec §2.5 validity, §7.2 anchor eligibility, §7.3 typing).
+ * Typed `wd` values report their binding slug and per-value typing;
+ * dormant bindings are valid but cannot mint a P0 anchor.
  *
  * - `malformed` — not `int:<scheme>:<value>` per the grammar
  * - `unknown-scheme` — the registry is closed; unknown schemes are invalid
@@ -105,6 +109,23 @@ export function inspectIntuitionId(input: string): IidInspection {
 			...(canonical !== undefined
 				? { canonical: formatIntuitionId(scheme.scheme, canonical) }
 				: {}),
+		};
+	}
+
+	if (scheme.scheme === 'wd' && value.includes(':')) {
+		// Canonicalization already proved membership in the closed binding set.
+		const wdSlug = value.slice(0, value.indexOf(':')) as WdEntitySchemaSlug;
+		const anchorEligible = isActiveWdEntitySchemaSlug(wdSlug);
+		return {
+			valid: true,
+			iid: formatIntuitionId(scheme.scheme, value),
+			scheme: scheme.scheme,
+			value,
+			class: scheme.class,
+			typing: 'unambiguous',
+			wdSlug,
+			anchorEligible,
+			...(!anchorEligible ? { anchorIneligibilityReason: 'dormant-wd-binding' as const } : {}),
 		};
 	}
 

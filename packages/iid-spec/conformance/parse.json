@@ -79,6 +79,20 @@
 			"scheme": null,
 			"value": null,
 			"note": "value exceeds 220-char limit"
+		},
+		{
+			"id": "parse-012",
+			"input": "int:wd:film:Q188035",
+			"scheme": "wd",
+			"value": "film:Q188035",
+			"note": "typed Wikidata value survives first-two-colon split"
+		},
+		{
+			"id": "parse-013",
+			"input": "int:wd:Q42",
+			"scheme": "wd",
+			"value": "Q42",
+			"note": "legacy bare Wikidata parse remains unchanged"
 		}
 	]
 }

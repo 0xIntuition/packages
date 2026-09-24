@@ -43,7 +43,7 @@
 			"iid": "int:wd:Q42",
 			"valid": true,
 			"anchorEligible": false,
-			"note": "valid but polymorphic — floors at P1"
+			"note": "valid but bare — polymorphic, floors at P1"
 		},
 		{
 			"id": "valid-007",
@@ -100,6 +100,52 @@
 			"valid": true,
 			"anchorEligible": true,
 			"note": "strong acct form is anchor eligible"
+		},
+		{
+			"id": "valid-015",
+			"iid": "int:wd:film:Q188035",
+			"valid": true,
+			"typing": "unambiguous",
+			"anchorEligible": true,
+			"note": "active film binding is P0 eligible"
+		},
+		{
+			"id": "valid-016",
+			"iid": "int:wd:human:Q42",
+			"valid": true,
+			"typing": "unambiguous",
+			"anchorEligible": true,
+			"note": "active human binding is P0 eligible"
+		},
+		{
+			"id": "valid-017",
+			"iid": "int:wd:written-work:Q47461344",
+			"valid": true,
+			"typing": "unambiguous",
+			"anchorEligible": false,
+			"note": "dormant written-work binding is valid but not mintable"
+		},
+		{
+			"id": "valid-018",
+			"iid": "int:wd:film:q42",
+			"valid": false,
+			"anchorEligible": false,
+			"note": "typed QID must be canonical byte-exactly"
+		},
+		{
+			"id": "valid-019",
+			"iid": "int:wd:bogus:Q1",
+			"valid": false,
+			"anchorEligible": false,
+			"note": "unknown binding rejects"
+		},
+		{
+			"id": "valid-020",
+			"iid": "int:wd:television-series:Q137400033",
+			"valid": true,
+			"typing": "unambiguous",
+			"anchorEligible": true,
+			"note": "active television series binding is P0 eligible"
 		}
 	]
 }

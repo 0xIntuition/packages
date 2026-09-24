@@ -15,7 +15,7 @@ This directory is the normative scheme registry referenced by [§9.1](../spec/09
 | [`gtin`](./gtin.md) | A | T1 | unambiguous | A trade item (product) |
 | [`doi`](./doi.md) | A | T1 | polymorphic | A registered digital object |
 | [`eidr`](./eidr.md) | A | T1 | unambiguous | An audiovisual work |
-| [`wd`](./wd.md) | A | T2 | polymorphic | Any Wikidata entity |
+| [`wd`](./wd.md) | A | T2 | polymorphic (bare) · unambiguous (typed, active binding) | Any Wikidata entity (value-typed) |
 | [`mbid`](./mbid.md) | A | T2 | unambiguous | A MusicBrainz entity (type in-value) |
 | [`olid`](./olid.md) | A | T2 | unambiguous | An OpenLibrary work, edition, or author |
 | [`imdb`](./imdb.md) | A | T3 | polymorphic | An IMDb title or name |

@@ -43,11 +43,23 @@ inspectIntuitionId('int:wd:Q42')
 // { valid: true, class: 'A', typing: 'polymorphic',
 //   anchorEligible: false, anchorIneligibilityReason: 'polymorphic-scheme' }
 
+inspectIntuitionId('int:wd:film:Q188035')
+// { valid: true, class: 'A', typing: 'unambiguous',
+//   anchorEligible: true, wdSlug: 'film', … }
+
 inspectIntuitionId('int:src:anything')
 // { valid: false, reason: 'unknown-scheme', … } — the registry is closed
 ```
 
-`isAnchorEligible` answers the P0 question (spec §7.2): valid + Class A/B + unambiguously typed scheme. Class C (`gen1`) and polymorphic schemes floor at P1.
+`isAnchorEligible` answers the P0 question (spec §7.2): valid + Class A/B + unambiguously typed identifier with an active binding when present. Class C (`gen1`) and polymorphic values, including bare `wd`, floor at P1.
+
+## Typed Wikidata identifiers
+
+`wd` is value-typed: `int:wd:film:Q188035`, `int:wd:television-series:Q137400033`, and `int:wd:human:Q42` carry active EntitySchema bindings and are P0-eligible. Bare `int:wd:Q42` remains valid, polymorphic, and ineligible for P0. Dormant typed bindings such as `written-work` remain valid for parsing and validation but do not mint.
+
+Declare `wdSlug: 'film'` on a `wd` scheme rung with a `field` or `same-as` source to mint typed values. Bare QIDs are prefixed; a conflicting typed slug or an overlong IID skips the rung. `same-as` selects the lexicographically smallest canonical value before checking the slug. A rung without `wdSlug` retains legacy bare minting during the transition.
+
+`WD_ENTITYSCHEMA_BINDINGS` exposes the 11 pinned rows; `WD_ENTITYSCHEMA_SLUGS` is the frozen grammar list. `isWdEntitySchemaSlug` checks membership, and `isActiveWdEntitySchemaSlug` checks minting eligibility. The corresponding public types are `WdEntitySchemaBinding` and `WdEntitySchemaSlug`. `SCHEME_TYPING.wd` stays `polymorphic`; use `inspectIntuitionId` for per-value typing and the `dormant-wd-binding` ineligibility reason.
 
 ## Canonicalize
 
@@ -108,7 +120,7 @@ Plus the derivation utilities the spec's schemes need: `norm1` (NORM-1), `keccak
 
 ## Conformance
 
-The versioned conformance corpus ships in [`@0xintuition/iid-spec`](https://www.npmjs.com/package/@0xintuition/iid-spec) (`conformance/*.json`) and runs in this package's test suite. Canonicalization rules are frozen (spec §9.3): a rule change ships as a new scheme, never an in-place edit.
+The versioned conformance corpus ships in [`@0xintuition/iid-spec`](https://www.npmjs.com/package/@0xintuition/iid-spec) (`conformance/*.json`) and runs in this package's test suite. Canonicalization rules are frozen (spec §9.3): changes to existing canonical values require a new scheme; additive value-grammar extensions follow §9.3.1.
 
 ## License
 
