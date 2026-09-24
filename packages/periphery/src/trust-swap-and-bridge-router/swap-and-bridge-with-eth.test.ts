@@ -10,6 +10,7 @@ describe('trustSwapAndBridgeRouterSwapAndBridgeWithETH', () => {
 			'0x4200000000000000000000000000000000000006000032833589fcd6edb6e08f4c7c32d4f71b54bda029130000016cd905df2ed214b22e0d48ff17cd4200c1c6d8a3' as Hex;
 		const minTrustOut = 1n;
 		const recipient = '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' as Address;
+		const deadline = 1_700_000_000n;
 		const value = 2_000_000_000_000_000n;
 		const hash = '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc' as Hex;
 		const account = {
@@ -30,7 +31,7 @@ describe('trustSwapAndBridgeRouterSwapAndBridgeWithETH', () => {
 				walletClient,
 			},
 			{
-				args: [path, minTrustOut, recipient],
+				args: [path, minTrustOut, recipient, deadline],
 				value,
 			}
 		);
@@ -41,7 +42,7 @@ describe('trustSwapAndBridgeRouterSwapAndBridgeWithETH', () => {
 				account,
 				address,
 				functionName: 'swapAndBridgeWithETH',
-				args: [path, minTrustOut, recipient],
+				args: [path, minTrustOut, recipient, deadline],
 				value,
 			})
 		);

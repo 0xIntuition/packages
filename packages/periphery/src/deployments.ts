@@ -13,11 +13,14 @@ export const intuitionPeripheryDeployments: {
 	};
 } = {
 	TrustSwapAndBridgeRouter: {
-		[base.id]: '0xA1EC6f95A88Bfc7A8Fd35f1296b64ebaf91C93fb',
+		[base.id]: '0xE485D9a5Dc39774b7A80864B625969Cf9d93E5D7',
 	},
 	MetaNativeSpoke: {
 		[INTUITION_MAINNET_CHAIN_ID]: '0x375135fe908dD62f3C7939FA4e65bf41Da721AB9',
 	},
+	// No addresses yet — FeeProxyDeploy.s.sol reads its deployment address from env vars
+	// at deploy time and nothing has been deployed. Populate once a real deployment exists.
+	FeeProxy: {},
 };
 
 export const intuitionPeripheryMetaERC20HubDeployments: Record<
