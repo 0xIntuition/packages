@@ -205,8 +205,13 @@ test('reports malformed exception policy without crashing', (t) => {
 });
 
 test('frozen install remains reproducible without an exception', () => {
+	const lockfilePath = path.join(repoRoot, 'bun.lock');
+	const before = fs.readFileSync(lockfilePath, 'utf8');
+
 	execFileSync('bun', ['install', '--frozen-lockfile'], {
 		cwd: repoRoot,
 		stdio: 'pipe',
 	});
+
+	assert.equal(fs.readFileSync(lockfilePath, 'utf8'), before, 'frozen install must leave bun.lock unchanged');
 });
