@@ -9,7 +9,7 @@ import {
 	listUnambiguousSchemeClassifications,
 } from '../classification.js';
 import { SCHEME_CLASSIFICATIONS } from '../classification-map.js';
-import type { UnambiguousScheme } from '../types.js';
+import type { ClassifiableScheme, UnambiguousScheme } from '../types.js';
 
 const SCHEMA_ORG_CONTEXT = 'https://schema.org/';
 
@@ -38,10 +38,13 @@ const DIRECT_EXPECTATIONS: Readonly<Record<string, string>> = {
 
 /** One canonical sample per value-typed scheme type segment. */
 const VALUE_TYPED_EXPECTATIONS: readonly {
-	scheme: UnambiguousScheme;
+	scheme: ClassifiableScheme;
 	value: string;
 	slug: string | undefined;
 }[] = [
+	{ scheme: 'wd', value: 'film:Q188035', slug: 'movie' },
+	{ scheme: 'wd', value: 'television-series:Q137400033', slug: 'tv-series' },
+	{ scheme: 'wd', value: 'human:Q42', slug: 'person' },
 	{ scheme: 'mbid', value: 'artist:056e4f3e-d505-4dad-8ec1-d04f521cbb56', slug: 'music-group' },
 	{
 		scheme: 'mbid',
@@ -80,9 +83,9 @@ const VALUE_TYPED_EXPECTATIONS: readonly {
 ];
 
 describe('totality over SCHEME_TYPING', () => {
-	it('maps exactly the D30-unambiguous schemes', () => {
+	it('maps exactly the D30-unambiguous schemes plus every value-typed scheme', () => {
 		const unambiguous = SCHEME_NAMES.filter((scheme) => SCHEME_TYPING[scheme] === 'unambiguous');
-		expect(new Set(Object.keys(SCHEME_CLASSIFICATIONS))).toEqual(new Set(unambiguous));
+		expect(new Set(Object.keys(SCHEME_CLASSIFICATIONS))).toEqual(new Set([...unambiguous, 'wd']));
 	});
 
 	it('references only real classification slugs in direct entries', () => {
@@ -95,13 +98,22 @@ describe('totality over SCHEME_TYPING', () => {
 
 	it('returns undefined for every polymorphic scheme, with or without a value', () => {
 		for (const scheme of SCHEME_NAMES) {
-			if (SCHEME_TYPING[scheme] === 'unambiguous') {
+			if (SCHEME_TYPING[scheme] === 'unambiguous' || scheme === 'wd') {
 				continue;
 			}
 
 			expect(classificationForScheme(scheme), scheme).toBeUndefined();
 			expect(classificationForScheme(scheme, 'Q42'), scheme).toBeUndefined();
 		}
+	});
+
+	it('value-typed schemes classify only typed values', () => {
+		expect(classificationForScheme('wd')).toBeUndefined();
+		expect(classificationForScheme('wd', 'Q42')).toBeUndefined();
+		expect(classificationForScheme('wd', 'written-work:Q47461344')).toBeUndefined();
+		expect(classificationForScheme('wd', 'film:Q188035')?.slug).toBe('movie');
+		expect(classificationForScheme('wd', 'television-series:Q137400033')?.slug).toBe('tv-series');
+		expect(classificationForScheme('wd', 'human:Q42')?.slug).toBe('person');
 	});
 
 	it('resolves every unambiguous scheme as mapped, value-typed, or asserted-unmapped', () => {
@@ -161,6 +173,14 @@ describe('classificationForIid', () => {
 	it('classifies non-canonical valid-grammar IIDs through their canonical form (read-compatibility)', () => {
 		expect(classificationForIid('int:isbn:0-684-83272-0')?.slug).toBe('book');
 		expect(classificationForIid('int:olid:ol26320a')?.slug).toBe('person');
+	});
+
+	it('classifies active typed wd and refuses its legacy bare and dormant forms', () => {
+		expect(classificationForIid('int:wd:film:Q188035')?.slug).toBe('movie');
+		expect(classificationForIid('int:wd:television-series:Q137400033')?.slug).toBe('tv-series');
+		expect(classificationForIid('int:wd:human:Q42')?.slug).toBe('person');
+		expect(classificationForIid('int:wd:Q42')).toBeUndefined();
+		expect(classificationForIid('int:wd:written-work:Q47461344')).toBeUndefined();
 	});
 
 	it('returns undefined for polymorphic, malformed, and unknown-scheme input', () => {

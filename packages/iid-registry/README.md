@@ -29,8 +29,11 @@ classificationForIid('int:mbid:label:83eca2b3-5ae1-43f5-a732-56fa9a8591b1')
 // { slug: 'company', … } — the type segment in the value decides
 
 classificationForIid('int:wd:Q42')
-// undefined — polymorphic scheme: valid IID, no inferred classification.
+// undefined — bare polymorphic value: valid IID, no inferred classification.
 //             Classify Unknown/Thing and still enrich on the identifier.
+
+classificationForIid('int:wd:film:Q188035')
+// { slug: 'movie', … } — active EntitySchema binding in the value
 
 classificationForIid('int:iswc:T0345246801')
 // undefined — ratified unambiguous but explicitly unmapped:
@@ -40,6 +43,8 @@ classificationForScheme('isbn') // { slug: 'book', … } — scheme alone decide
 ```
 
 Classification is total over the unambiguous schemes: every one is mapped directly, resolved from its value's type segment (`mbid`, `olid`, `caip19`, `gen1`), or *explicitly* declared unmapped with a reason. Adding a new unambiguous scheme to `@0xintuition/iid` fails this package's totality tests until it is placed.
+
+Value-typed schemes such as `wd` remain polymorphic at the scheme level and classify only values carrying an active EntitySchema slug; bare and dormant-slug values stay read-only.
 
 Value-aware narrowing is honest about coverage: `caip19` classifies only canonical `eip155/erc20` values as `ethereum-erc20` — a Solana SPL asset is a valid IID with no classification rather than a mislabeled one.
 
@@ -69,6 +74,8 @@ identifierHintsForIid('int:caip19:eip155:1/erc20:0xa0b8…')
 identifierHintsForIid('int:mbid:artist:056e4f3e-…')
 // { mbid: '056e4f3e-…', musicbrainz: '056e4f3e-…', mbidType: 'artist' }
 ```
+
+Typed `wd` hints carry the bare QID in `wd` and `wikidata`, plus the entity slug in `wdSlug`; bare values retain only `wd` and `wikidata`.
 
 The hint map is self-describing (the scheme-named key always appears) plus the alias keys provider capability gates actually read. Key names are a frozen consumer contract.
 

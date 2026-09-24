@@ -10,4 +10,9 @@ export {
 	providersForIid,
 	providersForScheme,
 } from './providers.js';
-export type { IidClassification, UnambiguousScheme } from './types.js';
+export type {
+	ClassifiableScheme,
+	IidClassification,
+	UnambiguousScheme,
+	ValueTypedScheme,
+} from './types.js';

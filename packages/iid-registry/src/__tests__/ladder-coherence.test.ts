@@ -44,6 +44,11 @@ describe('ladder => registry coherence', () => {
 	});
 
 	it('value-typed segments cohere with the ladders that mint them', () => {
+		expect(classificationForScheme('wd', 'film:Q188035')?.slug).toBe('movie');
+		expect(classificationForScheme('wd', 'television-series:Q137400033')?.slug).toBe('tv-series');
+		expect(classificationForScheme('wd', 'human:Q42')?.slug).toBe('person');
+		expect(classificationForScheme('wd', 'written-work:Q47461344')).toBeUndefined();
+
 		// music-group / music-album / music-recording all carry mbid rungs.
 		expect(
 			classificationForScheme('mbid', 'artist:056e4f3e-d505-4dad-8ec1-d04f521cbb56')?.slug

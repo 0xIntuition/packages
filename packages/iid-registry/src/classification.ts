@@ -3,7 +3,14 @@ import type { SchemeName } from '@0xintuition/iid';
 import { SCHEME_TYPING } from '@0xintuition/iid';
 import { parseCanonical } from './canonical.js';
 import { SCHEME_CLASSIFICATIONS } from './classification-map.js';
-import type { IidClassification, UnambiguousScheme } from './types.js';
+import type {
+	ClassifiableScheme,
+	IidClassification,
+	UnambiguousScheme,
+	ValueTypedScheme,
+} from './types.js';
+
+const VALUE_TYPED_SCHEMES: ReadonlySet<SchemeName> = new Set<ValueTypedScheme>(['wd']);
 
 function toResolution(slug: string): IidClassification | undefined {
 	const spec = getClassification(slug);
@@ -22,22 +29,23 @@ function toResolution(slug: string): IidClassification | undefined {
 
 /**
  * Resolve a scheme (plus, for value-typed schemes, a value) to its
- * classification. Polymorphic schemes always return `undefined` — callers
- * classify Unknown/Thing and still enrich on the identifier.
+ * classification. Polymorphic values return `undefined` — callers classify
+ * Unknown/Thing and still enrich on the identifier.
  *
  * `value` may be raw or canonical; it is canonicalized before the type
- * segment is read. It is required for the value-typed schemes (`mbid`,
- * `olid`, `caip19`, `gen1`) and ignored otherwise.
+ * segment is read. It is required for the value-typed schemes (`wd`, `mbid`,
+ * `olid`, `caip19`, `gen1`) and ignored otherwise. `wd` resolves only for
+ * active EntitySchema slugs; bare and dormant-slug values stay read-only.
  */
 export function classificationForScheme(
 	scheme: SchemeName,
 	value?: string
 ): IidClassification | undefined {
-	if (SCHEME_TYPING[scheme] !== 'unambiguous') {
+	if (SCHEME_TYPING[scheme] !== 'unambiguous' && !VALUE_TYPED_SCHEMES.has(scheme)) {
 		return undefined;
 	}
 
-	const entry = SCHEME_CLASSIFICATIONS[scheme as UnambiguousScheme];
+	const entry = SCHEME_CLASSIFICATIONS[scheme as ClassifiableScheme];
 
 	switch (entry.kind) {
 		case 'direct':
@@ -64,7 +72,7 @@ export function classificationForScheme(
 }
 
 /**
- * Classify an IID string. `undefined` for polymorphic schemes, malformed or
+ * Classify an IID string. `undefined` for polymorphic values, malformed or
  * uncanonicalizable IIDs, and ratified-but-unmapped schemes. Never throws.
  *
  * Non-canonical valid-grammar IIDs resolve through their canonical form —
@@ -84,7 +92,7 @@ export function classificationForIid(iid: string): IidClassification | undefined
 /**
  * Enumerate the scheme => classification pairs for schemes whose scheme
  * alone decides the classification — for consumers that build static maps.
- * Value-typed schemes (`mbid`, `olid`, `caip19`, `gen1`) are excluded: they
+ * Value-typed schemes (`wd`, `mbid`, `olid`, `caip19`, `gen1`) are excluded: they
  * have no single classification.
  */
 export function listUnambiguousSchemeClassifications(): readonly ({
