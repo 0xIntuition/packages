@@ -11,6 +11,28 @@ export type WriteConfig = {
 	publicClient: PublicClient;
 };
 
+/**
+ * MultiVault's `approve` bit-flag union, mirroring the on-chain `ApprovalTypes` enum
+ * (`IMultiVault.sol`) member-for-member: DEPOSIT (0b001), REDEMPTION (0b010), CREATION
+ * (0b100), and their unions.
+ *
+ * Plain object + type alias rather than a real `enum`: some consumers (e.g.
+ * lab/curve-demo) build with `erasableSyntaxOnly`, which forbids non-erasable `enum`
+ * declarations.
+ */
+export const ApprovalTypes = {
+	NONE: 0,
+	DEPOSIT: 1,
+	REDEMPTION: 2,
+	BOTH: 3,
+	CREATION: 4,
+	DEPOSIT_AND_CREATION: 5,
+	REDEMPTION_AND_CREATION: 6,
+	ALL: 7,
+} as const;
+
+export type ApprovalTypes = (typeof ApprovalTypes)[keyof typeof ApprovalTypes];
+
 export type MultivaultConfig = {
 	atom_cost: string;
 	formatted_atom_cost: string;
