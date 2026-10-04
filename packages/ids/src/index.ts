@@ -1,4 +1,15 @@
 export { calculateAtomId } from './atom-id.js';
+export type { AuthUserAtomData, AuthUserAtomInput } from './auth-user-atom.js';
+export {
+	AUTH_USER_ATOM_CONTEXT,
+	AUTH_USER_ATOM_DERIVATION_VERSION,
+	AUTH_USER_ATOM_TYPE,
+	authUserAtomDataHex,
+	authUserIdHash,
+	calculateAuthUserAtomId,
+	createAuthUserAtomData,
+	serializeAuthUserAtomData,
+} from './auth-user-atom.js';
 export { checksumAddress, formatTrustAmount, shortenHex } from './format.js';
 export {
 	ATOM_SALT,
@@ -7,6 +18,7 @@ export {
 	hashPacked,
 	TRIPLE_SALT,
 } from './hash.js';
+export { I_SUBJECT, I_SUBJECT_DATA, I_SUBJECT_ID } from './i-atom.js';
 export type { OAuthAtomData, OAuthAtomInput, OAuthProvider } from './oauth-atom.js';
 export {
 	calculateOAuthAtomId,
