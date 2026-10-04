@@ -29,6 +29,11 @@ describe('golden-path fixtures', () => {
 		expect(derived ? classificationForIid(derived.iid)?.slug : undefined).toBe('person');
 	});
 
+	it('active typed wd classifies while legacy bare wd remains read-only', () => {
+		expect(classificationForIid('int:wd:film:Q188035')?.slug).toBe('movie');
+		expect(classificationForIid('int:wd:Q42')).toBeUndefined();
+	});
+
 	it('bare polymorphic IID is valid but classifies undefined (enrich anyway)', () => {
 		expect(classificationForIid('int:wd:Q42')).toBeUndefined();
 	});
