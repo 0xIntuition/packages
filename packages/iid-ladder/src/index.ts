@@ -1,8 +1,14 @@
 export {
+	IDENTITY_CATEGORIES,
+	IDENTITY_CATEGORY_ALIAS_ONLY_POLICY,
 	IDENTITY_CATEGORY_RUNG_POLICY,
+	IDENTITY_RUNG_TOKENS,
 	type IdentityCategory,
 	type IdentityRungToken,
+	identityRungsForCategory,
+	isPlainWdPrimaryAllowed,
 	resolveWikidataP31Identity,
+	SCHEMA_TYPE_IDENTITY_CATEGORIES,
 	schemeOrderForIdentityCategory,
 	WIKIDATA_P31_IDENTITY_POLICY,
 	type WikidataP31Identity,
@@ -26,3 +32,4 @@ export {
 	PINNED_ACTIVE_WD_P31_CLOSURE,
 	PINNED_ACTIVE_WD_P31_CLOSURE_SHA256,
 } from './wd-p31-closure.js';
+export { pickWikidataLabel } from './wikidata-label.js';

@@ -45,6 +45,12 @@ const DIGITS = /^[1-9]\d*$/;
 export const PROVIDER_PREFIX_MAPPINGS = [
 	{
 		kind: 'provider-local',
+		providerPrefix: 'apple-podcasts:',
+		iidPrefix: 'apple-podcasts:',
+		valuePattern: DIGITS,
+	},
+	{
+		kind: 'provider-local',
 		providerPrefix: 'podcast-index:',
 		iidPrefix: 'podcast-index:',
 		valuePattern: DIGITS,

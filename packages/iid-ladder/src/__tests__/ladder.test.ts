@@ -35,6 +35,7 @@ const PROVIDER_CASES = [
 ] as const;
 
 const PROVIDER_LOCAL_CASES = [
+	'apple-podcasts:1222114325',
 	'podcast-index:3421639',
 	'spotify:track:4uLU6hMCjMI75M1A2tKUQC',
 	'spotify:album:6DEjYFkNZh67HP7R9PSZvv',
@@ -602,4 +603,47 @@ describe('projectIdentifierLadder', () => {
 			reason: 'url-over-cap',
 		});
 	});
+});
+
+it('opts into plain WD strong identifiers and int provider IDs without enabling bare handles', () => {
+	const fallback = { iid: null, fallback: 'envelope', reason: 'no-identifier' };
+	expect(projectIdentifierLadder({ strongIdentifiers: { wd: 'Q42' } })).toEqual(fallback);
+	expect(
+		projectIdentifierLadder({ allowPlainWd: false, strongIdentifiers: { wd: 'Q42' } })
+	).toEqual(fallback);
+	expect(projectIdentifierLadder({ allowPlainWd: true, strongIdentifiers: { wd: 'Q42' } })).toEqual(
+		{ iid: 'int:wd:Q42', rung: 'strong' }
+	);
+	for (const strongIdentifierOrder of [undefined, ['wd', 'imdb']]) {
+		expect(
+			projectIdentifierLadder({
+				allowPlainWd: true,
+				providerCanonicalId: 'int:wd:Q42',
+				strongIdentifierOrder,
+				strongIdentifiers: strongIdentifierOrder ? { imdb: 'tt0073629' } : undefined,
+			})
+		).toEqual({ iid: 'int:wd:Q42', rung: 'strong' });
+		expect(
+			projectIdentifierLadder({
+				allowPlainWd: true,
+				providerCanonicalId: 'wd:Q42',
+				strongIdentifierOrder,
+			})
+		).toEqual({ iid: null, fallback: 'envelope', reason: 'invalid-handle' });
+	}
+	expect(
+		projectIdentifierLadder({
+			allowPlainWd: true,
+			strongIdentifiers: { wd: 'Q42', wdSlug: 'film' },
+		})
+	).toEqual({ iid: 'int:wd:film:Q42', rung: 'strong' });
+	expect(
+		projectIdentifierLadder({
+			allowPlainWd: true,
+			strongIdentifiers: { wd: 'Q42', wikidata: 'Q43' },
+		})
+	).toEqual(fallback);
+	expect(
+		projectIdentifierLadder({ allowPlainWd: true, strongIdentifiers: { wd: 'written-work:Q42' } })
+	).toEqual(fallback);
 });

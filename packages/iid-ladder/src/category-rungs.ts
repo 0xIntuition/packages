@@ -1,34 +1,10 @@
 import {
 	isActiveWdEntitySchemaSlug,
+	MUSIC_IDENTITY_RUNG_POLICY,
 	WD_ENTITYSCHEMA_BINDINGS,
 	type WdEntitySchemaSlug,
 } from '@0xintuition/iid';
 import { PINNED_ACTIVE_WD_P31_CLOSURE } from './wd-p31-closure.js';
-
-export type IdentityCategory =
-	| 'book'
-	| 'movie'
-	| 'podcast-episode'
-	| 'podcast-series'
-	| 'song'
-	| 'tv-series';
-
-export type IdentityRungToken =
-	| 'goodreads:book'
-	| 'imdb:title'
-	| 'isbn'
-	| 'isrc'
-	| 'olid'
-	| 'podcast-index'
-	| 'podcastguid'
-	| 'rssitem'
-	| 'spotify:episode'
-	| 'spotify:show'
-	| 'spotify:track'
-	| 'tmdb:movie'
-	| 'tmdb:tv'
-	| 'wd:film'
-	| 'wd:television-series';
 
 /**
  * Shared create/seed identity policy. Rows are strongest-first and provider
@@ -36,13 +12,60 @@ export type IdentityRungToken =
  * stronger authority identifier owns the primary IID.
  */
 export const IDENTITY_CATEGORY_RUNG_POLICY = {
+	artist: MUSIC_IDENTITY_RUNG_POLICY.artist.rungs,
 	song: ['isrc', 'spotify:track'],
+	'music-album': MUSIC_IDENTITY_RUNG_POLICY['music-album'].rungs,
 	book: ['olid', 'isbn', 'goodreads:book'],
 	movie: ['wd:film', 'tmdb:movie', 'imdb:title'],
 	'tv-series': ['wd:television-series', 'tmdb:tv', 'imdb:title'],
 	'podcast-series': ['podcastguid', 'podcast-index', 'spotify:show'],
 	'podcast-episode': ['rssitem', 'podcast-index', 'spotify:episode'],
-} as const satisfies Readonly<Record<IdentityCategory, readonly IdentityRungToken[]>>;
+} as const;
+
+/** Release and provider identities admitted for matching, never primary selection. */
+export const IDENTITY_CATEGORY_ALIAS_ONLY_POLICY = {
+	'music-album': ['gtin'],
+	'podcast-series': ['wd', 'apple-podcasts'],
+} as const;
+
+export function identityRungsForCategory(category: IdentityCategory): readonly IdentityRungToken[] {
+	return [
+		...IDENTITY_CATEGORY_RUNG_POLICY[category],
+		...(IDENTITY_CATEGORY_ALIAS_ONLY_POLICY[
+			category as keyof typeof IDENTITY_CATEGORY_ALIAS_ONLY_POLICY
+		] ?? []),
+	];
+}
+
+export type IdentityCategory = keyof typeof IDENTITY_CATEGORY_RUNG_POLICY;
+export type IdentityRungToken =
+	| (typeof IDENTITY_CATEGORY_RUNG_POLICY)[IdentityCategory][number]
+	| (typeof IDENTITY_CATEGORY_ALIAS_ONLY_POLICY)[keyof typeof IDENTITY_CATEGORY_ALIAS_ONLY_POLICY][number];
+
+/** Runtime vocabulary and schema categories shared by classification and enrichment. */
+export const IDENTITY_CATEGORIES = Object.keys(IDENTITY_CATEGORY_RUNG_POLICY) as [
+	IdentityCategory,
+	...IdentityCategory[],
+];
+export const IDENTITY_RUNG_TOKENS = [
+	...new Set([
+		...Object.values(IDENTITY_CATEGORY_RUNG_POLICY).flat(),
+		...Object.values(IDENTITY_CATEGORY_ALIAS_ONLY_POLICY).flat(),
+	]),
+].sort() as [IdentityRungToken, ...IdentityRungToken[]];
+export const SCHEMA_TYPE_IDENTITY_CATEGORIES: Readonly<Partial<Record<string, IdentityCategory>>> =
+	{
+		Book: 'book',
+		Movie: 'movie',
+		MusicAlbum: 'music-album',
+		MusicGroup: 'artist',
+		MusicRecording: 'song',
+		PodcastEpisode: 'podcast-episode',
+		PodcastSeries: 'podcast-series',
+		TVSeries: 'tv-series',
+	};
+
+export { isPlainWdPrimaryAllowed } from '@0xintuition/iid';
 
 export type WikidataP31Identity = {
 	schemaType:
