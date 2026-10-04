@@ -54,6 +54,28 @@ export function validateIntuitionId(input: string): input is IntuitionId {
 	return scheme.isCanonical(parsed.value);
 }
 
+/**
+ * Storage/read-boundary IID contract for KG nodes.
+ *
+ * Registered schemes must use their canonical byte form. Unregistered
+ * provider-local schemes retain the bounded generic shape used by the app IID
+ * ladder, without trimming or embedded whitespace normalization.
+ */
+export function isCanonicalNodeIid(input: string): boolean {
+	const match = IID_SHAPE.exec(input);
+	const schemeName = match?.[1];
+	if (!schemeName) {
+		return false;
+	}
+
+	const scheme = getScheme(schemeName);
+	if (scheme) {
+		return scheme.isCanonical(match[2] ?? '');
+	}
+
+	return input.trim() === input && !/\s/.test(input);
+}
+
 /** Type guard for the broad IID string shape (does not check canonical form). */
 export function isIntuitionId(input: string): input is IntuitionId {
 	return parseIntuitionId(input) !== undefined;
