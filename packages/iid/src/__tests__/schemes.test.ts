@@ -41,6 +41,17 @@ describe('gtin', () => {
 });
 
 describe('check-digit identity schemes', () => {
+	it('canonicalizes durable isni.org evidence and rejects wrong hosts and checksums', () => {
+		expect(SCHEMES.isni.canonicalize('https://isni.org/isni/0000000121367029')).toBe(
+			'0000000121367029'
+		);
+		expect(SCHEMES.isni.canonicalize('https://isni.org/isni/0000000121367020')).toBeUndefined();
+		expect(SCHEMES.isni.canonicalize('https://isni.org/ISNI/0000000121367029')).toBe(
+			'0000000121367029'
+		);
+		expect(SCHEMES.isni.canonicalize('https://example.org/isni/0000000121367029')).toBeUndefined();
+		expect(SCHEMES.orcid.canonicalize('https://isni.org/isni/0000000121367029')).toBeUndefined();
+	});
 	it('canonicalizes ISRC by stripping separators and uppercasing', () => {
 		expect(SCHEMES.isrc.canonicalize('us-sm1-00-07459')).toBe('USSM10007459');
 	});
@@ -284,5 +295,23 @@ describe('misc natural keys', () => {
 	it('validates content hashes', () => {
 		const digest = 'sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08';
 		expect(SCHEMES.hash.canonicalize(digest.toUpperCase())).toBe(digest);
+	});
+});
+
+describe('music and podcast public exports', () => {
+	it('exports the music identity policy and podcast feed normalizer', () => {
+		expect(publicIid.MUSIC_IDENTITY_RUNG_POLICY).toEqual({
+			artist: { schemaType: 'MusicGroup', rungs: ['isni', 'mbid:artist', 'wd', 'spotify:artist'] },
+			'music-album': {
+				schemaType: 'MusicAlbum',
+				rungs: ['mbid:release-group', 'wd', 'spotify:album'],
+			},
+		});
+		expect(publicIid.isPlainWdPrimaryAllowed('MusicGroup')).toBe(true);
+		expect(publicIid.isPlainWdPrimaryAllowed('MusicAlbum')).toBe(true);
+		expect(publicIid.isPlainWdPrimaryAllowed('Person')).toBe(false);
+		expect(publicIid.normalizePodcastFeedUrl('HTTPS://Host.Example/Feed/')).toBe(
+			'host.example/Feed'
+		);
 	});
 });

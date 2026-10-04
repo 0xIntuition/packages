@@ -1,7 +1,7 @@
 import { isCanonicalNodeIid } from '@0xintuition/iid';
 import { describe, expect, it } from 'vitest';
 import {
-	IDENTITY_CATEGORY_RUNG_POLICY,
+	IDENTITY_RUNG_TOKENS,
 	type IdentityRungToken,
 	iidForIdentityRung,
 	projectIdentifierLadder,
@@ -9,6 +9,43 @@ import {
 
 describe('iidForIdentityRung', () => {
 	const cases = [
+		[
+			'isni',
+			'0000000121367029',
+			{ strongIdentifiers: { isni: '0000000121367029' }, strongIdentifierOrder: ['isni'] },
+			'int:isni:0000000121367029',
+		],
+		[
+			'mbid:artist',
+			'artist:5ae54dee-4dba-49c0-802a-a3b3b3adfe9b',
+			{
+				strongIdentifiers: { mbid: 'artist:5ae54dee-4dba-49c0-802a-a3b3b3adfe9b' },
+				strongIdentifierOrder: ['mbid'],
+			},
+			'int:mbid:artist:5ae54dee-4dba-49c0-802a-a3b3b3adfe9b',
+		],
+		[
+			'wd',
+			'Q189729',
+			{ allowPlainWd: true, strongIdentifiers: { wd: 'Q189729' }, strongIdentifierOrder: ['wd'] },
+			'int:wd:Q189729',
+		],
+		[
+			'mbid:release-group',
+			'release-group:6b1b8f24-9d81-4b3a-8ad8-3791ae3e6c76',
+			{
+				strongIdentifiers: { mbid: 'release-group:6b1b8f24-9d81-4b3a-8ad8-3791ae3e6c76' },
+				strongIdentifierOrder: ['mbid'],
+			},
+			'int:mbid:release-group:6b1b8f24-9d81-4b3a-8ad8-3791ae3e6c76',
+		],
+
+		[
+			'gtin',
+			'00012345678905',
+			{ strongIdentifiers: { gtin: '00012345678905' }, strongIdentifierOrder: ['gtin'] },
+			'int:gtin:00012345678905',
+		],
 		[
 			'imdb:title',
 			'tt0073629',
@@ -74,6 +111,9 @@ describe('iidForIdentityRung', () => {
 	] as const;
 
 	const providerLocalCases = [
+		['apple-podcasts', '1222114325'],
+		['spotify:album', '5xcunlfaZvD9BDQsLONI7A'],
+		['spotify:artist', '5xcunlfaZvD9BDQsLONI7A'],
 		['goodreads:book', '123'],
 		['podcast-index', '123'],
 		['spotify:episode', '5xcunlfaZvD9BDQsLONI7A'],
@@ -94,7 +134,7 @@ describe('iidForIdentityRung', () => {
 
 	it('covers every policy token', () => {
 		expect(new Set([...cases, ...providerLocalCases].map((c) => c[0]))).toEqual(
-			new Set(Object.values(IDENTITY_CATEGORY_RUNG_POLICY).flat())
+			new Set(IDENTITY_RUNG_TOKENS)
 		);
 	});
 	it.each(
@@ -147,4 +187,26 @@ describe('iidForIdentityRung', () => {
 		expect(iidForIdentityRung(token, raw)).toBe(expected);
 		expect(ladder).toBe(expected);
 	});
+});
+
+it('album authority never admits a recording MBID as a release-group rung', () => {
+	expect(
+		iidForIdentityRung('mbid:release-group', 'recording:6b1b8f24-9d81-4b3a-8ad8-3791ae3e6c76')
+	).toBeUndefined();
+});
+
+it('artist rung rejects release, release-group and recording MBIDs', () => {
+	for (const level of ['release', 'release-group', 'recording'])
+		expect(
+			iidForIdentityRung('mbid:artist', `${level}:5ae54dee-4dba-49c0-802a-a3b3b3adfe9b`)
+		).toBeUndefined();
+});
+
+it('allows plain WD aliases only with absent or policy-admitted primary schema types', () => {
+	expect(iidForIdentityRung('wd', 'Q42')).toBe('int:wd:Q42');
+	expect(iidForIdentityRung('wd', 'q42', 'MusicGroup')).toBe('int:wd:Q42');
+	expect(iidForIdentityRung('wd', 'Q42', 'MusicAlbum')).toBe('int:wd:Q42');
+	expect(iidForIdentityRung('wd', 'Q42', 'PodcastSeries')).toBeUndefined();
+	expect(iidForIdentityRung('wd', 'Q42', 'Movie')).toBeUndefined();
+	expect(iidForIdentityRung('wd:film', 'Q42', 'Movie')).toBe('int:wd:film:Q42');
 });

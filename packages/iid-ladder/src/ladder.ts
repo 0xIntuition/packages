@@ -10,6 +10,8 @@ import {
 import { PROVIDER_PREFIX_MAPPINGS } from './provider-prefixes.js';
 
 export type LadderInput = {
+	/** Music and podcast policy uses plain QIDs; active typed bindings remain opt-in. */
+	allowPlainWd?: boolean;
 	strongIdentifiers?: Readonly<Record<string, string>>;
 	/** Optional strongest-first scheme order for a classification-specific ladder. */
 	strongIdentifierOrder?: readonly string[];
@@ -55,11 +57,12 @@ type HandleProjection =
 export function projectIdentifierLadder(input: LadderInput): LadderResult {
 	const providerStrong =
 		input.strongIdentifierOrder && input.providerCanonicalId
-			? strongProviderCandidate(input.providerCanonicalId)
+			? strongProviderCandidate(input.providerCanonicalId, input.allowPlainWd)
 			: undefined;
 	const directStrongIid = selectStrongIdentifier(
 		input.strongIdentifiers,
-		input.strongIdentifierOrder
+		input.strongIdentifierOrder,
+		input.allowPlainWd
 	);
 	const strongIid = providerStrong
 		? selectStrongIdentifier(
@@ -67,7 +70,8 @@ export function projectIdentifierLadder(input: LadderInput): LadderResult {
 					...(input.strongIdentifiers ?? {}),
 					[providerStrong.scheme]: providerStrong.value,
 				},
-				input.strongIdentifierOrder
+				input.strongIdentifierOrder,
+				input.allowPlainWd
 			)
 		: directStrongIid;
 	if (strongIid) {
@@ -83,7 +87,8 @@ export function projectIdentifierLadder(input: LadderInput): LadderResult {
 	let canonicalUrl = input.canonicalUrl;
 	const providerCanonicalId = input.providerCanonicalId;
 	if (providerCanonicalId?.startsWith('int:')) {
-		return validateIntuitionId(providerCanonicalId) && isMintableWdIid(providerCanonicalId)
+		return validateIntuitionId(providerCanonicalId) &&
+			isMintableWdIid(providerCanonicalId, input.allowPlainWd)
 			? { iid: providerCanonicalId, rung: 'strong' }
 			: { fallback: 'envelope', iid: null, reason: 'invalid-handle' };
 	}
@@ -118,10 +123,11 @@ export function projectIdentifierLadder(input: LadderInput): LadderResult {
 }
 
 function strongProviderCandidate(
-	providerCanonicalId: string
+	providerCanonicalId: string,
+	allowPlainWd?: boolean
 ): { iid: string; rung: 'handle' | 'strong'; scheme: SchemeName; value: string } | undefined {
 	const projection = providerCanonicalId.startsWith('int:')
-		? validateIntuitionId(providerCanonicalId) && isMintableWdIid(providerCanonicalId)
+		? validateIntuitionId(providerCanonicalId) && isMintableWdIid(providerCanonicalId, allowPlainWd)
 			? { iid: providerCanonicalId, status: 'mapped' as const }
 			: { status: 'invalid' as const }
 		: projectProviderHandle(providerCanonicalId);
@@ -141,7 +147,8 @@ function strongProviderCandidate(
 
 function selectStrongIdentifier(
 	strongIdentifiers: LadderInput['strongIdentifiers'],
-	strongIdentifierOrder: LadderInput['strongIdentifierOrder']
+	strongIdentifierOrder: LadderInput['strongIdentifierOrder'],
+	allowPlainWd?: boolean
 ): string | undefined {
 	if (!strongIdentifiers) {
 		return undefined;
@@ -167,7 +174,7 @@ function selectStrongIdentifier(
 		if (!validateIntuitionId(iid)) {
 			continue;
 		}
-		if (!isMintableWdIid(iid)) {
+		if (!isMintableWdIid(iid, allowPlainWd)) {
 			continue;
 		}
 		const schemeCandidates = candidates.get(scheme) ?? [];
@@ -213,7 +220,7 @@ function hasWdSlugConflict(
 	return qids.size > 1 || typedValues.size > 1;
 }
 
-function isMintableWdIid(iid: string): boolean {
+function isMintableWdIid(iid: string, allowPlainWd = false): boolean {
 	const parsed = parseIntuitionId(iid);
 
 	if (parsed?.scheme !== 'wd') {
@@ -221,6 +228,7 @@ function isMintableWdIid(iid: string): boolean {
 	}
 
 	const separator = parsed.value.indexOf(':');
+	if (separator === -1) return allowPlainWd && /^Q[1-9]\d*$/u.test(parsed.value);
 	return separator > 0 && isActiveWdEntitySchemaSlug(parsed.value.slice(0, separator));
 }
 

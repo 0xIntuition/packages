@@ -779,6 +779,34 @@
 			"raw": "﻿Q42﻿",
 			"canonical": "Q42",
 			"note": "BOM-wrapped bare QID keeps its base canonicalization"
+		},
+		{
+			"id": "canon-isni-url-112",
+			"scheme": "isni",
+			"raw": "https://isni.org/isni/0000000121032683",
+			"canonical": "0000000121032683",
+			"note": "ISNI URL prefix strips to the existing bare canonical value (section 9.3.1)"
+		},
+		{
+			"id": "canon-isni-url-113",
+			"scheme": "isni",
+			"raw": "https://www.isni.org/isni/0000000121032683",
+			"canonical": "0000000121032683",
+			"note": "ISNI URL accepts the www host alias"
+		},
+		{
+			"id": "canon-isni-url-114",
+			"scheme": "isni",
+			"raw": "HTTPS://ISNI.ORG/isni/0000000121032683",
+			"canonical": "0000000121032683",
+			"note": "ISNI URL scheme and host are case-insensitive"
+		},
+		{
+			"id": "canon-isni-url-115",
+			"scheme": "isni",
+			"raw": "https://isni.org/ISNI/0000000121032683",
+			"canonical": "0000000121032683",
+			"note": "ISNI URL path segment is matched case-insensitively as well (whole-prefix fold, as the reference implementation does)"
 		}
 	]
 }

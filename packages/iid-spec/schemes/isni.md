@@ -22,6 +22,12 @@ That is what "polymorphic" means here, and it has a hard consequence: an `isni` 
 
 with the additional constraint that the final character is the correct ISO 7064 mod 11-2 check character over the first 15 digits. The grammar alone is not sufficient — a conforming validator recomputes the check character.
 
+## Accepted input forms
+
+The existing bare 16-character form and separator-containing display forms remain accepted. The `https://isni.org/isni/<id>` URL form, with or without `www.`, is also accepted; the whole prefix (scheme, host and the `/isni/` path segment) is matched case-insensitively, so `https://isni.org/ISNI/<id>` is accepted as well; the identifier itself is then canonicalized as below. Strip that URL prefix before applying the existing canonicalization below. Canonical output and existing trim behavior remain unchanged; a URL is an input form, never a canonical IID value.
+
+This follows [§9.3.1](../spec/09-registry-governance.md): an additive value-grammar extension accepts a previously-invalid raw form without changing any existing canonical bytes. The URL form mirrors v2 commit `83a003bc1` (R24, default-in-effect).
+
 ## Canonicalization
 
 1. **Strip separators.** Remove every hyphen, dot, and whitespace character (`[-\s.]`). ISNIs are conventionally displayed in four space-separated groups of four; the grouping carries no identity.

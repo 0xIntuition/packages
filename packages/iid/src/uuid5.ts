@@ -45,3 +45,21 @@ export function derivePodcastGuid(feedUrl: string): string {
 
 	return uuidv5(stripped, PODCAST_GUID_NAMESPACE);
 }
+
+/** Canonical feed GUID input: fold scheme/host only, preserving path and query bytes. */
+export function normalizePodcastFeedUrl(feedUrl: string): string {
+	return feedUrl
+		.trim()
+		.replace(
+			/^([a-z][a-z0-9+.-]*:\/\/)?([^/?#]*@)?(\[[^\]]+\]|[^:/?#]+)(:[0-9]+)?/i,
+			(
+				_match,
+				scheme: string | undefined,
+				userinfo: string | undefined,
+				hostname: string,
+				port: string | undefined
+			) => `${scheme?.toLowerCase() ?? ''}${userinfo ?? ''}${hostname.toLowerCase()}${port ?? ''}`
+		)
+		.replace(/^[a-z][a-z0-9+.-]*:\/\//i, '')
+		.replace(/\/+$/, '');
+}
