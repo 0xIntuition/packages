@@ -9,6 +9,8 @@ export type RedeemConfig = {
 };
 
 export type RedeemInputs = {
+	// `redeem` is declared payable only so it can share a value-bearing multicall with
+	// payable legs; its own value allocation must be zero.
 	args: ContractFunctionArgs<typeof MultiVaultAbi, 'payable', 'redeem'>;
 };
 
