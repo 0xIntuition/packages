@@ -3,7 +3,8 @@
 # Defense-in-depth against supply chain attacks using compromised credentials.
 minimumReleaseAge = 1209600
 
-# Approved, version-pinned exception. Bun can exempt only by package name, so
-# scripts/guard-supply-chain-policy.mjs binds this entry to the exact version,
-# integrity, and removal date recorded in supply-chain-exceptions.json.
-minimumReleaseAgeExcludes = ["@0xintuition/contracts-v2"]
+# Approved, version-pinned exceptions are recorded in supply-chain-exceptions.json
+# and mirrored here as `minimumReleaseAgeExcludes = ["<package>"]`. Bun can exempt
+# only by package name, so scripts/guard-supply-chain-policy.mjs binds each entry
+# to the exact version, integrity, and removal date in that manifest and fails the
+# build once the normal age is reached. No exception is currently active.
