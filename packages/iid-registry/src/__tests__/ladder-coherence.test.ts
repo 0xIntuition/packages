@@ -8,7 +8,8 @@ import { CLASSIFICATION_SPECS } from '@0xintuition/classifications';
 import { SCHEME_TYPING } from '@0xintuition/iid';
 import { describe, expect, it } from 'vitest';
 
-import { classificationForScheme } from '../classification.js';
+import { parseCanonical } from '../canonical.js';
+import { classificationForIid, classificationForScheme } from '../classification.js';
 import { SCHEME_CLASSIFICATIONS } from '../classification-map.js';
 import type { UnambiguousScheme } from '../types.js';
 
@@ -69,5 +70,27 @@ describe('ladder => registry coherence', () => {
 			classificationForScheme('caip19', 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')
 				?.slug
 		).toBe('ethereum-erc20');
+	});
+
+	it('pins the album MBID ladder without recording-level ISRC identity', () => {
+		const album = CLASSIFICATION_SPECS.find((spec) => spec.slug === 'music-album');
+		expect(album?.identity?.ladder).toEqual(
+			expect.arrayContaining([expect.objectContaining({ kind: 'scheme', scheme: 'mbid' })])
+		);
+		expect(album?.identity?.ladder).not.toEqual(
+			expect.arrayContaining([expect.objectContaining({ kind: 'scheme', scheme: 'isrc' })])
+		);
+	});
+
+	it.each([
+		'release-group',
+		'release',
+	])('preserves %s canonical identity and album classification', (level) => {
+		const uuid = '1b022e01-4da6-387b-8658-8678046e4cef';
+		const iid = `int:mbid:${level}:${uuid.toUpperCase()}`;
+		expect(parseCanonical(iid)).toEqual({ scheme: 'mbid', value: `${level}:${uuid}` });
+		expect(classificationForIid(iid)?.slug).toBe('music-album');
+		expect(classificationForScheme('mbid', `${level}:${uuid}`)?.slug).toBe('music-album');
+		expect(classificationForIid(`int:mbid:recording:${uuid}`)?.slug).toBe('music-recording');
 	});
 });
