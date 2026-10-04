@@ -112,6 +112,12 @@ buildGen1Iid('movie', 4, { name: 'Inception', yearPublished: '2010' })
 
 Plus the derivation utilities the spec's schemes need: `norm1` (NORM-1), `keccak16`, `geohashEncode`, `uuidv5` / `derivePodcastGuid`.
 
+## Music identity policy and podcast feeds
+
+`MUSIC_IDENTITY_RUNG_POLICY` shares the music rung order: `artist` → `MusicGroup` uses `isni`, `mbid:artist`, `wd`, `spotify:artist`; `music-album` → `MusicAlbum` uses `mbid:release-group`, `wd`, `spotify:album`. `isPlainWdPrimaryAllowed(schemaType)` returns true for these two schema types, whose policy admits plain `wd`.
+
+`normalizePodcastFeedUrl(feedUrl)` trims input, folds the scheme and hostname case, strips the scheme and trailing slashes, and preserves userinfo, port, path and query bytes. Pass the result to `derivePodcastGuid` when normalizing feed evidence; `derivePodcastGuid` itself is unchanged.
+
 ## What this package is not
 
 - **No classification lookup, no provider routing.** Scheme-to-classification mapping lives in `@0xintuition/iid-registry`; ladder declarations for Intuition's entity types live in `@0xintuition/classifications`.
