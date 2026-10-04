@@ -9,10 +9,19 @@ export type TrustSwapAndBridgeRouterQuoteExactInputInputs = {
 
 /**
  * Calls TrustSwapAndBridgeRouter `quoteExactInput` via simulation.
- * Note: the ABI marks this function `nonpayable`, so simulation is used instead of `readContract`.
+ *
+ * Returns a tuple `[amountOut, success]`. `success = false` indicates the
+ * underlying Slipstream quoter reverted (transient RPC failure, stale oracle,
+ * deprecated pool) — callers that derive `minTrustOut` from this preflight
+ * **must** branch on `success` and abort the swap when `false`, otherwise
+ * downstream slippage protection collapses on a subsequent swap call.
+ *
+ * Note: the ABI marks this function `nonpayable`, so simulation is used
+ * instead of `readContract`.
+ *
  * @param config Contract address and public client.
  * @param inputs Function args (path, amountIn).
- * @returns Expected output amount from the quoter path.
+ * @returns Tuple `[amountOut, success]` from the quoter path.
  */
 export async function trustSwapAndBridgeRouterQuoteExactInput(
 	config: ReadConfig,

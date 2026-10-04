@@ -1,3 +1,5 @@
+export { FeeProxyAbi } from './FeeProxy-abi';
+export { FeeProxyBytecode } from './FeeProxy-bytecode';
 export { MetaERC20HubAbi } from './MetaERC20Hub-abi';
 export { MetaERC20HubBytecode } from './MetaERC20Hub-bytecode';
 export { MetaERC20SpokeAbi } from './MetaERC20Spoke-abi';

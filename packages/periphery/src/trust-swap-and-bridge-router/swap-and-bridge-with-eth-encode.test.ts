@@ -10,11 +10,13 @@ describe('trustSwapAndBridgeRouterSwapAndBridgeWithETHEncode', () => {
 			'0x4200000000000000000000000000000000000006000032833589fcd6edb6e08f4c7c32d4f71b54bda029130000016cd905df2ed214b22e0d48ff17cd4200c1c6d8a3' as Hex;
 		const minTrustOut = 123n;
 		const recipient = '0x1111111111111111111111111111111111111111' as Address;
+		const deadline = 1_700_000_000n;
 
 		const encoded = trustSwapAndBridgeRouterSwapAndBridgeWithETHEncode(
 			path,
 			minTrustOut,
-			recipient
+			recipient,
+			deadline
 		);
 
 		expect(isHex(encoded)).toBe(true);
@@ -24,6 +26,6 @@ describe('trustSwapAndBridgeRouterSwapAndBridgeWithETHEncode', () => {
 		});
 
 		expect(decoded.functionName).toBe('swapAndBridgeWithETH');
-		expect(decoded.args).toEqual([path, minTrustOut, recipient]);
+		expect(decoded.args).toEqual([path, minTrustOut, recipient, deadline]);
 	});
 });
