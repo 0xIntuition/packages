@@ -1,13 +1,29 @@
 // Types
 
+// Dynamic fee curve
+export {
+	DYNAMIC_FEE_BPS,
+	dynamicFeeDepositFeeBps,
+	dynamicFeeQuoteDepositFee,
+	dynamicFeeQuoteWithdrawalFee,
+	dynamicFeeTierLadder,
+	dynamicFeeTierOf,
+	dynamicFeeTierUpperEdge,
+	dynamicFeeTierWidthAt,
+	dynamicFeeWithdrawalFeeBps,
+} from './dynamic-fee-curve.js';
 // Fee simulation
 export {
+	grossUpAtomCreate,
+	grossUpAtomDeposit,
+	grossUpTripleCreate,
+	grossUpTripleDeposit,
 	previewAtomDeposit,
 	previewDepositWithFees,
 	previewRedeemWithFees,
 	previewTripleDeposit,
 	totalFees,
-} from './fees';
+} from './fees.js';
 // Linear curve
 export {
 	createLinearCurve,
@@ -18,9 +34,9 @@ export {
 	linearPreviewMint,
 	linearPreviewRedeem,
 	linearPreviewWithdraw,
-} from './linear-curve';
+} from './linear-curve.js';
 // Market cap
-export { marketCapFromState } from './market-cap';
+export { marketCapFromState } from './market-cap.js';
 // Math primitives
 export {
 	divWadDown,
@@ -37,7 +53,7 @@ export {
 	squareWadDown,
 	squareWadUp,
 	WAD,
-} from './math';
+} from './math.js';
 
 // Offset progressive curve
 export {
@@ -49,7 +65,7 @@ export {
 	offsetProgressivePreviewMint,
 	offsetProgressivePreviewRedeem,
 	offsetProgressivePreviewWithdraw,
-} from './offset-progressive-curve';
+} from './offset-progressive-curve.js';
 // Progressive curve
 export {
 	createProgressiveCurve,
@@ -60,16 +76,20 @@ export {
 	progressivePreviewMint,
 	progressivePreviewRedeem,
 	progressivePreviewWithdraw,
-} from './progressive-curve';
+} from './progressive-curve.js';
 export type {
 	AtomFees,
 	Curve,
 	CurveState,
 	DepositQuote,
+	DynamicFeeConfig,
+	DynamicFeeTierLadderEntry,
+	DynamicFeeTierOverride,
 	FeeBreakdown,
 	FeeSchedule,
+	GrossDepositQuote,
 	OffsetProgressiveCurveConfig,
 	ProgressiveCurveConfig,
 	RedeemQuote,
 	TripleFees,
-} from './types';
+} from './types.js';
