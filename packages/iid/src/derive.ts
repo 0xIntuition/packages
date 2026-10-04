@@ -2,7 +2,7 @@ import { buildGen1Iid } from './gen1.js';
 import { geohashEncode } from './geohash.js';
 import { keccak16 } from './hash.js';
 import { norm1 } from './norm.js';
-import { formatIntuitionId } from './parse.js';
+import { formatIntuitionId, validateIntuitionId } from './parse.js';
 import { SCHEMES } from './schemes.js';
 import type {
 	DerivedIid,
@@ -13,6 +13,7 @@ import type {
 	IidValueMap,
 } from './types.js';
 import { derivePodcastGuid } from './uuid5.js';
+import { isActiveWdEntitySchemaSlug } from './wd-entityschema-bindings.js';
 
 /**
  * The pure declarative derivation engine (spec §5.2).
@@ -26,6 +27,15 @@ import { derivePodcastGuid } from './uuid5.js';
  * contract: ladders are data, and two engines interpreting the same ladder
  * against the same field map MUST return the same identifier.
  *
+ * | `wd` rung | Behavior |
+ * | --------- | -------- |
+ * | Active `wdSlug` | Prefix bare QIDs; retain matching typed values; skip conflicting slugs or invalid IIDs (including values over 220 characters). |
+ * | Dormant `wdSlug` | Skip the rung. |
+ * | No `wdSlug` | Legacy bare minting only (D-P16-1, D-P16-5): a typed value reaching a slugless rung is skipped; typed minting requires a declared active binding. |
+ *
+ * `same-as` canonicalizes the whole set and selects its lexicographically
+ * smallest value before checking the rung's slug, including typed values.
+ *
  * Returns `undefined` when no rung fires — the atom mints without an IID.
  */
 export function deriveIntuitionId(
@@ -34,6 +44,11 @@ export function deriveIntuitionId(
 ): DerivedIid | undefined {
 	for (const rung of ladder.rungs) {
 		if (rung.kind === 'scheme') {
+			const wdSlug = rung.scheme === 'wd' ? rung.wdSlug : undefined;
+			if (wdSlug !== undefined && !isActiveWdEntitySchemaSlug(wdSlug)) {
+				continue;
+			}
+
 			const raw = resolveValueSource(rung.source, rung.scheme, values);
 
 			if (raw === undefined) {
@@ -41,14 +56,38 @@ export function deriveIntuitionId(
 			}
 
 			const definition = SCHEMES[rung.scheme];
-			const canonical = definition.canonicalize(raw);
+			let canonical = definition.canonicalize(raw);
 
 			if (canonical === undefined) {
 				continue;
 			}
 
+			if (rung.scheme === 'wd' && wdSlug === undefined && canonical.includes(':')) {
+				// D-P16-5: a slugless rung keeps the base accepted-value domain (bare QIDs only).
+				continue;
+			}
+
+			if (wdSlug !== undefined) {
+				if (canonical.includes(':')) {
+					if (canonical.split(':', 1)[0] !== wdSlug) {
+						continue;
+					}
+				} else {
+					canonical = definition.canonicalize(`${wdSlug}:${canonical}`);
+				}
+			}
+
+			if (canonical === undefined) {
+				continue;
+			}
+
+			const iid = formatIntuitionId(rung.scheme, canonical);
+			if (wdSlug !== undefined && !validateIntuitionId(iid)) {
+				continue;
+			}
+
 			return {
-				iid: formatIntuitionId(rung.scheme, canonical),
+				iid,
 				scheme: rung.scheme,
 				class: definition.class,
 			};

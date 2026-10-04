@@ -7,6 +7,9 @@
  */
 import { norm1 } from './norm.js';
 import type { IdentityClass, SchemeDefinition, SchemeName } from './types.js';
+import { isWdEntitySchemaSlug } from './wd-entityschema-bindings.js';
+
+const ASCII_MAX_CODE_UNIT = 0x7f;
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
@@ -30,6 +33,10 @@ const TRACKING_PARAM_PATTERN =
 
 function stripSeparators(raw: string): string {
 	return raw.replace(/[-\s.]/g, '');
+}
+
+function isAscii(value: string): boolean {
+	return Array.from(value).every((character) => character.charCodeAt(0) <= ASCII_MAX_CODE_UNIT);
 }
 
 // --- check digits ---
@@ -186,12 +193,30 @@ function canonicalizeEidr(raw: string): string | undefined {
 }
 
 function canonicalizeWikidata(raw: string): string | undefined {
-	const clean = raw
-		.trim()
-		.replace(/^https?:\/\/(www\.)?wikidata\.org\/(wiki|entity)\//i, '')
-		.toUpperCase();
+	const trimmed = raw.trim();
+	const fromUrl = trimmed.replace(/^https?:\/\/(www\.)?wikidata\.org\/(wiki|entity)\//i, '');
 
-	return /^Q[1-9]\d*$/.test(clean) ? clean : undefined;
+	if (fromUrl !== trimmed) {
+		const qid = fromUrl.toUpperCase();
+		return /^Q[1-9]\d*$/.test(qid) ? qid : undefined;
+	}
+
+	const typed = trimmed.match(/^([^:]+):(Q[1-9]\d*)$/i);
+
+	if (typed) {
+		const rawSlug = typed[1] ?? '';
+
+		if (!isAscii(rawSlug)) {
+			return undefined;
+		}
+
+		const slug = rawSlug.toLowerCase();
+		const qid = (typed[2] ?? '').toUpperCase();
+		return isWdEntitySchemaSlug(slug) ? `${slug}:${qid}` : undefined;
+	}
+
+	const qid = trimmed.toUpperCase();
+	return /^Q[1-9]\d*$/.test(qid) ? qid : undefined;
 }
 
 function canonicalizeMbid(raw: string): string | undefined {
@@ -458,7 +483,9 @@ export const SCHEMES: Readonly<Record<SchemeName, SchemeDefinition>> = {
 	isbn: define('isbn', 'A', canonicalizeIsbn),
 	isrc: define('isrc', 'A', canonicalizeIsrc),
 	iswc: define('iswc', 'A', canonicalizeIswc),
-	isni: define('isni', 'A', canonicalizeIsni),
+	isni: define('isni', 'A', (raw) =>
+		canonicalizeIsni(raw.replace(/^https:\/\/(?:www\.)?isni\.org\/isni\//i, ''))
+	),
 	orcid: define('orcid', 'A', canonicalizeIsni),
 	lei: define('lei', 'A', canonicalizeLei),
 	gtin: define('gtin', 'A', canonicalizeGtin),
@@ -485,10 +512,10 @@ export const SCHEMES: Readonly<Record<SchemeName, SchemeDefinition>> = {
 
 /**
  * Scheme typing (spec §7.3): a P0 anchor (atom data = the bare IID) is only legal
- * when the scheme implies the entity's classification. `mbid` and `gen1`
- * carry their type inside the value; polymorphic schemes (`wd` covers
- * everything, `caip10` is account-or-contract, ...) floor at P1 where
- * `@type` lives in the payload.
+ * when the identifier implies the entity's classification. `mbid`, `olid`
+ * and `gen1` carry their type inside the value. `wd` stays polymorphic here
+ * for bare values; inspectIntuitionId decides typed-wd eligibility per value.
+ * Polymorphic values floor at P1 where `@type` lives in the payload.
  */
 export const SCHEME_TYPING: Readonly<Record<SchemeName, 'unambiguous' | 'polymorphic'>> = {
 	isbn: 'unambiguous',

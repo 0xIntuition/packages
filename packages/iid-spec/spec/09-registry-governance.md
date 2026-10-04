@@ -52,6 +52,17 @@ Old and new coexist in the registry. Identifiers under each remain valid and sta
 
 Known defects in the reference implementation are recorded in [`implementation-notes.md`](../implementation-notes.md) rather than silently repaired.
 
+### 9.3.1 Additive value-grammar extensions
+
+An additive value-grammar extension MAY be ratified in place as a MINOR registry change only when:
+
+1. Every existing canonical value remains canonical and byte-identical.
+2. No existing valid identifier changes validity, typing, or anchor eligibility.
+3. The new forms were previously invalid.
+4. Conformance vectors are added that prove conditions 1–3.
+
+The `wd` extension from bare `Q…` to optional `<slug>:Q…` is the first instance: existing bare identifiers remain polymorphic and ineligible for P0; newly valid typed forms follow the binding rules in [`schemes/wd.md`](../schemes/wd.md). This exception does not permit rewriting existing identifiers or changing their canonical values.
+
 ## 9.4 Adding a scheme
 
 Adding a scheme is a specification change, reviewed and merged.

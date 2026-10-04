@@ -1,7 +1,16 @@
 import { describe, expect, it } from 'vitest';
-
+import type { WdEntitySchemaBinding, WdEntitySchemaSlug } from '../index.js';
+import * as publicIid from '../index.js';
+import { validateIntuitionId } from '../parse.js';
 import { SCHEMES } from '../schemes.js';
 import { derivePodcastGuid } from '../uuid5.js';
+
+const {
+	WD_ENTITYSCHEMA_BINDINGS,
+	WD_ENTITYSCHEMA_SLUGS,
+	isWdEntitySchemaSlug,
+	isActiveWdEntitySchemaSlug,
+} = publicIid;
 
 describe('isbn', () => {
 	it('converts valid ISBN-10 to ISBN-13', () => {
@@ -32,6 +41,17 @@ describe('gtin', () => {
 });
 
 describe('check-digit identity schemes', () => {
+	it('canonicalizes durable isni.org evidence and rejects wrong hosts and checksums', () => {
+		expect(SCHEMES.isni.canonicalize('https://isni.org/isni/0000000121367029')).toBe(
+			'0000000121367029'
+		);
+		expect(SCHEMES.isni.canonicalize('https://isni.org/isni/0000000121367020')).toBeUndefined();
+		expect(SCHEMES.isni.canonicalize('https://isni.org/ISNI/0000000121367029')).toBe(
+			'0000000121367029'
+		);
+		expect(SCHEMES.isni.canonicalize('https://example.org/isni/0000000121367029')).toBeUndefined();
+		expect(SCHEMES.orcid.canonicalize('https://isni.org/isni/0000000121367029')).toBeUndefined();
+	});
 	it('canonicalizes ISRC by stripping separators and uppercasing', () => {
 		expect(SCHEMES.isrc.canonicalize('us-sm1-00-07459')).toBe('USSM10007459');
 	});
@@ -57,6 +77,115 @@ describe('doi / wd / mbid / imdb / tmdb', () => {
 	it('extracts Wikidata QIDs from entity URLs', () => {
 		expect(SCHEMES.wd.canonicalize('https://www.wikidata.org/wiki/Q42')).toBe('Q42');
 		expect(SCHEMES.wd.canonicalize('q42')).toBe('Q42');
+	});
+
+	it('keeps legacy Wikidata QIDs and entity URLs canonical', () => {
+		expect(SCHEMES.wd.canonicalize('https://www.wikidata.org/wiki/Q42')).toBe('Q42');
+		expect(SCHEMES.wd.canonicalize('q42')).toBe('Q42');
+	});
+
+	it('pins the ratified EntitySchema binding data', () => {
+		expect(
+			WD_ENTITYSCHEMA_BINDINGS.map(
+				({ slug, entitySchemaId, anchorQids, classification, status, precedence, schemaRevId }) => [
+					slug,
+					entitySchemaId,
+					anchorQids,
+					classification,
+					status,
+					precedence,
+					schemaRevId,
+				]
+			)
+		).toEqual([
+			['film', 'E11424', ['Q11424'], 'Movie', 'active', 0, 2403158147],
+			['television-series', 'E17', ['Q5398426'], 'TVSeries', 'active', 1, 2525771900],
+			['television-series-season', 'E18', ['Q3464665'], 'TVSeason', 'dormant', 2, 2525772131],
+			['television-series-episode', 'E19', ['Q21191270'], 'TVEpisode', 'dormant', 3, 2279362550],
+			['written-work', 'E35', ['Q47461344'], 'Book', 'dormant', 4, 2525775487],
+			['human', 'E10', ['Q5'], 'Person', 'active', 5, 2499173058],
+			['podcast', 'E418', ['Q24634210'], 'PodcastSeries', 'dormant', 6, 2052853948],
+			['podcast-episode', 'E420', ['Q61855877'], 'PodcastEpisode', 'dormant', 7, 2212603393],
+			['video-game', 'E272', ['Q7889'], 'VideoGame', 'dormant', 8, 2363080401],
+			['album', 'E248', ['Q482994'], 'MusicAlbum', 'dormant', 9, 2226920960],
+			['organization', 'E98', ['Q43229'], 'Organization', 'dormant', 10, 2392901167],
+		]);
+	});
+
+	it('canonicalizes every active and dormant EntitySchema slug', () => {
+		expect(WD_ENTITYSCHEMA_BINDINGS.map(({ precedence }) => precedence)).toEqual(
+			WD_ENTITYSCHEMA_BINDINGS.map((_, index) => index)
+		);
+		expect([...WD_ENTITYSCHEMA_SLUGS]).toEqual(WD_ENTITYSCHEMA_BINDINGS.map(({ slug }) => slug));
+
+		for (const { slug } of WD_ENTITYSCHEMA_BINDINGS) {
+			const canonical = `${slug}:Q42`;
+			expect(SCHEMES.wd.canonicalize(`${slug}:q42`), slug).toBe(canonical);
+			expect(SCHEMES.wd.canonicalize(canonical), slug).toBe(canonical);
+		}
+	});
+
+	it('distinguishes the active minting set from dormant parse-only slugs', () => {
+		for (const { slug, status } of WD_ENTITYSCHEMA_BINDINGS) {
+			expect(isActiveWdEntitySchemaSlug(slug), slug).toBe(status === 'active');
+		}
+	});
+
+	it('rejects unknown Wikidata slugs and never infers one from URLs', () => {
+		expect(SCHEMES.wd.canonicalize('bogus:Q1')).toBeUndefined();
+		expect(SCHEMES.wd.canonicalize('https://www.wikidata.org/wiki/Q188035')).toBe('Q188035');
+	});
+
+	it('rejects non-ASCII Wikidata slugs before case folding', () => {
+		expect(SCHEMES.wd.canonicalize('written-wor\u212a:Q42')).toBeUndefined();
+		expect(SCHEMES.wd.canonicalize('WrItTeN-WoR\u212a:q42')).toBeUndefined();
+	});
+
+	it('keeps the ratified trim for every wd form: BOM and NBSP edges trim like whitespace (D-P16-4)', () => {
+		expect(SCHEMES.wd.canonicalize(' \tfilm:q42\r\n')).toBe('film:Q42');
+		expect(SCHEMES.wd.canonicalize('\uFEFFfilm:Q42\uFEFF')).toBe('film:Q42');
+		expect(SCHEMES.wd.canonicalize('\uFEFFQ42\uFEFF')).toBe('Q42');
+		expect(SCHEMES.wd.canonicalize('\u00A0Q42\u00A0')).toBe('Q42');
+	});
+
+	it('exports the typed-wd bindings, slug guards and public types', () => {
+		const bindings: readonly WdEntitySchemaBinding[] = publicIid.WD_ENTITYSCHEMA_BINDINGS;
+		const slugs: readonly WdEntitySchemaSlug[] = publicIid.WD_ENTITYSCHEMA_SLUGS;
+		expect(bindings).toHaveLength(11);
+		expect(slugs).toEqual(bindings.map(({ slug }) => slug));
+		expect(isWdEntitySchemaSlug('film')).toBe(true);
+		expect(isWdEntitySchemaSlug('written-work')).toBe(true);
+		expect(isWdEntitySchemaSlug('bogus')).toBe(false);
+		expect(isActiveWdEntitySchemaSlug('film')).toBe(true);
+		expect(isActiveWdEntitySchemaSlug('written-work')).toBe(false);
+	});
+
+	it('does not expose a runtime-mutable Wikidata slug allowlist', () => {
+		expect(Object.isFrozen(WD_ENTITYSCHEMA_SLUGS)).toBe(true);
+		expect(() => {
+			(WD_ENTITYSCHEMA_SLUGS as unknown as { add: (slug: string) => void }).add('bogus');
+		}).toThrow(TypeError);
+		expect(validateIntuitionId('int:wd:bogus:Q42')).toBe(false);
+	});
+
+	it('deep-freezes the binding table, its rows and their anchor QIDs', () => {
+		expect(Object.isFrozen(WD_ENTITYSCHEMA_BINDINGS)).toBe(true);
+		for (const row of WD_ENTITYSCHEMA_BINDINGS) {
+			expect(Object.isFrozen(row), row.slug).toBe(true);
+			expect(Object.isFrozen(row.anchorQids), row.slug).toBe(true);
+		}
+		const film = WD_ENTITYSCHEMA_BINDINGS[0] as unknown as {
+			classification: string;
+			anchorQids: { push: (qid: string) => void };
+		};
+		expect(() => {
+			film.classification = 'Person';
+		}).toThrow(TypeError);
+		expect(() => {
+			film.anchorQids.push('Q5');
+		}).toThrow(TypeError);
+		expect(WD_ENTITYSCHEMA_BINDINGS[0].classification).toBe('Movie');
+		expect(WD_ENTITYSCHEMA_BINDINGS[0].anchorQids).toEqual(['Q11424']);
 	});
 
 	it('requires the MBID entity-type segment', () => {
@@ -166,5 +295,23 @@ describe('misc natural keys', () => {
 	it('validates content hashes', () => {
 		const digest = 'sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08';
 		expect(SCHEMES.hash.canonicalize(digest.toUpperCase())).toBe(digest);
+	});
+});
+
+describe('music and podcast public exports', () => {
+	it('exports the music identity policy and podcast feed normalizer', () => {
+		expect(publicIid.MUSIC_IDENTITY_RUNG_POLICY).toEqual({
+			artist: { schemaType: 'MusicGroup', rungs: ['isni', 'mbid:artist', 'wd', 'spotify:artist'] },
+			'music-album': {
+				schemaType: 'MusicAlbum',
+				rungs: ['mbid:release-group', 'wd', 'spotify:album'],
+			},
+		});
+		expect(publicIid.isPlainWdPrimaryAllowed('MusicGroup')).toBe(true);
+		expect(publicIid.isPlainWdPrimaryAllowed('MusicAlbum')).toBe(true);
+		expect(publicIid.isPlainWdPrimaryAllowed('Person')).toBe(false);
+		expect(publicIid.normalizePodcastFeedUrl('HTTPS://Host.Example/Feed/')).toBe(
+			'host.example/Feed'
+		);
 	});
 });

@@ -66,3 +66,66 @@ describe('inspectIntuitionId', () => {
 		});
 	});
 });
+
+describe('typed Wikidata inspection', () => {
+	it.each([
+		['film', 'Q188035'],
+		['television-series', 'Q137400033'],
+		['human', 'Q42'],
+	])('reports an active %s binding as unambiguous and eligible', (wdSlug, qid) => {
+		const value = `${wdSlug}:${qid}`;
+		expect(inspectIntuitionId(`int:wd:${value}`)).toEqual({
+			valid: true,
+			iid: `int:wd:${value}`,
+			scheme: 'wd',
+			value,
+			class: 'A',
+			typing: 'unambiguous',
+			anchorEligible: true,
+			wdSlug,
+		});
+	});
+
+	it('reports a dormant binding as valid, typed and ineligible', () => {
+		expect(inspectIntuitionId('int:wd:written-work:Q47461344')).toEqual({
+			valid: true,
+			iid: 'int:wd:written-work:Q47461344',
+			scheme: 'wd',
+			value: 'written-work:Q47461344',
+			class: 'A',
+			typing: 'unambiguous',
+			anchorEligible: false,
+			anchorIneligibilityReason: 'dormant-wd-binding',
+			wdSlug: 'written-work',
+		});
+	});
+
+	it('preserves bare Wikidata inspection byte-for-byte', () => {
+		expect(inspectIntuitionId('int:wd:Q42')).toEqual({
+			valid: true,
+			iid: 'int:wd:Q42',
+			scheme: 'wd',
+			value: 'Q42',
+			class: 'A',
+			typing: 'polymorphic',
+			anchorEligible: false,
+			anchorIneligibilityReason: 'polymorphic-scheme',
+		});
+	});
+
+	it('repairs noncanonical typed values and rejects unknown slugs without a repair', () => {
+		expect(inspectIntuitionId('int:wd:film:q42')).toEqual({
+			valid: false,
+			reason: 'noncanonical',
+			scheme: 'wd',
+			value: 'film:q42',
+			canonical: 'int:wd:film:Q42',
+		});
+		expect(inspectIntuitionId('int:wd:bogus:Q1')).toEqual({
+			valid: false,
+			reason: 'noncanonical',
+			scheme: 'wd',
+			value: 'bogus:Q1',
+		});
+	});
+});

@@ -709,6 +709,104 @@
 			"raw": "movie:r4:FB681AFE7D438CAD73AE90A70F1CC55A",
 			"canonical": null,
 			"note": "hash must be lowercase"
+		},
+		{
+			"id": "canon-wd-102",
+			"scheme": "wd",
+			"raw": "film:q42",
+			"canonical": "film:Q42",
+			"note": "typed QID uppercases"
+		},
+		{
+			"id": "canon-wd-103",
+			"scheme": "wd",
+			"raw": " \tfilm:q42\r\n",
+			"canonical": "film:Q42",
+			"note": "edge whitespace trims"
+		},
+		{
+			"id": "canon-wd-104",
+			"scheme": "wd",
+			"raw": "https://www.wikidata.org/wiki/Q188035",
+			"canonical": "Q188035",
+			"note": "URL remains bare; never infers a slug"
+		},
+		{
+			"id": "canon-wd-105",
+			"scheme": "wd",
+			"raw": "bogus:Q1",
+			"canonical": null,
+			"note": "unknown binding rejects"
+		},
+		{
+			"id": "canon-wd-106",
+			"scheme": "wd",
+			"raw": "written-worK:Q42",
+			"canonical": null,
+			"note": "non-ASCII slug rejects before case folding"
+		},
+		{
+			"id": "canon-wd-107",
+			"scheme": "wd",
+			"raw": "﻿film:Q42﻿",
+			"canonical": "film:Q42",
+			"note": "U+FEFF trims like other edge whitespace (base behavior preserved)"
+		},
+		{
+			"id": "canon-wd-108",
+			"scheme": "wd",
+			"raw": "film:Q042",
+			"canonical": null,
+			"note": "typed QID leading zero rejects"
+		},
+		{
+			"id": "canon-wd-109",
+			"scheme": "wd",
+			"raw": "FILM:q42",
+			"canonical": "film:Q42",
+			"note": "ASCII slug lowercases"
+		},
+		{
+			"id": "canon-wd-110",
+			"scheme": "wd",
+			"raw": "written-work:q42",
+			"canonical": "written-work:Q42",
+			"note": "dormant binding remains canonical and parse-only"
+		},
+		{
+			"id": "canon-wd-111",
+			"scheme": "wd",
+			"raw": "﻿Q42﻿",
+			"canonical": "Q42",
+			"note": "BOM-wrapped bare QID keeps its base canonicalization"
+		},
+		{
+			"id": "canon-isni-url-112",
+			"scheme": "isni",
+			"raw": "https://isni.org/isni/0000000121032683",
+			"canonical": "0000000121032683",
+			"note": "ISNI URL prefix strips to the existing bare canonical value (section 9.3.1)"
+		},
+		{
+			"id": "canon-isni-url-113",
+			"scheme": "isni",
+			"raw": "https://www.isni.org/isni/0000000121032683",
+			"canonical": "0000000121032683",
+			"note": "ISNI URL accepts the www host alias"
+		},
+		{
+			"id": "canon-isni-url-114",
+			"scheme": "isni",
+			"raw": "HTTPS://ISNI.ORG/isni/0000000121032683",
+			"canonical": "0000000121032683",
+			"note": "ISNI URL scheme and host are case-insensitive"
+		},
+		{
+			"id": "canon-isni-url-115",
+			"scheme": "isni",
+			"raw": "https://isni.org/ISNI/0000000121032683",
+			"canonical": "0000000121032683",
+			"note": "ISNI URL path segment is matched case-insensitively as well (whole-prefix fold, as the reference implementation does)"
 		}
 	]
 }

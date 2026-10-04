@@ -140,6 +140,10 @@
 							"id": { "$ref": "#/$defs/vectorId" },
 							"iid": { "type": "string" },
 							"valid": { "type": "boolean" },
+							"typing": {
+								"enum": ["unambiguous", "polymorphic"],
+								"description": "Effective typing of THIS identifier; permitted only for a scheme marked `valueTyped`; defaults to the scheme's typing."
+							},
 							"anchorEligible": {
 								"type": "boolean",
 								"description": "Whether the IID may be minted as a bare P0 anchor (spec §7.2)."
@@ -163,7 +167,11 @@
 						"additionalProperties": false,
 						"properties": {
 							"class": { "enum": ["A", "B", "C"] },
-							"typing": { "enum": ["unambiguous", "polymorphic"] }
+							"typing": { "enum": ["unambiguous", "polymorphic"] },
+							"valueTyped": {
+								"type": "boolean",
+								"description": "Bare values are polymorphic, but a value MAY carry the entity type inside the value (spec §7.3); validation vectors for such a scheme MAY state per-value typing."
+							}
 						}
 					}
 				}
