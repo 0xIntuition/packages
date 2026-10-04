@@ -146,6 +146,13 @@
 			"typing": "unambiguous",
 			"anchorEligible": true,
 			"note": "active television series binding is P0 eligible"
+		},
+		{
+			"id": "valid-isni-url",
+			"iid": "int:isni:https://isni.org/isni/0000000121032683",
+			"valid": false,
+			"anchorEligible": false,
+			"note": "ISNI URL is accepted raw input but is not a canonical IID value"
 		}
 	]
 }

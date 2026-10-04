@@ -483,7 +483,9 @@ export const SCHEMES: Readonly<Record<SchemeName, SchemeDefinition>> = {
 	isbn: define('isbn', 'A', canonicalizeIsbn),
 	isrc: define('isrc', 'A', canonicalizeIsrc),
 	iswc: define('iswc', 'A', canonicalizeIswc),
-	isni: define('isni', 'A', canonicalizeIsni),
+	isni: define('isni', 'A', (raw) =>
+		canonicalizeIsni(raw.replace(/^https:\/\/(?:www\.)?isni\.org\/isni\//i, ''))
+	),
 	orcid: define('orcid', 'A', canonicalizeIsni),
 	lei: define('lei', 'A', canonicalizeLei),
 	gtin: define('gtin', 'A', canonicalizeGtin),
