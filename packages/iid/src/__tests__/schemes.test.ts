@@ -46,6 +46,9 @@ describe('check-digit identity schemes', () => {
 			'0000000121367029'
 		);
 		expect(SCHEMES.isni.canonicalize('https://isni.org/isni/0000000121367020')).toBeUndefined();
+		expect(SCHEMES.isni.canonicalize('https://isni.org/ISNI/0000000121367029')).toBe(
+			'0000000121367029'
+		);
 		expect(SCHEMES.isni.canonicalize('https://example.org/isni/0000000121367029')).toBeUndefined();
 		expect(SCHEMES.orcid.canonicalize('https://isni.org/isni/0000000121367029')).toBeUndefined();
 	});

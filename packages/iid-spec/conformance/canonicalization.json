@@ -800,6 +800,13 @@
 			"raw": "HTTPS://ISNI.ORG/isni/0000000121032683",
 			"canonical": "0000000121032683",
 			"note": "ISNI URL scheme and host are case-insensitive"
+		},
+		{
+			"id": "canon-isni-url-115",
+			"scheme": "isni",
+			"raw": "https://isni.org/ISNI/0000000121032683",
+			"canonical": "0000000121032683",
+			"note": "ISNI URL path segment is matched case-insensitively as well (whole-prefix fold, as the reference implementation does)"
 		}
 	]
 }
