@@ -93,6 +93,10 @@ bun run pack:dry-run
 bun run smoke:tarballs
 ```
 
+### Conformance harness
+
+After `bun run build`, run `bun run conformance:check` for five public-surface proofs over reference implementation @ 31b62f3. See [the harness guide](./conformance/README.md) for coverage, explicit divergences, and vector maintenance.
+
 ## Contributing and Releases
 
 - [Contributing guide](./CONTRIBUTING.md)

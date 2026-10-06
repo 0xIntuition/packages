@@ -1,0 +1,2530 @@
+{
+	"provenance": {
+		"referenceSha": "31b62f35a787b6a7b9318f7a5d245ba6d0c76e9b",
+		"reference": "reference implementation @ 31b62f35a787b6a7b9318f7a5d245ba6d0c76e9b",
+		"generatedAt": "2026-10-06T03:23:56.725Z",
+		"generator": "gen-canonicalization-vectors.ts"
+	},
+	"description": "Parity between the public spec conformance corpus and the reference implementation. For each corpus input the reference output (or thrown error) is recorded next to the corpus expectation; `agrees` is true when they match. canonicalization: reference scheme canonicalize(raw) with `null` for a rejected value; parse: reference parse (first-two-colons split, closed registry) with `null` for a rejected string; norm1: reference NORM-1; gen1: reference gen1 builder — the reference exposes no preimage, so `preimageReconstructed` is rebuilt from the reference NORM-1 (sorted keys, compact JSON) and `preimageHashMatchesIid` confirms keccak16(preimage) equals the IID hash segment.",
+	"corpus": {
+		"canonicalization.json": {
+			"specVersion": "0.1.0",
+			"fixtureVersion": 1,
+			"kind": "canonicalization",
+			"vectorCount": 101
+		},
+		"parse.json": {
+			"specVersion": "0.1.0",
+			"fixtureVersion": 1,
+			"kind": "parse",
+			"vectorCount": 11
+		},
+		"norm1.json": {
+			"specVersion": "0.1.0",
+			"fixtureVersion": 1,
+			"kind": "norm1",
+			"vectorCount": 13
+		},
+		"gen1.json": {
+			"specVersion": "0.1.0",
+			"fixtureVersion": 1,
+			"kind": "gen1",
+			"vectorCount": 6
+		}
+	},
+	"summary": {
+		"caseCount": 131,
+		"agreeCount": 129,
+		"disagreeCount": 2,
+		"perFile": {
+			"canonicalization.json": {
+				"cases": 101,
+				"agree": 101,
+				"disagree": 0
+			},
+			"parse.json": {
+				"cases": 11,
+				"agree": 9,
+				"disagree": 2
+			},
+			"norm1.json": {
+				"cases": 13,
+				"agree": 13,
+				"disagree": 0
+			},
+			"gen1.json": {
+				"cases": 6,
+				"agree": 6,
+				"disagree": 0
+			}
+		}
+	},
+	"disagreements": [
+		{
+			"corpusFile": "parse.json",
+			"id": "parse-009",
+			"label": "parse-009: space is not a value character (grammar %x21-7E)",
+			"input": "int:isbn:97806848 32722",
+			"corpusExpected": {
+				"scheme": null,
+				"value": null
+			},
+			"referenceOutput": {
+				"scheme": "isbn",
+				"value": "97806848 32722",
+				"validates": false
+			}
+		},
+		{
+			"corpusFile": "parse.json",
+			"id": "parse-010",
+			"label": "parse-010: non-ASCII is not a value character (grammar %x21-7E)",
+			"input": "int:isbn:9780684832722é",
+			"corpusExpected": {
+				"scheme": null,
+				"value": null
+			},
+			"referenceOutput": {
+				"scheme": "isbn",
+				"value": "9780684832722é",
+				"validates": false
+			}
+		}
+	],
+	"cases": [
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-acct-090 acct: strong form: immutable numeric ID, case preserved",
+			"id": "canon-acct-090",
+			"note": "strong form: immutable numeric ID, case preserved",
+			"input": {
+				"scheme": "acct",
+				"raw": "github:583231"
+			},
+			"corpusExpected": {
+				"canonical": "github:583231"
+			},
+			"referenceOutput": {
+				"canonical": "github:583231",
+				"isCanonicalRaw": true,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-acct-091 acct: weak handle form applies NORM-1",
+			"id": "canon-acct-091",
+			"note": "weak handle form applies NORM-1",
+			"input": {
+				"scheme": "acct",
+				"raw": "twitter:@Jack"
+			},
+			"corpusExpected": {
+				"canonical": "twitter:@jack"
+			},
+			"referenceOutput": {
+				"canonical": "twitter:@jack",
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-acct-092 acct: platform lowercases; strong ID case preserved",
+			"id": "canon-acct-092",
+			"note": "platform lowercases; strong ID case preserved",
+			"input": {
+				"scheme": "acct",
+				"raw": "GitHub:MonaLisa"
+			},
+			"corpusExpected": {
+				"canonical": "github:MonaLisa"
+			},
+			"referenceOutput": {
+				"canonical": "github:MonaLisa",
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-acct-093 acct: empty identifier",
+			"id": "canon-acct-093",
+			"note": "empty identifier",
+			"input": {
+				"scheme": "acct",
+				"raw": "github:"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-appid-080 appid: bundle ID lowercases",
+			"id": "canon-appid-080",
+			"note": "bundle ID lowercases",
+			"input": {
+				"scheme": "appid",
+				"raw": "ios:com.Spotify.Client"
+			},
+			"corpusExpected": {
+				"canonical": "ios:com.spotify.client"
+			},
+			"referenceOutput": {
+				"canonical": "ios:com.spotify.client",
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-appid-081 appid: android package name",
+			"id": "canon-appid-081",
+			"note": "android package name",
+			"input": {
+				"scheme": "appid",
+				"raw": "android:com.spotify.music"
+			},
+			"corpusExpected": {
+				"canonical": "android:com.spotify.music"
+			},
+			"referenceOutput": {
+				"canonical": "android:com.spotify.music",
+				"isCanonicalRaw": true,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-appid-082 appid: unregistered store",
+			"id": "canon-appid-082",
+			"note": "unregistered store",
+			"input": {
+				"scheme": "appid",
+				"raw": "windows:spotify"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-caip10-071 caip10: eip155 address lowercases (no EIP-55 at the ID layer)",
+			"id": "canon-caip10-071",
+			"note": "eip155 address lowercases (no EIP-55 at the ID layer)",
+			"input": {
+				"scheme": "caip10",
+				"raw": "eip155:1:0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+			},
+			"corpusExpected": {
+				"canonical": "eip155:1:0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+			},
+			"referenceOutput": {
+				"canonical": "eip155:1:0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-caip10-072 caip10: non-eip155 namespaces pass through",
+			"id": "canon-caip10-072",
+			"note": "non-eip155 namespaces pass through",
+			"input": {
+				"scheme": "caip10",
+				"raw": "cosmos:cosmoshub-4:cosmos1t2uflqwqe0fsj0shcfkrvpukewcw40yjj6hdc0"
+			},
+			"corpusExpected": {
+				"canonical": "cosmos:cosmoshub-4:cosmos1t2uflqwqe0fsj0shcfkrvpukewcw40yjj6hdc0"
+			},
+			"referenceOutput": {
+				"canonical": "cosmos:cosmoshub-4:cosmos1t2uflqwqe0fsj0shcfkrvpukewcw40yjj6hdc0",
+				"isCanonicalRaw": true,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-caip10-073 caip10: eip155 address must be 20 bytes",
+			"id": "canon-caip10-073",
+			"note": "eip155 address must be 20 bytes",
+			"input": {
+				"scheme": "caip10",
+				"raw": "eip155:1:0xd8da6bf2"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-caip19-074 caip19: erc20 asset reference lowercases",
+			"id": "canon-caip19-074",
+			"note": "erc20 asset reference lowercases",
+			"input": {
+				"scheme": "caip19",
+				"raw": "eip155:1/erc20:0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+			},
+			"corpusExpected": {
+				"canonical": "eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+			},
+			"referenceOutput": {
+				"canonical": "eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-caip19-075 caip19: erc721 canonicalizes; classification narrowing is a registry concern",
+			"id": "canon-caip19-075",
+			"note": "erc721 canonicalizes; classification narrowing is a registry concern",
+			"input": {
+				"scheme": "caip19",
+				"raw": "eip155:1/erc721:0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D"
+			},
+			"corpusExpected": {
+				"canonical": "eip155:1/erc721:0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d"
+			},
+			"referenceOutput": {
+				"canonical": "eip155:1/erc721:0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d",
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-caip19-076 caip19: missing slash separator",
+			"id": "canon-caip19-076",
+			"note": "missing slash separator",
+			"input": {
+				"scheme": "caip19",
+				"raw": "eip155:1:erc20:0xA0b8"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-doi-032 doi: resolver URL form strips to bare DOI",
+			"id": "canon-doi-032",
+			"note": "resolver URL form strips to bare DOI",
+			"input": {
+				"scheme": "doi",
+				"raw": "https://doi.org/10.1000/182"
+			},
+			"corpusExpected": {
+				"canonical": "10.1000/182"
+			},
+			"referenceOutput": {
+				"canonical": "10.1000/182",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-doi-033 doi: doi: prefix strips",
+			"id": "canon-doi-033",
+			"note": "doi: prefix strips",
+			"input": {
+				"scheme": "doi",
+				"raw": "DOI:10.1000/182"
+			},
+			"corpusExpected": {
+				"canonical": "10.1000/182"
+			},
+			"referenceOutput": {
+				"canonical": "10.1000/182",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-doi-034 doi: canonical DOI is idempotent",
+			"id": "canon-doi-034",
+			"note": "canonical DOI is idempotent",
+			"input": {
+				"scheme": "doi",
+				"raw": "10.1000/182"
+			},
+			"corpusExpected": {
+				"canonical": "10.1000/182"
+			},
+			"referenceOutput": {
+				"canonical": "10.1000/182",
+				"isCanonicalRaw": true,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-doi-035 doi: DOI suffix lowercases",
+			"id": "canon-doi-035",
+			"note": "DOI suffix lowercases",
+			"input": {
+				"scheme": "doi",
+				"raw": "10.1000/ABC"
+			},
+			"corpusExpected": {
+				"canonical": "10.1000/abc"
+			},
+			"referenceOutput": {
+				"canonical": "10.1000/abc",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-doi-036 doi: directory indicator must be 10",
+			"id": "canon-doi-036",
+			"note": "directory indicator must be 10",
+			"input": {
+				"scheme": "doi",
+				"raw": "11.1000/182"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-eidr-037 eidr: resolver URL form strips to bare EIDR",
+			"id": "canon-eidr-037",
+			"note": "resolver URL form strips to bare EIDR",
+			"input": {
+				"scheme": "eidr",
+				"raw": "https://doi.org/10.5240/7791-8534-2C23-9030-8610-5"
+			},
+			"corpusExpected": {
+				"canonical": "10.5240/7791-8534-2C23-9030-8610-5"
+			},
+			"referenceOutput": {
+				"canonical": "10.5240/7791-8534-2C23-9030-8610-5",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-eidr-038 eidr: lowercase EIDR uppercases",
+			"id": "canon-eidr-038",
+			"note": "lowercase EIDR uppercases",
+			"input": {
+				"scheme": "eidr",
+				"raw": "10.5240/7791-8534-2c23-9030-8610-5"
+			},
+			"corpusExpected": {
+				"canonical": "10.5240/7791-8534-2C23-9030-8610-5"
+			},
+			"referenceOutput": {
+				"canonical": "10.5240/7791-8534-2C23-9030-8610-5",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-eidr-039 eidr: missing check segment",
+			"id": "canon-eidr-039",
+			"note": "missing check segment",
+			"input": {
+				"scheme": "eidr",
+				"raw": "10.5240/7791-8534-2C23-9030-8610"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-gen1-099 gen1: well-formed gen1 value is accepted as-is",
+			"id": "canon-gen1-099",
+			"note": "well-formed gen1 value is accepted as-is",
+			"input": {
+				"scheme": "gen1",
+				"raw": "movie:r4:fb681afe7d438cad73ae90a70f1cc55a"
+			},
+			"corpusExpected": {
+				"canonical": "movie:r4:fb681afe7d438cad73ae90a70f1cc55a"
+			},
+			"referenceOutput": {
+				"canonical": "movie:r4:fb681afe7d438cad73ae90a70f1cc55a",
+				"isCanonicalRaw": true,
+				"class": "C"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-gen1-100 gen1: rung tags start at 1",
+			"id": "canon-gen1-100",
+			"note": "rung tags start at 1",
+			"input": {
+				"scheme": "gen1",
+				"raw": "movie:r0:fb681afe7d438cad73ae90a70f1cc55a"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "C"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-gen1-101 gen1: hash must be lowercase",
+			"id": "canon-gen1-101",
+			"note": "hash must be lowercase",
+			"input": {
+				"scheme": "gen1",
+				"raw": "movie:r4:FB681AFE7D438CAD73AE90A70F1CC55A"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "C"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-geo-087 geo: canonical geohash is idempotent",
+			"id": "canon-geo-087",
+			"note": "canonical geohash is idempotent",
+			"input": {
+				"scheme": "geo",
+				"raw": "9q8yyk8y"
+			},
+			"corpusExpected": {
+				"canonical": "9q8yyk8y"
+			},
+			"referenceOutput": {
+				"canonical": "9q8yyk8y",
+				"isCanonicalRaw": true,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-geo-088 geo: uppercase geohash lowercases",
+			"id": "canon-geo-088",
+			"note": "uppercase geohash lowercases",
+			"input": {
+				"scheme": "geo",
+				"raw": "9Q8YYK8Y"
+			},
+			"corpusExpected": {
+				"canonical": "9q8yyk8y"
+			},
+			"referenceOutput": {
+				"canonical": "9q8yyk8y",
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-geo-089 geo: a is not in the geohash alphabet",
+			"id": "canon-geo-089",
+			"note": "a is not in the geohash alphabet",
+			"input": {
+				"scheme": "geo",
+				"raw": "9q8yyk8a"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-gtin-027 gtin: UPC-A pads to 14 digits",
+			"id": "canon-gtin-027",
+			"note": "UPC-A pads to 14 digits",
+			"input": {
+				"scheme": "gtin",
+				"raw": "036000291452"
+			},
+			"corpusExpected": {
+				"canonical": "00036000291452"
+			},
+			"referenceOutput": {
+				"canonical": "00036000291452",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-gtin-028 gtin: EAN-13 pads to 14 digits",
+			"id": "canon-gtin-028",
+			"note": "EAN-13 pads to 14 digits",
+			"input": {
+				"scheme": "gtin",
+				"raw": "4006381333931"
+			},
+			"corpusExpected": {
+				"canonical": "04006381333931"
+			},
+			"referenceOutput": {
+				"canonical": "04006381333931",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-gtin-029 gtin: canonical GTIN-14 is idempotent",
+			"id": "canon-gtin-029",
+			"note": "canonical GTIN-14 is idempotent",
+			"input": {
+				"scheme": "gtin",
+				"raw": "00036000291452"
+			},
+			"corpusExpected": {
+				"canonical": "00036000291452"
+			},
+			"referenceOutput": {
+				"canonical": "00036000291452",
+				"isCanonicalRaw": true,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-gtin-030 gtin: check digit fails",
+			"id": "canon-gtin-030",
+			"note": "check digit fails",
+			"input": {
+				"scheme": "gtin",
+				"raw": "036000291453"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-gtin-031 gtin: 9 digits is not a GTIN length",
+			"id": "canon-gtin-031",
+			"note": "9 digits is not a GTIN length",
+			"input": {
+				"scheme": "gtin",
+				"raw": "123456789"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-hash-077 hash: 0x prefix strips, digest lowercases",
+			"id": "canon-hash-077",
+			"note": "0x prefix strips, digest lowercases",
+			"input": {
+				"scheme": "hash",
+				"raw": "sha256:0x9F86D081884C7D659A2FEAA0C55AD015A3BF4F1B2B0B822CD15D6C15B0F00A08"
+			},
+			"corpusExpected": {
+				"canonical": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+			},
+			"referenceOutput": {
+				"canonical": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-hash-078 hash: keccak256 is a registered algorithm",
+			"id": "canon-hash-078",
+			"note": "keccak256 is a registered algorithm",
+			"input": {
+				"scheme": "hash",
+				"raw": "keccak256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+			},
+			"corpusExpected": {
+				"canonical": "keccak256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+			},
+			"referenceOutput": {
+				"canonical": "keccak256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+				"isCanonicalRaw": true,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-hash-079 hash: md5 is not a registered algorithm",
+			"id": "canon-hash-079",
+			"note": "md5 is not a registered algorithm",
+			"input": {
+				"scheme": "hash",
+				"raw": "md5:9f86d081884c7d659a2feaa0c55ad015"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-imdb-056 imdb: title URL strips to ID",
+			"id": "canon-imdb-056",
+			"note": "title URL strips to ID",
+			"input": {
+				"scheme": "imdb",
+				"raw": "https://www.imdb.com/title/tt1375666/"
+			},
+			"corpusExpected": {
+				"canonical": "tt1375666"
+			},
+			"referenceOutput": {
+				"canonical": "tt1375666",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-imdb-057 imdb: uppercase ID lowercases",
+			"id": "canon-imdb-057",
+			"note": "uppercase ID lowercases",
+			"input": {
+				"scheme": "imdb",
+				"raw": "TT1375666"
+			},
+			"corpusExpected": {
+				"canonical": "tt1375666"
+			},
+			"referenceOutput": {
+				"canonical": "tt1375666",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-imdb-058 imdb: name ID is idempotent",
+			"id": "canon-imdb-058",
+			"note": "name ID is idempotent",
+			"input": {
+				"scheme": "imdb",
+				"raw": "nm0000138"
+			},
+			"corpusExpected": {
+				"canonical": "nm0000138"
+			},
+			"referenceOutput": {
+				"canonical": "nm0000138",
+				"isCanonicalRaw": true,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-imdb-059 imdb: fewer than 6 digits",
+			"id": "canon-imdb-059",
+			"note": "fewer than 6 digits",
+			"input": {
+				"scheme": "imdb",
+				"raw": "tt123"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-isbn-001 isbn: ISBN-10 with hyphens upconverts to ISBN-13",
+			"id": "canon-isbn-001",
+			"note": "ISBN-10 with hyphens upconverts to ISBN-13",
+			"input": {
+				"scheme": "isbn",
+				"raw": "0-684-83272-0"
+			},
+			"corpusExpected": {
+				"canonical": "9780684832722"
+			},
+			"referenceOutput": {
+				"canonical": "9780684832722",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-isbn-002 isbn: canonical ISBN-13 is idempotent",
+			"id": "canon-isbn-002",
+			"note": "canonical ISBN-13 is idempotent",
+			"input": {
+				"scheme": "isbn",
+				"raw": "9780684832722"
+			},
+			"corpusExpected": {
+				"canonical": "9780684832722"
+			},
+			"referenceOutput": {
+				"canonical": "9780684832722",
+				"isCanonicalRaw": true,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-isbn-003 isbn: hyphenated ISBN-13 strips separators",
+			"id": "canon-isbn-003",
+			"note": "hyphenated ISBN-13 strips separators",
+			"input": {
+				"scheme": "isbn",
+				"raw": "978-0-14-044913-6"
+			},
+			"corpusExpected": {
+				"canonical": "9780140449136"
+			},
+			"referenceOutput": {
+				"canonical": "9780140449136",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-isbn-004 isbn: ISBN-10 check digit fails (expected 2)",
+			"id": "canon-isbn-004",
+			"note": "ISBN-10 check digit fails (expected 2)",
+			"input": {
+				"scheme": "isbn",
+				"raw": "0-306-40615-3"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-isbn-005 isbn: ISBN-13 check digit fails",
+			"id": "canon-isbn-005",
+			"note": "ISBN-13 check digit fails",
+			"input": {
+				"scheme": "isbn",
+				"raw": "9780684832723"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-isbn-006 isbn: wrong length",
+			"id": "canon-isbn-006",
+			"note": "wrong length",
+			"input": {
+				"scheme": "isbn",
+				"raw": "12345"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-isni-016 isni: spaced ISNI strips separators",
+			"id": "canon-isni-016",
+			"note": "spaced ISNI strips separators",
+			"input": {
+				"scheme": "isni",
+				"raw": "0000 0001 2103 2683"
+			},
+			"corpusExpected": {
+				"canonical": "0000000121032683"
+			},
+			"referenceOutput": {
+				"canonical": "0000000121032683",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-isni-017 isni: canonical ISNI is idempotent",
+			"id": "canon-isni-017",
+			"note": "canonical ISNI is idempotent",
+			"input": {
+				"scheme": "isni",
+				"raw": "0000000121032683"
+			},
+			"corpusExpected": {
+				"canonical": "0000000121032683"
+			},
+			"referenceOutput": {
+				"canonical": "0000000121032683",
+				"isCanonicalRaw": true,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-isni-018 isni: check character fails",
+			"id": "canon-isni-018",
+			"note": "check character fails",
+			"input": {
+				"scheme": "isni",
+				"raw": "0000000121032684"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-isni-019 isni: wrong length",
+			"id": "canon-isni-019",
+			"note": "wrong length",
+			"input": {
+				"scheme": "isni",
+				"raw": "000000012103268"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-isrc-007 isrc: formatted ISRC strips separators and uppercases",
+			"id": "canon-isrc-007",
+			"note": "formatted ISRC strips separators and uppercases",
+			"input": {
+				"scheme": "isrc",
+				"raw": "US-RC1-76-07839"
+			},
+			"corpusExpected": {
+				"canonical": "USRC17607839"
+			},
+			"referenceOutput": {
+				"canonical": "USRC17607839",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-isrc-008 isrc: lowercase ISRC uppercases",
+			"id": "canon-isrc-008",
+			"note": "lowercase ISRC uppercases",
+			"input": {
+				"scheme": "isrc",
+				"raw": "usrc17607839"
+			},
+			"corpusExpected": {
+				"canonical": "USRC17607839"
+			},
+			"referenceOutput": {
+				"canonical": "USRC17607839",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-isrc-009 isrc: canonical ISRC is idempotent",
+			"id": "canon-isrc-009",
+			"note": "canonical ISRC is idempotent",
+			"input": {
+				"scheme": "isrc",
+				"raw": "USRC17607839"
+			},
+			"corpusExpected": {
+				"canonical": "USRC17607839"
+			},
+			"referenceOutput": {
+				"canonical": "USRC17607839",
+				"isCanonicalRaw": true,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-isrc-010 isrc: wrong length",
+			"id": "canon-isrc-010",
+			"note": "wrong length",
+			"input": {
+				"scheme": "isrc",
+				"raw": "USRC1760783"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-isrc-011 isrc: country prefix must be alphabetic",
+			"id": "canon-isrc-011",
+			"note": "country prefix must be alphabetic",
+			"input": {
+				"scheme": "isrc",
+				"raw": "1SRC17607839"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-iswc-012 iswc: formatted ISWC strips separators",
+			"id": "canon-iswc-012",
+			"note": "formatted ISWC strips separators",
+			"input": {
+				"scheme": "iswc",
+				"raw": "T-034.524.680-1"
+			},
+			"corpusExpected": {
+				"canonical": "T0345246801"
+			},
+			"referenceOutput": {
+				"canonical": "T0345246801",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-iswc-013 iswc: canonical ISWC is idempotent",
+			"id": "canon-iswc-013",
+			"note": "canonical ISWC is idempotent",
+			"input": {
+				"scheme": "iswc",
+				"raw": "T0345246801"
+			},
+			"corpusExpected": {
+				"canonical": "T0345246801"
+			},
+			"referenceOutput": {
+				"canonical": "T0345246801",
+				"isCanonicalRaw": true,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-iswc-014 iswc: check digit fails",
+			"id": "canon-iswc-014",
+			"note": "check digit fails",
+			"input": {
+				"scheme": "iswc",
+				"raw": "T0345246802"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-iswc-015 iswc: missing T prefix",
+			"id": "canon-iswc-015",
+			"note": "missing T prefix",
+			"input": {
+				"scheme": "iswc",
+				"raw": "0345246801"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-lei-023 lei: letter O in what must be digits region",
+			"id": "canon-lei-023",
+			"note": "letter O in what must be digits region",
+			"input": {
+				"scheme": "lei",
+				"raw": "5493 00B2 N3T1 CIB4 3O74"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-lei-024 lei: canonical LEI is idempotent",
+			"id": "canon-lei-024",
+			"note": "canonical LEI is idempotent",
+			"input": {
+				"scheme": "lei",
+				"raw": "529900T8BM49AURSDO55"
+			},
+			"corpusExpected": {
+				"canonical": "529900T8BM49AURSDO55"
+			},
+			"referenceOutput": {
+				"canonical": "529900T8BM49AURSDO55",
+				"isCanonicalRaw": true,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-lei-025 lei: lowercase LEI uppercases",
+			"id": "canon-lei-025",
+			"note": "lowercase LEI uppercases",
+			"input": {
+				"scheme": "lei",
+				"raw": "529900t8bm49aursdo55"
+			},
+			"corpusExpected": {
+				"canonical": "529900T8BM49AURSDO55"
+			},
+			"referenceOutput": {
+				"canonical": "529900T8BM49AURSDO55",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-lei-026 lei: mod 97-10 validation fails",
+			"id": "canon-lei-026",
+			"note": "mod 97-10 validation fails",
+			"input": {
+				"scheme": "lei",
+				"raw": "529900T8BM49AURSDO54"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-mbid-045 mbid: URL form strips to type-scoped UUID",
+			"id": "canon-mbid-045",
+			"note": "URL form strips to type-scoped UUID",
+			"input": {
+				"scheme": "mbid",
+				"raw": "https://musicbrainz.org/artist/056e4f3e-d505-4dad-8ec1-d04f521cbb56"
+			},
+			"corpusExpected": {
+				"canonical": "artist:056e4f3e-d505-4dad-8ec1-d04f521cbb56"
+			},
+			"referenceOutput": {
+				"canonical": "artist:056e4f3e-d505-4dad-8ec1-d04f521cbb56",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-mbid-046 mbid: uppercase UUID lowercases",
+			"id": "canon-mbid-046",
+			"note": "uppercase UUID lowercases",
+			"input": {
+				"scheme": "mbid",
+				"raw": "recording:B1A9C0E9-D987-4042-AE91-78D6A3267D69"
+			},
+			"corpusExpected": {
+				"canonical": "recording:b1a9c0e9-d987-4042-ae91-78d6a3267d69"
+			},
+			"referenceOutput": {
+				"canonical": "recording:b1a9c0e9-d987-4042-ae91-78d6a3267d69",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-mbid-047 mbid: label entity type is registered",
+			"id": "canon-mbid-047",
+			"note": "label entity type is registered",
+			"input": {
+				"scheme": "mbid",
+				"raw": "label:83eca2b3-5ae1-43f5-a732-56fa9a8591b1"
+			},
+			"corpusExpected": {
+				"canonical": "label:83eca2b3-5ae1-43f5-a732-56fa9a8591b1"
+			},
+			"referenceOutput": {
+				"canonical": "label:83eca2b3-5ae1-43f5-a732-56fa9a8591b1",
+				"isCanonicalRaw": true,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-mbid-048 mbid: work entity type is registered",
+			"id": "canon-mbid-048",
+			"note": "work entity type is registered",
+			"input": {
+				"scheme": "mbid",
+				"raw": "work:39fb6ed0-a0d1-3a3d-9f77-4e0fcdadfa5e"
+			},
+			"corpusExpected": {
+				"canonical": "work:39fb6ed0-a0d1-3a3d-9f77-4e0fcdadfa5e"
+			},
+			"referenceOutput": {
+				"canonical": "work:39fb6ed0-a0d1-3a3d-9f77-4e0fcdadfa5e",
+				"isCanonicalRaw": true,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-mbid-049 mbid: venue is not a registered MBID entity type",
+			"id": "canon-mbid-049",
+			"note": "venue is not a registered MBID entity type",
+			"input": {
+				"scheme": "mbid",
+				"raw": "venue:056e4f3e-d505-4dad-8ec1-d04f521cbb56"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-mbid-050 mbid: not a UUID",
+			"id": "canon-mbid-050",
+			"note": "not a UUID",
+			"input": {
+				"scheme": "mbid",
+				"raw": "artist:056e4f3e"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-olid-051 olid: works URL strips to OLID",
+			"id": "canon-olid-051",
+			"note": "works URL strips to OLID",
+			"input": {
+				"scheme": "olid",
+				"raw": "https://openlibrary.org/works/OL45804W"
+			},
+			"corpusExpected": {
+				"canonical": "OL45804W"
+			},
+			"referenceOutput": {
+				"canonical": "OL45804W",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-olid-052 olid: lowercase OLID uppercases",
+			"id": "canon-olid-052",
+			"note": "lowercase OLID uppercases",
+			"input": {
+				"scheme": "olid",
+				"raw": "ol45804w"
+			},
+			"corpusExpected": {
+				"canonical": "OL45804W"
+			},
+			"referenceOutput": {
+				"canonical": "OL45804W",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-olid-053 olid: edition OLID is idempotent",
+			"id": "canon-olid-053",
+			"note": "edition OLID is idempotent",
+			"input": {
+				"scheme": "olid",
+				"raw": "OL7353617M"
+			},
+			"corpusExpected": {
+				"canonical": "OL7353617M"
+			},
+			"referenceOutput": {
+				"canonical": "OL7353617M",
+				"isCanonicalRaw": true,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-olid-054 olid: author OLID is idempotent",
+			"id": "canon-olid-054",
+			"note": "author OLID is idempotent",
+			"input": {
+				"scheme": "olid",
+				"raw": "OL34184A"
+			},
+			"corpusExpected": {
+				"canonical": "OL34184A"
+			},
+			"referenceOutput": {
+				"canonical": "OL34184A",
+				"isCanonicalRaw": true,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-olid-055 olid: unknown suffix",
+			"id": "canon-olid-055",
+			"note": "unknown suffix",
+			"input": {
+				"scheme": "olid",
+				"raw": "OL45804Z"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-orcid-020 orcid: hyphenated ORCID strips separators",
+			"id": "canon-orcid-020",
+			"note": "hyphenated ORCID strips separators",
+			"input": {
+				"scheme": "orcid",
+				"raw": "0000-0002-1825-0097"
+			},
+			"corpusExpected": {
+				"canonical": "0000000218250097"
+			},
+			"referenceOutput": {
+				"canonical": "0000000218250097",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-orcid-021 orcid: canonical ORCID is idempotent",
+			"id": "canon-orcid-021",
+			"note": "canonical ORCID is idempotent",
+			"input": {
+				"scheme": "orcid",
+				"raw": "0000000218250097"
+			},
+			"corpusExpected": {
+				"canonical": "0000000218250097"
+			},
+			"referenceOutput": {
+				"canonical": "0000000218250097",
+				"isCanonicalRaw": true,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-orcid-022 orcid: check character fails",
+			"id": "canon-orcid-022",
+			"note": "check character fails",
+			"input": {
+				"scheme": "orcid",
+				"raw": "0000-0002-1825-0098"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-podcastguid-064 podcastguid: uppercase GUID lowercases",
+			"id": "canon-podcastguid-064",
+			"note": "uppercase GUID lowercases",
+			"input": {
+				"scheme": "podcastguid",
+				"raw": "917393E3-1B1E-5CEF-ACE4-EDAA54E1F810"
+			},
+			"corpusExpected": {
+				"canonical": "917393e3-1b1e-5cef-ace4-edaa54e1f810"
+			},
+			"referenceOutput": {
+				"canonical": "917393e3-1b1e-5cef-ace4-edaa54e1f810",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-podcastguid-065 podcastguid: not a UUID",
+			"id": "canon-podcastguid-065",
+			"note": "not a UUID",
+			"input": {
+				"scheme": "podcastguid",
+				"raw": "not-a-uuid"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-purl-083 purl: pkg: prefix and version strip",
+			"id": "canon-purl-083",
+			"note": "pkg: prefix and version strip",
+			"input": {
+				"scheme": "purl",
+				"raw": "pkg:npm/react@18.2.0"
+			},
+			"corpusExpected": {
+				"canonical": "npm/react"
+			},
+			"referenceOutput": {
+				"canonical": "npm/react",
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-purl-084 purl: canonical purl is idempotent",
+			"id": "canon-purl-084",
+			"note": "canonical purl is idempotent",
+			"input": {
+				"scheme": "purl",
+				"raw": "npm/react"
+			},
+			"corpusExpected": {
+				"canonical": "npm/react"
+			},
+			"referenceOutput": {
+				"canonical": "npm/react",
+				"isCanonicalRaw": true,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-purl-085 purl: nested path purl",
+			"id": "canon-purl-085",
+			"note": "nested path purl",
+			"input": {
+				"scheme": "purl",
+				"raw": "pkg:golang/github.com/gorilla/mux"
+			},
+			"corpusExpected": {
+				"canonical": "golang/github.com/gorilla/mux"
+			},
+			"referenceOutput": {
+				"canonical": "golang/github.com/gorilla/mux",
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-purl-086 purl: missing ecosystem",
+			"id": "canon-purl-086",
+			"note": "missing ecosystem",
+			"input": {
+				"scheme": "purl",
+				"raw": "react"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-rssitem-094 rssitem: feed GUID + item hash lowercase",
+			"id": "canon-rssitem-094",
+			"note": "feed GUID + item hash lowercase",
+			"input": {
+				"scheme": "rssitem",
+				"raw": "917393E3-1B1E-5CEF-ACE4-EDAA54E1F810:1A2B3C4D5E6F7A8B9C0D1E2F3A4B5C6D"
+			},
+			"corpusExpected": {
+				"canonical": "917393e3-1b1e-5cef-ace4-edaa54e1f810:1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d"
+			},
+			"referenceOutput": {
+				"canonical": "917393e3-1b1e-5cef-ace4-edaa54e1f810:1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d",
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-rssitem-095 rssitem: feed GUID must be a UUID",
+			"id": "canon-rssitem-095",
+			"note": "feed GUID must be a UUID",
+			"input": {
+				"scheme": "rssitem",
+				"raw": "not-a-uuid:1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-termset-096 termset: set hash lowercases, term code preserved",
+			"id": "canon-termset-096",
+			"note": "set hash lowercases, term code preserved",
+			"input": {
+				"scheme": "termset",
+				"raw": "1A2B3C4D5E6F7A8B9C0D1E2F3A4B5C6D:follow"
+			},
+			"corpusExpected": {
+				"canonical": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d:follow"
+			},
+			"referenceOutput": {
+				"canonical": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d:follow",
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-termset-097 termset: term code case folds",
+			"id": "canon-termset-097",
+			"note": "term code case folds",
+			"input": {
+				"scheme": "termset",
+				"raw": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d:Follow"
+			},
+			"corpusExpected": {
+				"canonical": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d:follow"
+			},
+			"referenceOutput": {
+				"canonical": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d:follow",
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-termset-098 termset: term code must start alphanumeric",
+			"id": "canon-termset-098",
+			"note": "term code must start alphanumeric",
+			"input": {
+				"scheme": "termset",
+				"raw": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d:-follow"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-tmdb-060 tmdb: URL with slug strips to type-scoped ID",
+			"id": "canon-tmdb-060",
+			"note": "URL with slug strips to type-scoped ID",
+			"input": {
+				"scheme": "tmdb",
+				"raw": "https://www.themoviedb.org/movie/27205-inception"
+			},
+			"corpusExpected": {
+				"canonical": "movie:27205"
+			},
+			"referenceOutput": {
+				"canonical": "movie:27205",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-tmdb-061 tmdb: slash separator canonicalizes to colon",
+			"id": "canon-tmdb-061",
+			"note": "slash separator canonicalizes to colon",
+			"input": {
+				"scheme": "tmdb",
+				"raw": "tv/1399"
+			},
+			"corpusExpected": {
+				"canonical": "tv:1399"
+			},
+			"referenceOutput": {
+				"canonical": "tv:1399",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-tmdb-062 tmdb: person ID is idempotent",
+			"id": "canon-tmdb-062",
+			"note": "person ID is idempotent",
+			"input": {
+				"scheme": "tmdb",
+				"raw": "person:6193"
+			},
+			"corpusExpected": {
+				"canonical": "person:6193"
+			},
+			"referenceOutput": {
+				"canonical": "person:6193",
+				"isCanonicalRaw": true,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-tmdb-063 tmdb: collection is not a registered TMDB type",
+			"id": "canon-tmdb-063",
+			"note": "collection is not a registered TMDB type",
+			"input": {
+				"scheme": "tmdb",
+				"raw": "collection:10"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-url-066 url: folds scheme, strips www/port/fragment/tracking, sorts query, trims trailing slash",
+			"id": "canon-url-066",
+			"note": "folds scheme, strips www/port/fragment/tracking, sorts query, trims trailing slash",
+			"input": {
+				"scheme": "url",
+				"raw": "http://www.Example.com:80/path/?utm_source=x&b=2&a=1#frag"
+			},
+			"corpusExpected": {
+				"canonical": "https://example.com/path?a=1&b=2"
+			},
+			"referenceOutput": {
+				"canonical": "https://example.com/path?a=1&b=2",
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-url-067 url: path case is preserved",
+			"id": "canon-url-067",
+			"note": "path case is preserved",
+			"input": {
+				"scheme": "url",
+				"raw": "https://en.wikipedia.org/wiki/Brad_Pitt"
+			},
+			"corpusExpected": {
+				"canonical": "https://en.wikipedia.org/wiki/Brad_Pitt"
+			},
+			"referenceOutput": {
+				"canonical": "https://en.wikipedia.org/wiki/Brad_Pitt",
+				"isCanonicalRaw": true,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-url-068 url: root trailing slash strips",
+			"id": "canon-url-068",
+			"note": "root trailing slash strips",
+			"input": {
+				"scheme": "url",
+				"raw": "https://example.com/"
+			},
+			"corpusExpected": {
+				"canonical": "https://example.com"
+			},
+			"referenceOutput": {
+				"canonical": "https://example.com",
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-url-069 url: non-http(s) scheme",
+			"id": "canon-url-069",
+			"note": "non-http(s) scheme",
+			"input": {
+				"scheme": "url",
+				"raw": "ftp://example.com/file"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-url-070 url: unparseable",
+			"id": "canon-url-070",
+			"note": "unparseable",
+			"input": {
+				"scheme": "url",
+				"raw": "not a url"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "B"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-wd-040 wd: wiki URL form strips to QID",
+			"id": "canon-wd-040",
+			"note": "wiki URL form strips to QID",
+			"input": {
+				"scheme": "wd",
+				"raw": "https://www.wikidata.org/wiki/Q42"
+			},
+			"corpusExpected": {
+				"canonical": "Q42"
+			},
+			"referenceOutput": {
+				"canonical": "Q42",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-wd-041 wd: lowercase QID uppercases",
+			"id": "canon-wd-041",
+			"note": "lowercase QID uppercases",
+			"input": {
+				"scheme": "wd",
+				"raw": "q42"
+			},
+			"corpusExpected": {
+				"canonical": "Q42"
+			},
+			"referenceOutput": {
+				"canonical": "Q42",
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-wd-042 wd: canonical QID is idempotent",
+			"id": "canon-wd-042",
+			"note": "canonical QID is idempotent",
+			"input": {
+				"scheme": "wd",
+				"raw": "Q42"
+			},
+			"corpusExpected": {
+				"canonical": "Q42"
+			},
+			"referenceOutput": {
+				"canonical": "Q42",
+				"isCanonicalRaw": true,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-wd-043 wd: leading zero not canonical",
+			"id": "canon-wd-043",
+			"note": "leading zero not canonical",
+			"input": {
+				"scheme": "wd",
+				"raw": "Q042"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "canonicalization.json",
+			"label": "canon-wd-044 wd: properties are not entities",
+			"id": "canon-wd-044",
+			"note": "properties are not entities",
+			"input": {
+				"scheme": "wd",
+				"raw": "P31"
+			},
+			"corpusExpected": {
+				"canonical": null
+			},
+			"referenceOutput": {
+				"canonical": null,
+				"isCanonicalRaw": false,
+				"class": "A"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "gen1.json",
+			"label": "gen1-001: spec §6.5 worked example",
+			"id": "gen1-001",
+			"note": "spec §6.5 worked example",
+			"input": {
+				"slug": "movie",
+				"tag": 4,
+				"fields": {
+					"name": "Inception",
+					"yearPublished": "2010"
+				}
+			},
+			"corpusExpected": {
+				"preimage": "{\"c\":\"movie\",\"f\":{\"name\":\"inception\",\"yearPublished\":\"2010\"}}",
+				"iid": "int:gen1:movie:r4:fb681afe7d438cad73ae90a70f1cc55a"
+			},
+			"referenceOutput": {
+				"iid": "int:gen1:movie:r4:fb681afe7d438cad73ae90a70f1cc55a",
+				"preimageReconstructed": "{\"c\":\"movie\",\"f\":{\"name\":\"inception\",\"yearPublished\":\"2010\"}}",
+				"preimageHashMatchesIid": true,
+				"validates": true
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "gen1.json",
+			"label": "gen1-002: same fields minus year — different rung, different hash",
+			"id": "gen1-002",
+			"note": "same fields minus year — different rung, different hash",
+			"input": {
+				"slug": "movie",
+				"tag": 5,
+				"fields": {
+					"name": "Inception"
+				}
+			},
+			"corpusExpected": {
+				"preimage": "{\"c\":\"movie\",\"f\":{\"name\":\"inception\"}}",
+				"iid": "int:gen1:movie:r5:ed2d2ab3773c903a3e8f9ebac3a13122"
+			},
+			"referenceOutput": {
+				"iid": "int:gen1:movie:r5:ed2d2ab3773c903a3e8f9ebac3a13122",
+				"preimageReconstructed": "{\"c\":\"movie\",\"f\":{\"name\":\"inception\"}}",
+				"preimageHashMatchesIid": true,
+				"validates": true
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "gen1.json",
+			"label": "gen1-003: name-level concept; every band named Nirvana collides",
+			"id": "gen1-003",
+			"note": "name-level concept; every band named Nirvana collides",
+			"input": {
+				"slug": "music-group",
+				"tag": 4,
+				"fields": {
+					"name": "Nirvana"
+				}
+			},
+			"corpusExpected": {
+				"preimage": "{\"c\":\"music-group\",\"f\":{\"name\":\"nirvana\"}}",
+				"iid": "int:gen1:music-group:r4:d202109df634438f49760a50b943e0fe"
+			},
+			"referenceOutput": {
+				"iid": "int:gen1:music-group:r4:d202109df634438f49760a50b943e0fe",
+				"preimageReconstructed": "{\"c\":\"music-group\",\"f\":{\"name\":\"nirvana\"}}",
+				"preimageHashMatchesIid": true,
+				"validates": true
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "gen1.json",
+			"label": "gen1-004: NORM-1 convergence: formatting variants collide",
+			"id": "gen1-004",
+			"note": "NORM-1 convergence: formatting variants collide",
+			"input": {
+				"slug": "music-group",
+				"tag": 4,
+				"fields": {
+					"name": "  NIRVANA  "
+				}
+			},
+			"corpusExpected": {
+				"preimage": "{\"c\":\"music-group\",\"f\":{\"name\":\"nirvana\"}}",
+				"iid": "int:gen1:music-group:r4:d202109df634438f49760a50b943e0fe"
+			},
+			"referenceOutput": {
+				"iid": "int:gen1:music-group:r4:d202109df634438f49760a50b943e0fe",
+				"preimageReconstructed": "{\"c\":\"music-group\",\"f\":{\"name\":\"nirvana\"}}",
+				"preimageHashMatchesIid": true,
+				"validates": true
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "gen1.json",
+			"label": "gen1-005: unicode name normalizes without diacritic loss",
+			"id": "gen1-005",
+			"note": "unicode name normalizes without diacritic loss",
+			"input": {
+				"slug": "person",
+				"tag": 3,
+				"fields": {
+					"name": "Sigur Rós"
+				}
+			},
+			"corpusExpected": {
+				"preimage": "{\"c\":\"person\",\"f\":{\"name\":\"sigur rós\"}}",
+				"iid": "int:gen1:person:r3:40cd11c4bf61e7628462df1ccc40040e"
+			},
+			"referenceOutput": {
+				"iid": "int:gen1:person:r3:40cd11c4bf61e7628462df1ccc40040e",
+				"preimageReconstructed": "{\"c\":\"person\",\"f\":{\"name\":\"sigur rós\"}}",
+				"preimageHashMatchesIid": true,
+				"validates": true
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "gen1.json",
+			"label": "gen1-006: punctuation folding in preimage",
+			"id": "gen1-006",
+			"note": "punctuation folding in preimage",
+			"input": {
+				"slug": "book",
+				"tag": 2,
+				"fields": {
+					"name": "Don’t Panic",
+					"yearPublished": "1988"
+				}
+			},
+			"corpusExpected": {
+				"preimage": "{\"c\":\"book\",\"f\":{\"name\":\"don't panic\",\"yearPublished\":\"1988\"}}",
+				"iid": "int:gen1:book:r2:71c1fa3b18f0980d2bbe8d2fa8612b46"
+			},
+			"referenceOutput": {
+				"iid": "int:gen1:book:r2:71c1fa3b18f0980d2bbe8d2fa8612b46",
+				"preimageReconstructed": "{\"c\":\"book\",\"f\":{\"name\":\"don't panic\",\"yearPublished\":\"1988\"}}",
+				"preimageHashMatchesIid": true,
+				"validates": true
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "norm1.json",
+			"label": "norm1-001: trim and case fold",
+			"id": "norm1-001",
+			"note": "trim and case fold",
+			"input": "  Inception  ",
+			"corpusExpected": {
+				"output": "inception"
+			},
+			"referenceOutput": {
+				"output": "inception"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "norm1.json",
+			"label": "norm1-002: curly apostrophe folds",
+			"id": "norm1-002",
+			"note": "curly apostrophe folds",
+			"input": "Don’t Stop Me Now",
+			"corpusExpected": {
+				"output": "don't stop me now"
+			},
+			"referenceOutput": {
+				"output": "don't stop me now"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "norm1.json",
+			"label": "norm1-003: capital sharp s full-folds to ss",
+			"id": "norm1-003",
+			"note": "capital sharp s full-folds to ss",
+			"input": "STRAẞE",
+			"corpusExpected": {
+				"output": "strasse"
+			},
+			"referenceOutput": {
+				"output": "strasse"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "norm1.json",
+			"label": "norm1-004: sharp s full-folds to ss",
+			"id": "norm1-004",
+			"note": "sharp s full-folds to ss",
+			"input": "Straße",
+			"corpusExpected": {
+				"output": "strasse"
+			},
+			"referenceOutput": {
+				"output": "strasse"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "norm1.json",
+			"label": "norm1-005: diacritics preserved",
+			"id": "norm1-005",
+			"note": "diacritics preserved",
+			"input": "Sigur Rós",
+			"corpusExpected": {
+				"output": "sigur rós"
+			},
+			"referenceOutput": {
+				"output": "sigur rós"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "norm1.json",
+			"label": "norm1-006: no diacritic stripping — Björk and Bjork differ",
+			"id": "norm1-006",
+			"note": "no diacritic stripping — Björk and Bjork differ",
+			"input": "Björk",
+			"corpusExpected": {
+				"output": "björk"
+			},
+			"referenceOutput": {
+				"output": "björk"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "norm1.json",
+			"label": "norm1-007: internal whitespace collapses",
+			"id": "norm1-007",
+			"note": "internal whitespace collapses",
+			"input": "The\tBeatles",
+			"corpusExpected": {
+				"output": "the beatles"
+			},
+			"referenceOutput": {
+				"output": "the beatles"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "norm1.json",
+			"label": "norm1-008: full-width forms fold via NFKC",
+			"id": "norm1-008",
+			"note": "full-width forms fold via NFKC",
+			"input": "Ｍｅｔａ",
+			"corpusExpected": {
+				"output": "meta"
+			},
+			"referenceOutput": {
+				"output": "meta"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "norm1.json",
+			"label": "norm1-009: en dash folds to hyphen",
+			"id": "norm1-009",
+			"note": "en dash folds to hyphen",
+			"input": "Jay–Z",
+			"corpusExpected": {
+				"output": "jay-z"
+			},
+			"referenceOutput": {
+				"output": "jay-z"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "norm1.json",
+			"label": "norm1-010: curly double quotes fold",
+			"id": "norm1-010",
+			"note": "curly double quotes fold",
+			"input": "“Quoted”",
+			"corpusExpected": {
+				"output": "\"quoted\""
+			},
+			"referenceOutput": {
+				"output": "\"quoted\""
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "norm1.json",
+			"label": "norm1-011: Greek final sigma folds to sigma",
+			"id": "norm1-011",
+			"note": "Greek final sigma folds to sigma",
+			"input": "οδός",
+			"corpusExpected": {
+				"output": "οδόσ"
+			},
+			"referenceOutput": {
+				"output": "οδόσ"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "norm1.json",
+			"label": "norm1-012: NFC composed form is stable",
+			"id": "norm1-012",
+			"note": "NFC composed form is stable",
+			"input": "café",
+			"corpusExpected": {
+				"output": "café"
+			},
+			"referenceOutput": {
+				"output": "café"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "norm1.json",
+			"label": "norm1-013: decomposed accent composes via NFKC",
+			"id": "norm1-013",
+			"note": "decomposed accent composes via NFKC",
+			"input": "café",
+			"corpusExpected": {
+				"output": "café"
+			},
+			"referenceOutput": {
+				"output": "café"
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "parse.json",
+			"label": "parse-001: simple two-part value",
+			"id": "parse-001",
+			"note": "simple two-part value",
+			"input": "int:isbn:9780684832722",
+			"corpusExpected": {
+				"scheme": "isbn",
+				"value": "9780684832722"
+			},
+			"referenceOutput": {
+				"scheme": "isbn",
+				"value": "9780684832722",
+				"validates": true
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "parse.json",
+			"label": "parse-002: colon-bearing value survives first-two-colon split",
+			"id": "parse-002",
+			"note": "colon-bearing value survives first-two-colon split",
+			"input": "int:caip10:eip155:1:0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+			"corpusExpected": {
+				"scheme": "caip10",
+				"value": "eip155:1:0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+			},
+			"referenceOutput": {
+				"scheme": "caip10",
+				"value": "eip155:1:0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+				"validates": true
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "parse.json",
+			"label": "parse-003: slash-bearing value",
+			"id": "parse-003",
+			"note": "slash-bearing value",
+			"input": "int:doi:10.1000/182",
+			"corpusExpected": {
+				"scheme": "doi",
+				"value": "10.1000/182"
+			},
+			"referenceOutput": {
+				"scheme": "doi",
+				"value": "10.1000/182",
+				"validates": true
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "parse.json",
+			"label": "parse-004: gen1 value contains two colons",
+			"id": "parse-004",
+			"note": "gen1 value contains two colons",
+			"input": "int:gen1:movie:r4:fb681afe7d438cad73ae90a70f1cc55a",
+			"corpusExpected": {
+				"scheme": "gen1",
+				"value": "movie:r4:fb681afe7d438cad73ae90a70f1cc55a"
+			},
+			"referenceOutput": {
+				"scheme": "gen1",
+				"value": "movie:r4:fb681afe7d438cad73ae90a70f1cc55a",
+				"validates": true
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "parse.json",
+			"label": "parse-005: unregistered scheme rejects (closed registry)",
+			"id": "parse-005",
+			"note": "unregistered scheme rejects (closed registry)",
+			"input": "int:src:some-value",
+			"corpusExpected": {
+				"scheme": null,
+				"value": null
+			},
+			"referenceOutput": {
+				"scheme": null,
+				"value": null,
+				"validates": false
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "parse.json",
+			"label": "parse-006: empty value rejects",
+			"id": "parse-006",
+			"note": "empty value rejects",
+			"input": "int:isbn:",
+			"corpusExpected": {
+				"scheme": null,
+				"value": null
+			},
+			"referenceOutput": {
+				"scheme": null,
+				"value": null,
+				"validates": false
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "parse.json",
+			"label": "parse-007: namespace is case-sensitive",
+			"id": "parse-007",
+			"note": "namespace is case-sensitive",
+			"input": "INT:isbn:9780684832722",
+			"corpusExpected": {
+				"scheme": null,
+				"value": null
+			},
+			"referenceOutput": {
+				"scheme": null,
+				"value": null,
+				"validates": false
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "parse.json",
+			"label": "parse-008: missing namespace",
+			"id": "parse-008",
+			"note": "missing namespace",
+			"input": "isbn:9780684832722",
+			"corpusExpected": {
+				"scheme": null,
+				"value": null
+			},
+			"referenceOutput": {
+				"scheme": null,
+				"value": null,
+				"validates": false
+			},
+			"agrees": true
+		},
+		{
+			"corpusFile": "parse.json",
+			"label": "parse-009: space is not a value character (grammar %x21-7E)",
+			"id": "parse-009",
+			"note": "space is not a value character (grammar %x21-7E)",
+			"input": "int:isbn:97806848 32722",
+			"corpusExpected": {
+				"scheme": null,
+				"value": null
+			},
+			"referenceOutput": {
+				"scheme": "isbn",
+				"value": "97806848 32722",
+				"validates": false
+			},
+			"agrees": false
+		},
+		{
+			"corpusFile": "parse.json",
+			"label": "parse-010: non-ASCII is not a value character (grammar %x21-7E)",
+			"id": "parse-010",
+			"note": "non-ASCII is not a value character (grammar %x21-7E)",
+			"input": "int:isbn:9780684832722é",
+			"corpusExpected": {
+				"scheme": null,
+				"value": null
+			},
+			"referenceOutput": {
+				"scheme": "isbn",
+				"value": "9780684832722é",
+				"validates": false
+			},
+			"agrees": false
+		},
+		{
+			"corpusFile": "parse.json",
+			"label": "parse-011: value exceeds 220-char limit",
+			"id": "parse-011",
+			"note": "value exceeds 220-char limit",
+			"input": "int:url:https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			"corpusExpected": {
+				"scheme": null,
+				"value": null
+			},
+			"referenceOutput": {
+				"scheme": null,
+				"value": null,
+				"validates": false
+			},
+			"agrees": true
+		}
+	]
+}

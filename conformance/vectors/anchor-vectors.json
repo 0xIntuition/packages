@@ -1,0 +1,3350 @@
+{
+	"provenance": {
+		"referenceSha": "31b62f35a787b6a7b9318f7a5d245ba6d0c76e9b",
+		"reference": "reference implementation @ 31b62f35a787b6a7b9318f7a5d245ba6d0c76e9b",
+		"generatedAt": "2026-10-06T03:23:56.588Z",
+		"generator": "gen-anchor-vectors.ts"
+	},
+	"description": "Reference atom-anchor builder. `input` is the exact (slug, values, options) tuple; `expected.anchorJson` is the exact serialised atom data string (a bare IID for P0, compact JSON for P1), `anchorBytesHex` its UTF-8 bytes, `atomId` the keccak atom id. `error` carries the typed error code (INVALID_IID, MISSING_RECIPE_EVIDENCE, MISSING_SCHEMA_CONTEXT) or the plain error class name; `raw` is the full result object or the thrown error.",
+	"notes": {
+		"identityFieldOrder": "In the identity envelope (a ladder rung fired but the IID is not anchor-eligible) the gen1 recipe fields are emitted in the producing rung's declared recipe order — e.g. person r4 emits \"givenName\" then \"familyName\", local-business r2 emits \"name\" then \"geo7\", news-article r2 emits \"headline\" then \"datePublished\" — never sorted by key, and each carries the raw PRE-NORM-1 source value verbatim (padding and punctuation intact) while only the hash inside \"identifier\" is NORM-1 normalised.",
+		"jsonLdKeys": "P0 emits the bare IID string (no JSON at all); the identity envelope emits exactly \"@context\", \"@type\", \"identifier\", then (gen1 rungs only) the recipe field keys in recipe order, then \"sameAs\" (string entries deduplicated and codepoint-sorted) only when non-empty; the fallback envelope (no rung fired) emits \"@context\", \"@type\", then \"identifier\" only when a candidate IID was supplied, then every declared classification field present in the values in the classification's declared field order, with string[] fields deduplicated and sorted.",
+		"context": "\"@context\" is the classification's declared schema.org context value: \"https://schema.org/\" (with the trailing slash) for every schema.org-typed classification and \"https://schemas.intuition.systems/v1\" for the ethereum-account, ethereum-erc20 and ethereum-smart-contract classifications.",
+		"serialization": "Envelopes are serialised with compact JSON.stringify (no whitespace, insertion-ordered keys, JSON string escaping — e.g. an apostrophe is left unescaped) and hashed as UTF-8 bytes.",
+		"atomId": "atomId = keccak256(abi.encodePacked(ATOM_SALT, keccak256(utf8Bytes(data)))) with ATOM_SALT = 0xc50959b2b0264fed58f3489f13cdf8345df0911245cc2b741070787ee7aceaa2.",
+		"p0Eligibility": "P0 requires a valid canonical IID of Class A or B whose scheme is typed \"unambiguous\"; wd requires an ACTIVE typed slug prefix; the weak acct handle form (platform:@handle) and every Class C (gen1) IID floor at P1.",
+		"searchText": "P1 search text joins, in this order, the trimmed string values of name, title, headline, givenName, familyName, description, summary (arrays flattened), skipping duplicates and values starting with \"int:\" or \"http(s)://\", truncated to 20000 characters; P0 search text is always the empty string.",
+		"validation": "Classification field validation (unknown or missing required fields) runs only on the fallback-envelope path (no rung fired, or a non-P0 candidate); the P0 path and the gen1 identity-envelope path never validate the value map."
+	},
+	"summary": {
+		"caseCount": 79,
+		"harvestedCaseCount": 22,
+		"syntheticCaseCount": 57,
+		"okCount": 67,
+		"errorCount": 12,
+		"p0Count": 20,
+		"p1Count": 47,
+		"allAtomIdsRecomputed": true,
+		"validatorCaseCount": 9,
+		"slugsCovered": [
+			"aggregate-rating",
+			"book",
+			"company",
+			"dataset",
+			"defined-term",
+			"does-not-exist",
+			"ethereum-account",
+			"ethereum-erc20",
+			"ethereum-smart-contract",
+			"event",
+			"image",
+			"job-posting",
+			"local-business",
+			"location",
+			"mobile-application",
+			"movie",
+			"music-album",
+			"music-group",
+			"music-recording",
+			"news-article",
+			"person",
+			"podcast-episode",
+			"podcast-series",
+			"product",
+			"review",
+			"social-media-account",
+			"social-media-posting",
+			"software",
+			"software-application",
+			"thing",
+			"tv-series",
+			"video-object",
+			"web-page",
+			"web-site"
+		]
+	},
+	"cases": [
+		{
+			"label": "harvested: P1 envelope when no rung fires",
+			"origin": "harvested",
+			"classificationType": "Review",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "review",
+				"values": {
+					"reviewBody": "Excellent."
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"Review\",\"reviewBody\":\"Excellent.\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a22526576696577222c22726576696577426f6479223a22457863656c6c656e742e227d",
+				"anchorByteLength": 77,
+				"atomId": "0x0dfffdff202f6bc0decedeed96d401e56e7c312322e0182528f5641ebf732cb8",
+				"atomIdRecomputedFromBytes": "0x0dfffdff202f6bc0decedeed96d401e56e7c312322e0182528f5641ebf732cb8",
+				"atomIdMatches": true,
+				"iid": null,
+				"searchText": "",
+				"envelopeKeyOrder": ["@context", "@type", "reviewBody"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "Review",
+					"reviewBody": "Excellent."
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"Review\",\"reviewBody\":\"Excellent.\"}",
+					"id": "0x0dfffdff202f6bc0decedeed96d401e56e7c312322e0182528f5641ebf732cb8",
+					"iid": null,
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "harvested: active typed wd candidate flips to P0",
+			"origin": "harvested",
+			"classificationType": "Movie",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "movie",
+				"values": {
+					"sameAs": ["https://www.wikidata.org/wiki/Q25188"]
+				},
+				"options": {
+					"candidateIid": "int:wd:film:Q25188"
+				}
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P0",
+				"anchorJson": "int:wd:film:Q25188",
+				"anchorBytesHex": "696e743a77643a66696c6d3a513235313838",
+				"anchorByteLength": 18,
+				"atomId": "0x674b0eb5286a845f2f953f01d5ee72d0712d0fdfdc958dc5de6fe89269bd6dae",
+				"atomIdRecomputedFromBytes": "0x674b0eb5286a845f2f953f01d5ee72d0712d0fdfdc958dc5de6fe89269bd6dae",
+				"atomIdMatches": true,
+				"iid": "int:wd:film:Q25188",
+				"searchText": "",
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": null,
+				"raw": {
+					"profile": "P0",
+					"data": "int:wd:film:Q25188",
+					"id": "0x674b0eb5286a845f2f953f01d5ee72d0712d0fdfdc958dc5de6fe89269bd6dae",
+					"iid": "int:wd:film:Q25188",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "harvested: active typed wd candidate of another classification refused",
+			"origin": "harvested",
+			"classificationType": "Book",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "book",
+				"values": {
+					"isbn": "9780140328721",
+					"name": "Matilda"
+				},
+				"options": {
+					"candidateIid": "int:wd:film:Q42"
+				}
+			},
+			"expected": {
+				"ok": false,
+				"profile": null,
+				"anchorJson": null,
+				"anchorBytesHex": null,
+				"anchorByteLength": null,
+				"atomId": null,
+				"atomIdRecomputedFromBytes": null,
+				"atomIdMatches": null,
+				"iid": null,
+				"searchText": null,
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": "INVALID_IID",
+				"raw": {
+					"thrown": {
+						"name": "AtomAnchorError",
+						"code": "INVALID_IID",
+						"message": "Candidate wd identifier classifies as \"Movie\", not \"Book\": int:wd:film:Q42"
+					}
+				}
+			}
+		},
+		{
+			"label": "harvested: anchor-eligible candidate overrides values",
+			"origin": "harvested",
+			"classificationType": "MusicRecording",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "music-recording",
+				"values": {
+					"isrc": "GBARL9300135",
+					"name": "One Last Time"
+				},
+				"options": {
+					"candidateIid": "int:isrc:USQX91300108"
+				}
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P0",
+				"anchorJson": "int:isrc:USQX91300108",
+				"anchorBytesHex": "696e743a697372633a555351583931333030313038",
+				"anchorByteLength": 21,
+				"atomId": "0x42eea046949fed98884bad097ac5c7ec5a81b0b3ace46313f46abd9dcf6bd858",
+				"atomIdRecomputedFromBytes": "0x42eea046949fed98884bad097ac5c7ec5a81b0b3ace46313f46abd9dcf6bd858",
+				"atomIdMatches": true,
+				"iid": "int:isrc:USQX91300108",
+				"searchText": "",
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": null,
+				"raw": {
+					"profile": "P0",
+					"data": "int:isrc:USQX91300108",
+					"id": "0x42eea046949fed98884bad097ac5c7ec5a81b0b3ace46313f46abd9dcf6bd858",
+					"iid": "int:isrc:USQX91300108",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "harvested: dormant typed wd candidate refused for book",
+			"origin": "harvested",
+			"classificationType": "Book",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "book",
+				"values": {
+					"isbn": "9780140328721",
+					"name": "Matilda"
+				},
+				"options": {
+					"candidateIid": "int:wd:written-work:Q47461344"
+				}
+			},
+			"expected": {
+				"ok": false,
+				"profile": null,
+				"anchorJson": null,
+				"anchorBytesHex": null,
+				"anchorByteLength": null,
+				"atomId": null,
+				"atomIdRecomputedFromBytes": null,
+				"atomIdMatches": null,
+				"iid": null,
+				"searchText": null,
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": "INVALID_IID",
+				"raw": {
+					"thrown": {
+						"name": "AtomAnchorError",
+						"code": "INVALID_IID",
+						"message": "Candidate wd identifier is parse-only and cannot be minted for \"book\": int:wd:written-work:Q47461344"
+					}
+				}
+			}
+		},
+		{
+			"label": "harvested: empty options object equals no options (gen1 person)",
+			"origin": "harvested",
+			"classificationType": "Person",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "person",
+				"values": {
+					"familyName": "Adams",
+					"givenName": "Douglas"
+				},
+				"options": {}
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"Person\",\"identifier\":\"int:gen1:person:r4:ecd9b23e74a6eb3380067d12349a669e\",\"givenName\":\"Douglas\",\"familyName\":\"Adams\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a22506572736f6e222c226964656e746966696572223a22696e743a67656e313a706572736f6e3a72343a6563643962323365373461366562333338303036376431323334396136363965222c22676976656e4e616d65223a22446f75676c6173222c2266616d696c794e616d65223a224164616d73227d",
+				"anchorByteLength": 161,
+				"atomId": "0x7e62b35f6b3361ddf61cdf6a4e9670e8bea66776c730c0df24792a6cac701e84",
+				"atomIdRecomputedFromBytes": "0x7e62b35f6b3361ddf61cdf6a4e9670e8bea66776c730c0df24792a6cac701e84",
+				"atomIdMatches": true,
+				"iid": "int:gen1:person:r4:ecd9b23e74a6eb3380067d12349a669e",
+				"searchText": "Douglas Adams",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "givenName", "familyName"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "Person",
+					"identifier": "int:gen1:person:r4:ecd9b23e74a6eb3380067d12349a669e",
+					"givenName": "Douglas",
+					"familyName": "Adams"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"Person\",\"identifier\":\"int:gen1:person:r4:ecd9b23e74a6eb3380067d12349a669e\",\"givenName\":\"Douglas\",\"familyName\":\"Adams\"}",
+					"id": "0x7e62b35f6b3361ddf61cdf6a4e9670e8bea66776c730c0df24792a6cac701e84",
+					"iid": "int:gen1:person:r4:ecd9b23e74a6eb3380067d12349a669e",
+					"searchText": "Douglas Adams"
+				}
+			}
+		},
+		{
+			"label": "harvested: gen1 person r4 recipe evidence (two identity fields, recipe order)",
+			"origin": "harvested",
+			"classificationType": "Person",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "person",
+				"values": {
+					"familyName": "Adams",
+					"givenName": "Douglas"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"Person\",\"identifier\":\"int:gen1:person:r4:ecd9b23e74a6eb3380067d12349a669e\",\"givenName\":\"Douglas\",\"familyName\":\"Adams\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a22506572736f6e222c226964656e746966696572223a22696e743a67656e313a706572736f6e3a72343a6563643962323365373461366562333338303036376431323334396136363965222c22676976656e4e616d65223a22446f75676c6173222c2266616d696c794e616d65223a224164616d73227d",
+				"anchorByteLength": 161,
+				"atomId": "0x7e62b35f6b3361ddf61cdf6a4e9670e8bea66776c730c0df24792a6cac701e84",
+				"atomIdRecomputedFromBytes": "0x7e62b35f6b3361ddf61cdf6a4e9670e8bea66776c730c0df24792a6cac701e84",
+				"atomIdMatches": true,
+				"iid": "int:gen1:person:r4:ecd9b23e74a6eb3380067d12349a669e",
+				"searchText": "Douglas Adams",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "givenName", "familyName"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "Person",
+					"identifier": "int:gen1:person:r4:ecd9b23e74a6eb3380067d12349a669e",
+					"givenName": "Douglas",
+					"familyName": "Adams"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"Person\",\"identifier\":\"int:gen1:person:r4:ecd9b23e74a6eb3380067d12349a669e\",\"givenName\":\"Douglas\",\"familyName\":\"Adams\"}",
+					"id": "0x7e62b35f6b3361ddf61cdf6a4e9670e8bea66776c730c0df24792a6cac701e84",
+					"iid": "int:gen1:person:r4:ecd9b23e74a6eb3380067d12349a669e",
+					"searchText": "Douglas Adams"
+				}
+			}
+		},
+		{
+			"label": "harvested: identifier-shaped name excluded from search text",
+			"origin": "harvested",
+			"classificationType": "Movie",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "movie",
+				"values": {
+					"name": "int:wd:Q25188",
+					"sameAs": ["https://evidence.example/inception"]
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"Movie\",\"identifier\":\"int:gen1:movie:r5:706db04bdf3676623e287ae9781adafc\",\"name\":\"int:wd:Q25188\",\"sameAs\":[\"https://evidence.example/inception\"]}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a224d6f766965222c226964656e746966696572223a22696e743a67656e313a6d6f7669653a72353a3730366462303462646633363736363233653238376165393738316164616663222c226e616d65223a22696e743a77643a513235313838222c2273616d654173223a5b2268747470733a2f2f65766964656e63652e6578616d706c652f696e63657074696f6e225d7d",
+				"anchorByteLength": 187,
+				"atomId": "0xcdd25a76e75da2f49b835d3ed753e3d5aad3efbb17e0038657978196fd937b2c",
+				"atomIdRecomputedFromBytes": "0xcdd25a76e75da2f49b835d3ed753e3d5aad3efbb17e0038657978196fd937b2c",
+				"atomIdMatches": true,
+				"iid": "int:gen1:movie:r5:706db04bdf3676623e287ae9781adafc",
+				"searchText": "",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "name", "sameAs"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "Movie",
+					"identifier": "int:gen1:movie:r5:706db04bdf3676623e287ae9781adafc",
+					"name": "int:wd:Q25188",
+					"sameAs": ["https://evidence.example/inception"]
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"Movie\",\"identifier\":\"int:gen1:movie:r5:706db04bdf3676623e287ae9781adafc\",\"name\":\"int:wd:Q25188\",\"sameAs\":[\"https://evidence.example/inception\"]}",
+					"id": "0xcdd25a76e75da2f49b835d3ed753e3d5aad3efbb17e0038657978196fd937b2c",
+					"iid": "int:gen1:movie:r5:706db04bdf3676623e287ae9781adafc",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "harvested: isrc P0 bare bytes",
+			"origin": "harvested",
+			"classificationType": "MusicRecording",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "music-recording",
+				"values": {
+					"isrc": "US-QX9-13-00108"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P0",
+				"anchorJson": "int:isrc:USQX91300108",
+				"anchorBytesHex": "696e743a697372633a555351583931333030313038",
+				"anchorByteLength": 21,
+				"atomId": "0x42eea046949fed98884bad097ac5c7ec5a81b0b3ace46313f46abd9dcf6bd858",
+				"atomIdRecomputedFromBytes": "0x42eea046949fed98884bad097ac5c7ec5a81b0b3ace46313f46abd9dcf6bd858",
+				"atomIdMatches": true,
+				"iid": "int:isrc:USQX91300108",
+				"searchText": "",
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": null,
+				"raw": {
+					"profile": "P0",
+					"data": "int:isrc:USQX91300108",
+					"id": "0x42eea046949fed98884bad097ac5c7ec5a81b0b3ace46313f46abd9dcf6bd858",
+					"iid": "int:isrc:USQX91300108",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "harvested: local-business gen1 r2 (name + geo7) with sameAs z,a",
+			"origin": "harvested",
+			"classificationType": "LocalBusiness",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "local-business",
+				"values": {
+					"name": "Blue Bottle Coffee",
+					"latitude": 37.7823,
+					"longitude": -122.4076,
+					"sameAs": ["https://evidence.example/z", "https://evidence.example/a"]
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"LocalBusiness\",\"identifier\":\"int:gen1:local-business:r2:3e0068d38f80d5f50f265019e8623f09\",\"name\":\"Blue Bottle Coffee\",\"geo7\":\"9q8yyw1\",\"sameAs\":[\"https://evidence.example/a\",\"https://evidence.example/z\"]}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a224c6f63616c427573696e657373222c226964656e746966696572223a22696e743a67656e313a6c6f63616c2d627573696e6573733a72323a3365303036386433386638306435663530663236353031396538363233663039222c226e616d65223a22426c756520426f74746c6520436f66666565222c2267656f37223a2239713879797731222c2273616d654173223a5b2268747470733a2f2f65766964656e63652e6578616d706c652f61222c2268747470733a2f2f65766964656e63652e6578616d706c652f7a225d7d",
+				"anchorByteLength": 247,
+				"atomId": "0x6a14178238cfa147d1ec9d06272a163dbd146a58095224529e1d95db75d5fe51",
+				"atomIdRecomputedFromBytes": "0x6a14178238cfa147d1ec9d06272a163dbd146a58095224529e1d95db75d5fe51",
+				"atomIdMatches": true,
+				"iid": "int:gen1:local-business:r2:3e0068d38f80d5f50f265019e8623f09",
+				"searchText": "Blue Bottle Coffee",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "name", "geo7", "sameAs"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "LocalBusiness",
+					"identifier": "int:gen1:local-business:r2:3e0068d38f80d5f50f265019e8623f09",
+					"name": "Blue Bottle Coffee",
+					"geo7": "9q8yyw1",
+					"sameAs": ["https://evidence.example/a", "https://evidence.example/z"]
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"LocalBusiness\",\"identifier\":\"int:gen1:local-business:r2:3e0068d38f80d5f50f265019e8623f09\",\"name\":\"Blue Bottle Coffee\",\"geo7\":\"9q8yyw1\",\"sameAs\":[\"https://evidence.example/a\",\"https://evidence.example/z\"]}",
+					"id": "0x6a14178238cfa147d1ec9d06272a163dbd146a58095224529e1d95db75d5fe51",
+					"iid": "int:gen1:local-business:r2:3e0068d38f80d5f50f265019e8623f09",
+					"searchText": "Blue Bottle Coffee"
+				}
+			}
+		},
+		{
+			"label": "harvested: local-business gen1 r2 with reordered keys and sameAs a,z",
+			"origin": "harvested",
+			"classificationType": "LocalBusiness",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "local-business",
+				"values": {
+					"sameAs": ["https://evidence.example/a", "https://evidence.example/z"],
+					"longitude": -122.4076,
+					"latitude": 37.7823,
+					"name": "Blue Bottle Coffee"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"LocalBusiness\",\"identifier\":\"int:gen1:local-business:r2:3e0068d38f80d5f50f265019e8623f09\",\"name\":\"Blue Bottle Coffee\",\"geo7\":\"9q8yyw1\",\"sameAs\":[\"https://evidence.example/a\",\"https://evidence.example/z\"]}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a224c6f63616c427573696e657373222c226964656e746966696572223a22696e743a67656e313a6c6f63616c2d627573696e6573733a72323a3365303036386433386638306435663530663236353031396538363233663039222c226e616d65223a22426c756520426f74746c6520436f66666565222c2267656f37223a2239713879797731222c2273616d654173223a5b2268747470733a2f2f65766964656e63652e6578616d706c652f61222c2268747470733a2f2f65766964656e63652e6578616d706c652f7a225d7d",
+				"anchorByteLength": 247,
+				"atomId": "0x6a14178238cfa147d1ec9d06272a163dbd146a58095224529e1d95db75d5fe51",
+				"atomIdRecomputedFromBytes": "0x6a14178238cfa147d1ec9d06272a163dbd146a58095224529e1d95db75d5fe51",
+				"atomIdMatches": true,
+				"iid": "int:gen1:local-business:r2:3e0068d38f80d5f50f265019e8623f09",
+				"searchText": "Blue Bottle Coffee",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "name", "geo7", "sameAs"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "LocalBusiness",
+					"identifier": "int:gen1:local-business:r2:3e0068d38f80d5f50f265019e8623f09",
+					"name": "Blue Bottle Coffee",
+					"geo7": "9q8yyw1",
+					"sameAs": ["https://evidence.example/a", "https://evidence.example/z"]
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"LocalBusiness\",\"identifier\":\"int:gen1:local-business:r2:3e0068d38f80d5f50f265019e8623f09\",\"name\":\"Blue Bottle Coffee\",\"geo7\":\"9q8yyw1\",\"sameAs\":[\"https://evidence.example/a\",\"https://evidence.example/z\"]}",
+					"id": "0x6a14178238cfa147d1ec9d06272a163dbd146a58095224529e1d95db75d5fe51",
+					"iid": "int:gen1:local-business:r2:3e0068d38f80d5f50f265019e8623f09",
+					"searchText": "Blue Bottle Coffee"
+				}
+			}
+		},
+		{
+			"label": "harvested: non-canonical registered-scheme candidate is rejected",
+			"origin": "harvested",
+			"classificationType": "Book",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "book",
+				"values": {
+					"isbn": "0-14-032872-6",
+					"name": "Matilda"
+				},
+				"options": {
+					"candidateIid": "int:isbn:0-14-032872-6"
+				}
+			},
+			"expected": {
+				"ok": false,
+				"profile": null,
+				"anchorJson": null,
+				"anchorBytesHex": null,
+				"anchorByteLength": null,
+				"atomId": null,
+				"atomIdRecomputedFromBytes": null,
+				"atomIdMatches": null,
+				"iid": null,
+				"searchText": null,
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": "INVALID_IID",
+				"raw": {
+					"thrown": {
+						"name": "AtomAnchorError",
+						"code": "INVALID_IID",
+						"message": "Candidate identifier is not canonical for \"book\": int:isbn:0-14-032872-6"
+					}
+				}
+			}
+		},
+		{
+			"label": "harvested: over-cap url falls back to P1 without identifier",
+			"origin": "harvested",
+			"classificationType": "WebPage",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "web-page",
+				"values": {
+					"name": "Long URL",
+					"url": "https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"WebPage\",\"name\":\"Long URL\",\"url\":\"https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a2257656250616765222c226e616d65223a224c6f6e672055524c222c2275726c223a2268747470733a2f2f6578616d706c652e636f6d2f61616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161227d",
+				"anchorByteLength": 319,
+				"atomId": "0x74f9fa07c7a980a45750951136372595e47419b2eac92d07b1c9df9aa88610ae",
+				"atomIdRecomputedFromBytes": "0x74f9fa07c7a980a45750951136372595e47419b2eac92d07b1c9df9aa88610ae",
+				"atomIdMatches": true,
+				"iid": null,
+				"searchText": "Long URL",
+				"envelopeKeyOrder": ["@context", "@type", "name", "url"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "WebPage",
+					"name": "Long URL",
+					"url": "https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"WebPage\",\"name\":\"Long URL\",\"url\":\"https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}",
+					"id": "0x74f9fa07c7a980a45750951136372595e47419b2eac92d07b1c9df9aa88610ae",
+					"iid": null,
+					"searchText": "Long URL"
+				}
+			}
+		},
+		{
+			"label": "harvested: oversized purl is an invalid non-url derived IID",
+			"origin": "harvested",
+			"classificationType": "SoftwareSourceCode",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "software",
+				"values": {
+					"name": "oversized-package",
+					"codeRepository": "https://example.com/oversized-package",
+					"packageUrl": "pkg:npm/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": false,
+				"profile": null,
+				"anchorJson": null,
+				"anchorBytesHex": null,
+				"anchorByteLength": null,
+				"atomId": null,
+				"atomIdRecomputedFromBytes": null,
+				"atomIdMatches": null,
+				"iid": null,
+				"searchText": null,
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": "INVALID_IID",
+				"raw": {
+					"thrown": {
+						"name": "AtomAnchorError",
+						"code": "INVALID_IID",
+						"message": "Derived identifier is not canonical for \"software\": int:purl:npm/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+					}
+				}
+			}
+		},
+		{
+			"label": "harvested: plain wd candidate promotable for music-album",
+			"origin": "harvested",
+			"classificationType": "MusicAlbum",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "music-album",
+				"values": {
+					"name": "Fixture music entity"
+				},
+				"options": {
+					"candidateIid": "int:wd:Q189729"
+				}
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"MusicAlbum\",\"identifier\":\"int:wd:Q189729\",\"name\":\"Fixture music entity\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a224d75736963416c62756d222c226964656e746966696572223a22696e743a77643a51313839373239222c226e616d65223a2246697874757265206d7573696320656e74697479227d",
+				"anchorByteLength": 115,
+				"atomId": "0x4c818586fef1459414261aa32f293b8a11b665148e2d639e8c6899124cb1c660",
+				"atomIdRecomputedFromBytes": "0x4c818586fef1459414261aa32f293b8a11b665148e2d639e8c6899124cb1c660",
+				"atomIdMatches": true,
+				"iid": "int:wd:Q189729",
+				"searchText": "Fixture music entity",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "name"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "MusicAlbum",
+					"identifier": "int:wd:Q189729",
+					"name": "Fixture music entity"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"MusicAlbum\",\"identifier\":\"int:wd:Q189729\",\"name\":\"Fixture music entity\"}",
+					"id": "0x4c818586fef1459414261aa32f293b8a11b665148e2d639e8c6899124cb1c660",
+					"iid": "int:wd:Q189729",
+					"searchText": "Fixture music entity"
+				}
+			}
+		},
+		{
+			"label": "harvested: plain wd candidate promotable for music-group",
+			"origin": "harvested",
+			"classificationType": "MusicGroup",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "music-group",
+				"values": {
+					"name": "Fixture music entity"
+				},
+				"options": {
+					"candidateIid": "int:wd:Q189729"
+				}
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"MusicGroup\",\"identifier\":\"int:wd:Q189729\",\"name\":\"Fixture music entity\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a224d7573696347726f7570222c226964656e746966696572223a22696e743a77643a51313839373239222c226e616d65223a2246697874757265206d7573696320656e74697479227d",
+				"anchorByteLength": 115,
+				"atomId": "0x674e942510a0d0f79f4795987ac5f3aada37db4e9bda869f8ed6eed2d0ecf744",
+				"atomIdRecomputedFromBytes": "0x674e942510a0d0f79f4795987ac5f3aada37db4e9bda869f8ed6eed2d0ecf744",
+				"atomIdMatches": true,
+				"iid": "int:wd:Q189729",
+				"searchText": "Fixture music entity",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "name"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "MusicGroup",
+					"identifier": "int:wd:Q189729",
+					"name": "Fixture music entity"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"MusicGroup\",\"identifier\":\"int:wd:Q189729\",\"name\":\"Fixture music entity\"}",
+					"id": "0x674e942510a0d0f79f4795987ac5f3aada37db4e9bda869f8ed6eed2d0ecf744",
+					"iid": "int:wd:Q189729",
+					"searchText": "Fixture music entity"
+				}
+			}
+		},
+		{
+			"label": "harvested: plain wd candidate refused for book",
+			"origin": "harvested",
+			"classificationType": "Book",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "book",
+				"values": {
+					"isbn": "9780140328721",
+					"name": "Matilda"
+				},
+				"options": {
+					"candidateIid": "int:wd:Q42"
+				}
+			},
+			"expected": {
+				"ok": false,
+				"profile": null,
+				"anchorJson": null,
+				"anchorBytesHex": null,
+				"anchorByteLength": null,
+				"atomId": null,
+				"atomIdRecomputedFromBytes": null,
+				"atomIdMatches": null,
+				"iid": null,
+				"searchText": null,
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": "INVALID_IID",
+				"raw": {
+					"thrown": {
+						"name": "AtomAnchorError",
+						"code": "INVALID_IID",
+						"message": "Candidate wd identifier is parse-only and cannot be minted for \"book\": int:wd:Q42"
+					}
+				}
+			}
+		},
+		{
+			"label": "harvested: podcast guid derived from upper-case feed host",
+			"origin": "harvested",
+			"classificationType": "PodcastSeries",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "podcast-series",
+				"values": {
+					"feedUrl": "https://FEEDS.EXAMPLE.ORG/podcast.xml",
+					"name": "Podcast"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P0",
+				"anchorJson": "int:podcastguid:7d8bd745-04d4-5ab5-9754-49afad1729dc",
+				"anchorBytesHex": "696e743a706f6463617374677569643a37643862643734352d303464342d356162352d393735342d343961666164313732396463",
+				"anchorByteLength": 52,
+				"atomId": "0x9cf6bb388a9cf540157aacb3a34660e72db4cb1c58bdea1b69b536c96ce15b4c",
+				"atomIdRecomputedFromBytes": "0x9cf6bb388a9cf540157aacb3a34660e72db4cb1c58bdea1b69b536c96ce15b4c",
+				"atomIdMatches": true,
+				"iid": "int:podcastguid:7d8bd745-04d4-5ab5-9754-49afad1729dc",
+				"searchText": "",
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": null,
+				"raw": {
+					"profile": "P0",
+					"data": "int:podcastguid:7d8bd745-04d4-5ab5-9754-49afad1729dc",
+					"id": "0x9cf6bb388a9cf540157aacb3a34660e72db4cb1c58bdea1b69b536c96ce15b4c",
+					"iid": "int:podcastguid:7d8bd745-04d4-5ab5-9754-49afad1729dc",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "harvested: provider-local handle candidate rides the P1 values envelope",
+			"origin": "harvested",
+			"classificationType": "MusicRecording",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "music-recording",
+				"values": {
+					"name": "I'm Shady",
+					"sameAs": ["https://open.spotify.com/track/3UMaczJpikHgJFyBTAJVOz"]
+				},
+				"options": {
+					"candidateIid": "int:spotify:track:3UMaczJpikHgJFyBTAJVOz"
+				}
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"MusicRecording\",\"identifier\":\"int:spotify:track:3UMaczJpikHgJFyBTAJVOz\",\"name\":\"I'm Shady\",\"sameAs\":[\"https://open.spotify.com/track/3UMaczJpikHgJFyBTAJVOz\"]}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a224d757369635265636f7264696e67222c226964656e746966696572223a22696e743a73706f746966793a747261636b3a33554d61637a4a70696b48674a46794254414a564f7a222c226e616d65223a2249276d205368616479222c2273616d654173223a5b2268747470733a2f2f6f70656e2e73706f746966792e636f6d2f747261636b2f33554d61637a4a70696b48674a46794254414a564f7a225d7d",
+				"anchorByteLength": 201,
+				"atomId": "0xcfc77bb8c419823519005546dae827a89ec16f222ea7f8564c19362614b19bab",
+				"atomIdRecomputedFromBytes": "0xcfc77bb8c419823519005546dae827a89ec16f222ea7f8564c19362614b19bab",
+				"atomIdMatches": true,
+				"iid": "int:spotify:track:3UMaczJpikHgJFyBTAJVOz",
+				"searchText": "I'm Shady",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "name", "sameAs"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "MusicRecording",
+					"identifier": "int:spotify:track:3UMaczJpikHgJFyBTAJVOz",
+					"name": "I'm Shady",
+					"sameAs": ["https://open.spotify.com/track/3UMaczJpikHgJFyBTAJVOz"]
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"MusicRecording\",\"identifier\":\"int:spotify:track:3UMaczJpikHgJFyBTAJVOz\",\"name\":\"I'm Shady\",\"sameAs\":[\"https://open.spotify.com/track/3UMaczJpikHgJFyBTAJVOz\"]}",
+					"id": "0xcfc77bb8c419823519005546dae827a89ec16f222ea7f8564c19362614b19bab",
+					"iid": "int:spotify:track:3UMaczJpikHgJFyBTAJVOz",
+					"searchText": "I'm Shady"
+				}
+			}
+		},
+		{
+			"label": "harvested: search text from display field",
+			"origin": "harvested",
+			"classificationType": "Movie",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "movie",
+				"values": {
+					"name": "Inception",
+					"sameAs": ["https://evidence.example/inception"]
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"Movie\",\"identifier\":\"int:gen1:movie:r5:ed2d2ab3773c903a3e8f9ebac3a13122\",\"name\":\"Inception\",\"sameAs\":[\"https://evidence.example/inception\"]}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a224d6f766965222c226964656e746966696572223a22696e743a67656e313a6d6f7669653a72353a6564326432616233373733633930336133653866396562616333613133313232222c226e616d65223a22496e63657074696f6e222c2273616d654173223a5b2268747470733a2f2f65766964656e63652e6578616d706c652f696e63657074696f6e225d7d",
+				"anchorByteLength": 183,
+				"atomId": "0x117527781a691838bd73f042309ee2d53d81e07a37ced19eb123230a1e32e6b2",
+				"atomIdRecomputedFromBytes": "0x117527781a691838bd73f042309ee2d53d81e07a37ced19eb123230a1e32e6b2",
+				"atomIdMatches": true,
+				"iid": "int:gen1:movie:r5:ed2d2ab3773c903a3e8f9ebac3a13122",
+				"searchText": "Inception",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "name", "sameAs"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "Movie",
+					"identifier": "int:gen1:movie:r5:ed2d2ab3773c903a3e8f9ebac3a13122",
+					"name": "Inception",
+					"sameAs": ["https://evidence.example/inception"]
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"Movie\",\"identifier\":\"int:gen1:movie:r5:ed2d2ab3773c903a3e8f9ebac3a13122\",\"name\":\"Inception\",\"sameAs\":[\"https://evidence.example/inception\"]}",
+					"id": "0x117527781a691838bd73f042309ee2d53d81e07a37ced19eb123230a1e32e6b2",
+					"iid": "int:gen1:movie:r5:ed2d2ab3773c903a3e8f9ebac3a13122",
+					"searchText": "Inception"
+				}
+			}
+		},
+		{
+			"label": "harvested: wd evidence derives typed P0 without bare wd",
+			"origin": "harvested",
+			"classificationType": "Movie",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "movie",
+				"values": {
+					"name": "Inception",
+					"sameAs": ["https://www.wikidata.org/wiki/Q25188"]
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P0",
+				"anchorJson": "int:wd:film:Q25188",
+				"anchorBytesHex": "696e743a77643a66696c6d3a513235313838",
+				"anchorByteLength": 18,
+				"atomId": "0x674b0eb5286a845f2f953f01d5ee72d0712d0fdfdc958dc5de6fe89269bd6dae",
+				"atomIdRecomputedFromBytes": "0x674b0eb5286a845f2f953f01d5ee72d0712d0fdfdc958dc5de6fe89269bd6dae",
+				"atomIdMatches": true,
+				"iid": "int:wd:film:Q25188",
+				"searchText": "",
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": null,
+				"raw": {
+					"profile": "P0",
+					"data": "int:wd:film:Q25188",
+					"id": "0x674b0eb5286a845f2f953f01d5ee72d0712d0fdfdc958dc5de6fe89269bd6dae",
+					"iid": "int:wd:film:Q25188",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "harvested: weak acct candidate rides the P1 values envelope",
+			"origin": "harvested",
+			"classificationType": "SocialMediaAccount",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "social-media-account",
+				"values": {
+					"platform": "x",
+					"url": "https://x.com/jack",
+					"username": "jack"
+				},
+				"options": {
+					"candidateIid": "int:acct:x:@jack"
+				}
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"SocialMediaAccount\",\"identifier\":\"int:acct:x:@jack\",\"username\":\"jack\",\"platform\":\"x\",\"url\":\"https://x.com/jack\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a22536f6369616c4d656469614163636f756e74222c226964656e746966696572223a22696e743a616363743a783a406a61636b222c22757365726e616d65223a226a61636b222c22706c6174666f726d223a2278222c2275726c223a2268747470733a2f2f782e636f6d2f6a61636b227d",
+				"anchorByteLength": 155,
+				"atomId": "0x83ac130749dcbcf8e315ea626363ef182d6a8f4d1f4b1d63d96cd9eeca8491bb",
+				"atomIdRecomputedFromBytes": "0x83ac130749dcbcf8e315ea626363ef182d6a8f4d1f4b1d63d96cd9eeca8491bb",
+				"atomIdMatches": true,
+				"iid": "int:acct:x:@jack",
+				"searchText": "",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "username", "platform", "url"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "SocialMediaAccount",
+					"identifier": "int:acct:x:@jack",
+					"username": "jack",
+					"platform": "x",
+					"url": "https://x.com/jack"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"SocialMediaAccount\",\"identifier\":\"int:acct:x:@jack\",\"username\":\"jack\",\"platform\":\"x\",\"url\":\"https://x.com/jack\"}",
+					"id": "0x83ac130749dcbcf8e315ea626363ef182d6a8f4d1f4b1d63d96cd9eeca8491bb",
+					"iid": "int:acct:x:@jack",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "synthetic: aggregate-rating (null ladder) fallback envelope",
+			"origin": "synthetic",
+			"classificationType": "AggregateRating",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "aggregate-rating",
+				"values": {
+					"ratingValue": 4.5,
+					"reviewCount": 10
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"AggregateRating\",\"ratingValue\":4.5,\"reviewCount\":10}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a22416767726567617465526174696e67222c22726174696e6756616c7565223a342e352c22726576696577436f756e74223a31307d",
+				"anchorByteLength": 95,
+				"atomId": "0x545be1e8362592f21b392597d135d06573a1d038eb5db603891c54c0f168d650",
+				"atomIdRecomputedFromBytes": "0x545be1e8362592f21b392597d135d06573a1d038eb5db603891c54c0f168d650",
+				"atomIdMatches": true,
+				"iid": null,
+				"searchText": "",
+				"envelopeKeyOrder": ["@context", "@type", "ratingValue", "reviewCount"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "AggregateRating",
+					"ratingValue": 4.5,
+					"reviewCount": 10
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"AggregateRating\",\"ratingValue\":4.5,\"reviewCount\":10}",
+					"id": "0x545be1e8362592f21b392597d135d06573a1d038eb5db603891c54c0f168d650",
+					"iid": null,
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "synthetic: book gen1 r3 one identity field",
+			"origin": "synthetic",
+			"classificationType": "Book",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "book",
+				"values": {
+					"name": "The Sovereign Individual"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"Book\",\"identifier\":\"int:gen1:book:r3:59a02a73cbe0d2a4223719fdc4d006ab\",\"name\":\"The Sovereign Individual\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a22426f6f6b222c226964656e746966696572223a22696e743a67656e313a626f6f6b3a72333a3539613032613733636265306432613432323337313966646334643030366162222c226e616d65223a2254686520536f7665726569676e20496e646976696475616c227d",
+				"anchorByteLength": 148,
+				"atomId": "0x27fe44bef8cf7b4e45aecfa32f1cc9eb9b234c18fd85e176cb7ab07a352efe55",
+				"atomIdRecomputedFromBytes": "0x27fe44bef8cf7b4e45aecfa32f1cc9eb9b234c18fd85e176cb7ab07a352efe55",
+				"atomIdMatches": true,
+				"iid": "int:gen1:book:r3:59a02a73cbe0d2a4223719fdc4d006ab",
+				"searchText": "The Sovereign Individual",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "name"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "Book",
+					"identifier": "int:gen1:book:r3:59a02a73cbe0d2a4223719fdc4d006ab",
+					"name": "The Sovereign Individual"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"Book\",\"identifier\":\"int:gen1:book:r3:59a02a73cbe0d2a4223719fdc4d006ab\",\"name\":\"The Sovereign Individual\"}",
+					"id": "0x27fe44bef8cf7b4e45aecfa32f1cc9eb9b234c18fd85e176cb7ab07a352efe55",
+					"iid": "int:gen1:book:r3:59a02a73cbe0d2a4223719fdc4d006ab",
+					"searchText": "The Sovereign Individual"
+				}
+			}
+		},
+		{
+			"label": "synthetic: book isbn P0 without required name (P0 path skips validation)",
+			"origin": "synthetic",
+			"classificationType": "Book",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "book",
+				"values": {
+					"isbn": "9780684832722"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P0",
+				"anchorJson": "int:isbn:9780684832722",
+				"anchorBytesHex": "696e743a6973626e3a39373830363834383332373232",
+				"anchorByteLength": 22,
+				"atomId": "0xc9f31c9c60164867df9c9b0aaca9e2504d3c11a3d2b75726382fb429171eb18b",
+				"atomIdRecomputedFromBytes": "0xc9f31c9c60164867df9c9b0aaca9e2504d3c11a3d2b75726382fb429171eb18b",
+				"atomIdMatches": true,
+				"iid": "int:isbn:9780684832722",
+				"searchText": "",
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": null,
+				"raw": {
+					"profile": "P0",
+					"data": "int:isbn:9780684832722",
+					"id": "0xc9f31c9c60164867df9c9b0aaca9e2504d3c11a3d2b75726382fb429171eb18b",
+					"iid": "int:isbn:9780684832722",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "synthetic: book olid work P0",
+			"origin": "synthetic",
+			"classificationType": "Book",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "book",
+				"values": {
+					"name": "The Sovereign Individual",
+					"sameAs": ["https://openlibrary.org/works/OL2716871W"]
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P0",
+				"anchorJson": "int:olid:OL2716871W",
+				"anchorBytesHex": "696e743a6f6c69643a4f4c3237313638373157",
+				"anchorByteLength": 19,
+				"atomId": "0x0942a97872dae9f15081f3daff02619ef3a16081a99a4c435db5a4e692a4b97f",
+				"atomIdRecomputedFromBytes": "0x0942a97872dae9f15081f3daff02619ef3a16081a99a4c435db5a4e692a4b97f",
+				"atomIdMatches": true,
+				"iid": "int:olid:OL2716871W",
+				"searchText": "",
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": null,
+				"raw": {
+					"profile": "P0",
+					"data": "int:olid:OL2716871W",
+					"id": "0x0942a97872dae9f15081f3daff02619ef3a16081a99a4c435db5a4e692a4b97f",
+					"iid": "int:olid:OL2716871W",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "synthetic: candidate P1 envelope missing required field throws plain Error",
+			"origin": "synthetic",
+			"classificationType": "WebPage",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "web-page",
+				"values": {
+					"url": "https://example.com/a"
+				},
+				"options": {
+					"candidateIid": "int:url:https://example.com/a"
+				}
+			},
+			"expected": {
+				"ok": false,
+				"profile": null,
+				"anchorJson": null,
+				"anchorBytesHex": null,
+				"anchorByteLength": null,
+				"atomId": null,
+				"atomIdRecomputedFromBytes": null,
+				"atomIdMatches": null,
+				"iid": null,
+				"searchText": null,
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": "Error",
+				"raw": {
+					"thrown": {
+						"name": "Error",
+						"code": null,
+						"message": "Invalid values for classification \"web-page\": Missing required field \"name\"."
+					}
+				}
+			}
+		},
+		{
+			"label": "synthetic: candidate gen1 (Class C) rides the P1 fallback envelope",
+			"origin": "synthetic",
+			"classificationType": "MusicGroup",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "music-group",
+				"values": {
+					"name": "Daft Punk"
+				},
+				"options": {
+					"candidateIid": "int:gen1:music-group:r4:364a1631a4fa913186c8b1db07729e6e"
+				}
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"MusicGroup\",\"identifier\":\"int:gen1:music-group:r4:364a1631a4fa913186c8b1db07729e6e\",\"name\":\"Daft Punk\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a224d7573696347726f7570222c226964656e746966696572223a22696e743a67656e313a6d757369632d67726f75703a72343a3336346131363331613466613931333138366338623164623037373239653665222c226e616d65223a22446166742050756e6b227d",
+				"anchorByteLength": 146,
+				"atomId": "0x72590cd17ebc992d437d0f4ef011f13b7a023393bbbab11f428193ba298c65f7",
+				"atomIdRecomputedFromBytes": "0x72590cd17ebc992d437d0f4ef011f13b7a023393bbbab11f428193ba298c65f7",
+				"atomIdMatches": true,
+				"iid": "int:gen1:music-group:r4:364a1631a4fa913186c8b1db07729e6e",
+				"searchText": "Daft Punk",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "name"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "MusicGroup",
+					"identifier": "int:gen1:music-group:r4:364a1631a4fa913186c8b1db07729e6e",
+					"name": "Daft Punk"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"MusicGroup\",\"identifier\":\"int:gen1:music-group:r4:364a1631a4fa913186c8b1db07729e6e\",\"name\":\"Daft Punk\"}",
+					"id": "0x72590cd17ebc992d437d0f4ef011f13b7a023393bbbab11f428193ba298c65f7",
+					"iid": "int:gen1:music-group:r4:364a1631a4fa913186c8b1db07729e6e",
+					"searchText": "Daft Punk"
+				}
+			}
+		},
+		{
+			"label": "synthetic: candidate not an IID shape rejected",
+			"origin": "synthetic",
+			"classificationType": "MusicRecording",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "music-recording",
+				"values": {
+					"name": "x"
+				},
+				"options": {
+					"candidateIid": "not-an-iid"
+				}
+			},
+			"expected": {
+				"ok": false,
+				"profile": null,
+				"anchorJson": null,
+				"anchorBytesHex": null,
+				"anchorByteLength": null,
+				"atomId": null,
+				"atomIdRecomputedFromBytes": null,
+				"atomIdMatches": null,
+				"iid": null,
+				"searchText": null,
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": "INVALID_IID",
+				"raw": {
+					"thrown": {
+						"name": "AtomAnchorError",
+						"code": "INVALID_IID",
+						"message": "Candidate identifier is not canonical for \"music-recording\": not-an-iid"
+					}
+				}
+			}
+		},
+		{
+			"label": "synthetic: candidate plain wd refused for movie (not a music classification)",
+			"origin": "synthetic",
+			"classificationType": "Movie",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "movie",
+				"values": {
+					"name": "Inception"
+				},
+				"options": {
+					"candidateIid": "int:wd:Q25188"
+				}
+			},
+			"expected": {
+				"ok": false,
+				"profile": null,
+				"anchorJson": null,
+				"anchorBytesHex": null,
+				"anchorByteLength": null,
+				"atomId": null,
+				"atomIdRecomputedFromBytes": null,
+				"atomIdMatches": null,
+				"iid": null,
+				"searchText": null,
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": "INVALID_IID",
+				"raw": {
+					"thrown": {
+						"name": "AtomAnchorError",
+						"code": "INVALID_IID",
+						"message": "Candidate wd identifier is parse-only and cannot be minted for \"movie\": int:wd:Q25188"
+					}
+				}
+			}
+		},
+		{
+			"label": "synthetic: candidate polymorphic url rides the fallback envelope after @type",
+			"origin": "synthetic",
+			"classificationType": "WebPage",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "web-page",
+				"values": {
+					"name": "A",
+					"url": "https://example.com/a"
+				},
+				"options": {
+					"candidateIid": "int:url:https://example.com/a"
+				}
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"WebPage\",\"identifier\":\"int:url:https://example.com/a\",\"name\":\"A\",\"url\":\"https://example.com/a\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a2257656250616765222c226964656e746966696572223a22696e743a75726c3a68747470733a2f2f6578616d706c652e636f6d2f61222c226e616d65223a2241222c2275726c223a2268747470733a2f2f6578616d706c652e636f6d2f61227d",
+				"anchorByteLength": 138,
+				"atomId": "0x54f569809abb215859969bba6810f47a86bccc555603f6f64523ec22c22f5464",
+				"atomIdRecomputedFromBytes": "0x54f569809abb215859969bba6810f47a86bccc555603f6f64523ec22c22f5464",
+				"atomIdMatches": true,
+				"iid": "int:url:https://example.com/a",
+				"searchText": "A",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "name", "url"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "WebPage",
+					"identifier": "int:url:https://example.com/a",
+					"name": "A",
+					"url": "https://example.com/a"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"WebPage\",\"identifier\":\"int:url:https://example.com/a\",\"name\":\"A\",\"url\":\"https://example.com/a\"}",
+					"id": "0x54f569809abb215859969bba6810f47a86bccc555603f6f64523ec22c22f5464",
+					"iid": "int:url:https://example.com/a",
+					"searchText": "A"
+				}
+			}
+		},
+		{
+			"label": "synthetic: candidate registered scheme lowercase isrc rejected",
+			"origin": "synthetic",
+			"classificationType": "MusicRecording",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "music-recording",
+				"values": {
+					"name": "x"
+				},
+				"options": {
+					"candidateIid": "int:isrc:us-qx9-13-00108"
+				}
+			},
+			"expected": {
+				"ok": false,
+				"profile": null,
+				"anchorJson": null,
+				"anchorBytesHex": null,
+				"anchorByteLength": null,
+				"atomId": null,
+				"atomIdRecomputedFromBytes": null,
+				"atomIdMatches": null,
+				"iid": null,
+				"searchText": null,
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": "INVALID_IID",
+				"raw": {
+					"thrown": {
+						"name": "AtomAnchorError",
+						"code": "INVALID_IID",
+						"message": "Candidate identifier is not canonical for \"music-recording\": int:isrc:us-qx9-13-00108"
+					}
+				}
+			}
+		},
+		{
+			"label": "synthetic: candidate typed wd human P0 for person",
+			"origin": "synthetic",
+			"classificationType": "Person",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "person",
+				"values": {
+					"givenName": "Douglas"
+				},
+				"options": {
+					"candidateIid": "int:wd:human:Q42"
+				}
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P0",
+				"anchorJson": "int:wd:human:Q42",
+				"anchorBytesHex": "696e743a77643a68756d616e3a513432",
+				"anchorByteLength": 16,
+				"atomId": "0x2425c4bef18851d3bf6f3f9945dce08a5848399f6ef09366a780049eba788e88",
+				"atomIdRecomputedFromBytes": "0x2425c4bef18851d3bf6f3f9945dce08a5848399f6ef09366a780049eba788e88",
+				"atomIdMatches": true,
+				"iid": "int:wd:human:Q42",
+				"searchText": "",
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": null,
+				"raw": {
+					"profile": "P0",
+					"data": "int:wd:human:Q42",
+					"id": "0x2425c4bef18851d3bf6f3f9945dce08a5848399f6ef09366a780049eba788e88",
+					"iid": "int:wd:human:Q42",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "synthetic: candidate unregistered scheme with embedded whitespace rejected",
+			"origin": "synthetic",
+			"classificationType": "MusicRecording",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "music-recording",
+				"values": {
+					"name": "x"
+				},
+				"options": {
+					"candidateIid": "int:spotify:track:abc def"
+				}
+			},
+			"expected": {
+				"ok": false,
+				"profile": null,
+				"anchorJson": null,
+				"anchorBytesHex": null,
+				"anchorByteLength": null,
+				"atomId": null,
+				"atomIdRecomputedFromBytes": null,
+				"atomIdMatches": null,
+				"iid": null,
+				"searchText": null,
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": "INVALID_IID",
+				"raw": {
+					"thrown": {
+						"name": "AtomAnchorError",
+						"code": "INVALID_IID",
+						"message": "Candidate identifier is not canonical for \"music-recording\": int:spotify:track:abc def"
+					}
+				}
+			}
+		},
+		{
+			"label": "synthetic: company url P1 with sameAs sorted and deduplicated",
+			"origin": "synthetic",
+			"classificationType": "Organization",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "company",
+				"values": {
+					"name": "Example Co",
+					"url": "https://www.example.com/",
+					"sameAs": ["https://b.example", "https://a.example", "https://b.example"]
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"Organization\",\"identifier\":\"int:url:https://example.com\",\"sameAs\":[\"https://a.example\",\"https://b.example\"]}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a224f7267616e697a6174696f6e222c226964656e746966696572223a22696e743a75726c3a68747470733a2f2f6578616d706c652e636f6d222c2273616d654173223a5b2268747470733a2f2f612e6578616d706c65222c2268747470733a2f2f622e6578616d706c65225d7d",
+				"anchorByteLength": 151,
+				"atomId": "0x3f7070045a24ed1e44b0c96e4356200f3230910d13e9a5c6d99871dadb1f862b",
+				"atomIdRecomputedFromBytes": "0x3f7070045a24ed1e44b0c96e4356200f3230910d13e9a5c6d99871dadb1f862b",
+				"atomIdMatches": true,
+				"iid": "int:url:https://example.com",
+				"searchText": "Example Co",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "sameAs"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "Organization",
+					"identifier": "int:url:https://example.com",
+					"sameAs": ["https://a.example", "https://b.example"]
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"Organization\",\"identifier\":\"int:url:https://example.com\",\"sameAs\":[\"https://a.example\",\"https://b.example\"]}",
+					"id": "0x3f7070045a24ed1e44b0c96e4356200f3230910d13e9a5c6d99871dadb1f862b",
+					"iid": "int:url:https://example.com",
+					"searchText": "Example Co"
+				}
+			}
+		},
+		{
+			"label": "synthetic: dataset doi from sameAs P1",
+			"origin": "synthetic",
+			"classificationType": "Dataset",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "dataset",
+				"values": {
+					"name": "Example Dataset",
+					"sameAs": ["https://doi.org/10.1000/182"]
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"Dataset\",\"identifier\":\"int:doi:10.1000/182\",\"sameAs\":[\"https://doi.org/10.1000/182\"]}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a2244617461736574222c226964656e746966696572223a22696e743a646f693a31302e313030302f313832222c2273616d654173223a5b2268747470733a2f2f646f692e6f72672f31302e313030302f313832225d7d",
+				"anchorByteLength": 128,
+				"atomId": "0xb994d18c8bda98c0d24efebe38d5e87d3ce56f3aba376955b851ec45f9560b90",
+				"atomIdRecomputedFromBytes": "0xb994d18c8bda98c0d24efebe38d5e87d3ce56f3aba376955b851ec45f9560b90",
+				"atomIdMatches": true,
+				"iid": "int:doi:10.1000/182",
+				"searchText": "Example Dataset",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "sameAs"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "Dataset",
+					"identifier": "int:doi:10.1000/182",
+					"sameAs": ["https://doi.org/10.1000/182"]
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"Dataset\",\"identifier\":\"int:doi:10.1000/182\",\"sameAs\":[\"https://doi.org/10.1000/182\"]}",
+					"id": "0xb994d18c8bda98c0d24efebe38d5e87d3ce56f3aba376955b851ec45f9560b90",
+					"iid": "int:doi:10.1000/182",
+					"searchText": "Example Dataset"
+				}
+			}
+		},
+		{
+			"label": "synthetic: defined-term termset P0",
+			"origin": "synthetic",
+			"classificationType": "DefinedTerm",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "defined-term",
+				"values": {
+					"name": "follows",
+					"inDefinedTermSet": "https://schema.intuition.systems/predicates",
+					"termCode": "Follows"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P0",
+				"anchorJson": "int:termset:8a323938d39fadee18e74d6bb069e607:follows",
+				"anchorBytesHex": "696e743a7465726d7365743a38613332333933386433396661646565313865373464366262303639653630373a666f6c6c6f7773",
+				"anchorByteLength": 52,
+				"atomId": "0x311148f9cb80a1b6f1d5abd6e1e58df209f4ef9938cb680c5f32cfdc593f403d",
+				"atomIdRecomputedFromBytes": "0x311148f9cb80a1b6f1d5abd6e1e58df209f4ef9938cb680c5f32cfdc593f403d",
+				"atomIdMatches": true,
+				"iid": "int:termset:8a323938d39fadee18e74d6bb069e607:follows",
+				"searchText": "",
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": null,
+				"raw": {
+					"profile": "P0",
+					"data": "int:termset:8a323938d39fadee18e74d6bb069e607:follows",
+					"id": "0x311148f9cb80a1b6f1d5abd6e1e58df209f4ef9938cb680c5f32cfdc593f403d",
+					"iid": "int:termset:8a323938d39fadee18e74d6bb069e607:follows",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "synthetic: ethereum-account caip10 P1 with intuition schema context",
+			"origin": "synthetic",
+			"classificationType": "EthereumAccount",
+			"schemaContext": "https://schemas.intuition.systems/v1",
+			"input": {
+				"slug": "ethereum-account",
+				"values": {
+					"address": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schemas.intuition.systems/v1\",\"@type\":\"EthereumAccount\",\"identifier\":\"int:caip10:eip155:1:0xd8da6bf26964af9d7eed9e03e53415d37aa96045\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d61732e696e74756974696f6e2e73797374656d732f7631222c224074797065223a22457468657265756d4163636f756e74222c226964656e746966696572223a22696e743a6361697031303a6569703135353a313a307864386461366266323639363461663964376565643965303365353334313564333761613936303435227d",
+				"anchorByteLength": 155,
+				"atomId": "0xca9e824639cd5af2f29c2c83ccb1ff9bbf6561cb317cdf3ab9a69d528599f5c2",
+				"atomIdRecomputedFromBytes": "0xca9e824639cd5af2f29c2c83ccb1ff9bbf6561cb317cdf3ab9a69d528599f5c2",
+				"atomIdMatches": true,
+				"iid": "int:caip10:eip155:1:0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+				"searchText": "",
+				"envelopeKeyOrder": ["@context", "@type", "identifier"],
+				"envelope": {
+					"@context": "https://schemas.intuition.systems/v1",
+					"@type": "EthereumAccount",
+					"identifier": "int:caip10:eip155:1:0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schemas.intuition.systems/v1\",\"@type\":\"EthereumAccount\",\"identifier\":\"int:caip10:eip155:1:0xd8da6bf26964af9d7eed9e03e53415d37aa96045\"}",
+					"id": "0xca9e824639cd5af2f29c2c83ccb1ff9bbf6561cb317cdf3ab9a69d528599f5c2",
+					"iid": "int:caip10:eip155:1:0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "synthetic: ethereum-erc20 caip19 P0",
+			"origin": "synthetic",
+			"classificationType": "EthereumERC20",
+			"schemaContext": "https://schemas.intuition.systems/v1",
+			"input": {
+				"slug": "ethereum-erc20",
+				"values": {
+					"chainId": 1,
+					"address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+					"name": "USD Coin",
+					"symbol": "USDC",
+					"decimals": 6
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P0",
+				"anchorJson": "int:caip19:eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+				"anchorBytesHex": "696e743a6361697031393a6569703135353a312f65726332303a307861306238363939316336323138623336633164313964346132653965623063653336303665623438",
+				"anchorByteLength": 68,
+				"atomId": "0x7cf4030088ee4a2dd04f6c3062901be8458cf3fc3ee16e7c1a4f13644841af5e",
+				"atomIdRecomputedFromBytes": "0x7cf4030088ee4a2dd04f6c3062901be8458cf3fc3ee16e7c1a4f13644841af5e",
+				"atomIdMatches": true,
+				"iid": "int:caip19:eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+				"searchText": "",
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": null,
+				"raw": {
+					"profile": "P0",
+					"data": "int:caip19:eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+					"id": "0x7cf4030088ee4a2dd04f6c3062901be8458cf3fc3ee16e7c1a4f13644841af5e",
+					"iid": "int:caip19:eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "synthetic: ethereum-smart-contract caip10 P1",
+			"origin": "synthetic",
+			"classificationType": "EthereumSmartContract",
+			"schemaContext": "https://schemas.intuition.systems/v1",
+			"input": {
+				"slug": "ethereum-smart-contract",
+				"values": {
+					"chainId": 8453,
+					"address": "0x4200000000000000000000000000000000000006"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schemas.intuition.systems/v1\",\"@type\":\"EthereumSmartContract\",\"identifier\":\"int:caip10:eip155:8453:0x4200000000000000000000000000000000000006\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d61732e696e74756974696f6e2e73797374656d732f7631222c224074797065223a22457468657265756d536d617274436f6e7472616374222c226964656e746966696572223a22696e743a6361697031303a6569703135353a383435333a307834323030303030303030303030303030303030303030303030303030303030303030303030303036227d",
+				"anchorByteLength": 164,
+				"atomId": "0xd3775eace35b408370910b1214edf9dd33df419c14483d6240cb8d9b249d8295",
+				"atomIdRecomputedFromBytes": "0xd3775eace35b408370910b1214edf9dd33df419c14483d6240cb8d9b249d8295",
+				"atomIdMatches": true,
+				"iid": "int:caip10:eip155:8453:0x4200000000000000000000000000000000000006",
+				"searchText": "",
+				"envelopeKeyOrder": ["@context", "@type", "identifier"],
+				"envelope": {
+					"@context": "https://schemas.intuition.systems/v1",
+					"@type": "EthereumSmartContract",
+					"identifier": "int:caip10:eip155:8453:0x4200000000000000000000000000000000000006"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schemas.intuition.systems/v1\",\"@type\":\"EthereumSmartContract\",\"identifier\":\"int:caip10:eip155:8453:0x4200000000000000000000000000000000000006\"}",
+					"id": "0xd3775eace35b408370910b1214edf9dd33df419c14483d6240cb8d9b249d8295",
+					"iid": "int:caip10:eip155:8453:0x4200000000000000000000000000000000000006",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "synthetic: event gen1 r3 name + startDate",
+			"origin": "synthetic",
+			"classificationType": "Event",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "event",
+				"values": {
+					"name": "Devcon 7",
+					"startDate": "2024-11-12"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"Event\",\"identifier\":\"int:gen1:event:r3:9f2a79d7dc886cdad3ef25de0811502e\",\"name\":\"Devcon 7\",\"startDate\":\"2024-11-12\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a224576656e74222c226964656e746966696572223a22696e743a67656e313a6576656e743a72333a3966326137396437646338383663646164336566323564653038313135303265222c226e616d65223a22446576636f6e2037222c22737461727444617465223a22323032342d31312d3132227d",
+				"anchorByteLength": 159,
+				"atomId": "0x8abddef052e13fa731db4988f2861209f61e91b428dbae319ad3034d344f1403",
+				"atomIdRecomputedFromBytes": "0x8abddef052e13fa731db4988f2861209f61e91b428dbae319ad3034d344f1403",
+				"atomIdMatches": true,
+				"iid": "int:gen1:event:r3:9f2a79d7dc886cdad3ef25de0811502e",
+				"searchText": "Devcon 7",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "name", "startDate"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "Event",
+					"identifier": "int:gen1:event:r3:9f2a79d7dc886cdad3ef25de0811502e",
+					"name": "Devcon 7",
+					"startDate": "2024-11-12"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"Event\",\"identifier\":\"int:gen1:event:r3:9f2a79d7dc886cdad3ef25de0811502e\",\"name\":\"Devcon 7\",\"startDate\":\"2024-11-12\"}",
+					"id": "0x8abddef052e13fa731db4988f2861209f61e91b428dbae319ad3034d344f1403",
+					"iid": "int:gen1:event:r3:9f2a79d7dc886cdad3ef25de0811502e",
+					"searchText": "Devcon 7"
+				}
+			}
+		},
+		{
+			"label": "synthetic: image content hash P1",
+			"origin": "synthetic",
+			"classificationType": "ImageObject",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "image",
+				"values": {
+					"name": "Cover Art",
+					"url": "https://cdn.example.com/cover.jpg",
+					"contentHash": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"ImageObject\",\"identifier\":\"int:hash:sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a22496d6167654f626a656374222c226964656e746966696572223a22696e743a686173683a7368613235363a39663836643038313838346337643635396132666561613063353561643031356133626634663162326230623832326364313564366331356230663030613038227d",
+				"anchorByteLength": 152,
+				"atomId": "0xcc2aa7d31c8df9171038f39dc9c059c8f6cc814bc3e25262d9032da6586d7920",
+				"atomIdRecomputedFromBytes": "0xcc2aa7d31c8df9171038f39dc9c059c8f6cc814bc3e25262d9032da6586d7920",
+				"atomIdMatches": true,
+				"iid": "int:hash:sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+				"searchText": "Cover Art",
+				"envelopeKeyOrder": ["@context", "@type", "identifier"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "ImageObject",
+					"identifier": "int:hash:sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"ImageObject\",\"identifier\":\"int:hash:sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\"}",
+					"id": "0xcc2aa7d31c8df9171038f39dc9c059c8f6cc814bc3e25262d9032da6586d7920",
+					"iid": "int:hash:sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+					"searchText": "Cover Art"
+				}
+			}
+		},
+		{
+			"label": "synthetic: job-posting gen1 r2 title + datePosted (recipe order differs from sorted)",
+			"origin": "synthetic",
+			"classificationType": "JobPosting",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "job-posting",
+				"values": {
+					"title": "Senior Rust Engineer",
+					"hiringOrganization": "Example Corp",
+					"datePosted": "2026-01-15"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"JobPosting\",\"identifier\":\"int:gen1:job-posting:r2:f8b5a175b491c7c0a2ffc257317b08c0\",\"title\":\"Senior Rust Engineer\",\"datePosted\":\"2026-01-15\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a224a6f62506f7374696e67222c226964656e746966696572223a22696e743a67656e313a6a6f622d706f7374696e673a72323a6638623561313735623439316337633061326666633235373331376230386330222c227469746c65223a2253656e696f72205275737420456e67696e656572222c2264617465506f73746564223a22323032362d30312d3135227d",
+				"anchorByteLength": 184,
+				"atomId": "0x22f58b237f98b5ec8cda09eda844fa3feba9babd2322809fdcfeb7c2f2730efd",
+				"atomIdRecomputedFromBytes": "0x22f58b237f98b5ec8cda09eda844fa3feba9babd2322809fdcfeb7c2f2730efd",
+				"atomIdMatches": true,
+				"iid": "int:gen1:job-posting:r2:f8b5a175b491c7c0a2ffc257317b08c0",
+				"searchText": "Senior Rust Engineer",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "title", "datePosted"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "JobPosting",
+					"identifier": "int:gen1:job-posting:r2:f8b5a175b491c7c0a2ffc257317b08c0",
+					"title": "Senior Rust Engineer",
+					"datePosted": "2026-01-15"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"JobPosting\",\"identifier\":\"int:gen1:job-posting:r2:f8b5a175b491c7c0a2ffc257317b08c0\",\"title\":\"Senior Rust Engineer\",\"datePosted\":\"2026-01-15\"}",
+					"id": "0x22f58b237f98b5ec8cda09eda844fa3feba9babd2322809fdcfeb7c2f2730efd",
+					"iid": "int:gen1:job-posting:r2:f8b5a175b491c7c0a2ffc257317b08c0",
+					"searchText": "Senior Rust Engineer"
+				}
+			}
+		},
+		{
+			"label": "synthetic: local-business gen1 r2 name + geo7 without sameAs (recipe order differs from sorted)",
+			"origin": "synthetic",
+			"classificationType": "LocalBusiness",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "local-business",
+				"values": {
+					"name": "Blue Bottle Coffee",
+					"latitude": 37.7823,
+					"longitude": -122.4076
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"LocalBusiness\",\"identifier\":\"int:gen1:local-business:r2:3e0068d38f80d5f50f265019e8623f09\",\"name\":\"Blue Bottle Coffee\",\"geo7\":\"9q8yyw1\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a224c6f63616c427573696e657373222c226964656e746966696572223a22696e743a67656e313a6c6f63616c2d627573696e6573733a72323a3365303036386433386638306435663530663236353031396538363233663039222c226e616d65223a22426c756520426f74746c6520436f66666565222c2267656f37223a2239713879797731227d",
+				"anchorByteLength": 178,
+				"atomId": "0x0e8f184ed14aa78250c54911ea4f00901d76d7c364a25b31cf3d2a7b27323bf0",
+				"atomIdRecomputedFromBytes": "0x0e8f184ed14aa78250c54911ea4f00901d76d7c364a25b31cf3d2a7b27323bf0",
+				"atomIdMatches": true,
+				"iid": "int:gen1:local-business:r2:3e0068d38f80d5f50f265019e8623f09",
+				"searchText": "Blue Bottle Coffee",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "name", "geo7"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "LocalBusiness",
+					"identifier": "int:gen1:local-business:r2:3e0068d38f80d5f50f265019e8623f09",
+					"name": "Blue Bottle Coffee",
+					"geo7": "9q8yyw1"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"LocalBusiness\",\"identifier\":\"int:gen1:local-business:r2:3e0068d38f80d5f50f265019e8623f09\",\"name\":\"Blue Bottle Coffee\",\"geo7\":\"9q8yyw1\"}",
+					"id": "0x0e8f184ed14aa78250c54911ea4f00901d76d7c364a25b31cf3d2a7b27323bf0",
+					"iid": "int:gen1:local-business:r2:3e0068d38f80d5f50f265019e8623f09",
+					"searchText": "Blue Bottle Coffee"
+				}
+			}
+		},
+		{
+			"label": "synthetic: location geo P1",
+			"origin": "synthetic",
+			"classificationType": "Place",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "location",
+				"values": {
+					"name": "Golden Gate Park",
+					"latitude": 37.7694,
+					"longitude": -122.4862
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"Place\",\"identifier\":\"int:geo:9q8yug8q\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a22506c616365222c226964656e746966696572223a22696e743a67656f3a3971387975673871227d",
+				"anchorByteLength": 82,
+				"atomId": "0x9ac23c45731adc98cee851a046c0bb70108f87a676f598dee53ab3f033949335",
+				"atomIdRecomputedFromBytes": "0x9ac23c45731adc98cee851a046c0bb70108f87a676f598dee53ab3f033949335",
+				"atomIdMatches": true,
+				"iid": "int:geo:9q8yug8q",
+				"searchText": "Golden Gate Park",
+				"envelopeKeyOrder": ["@context", "@type", "identifier"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "Place",
+					"identifier": "int:geo:9q8yug8q"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"Place\",\"identifier\":\"int:geo:9q8yug8q\"}",
+					"id": "0x9ac23c45731adc98cee851a046c0bb70108f87a676f598dee53ab3f033949335",
+					"iid": "int:geo:9q8yug8q",
+					"searchText": "Golden Gate Park"
+				}
+			}
+		},
+		{
+			"label": "synthetic: mobile-application appid P0",
+			"origin": "synthetic",
+			"classificationType": "MobileApplication",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "mobile-application",
+				"values": {
+					"name": "Spotify",
+					"operatingSystem": "iOS",
+					"bundleId": "com.Spotify.Client"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P0",
+				"anchorJson": "int:appid:ios:com.spotify.client",
+				"anchorBytesHex": "696e743a61707069643a696f733a636f6d2e73706f746966792e636c69656e74",
+				"anchorByteLength": 32,
+				"atomId": "0xcbfabb94f3a698ff3af69d0f365de89d69eb2d9e616c9b6e09b699b8e2c36a60",
+				"atomIdRecomputedFromBytes": "0xcbfabb94f3a698ff3af69d0f365de89d69eb2d9e616c9b6e09b699b8e2c36a60",
+				"atomIdMatches": true,
+				"iid": "int:appid:ios:com.spotify.client",
+				"searchText": "",
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": null,
+				"raw": {
+					"profile": "P0",
+					"data": "int:appid:ios:com.spotify.client",
+					"id": "0xcbfabb94f3a698ff3af69d0f365de89d69eb2d9e616c9b6e09b699b8e2c36a60",
+					"iid": "int:appid:ios:com.spotify.client",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "synthetic: mobile-application gen1 r3 name + operatingSystem",
+			"origin": "synthetic",
+			"classificationType": "MobileApplication",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "mobile-application",
+				"values": {
+					"name": "Example App",
+					"operatingSystem": "iOS"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"MobileApplication\",\"identifier\":\"int:gen1:mobile-application:r3:219e922c9d5a173b5b2e34d787c31043\",\"name\":\"Example App\",\"operatingSystem\":\"iOS\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a224d6f62696c654170706c69636174696f6e222c226964656e746966696572223a22696e743a67656e313a6d6f62696c652d6170706c69636174696f6e3a72333a3231396539323263396435613137336235623265333464373837633331303433222c226e616d65223a224578616d706c6520417070222c226f7065726174696e6753797374656d223a22694f53227d",
+				"anchorByteLength": 186,
+				"atomId": "0x882b13f9c0cac2f3eee721984a3dd12bf0b2b928cbe041bdec7031a59db86b23",
+				"atomIdRecomputedFromBytes": "0x882b13f9c0cac2f3eee721984a3dd12bf0b2b928cbe041bdec7031a59db86b23",
+				"atomIdMatches": true,
+				"iid": "int:gen1:mobile-application:r3:219e922c9d5a173b5b2e34d787c31043",
+				"searchText": "Example App",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "name", "operatingSystem"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "MobileApplication",
+					"identifier": "int:gen1:mobile-application:r3:219e922c9d5a173b5b2e34d787c31043",
+					"name": "Example App",
+					"operatingSystem": "iOS"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"MobileApplication\",\"identifier\":\"int:gen1:mobile-application:r3:219e922c9d5a173b5b2e34d787c31043\",\"name\":\"Example App\",\"operatingSystem\":\"iOS\"}",
+					"id": "0x882b13f9c0cac2f3eee721984a3dd12bf0b2b928cbe041bdec7031a59db86b23",
+					"iid": "int:gen1:mobile-application:r3:219e922c9d5a173b5b2e34d787c31043",
+					"searchText": "Example App"
+				}
+			}
+		},
+		{
+			"label": "synthetic: movie gen1 r4 name + yearPublished (derived from datePublished)",
+			"origin": "synthetic",
+			"classificationType": "Movie",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "movie",
+				"values": {
+					"name": "Inception",
+					"datePublished": "2010-07-16"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"Movie\",\"identifier\":\"int:gen1:movie:r4:fb681afe7d438cad73ae90a70f1cc55a\",\"name\":\"Inception\",\"yearPublished\":\"2010\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a224d6f766965222c226964656e746966696572223a22696e743a67656e313a6d6f7669653a72343a6662363831616665376434333863616437336165393061373066316363353561222c226e616d65223a22496e63657074696f6e222c22796561725075626c6973686564223a2232303130227d",
+				"anchorByteLength": 158,
+				"atomId": "0x1c684570d60c85a1e89f910cf7543a700bad760e60da6491ec437e3c08528cf1",
+				"atomIdRecomputedFromBytes": "0x1c684570d60c85a1e89f910cf7543a700bad760e60da6491ec437e3c08528cf1",
+				"atomIdMatches": true,
+				"iid": "int:gen1:movie:r4:fb681afe7d438cad73ae90a70f1cc55a",
+				"searchText": "Inception",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "name", "yearPublished"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "Movie",
+					"identifier": "int:gen1:movie:r4:fb681afe7d438cad73ae90a70f1cc55a",
+					"name": "Inception",
+					"yearPublished": "2010"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"Movie\",\"identifier\":\"int:gen1:movie:r4:fb681afe7d438cad73ae90a70f1cc55a\",\"name\":\"Inception\",\"yearPublished\":\"2010\"}",
+					"id": "0x1c684570d60c85a1e89f910cf7543a700bad760e60da6491ec437e3c08528cf1",
+					"iid": "int:gen1:movie:r4:fb681afe7d438cad73ae90a70f1cc55a",
+					"searchText": "Inception"
+				}
+			}
+		},
+		{
+			"label": "synthetic: movie gen1 r5 name only",
+			"origin": "synthetic",
+			"classificationType": "Movie",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "movie",
+				"values": {
+					"name": "Inception"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"Movie\",\"identifier\":\"int:gen1:movie:r5:ed2d2ab3773c903a3e8f9ebac3a13122\",\"name\":\"Inception\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a224d6f766965222c226964656e746966696572223a22696e743a67656e313a6d6f7669653a72353a6564326432616233373733633930336133653866396562616333613133313232222c226e616d65223a22496e63657074696f6e227d",
+				"anchorByteLength": 135,
+				"atomId": "0x2d1c2c78860df50bcfae7987df360254c189afafa60e367f3113b8cac46923bf",
+				"atomIdRecomputedFromBytes": "0x2d1c2c78860df50bcfae7987df360254c189afafa60e367f3113b8cac46923bf",
+				"atomIdMatches": true,
+				"iid": "int:gen1:movie:r5:ed2d2ab3773c903a3e8f9ebac3a13122",
+				"searchText": "Inception",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "name"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "Movie",
+					"identifier": "int:gen1:movie:r5:ed2d2ab3773c903a3e8f9ebac3a13122",
+					"name": "Inception"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"Movie\",\"identifier\":\"int:gen1:movie:r5:ed2d2ab3773c903a3e8f9ebac3a13122\",\"name\":\"Inception\"}",
+					"id": "0x2d1c2c78860df50bcfae7987df360254c189afafa60e367f3113b8cac46923bf",
+					"iid": "int:gen1:movie:r5:ed2d2ab3773c903a3e8f9ebac3a13122",
+					"searchText": "Inception"
+				}
+			}
+		},
+		{
+			"label": "synthetic: music-album mbid release-group P0",
+			"origin": "synthetic",
+			"classificationType": "MusicAlbum",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "music-album",
+				"values": {
+					"name": "Discovery",
+					"sameAs": ["https://musicbrainz.org/release-group/41b3f6ea-f7b6-3a6c-9a0a-3f8d6e2a1b55"]
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P0",
+				"anchorJson": "int:mbid:release-group:41b3f6ea-f7b6-3a6c-9a0a-3f8d6e2a1b55",
+				"anchorBytesHex": "696e743a6d6269643a72656c656173652d67726f75703a34316233663665612d663762362d336136632d396130612d336638643665326131623535",
+				"anchorByteLength": 59,
+				"atomId": "0x9043f6ac724c79623536cda976fb243a440e9784ce3346dd23c0d94c886d44d9",
+				"atomIdRecomputedFromBytes": "0x9043f6ac724c79623536cda976fb243a440e9784ce3346dd23c0d94c886d44d9",
+				"atomIdMatches": true,
+				"iid": "int:mbid:release-group:41b3f6ea-f7b6-3a6c-9a0a-3f8d6e2a1b55",
+				"searchText": "",
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": null,
+				"raw": {
+					"profile": "P0",
+					"data": "int:mbid:release-group:41b3f6ea-f7b6-3a6c-9a0a-3f8d6e2a1b55",
+					"id": "0x9043f6ac724c79623536cda976fb243a440e9784ce3346dd23c0d94c886d44d9",
+					"iid": "int:mbid:release-group:41b3f6ea-f7b6-3a6c-9a0a-3f8d6e2a1b55",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "synthetic: music-group gen1 r4 one identity field",
+			"origin": "synthetic",
+			"classificationType": "MusicGroup",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "music-group",
+				"values": {
+					"name": "Daft Punk"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"MusicGroup\",\"identifier\":\"int:gen1:music-group:r4:364a1631a4fa913186c8b1db07729e6e\",\"name\":\"Daft Punk\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a224d7573696347726f7570222c226964656e746966696572223a22696e743a67656e313a6d757369632d67726f75703a72343a3336346131363331613466613931333138366338623164623037373239653665222c226e616d65223a22446166742050756e6b227d",
+				"anchorByteLength": 146,
+				"atomId": "0x72590cd17ebc992d437d0f4ef011f13b7a023393bbbab11f428193ba298c65f7",
+				"atomIdRecomputedFromBytes": "0x72590cd17ebc992d437d0f4ef011f13b7a023393bbbab11f428193ba298c65f7",
+				"atomIdMatches": true,
+				"iid": "int:gen1:music-group:r4:364a1631a4fa913186c8b1db07729e6e",
+				"searchText": "Daft Punk",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "name"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "MusicGroup",
+					"identifier": "int:gen1:music-group:r4:364a1631a4fa913186c8b1db07729e6e",
+					"name": "Daft Punk"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"MusicGroup\",\"identifier\":\"int:gen1:music-group:r4:364a1631a4fa913186c8b1db07729e6e\",\"name\":\"Daft Punk\"}",
+					"id": "0x72590cd17ebc992d437d0f4ef011f13b7a023393bbbab11f428193ba298c65f7",
+					"iid": "int:gen1:music-group:r4:364a1631a4fa913186c8b1db07729e6e",
+					"searchText": "Daft Punk"
+				}
+			}
+		},
+		{
+			"label": "synthetic: music-group gen1 with pre-NORM-1 padding and punctuation kept verbatim in envelope",
+			"origin": "synthetic",
+			"classificationType": "MusicGroup",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "music-group",
+				"values": {
+					"name": "  Don’t  Stop  "
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"MusicGroup\",\"identifier\":\"int:gen1:music-group:r4:16247e59edd4e1de1c0351b1cec58010\",\"name\":\"  Don’t  Stop  \"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a224d7573696347726f7570222c226964656e746966696572223a22696e743a67656e313a6d757369632d67726f75703a72343a3136323437653539656464346531646531633033353162316365633538303130222c226e616d65223a222020446f6ee2809974202053746f702020227d",
+				"anchorByteLength": 154,
+				"atomId": "0xab6013c5f5c7e0c789e41dbaaf352ce4bf2b28439218b0c52a67c5650d202a80",
+				"atomIdRecomputedFromBytes": "0xab6013c5f5c7e0c789e41dbaaf352ce4bf2b28439218b0c52a67c5650d202a80",
+				"atomIdMatches": true,
+				"iid": "int:gen1:music-group:r4:16247e59edd4e1de1c0351b1cec58010",
+				"searchText": "Don’t  Stop",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "name"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "MusicGroup",
+					"identifier": "int:gen1:music-group:r4:16247e59edd4e1de1c0351b1cec58010",
+					"name": "  Don’t  Stop  "
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"MusicGroup\",\"identifier\":\"int:gen1:music-group:r4:16247e59edd4e1de1c0351b1cec58010\",\"name\":\"  Don’t  Stop  \"}",
+					"id": "0xab6013c5f5c7e0c789e41dbaaf352ce4bf2b28439218b0c52a67c5650d202a80",
+					"iid": "int:gen1:music-group:r4:16247e59edd4e1de1c0351b1cec58010",
+					"searchText": "Don’t  Stop"
+				}
+			}
+		},
+		{
+			"label": "synthetic: music-recording mbid recording P0",
+			"origin": "synthetic",
+			"classificationType": "MusicRecording",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "music-recording",
+				"values": {
+					"name": "One More Time",
+					"sameAs": ["https://musicbrainz.org/recording/b1a9c0e9-d987-4042-ae91-78d6a3267d69"]
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P0",
+				"anchorJson": "int:mbid:recording:b1a9c0e9-d987-4042-ae91-78d6a3267d69",
+				"anchorBytesHex": "696e743a6d6269643a7265636f7264696e673a62316139633065392d643938372d343034322d616539312d373864366133323637643639",
+				"anchorByteLength": 55,
+				"atomId": "0x695856ef8a14d99881df54c05da0129158185007e5bc41322c4bc3a5b20bb94b",
+				"atomIdRecomputedFromBytes": "0x695856ef8a14d99881df54c05da0129158185007e5bc41322c4bc3a5b20bb94b",
+				"atomIdMatches": true,
+				"iid": "int:mbid:recording:b1a9c0e9-d987-4042-ae91-78d6a3267d69",
+				"searchText": "",
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": null,
+				"raw": {
+					"profile": "P0",
+					"data": "int:mbid:recording:b1a9c0e9-d987-4042-ae91-78d6a3267d69",
+					"id": "0x695856ef8a14d99881df54c05da0129158185007e5bc41322c4bc3a5b20bb94b",
+					"iid": "int:mbid:recording:b1a9c0e9-d987-4042-ae91-78d6a3267d69",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "synthetic: music-recording search text uses display fields only",
+			"origin": "synthetic",
+			"classificationType": "MusicRecording",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "music-recording",
+				"values": {
+					"name": "Hello",
+					"byArtist": "Adele",
+					"inAlbum": "25"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"MusicRecording\",\"identifier\":\"int:gen1:music-recording:r3:a337905d810c1ef0ebd635c498c5602e\",\"name\":\"Hello\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a224d757369635265636f7264696e67222c226964656e746966696572223a22696e743a67656e313a6d757369632d7265636f7264696e673a72333a6133333739303564383130633165663065626436333563343938633536303265222c226e616d65223a2248656c6c6f227d",
+				"anchorByteLength": 150,
+				"atomId": "0x819b1237354029c67555d65ee9b50003d6980ac0e8481f8d8dba1a0dc36b8d11",
+				"atomIdRecomputedFromBytes": "0x819b1237354029c67555d65ee9b50003d6980ac0e8481f8d8dba1a0dc36b8d11",
+				"atomIdMatches": true,
+				"iid": "int:gen1:music-recording:r3:a337905d810c1ef0ebd635c498c5602e",
+				"searchText": "Hello",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "name"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "MusicRecording",
+					"identifier": "int:gen1:music-recording:r3:a337905d810c1ef0ebd635c498c5602e",
+					"name": "Hello"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"MusicRecording\",\"identifier\":\"int:gen1:music-recording:r3:a337905d810c1ef0ebd635c498c5602e\",\"name\":\"Hello\"}",
+					"id": "0x819b1237354029c67555d65ee9b50003d6980ac0e8481f8d8dba1a0dc36b8d11",
+					"iid": "int:gen1:music-recording:r3:a337905d810c1ef0ebd635c498c5602e",
+					"searchText": "Hello"
+				}
+			}
+		},
+		{
+			"label": "synthetic: news-article gen1 r2 headline + datePublished (recipe order differs from sorted)",
+			"origin": "synthetic",
+			"classificationType": "NewsArticle",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "news-article",
+				"values": {
+					"headline": "Markets Rally as Rates Hold",
+					"datePublished": "2026-02-02"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"NewsArticle\",\"identifier\":\"int:gen1:news-article:r2:f56fdab0b49ba4fa2e74558fd6ab90d6\",\"headline\":\"Markets Rally as Rates Hold\",\"datePublished\":\"2026-02-02\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a224e65777341727469636c65222c226964656e746966696572223a22696e743a67656e313a6e6577732d61727469636c653a72323a6635366664616230623439626134666132653734353538666436616239306436222c22686561646c696e65223a224d61726b6574732052616c6c7920617320526174657320486f6c64222c22646174655075626c6973686564223a22323032362d30322d3032227d",
+				"anchorByteLength": 199,
+				"atomId": "0xcbc3e29545808b27ed75f29e407759f9bdf301ef947200039504ef92daa50f9b",
+				"atomIdRecomputedFromBytes": "0xcbc3e29545808b27ed75f29e407759f9bdf301ef947200039504ef92daa50f9b",
+				"atomIdMatches": true,
+				"iid": "int:gen1:news-article:r2:f56fdab0b49ba4fa2e74558fd6ab90d6",
+				"searchText": "Markets Rally as Rates Hold",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "headline", "datePublished"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "NewsArticle",
+					"identifier": "int:gen1:news-article:r2:f56fdab0b49ba4fa2e74558fd6ab90d6",
+					"headline": "Markets Rally as Rates Hold",
+					"datePublished": "2026-02-02"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"NewsArticle\",\"identifier\":\"int:gen1:news-article:r2:f56fdab0b49ba4fa2e74558fd6ab90d6\",\"headline\":\"Markets Rally as Rates Hold\",\"datePublished\":\"2026-02-02\"}",
+					"id": "0xcbc3e29545808b27ed75f29e407759f9bdf301ef947200039504ef92daa50f9b",
+					"iid": "int:gen1:news-article:r2:f56fdab0b49ba4fa2e74558fd6ab90d6",
+					"searchText": "Markets Rally as Rates Hold"
+				}
+			}
+		},
+		{
+			"label": "synthetic: person gen1 r4 with extra undeclared field ignored (identity path skips validation)",
+			"origin": "synthetic",
+			"classificationType": "Person",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "person",
+				"values": {
+					"givenName": "Douglas",
+					"familyName": "Adams",
+					"undeclaredField": "ignored"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"Person\",\"identifier\":\"int:gen1:person:r4:ecd9b23e74a6eb3380067d12349a669e\",\"givenName\":\"Douglas\",\"familyName\":\"Adams\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a22506572736f6e222c226964656e746966696572223a22696e743a67656e313a706572736f6e3a72343a6563643962323365373461366562333338303036376431323334396136363965222c22676976656e4e616d65223a22446f75676c6173222c2266616d696c794e616d65223a224164616d73227d",
+				"anchorByteLength": 161,
+				"atomId": "0x7e62b35f6b3361ddf61cdf6a4e9670e8bea66776c730c0df24792a6cac701e84",
+				"atomIdRecomputedFromBytes": "0x7e62b35f6b3361ddf61cdf6a4e9670e8bea66776c730c0df24792a6cac701e84",
+				"atomIdMatches": true,
+				"iid": "int:gen1:person:r4:ecd9b23e74a6eb3380067d12349a669e",
+				"searchText": "Douglas Adams",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "givenName", "familyName"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "Person",
+					"identifier": "int:gen1:person:r4:ecd9b23e74a6eb3380067d12349a669e",
+					"givenName": "Douglas",
+					"familyName": "Adams"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"Person\",\"identifier\":\"int:gen1:person:r4:ecd9b23e74a6eb3380067d12349a669e\",\"givenName\":\"Douglas\",\"familyName\":\"Adams\"}",
+					"id": "0x7e62b35f6b3361ddf61cdf6a4e9670e8bea66776c730c0df24792a6cac701e84",
+					"iid": "int:gen1:person:r4:ecd9b23e74a6eb3380067d12349a669e",
+					"searchText": "Douglas Adams"
+				}
+			}
+		},
+		{
+			"label": "synthetic: person gen1 r5 mononym",
+			"origin": "synthetic",
+			"classificationType": "Person",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "person",
+				"values": {
+					"givenName": "Rihanna"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"Person\",\"identifier\":\"int:gen1:person:r5:9a529760b515df0ecc49efacfa9edd02\",\"givenName\":\"Rihanna\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a22506572736f6e222c226964656e746966696572223a22696e743a67656e313a706572736f6e3a72353a3961353239373630623531356466306563633439656661636661396564643032222c22676976656e4e616d65223a22526968616e6e61227d",
+				"anchorByteLength": 140,
+				"atomId": "0x9b6e575aa613eb657c01c3c26559a2b393877f451046a346d1b66e330c76a6d6",
+				"atomIdRecomputedFromBytes": "0x9b6e575aa613eb657c01c3c26559a2b393877f451046a346d1b66e330c76a6d6",
+				"atomIdMatches": true,
+				"iid": "int:gen1:person:r5:9a529760b515df0ecc49efacfa9edd02",
+				"searchText": "Rihanna",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "givenName"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "Person",
+					"identifier": "int:gen1:person:r5:9a529760b515df0ecc49efacfa9edd02",
+					"givenName": "Rihanna"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"Person\",\"identifier\":\"int:gen1:person:r5:9a529760b515df0ecc49efacfa9edd02\",\"givenName\":\"Rihanna\"}",
+					"id": "0x9b6e575aa613eb657c01c3c26559a2b393877f451046a346d1b66e330c76a6d6",
+					"iid": "int:gen1:person:r5:9a529760b515df0ecc49efacfa9edd02",
+					"searchText": "Rihanna"
+				}
+			}
+		},
+		{
+			"label": "synthetic: person isni P1 identity envelope with sameAs",
+			"origin": "synthetic",
+			"classificationType": "Person",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "person",
+				"values": {
+					"givenName": "Douglas",
+					"familyName": "Adams",
+					"sameAs": ["https://isni.org/isni/0000000121032683"]
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"Person\",\"identifier\":\"int:isni:0000000121032683\",\"sameAs\":[\"https://isni.org/isni/0000000121032683\"]}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a22506572736f6e222c226964656e746966696572223a22696e743a69736e693a30303030303030313231303332363833222c2273616d654173223a5b2268747470733a2f2f69736e692e6f72672f69736e692f30303030303030313231303332363833225d7d",
+				"anchorByteLength": 144,
+				"atomId": "0xb763b2a00d5dad1b6c3ccd18cdb5009d7e4954c8eec50974999151be6da250fa",
+				"atomIdRecomputedFromBytes": "0xb763b2a00d5dad1b6c3ccd18cdb5009d7e4954c8eec50974999151be6da250fa",
+				"atomIdMatches": true,
+				"iid": "int:isni:0000000121032683",
+				"searchText": "Douglas Adams",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "sameAs"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "Person",
+					"identifier": "int:isni:0000000121032683",
+					"sameAs": ["https://isni.org/isni/0000000121032683"]
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"Person\",\"identifier\":\"int:isni:0000000121032683\",\"sameAs\":[\"https://isni.org/isni/0000000121032683\"]}",
+					"id": "0xb763b2a00d5dad1b6c3ccd18cdb5009d7e4954c8eec50974999151be6da250fa",
+					"iid": "int:isni:0000000121032683",
+					"searchText": "Douglas Adams"
+				}
+			}
+		},
+		{
+			"label": "synthetic: person typed wd human P0",
+			"origin": "synthetic",
+			"classificationType": "Person",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "person",
+				"values": {
+					"givenName": "Douglas",
+					"sameAs": ["https://www.wikidata.org/wiki/Q42"]
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P0",
+				"anchorJson": "int:wd:human:Q42",
+				"anchorBytesHex": "696e743a77643a68756d616e3a513432",
+				"anchorByteLength": 16,
+				"atomId": "0x2425c4bef18851d3bf6f3f9945dce08a5848399f6ef09366a780049eba788e88",
+				"atomIdRecomputedFromBytes": "0x2425c4bef18851d3bf6f3f9945dce08a5848399f6ef09366a780049eba788e88",
+				"atomIdMatches": true,
+				"iid": "int:wd:human:Q42",
+				"searchText": "",
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": null,
+				"raw": {
+					"profile": "P0",
+					"data": "int:wd:human:Q42",
+					"id": "0x2425c4bef18851d3bf6f3f9945dce08a5848399f6ef09366a780049eba788e88",
+					"iid": "int:wd:human:Q42",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "synthetic: podcast-episode gen1 r3 name + datePublished (recipe order differs from sorted)",
+			"origin": "synthetic",
+			"classificationType": "PodcastEpisode",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "podcast-episode",
+				"values": {
+					"name": "Episode 42: Determinism",
+					"datePublished": "2026-02-02"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"PodcastEpisode\",\"identifier\":\"int:gen1:podcast-episode:r3:86d1c20b8729c09b691eef2f6ff00cbb\",\"name\":\"Episode 42: Determinism\",\"datePublished\":\"2026-02-02\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a22506f6463617374457069736f6465222c226964656e746966696572223a22696e743a67656e313a706f64636173742d657069736f64653a72333a3836643163323062383732396330396236393165656632663666663030636262222c226e616d65223a22457069736f64652034323a2044657465726d696e69736d222c22646174655075626c6973686564223a22323032362d30322d3032227d",
+				"anchorByteLength": 197,
+				"atomId": "0xcff9053b45ee5dd349453d8e924e02b443e0268f701d69042e644d81e9ef80c2",
+				"atomIdRecomputedFromBytes": "0xcff9053b45ee5dd349453d8e924e02b443e0268f701d69042e644d81e9ef80c2",
+				"atomIdMatches": true,
+				"iid": "int:gen1:podcast-episode:r3:86d1c20b8729c09b691eef2f6ff00cbb",
+				"searchText": "Episode 42: Determinism",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "name", "datePublished"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "PodcastEpisode",
+					"identifier": "int:gen1:podcast-episode:r3:86d1c20b8729c09b691eef2f6ff00cbb",
+					"name": "Episode 42: Determinism",
+					"datePublished": "2026-02-02"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"PodcastEpisode\",\"identifier\":\"int:gen1:podcast-episode:r3:86d1c20b8729c09b691eef2f6ff00cbb\",\"name\":\"Episode 42: Determinism\",\"datePublished\":\"2026-02-02\"}",
+					"id": "0xcff9053b45ee5dd349453d8e924e02b443e0268f701d69042e644d81e9ef80c2",
+					"iid": "int:gen1:podcast-episode:r3:86d1c20b8729c09b691eef2f6ff00cbb",
+					"searchText": "Episode 42: Determinism"
+				}
+			}
+		},
+		{
+			"label": "synthetic: podcast-episode rssitem P0",
+			"origin": "synthetic",
+			"classificationType": "PodcastEpisode",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "podcast-episode",
+				"values": {
+					"name": "Episode 42: Determinism",
+					"feedGuid": "f77016bc-fd74-5c94-893f-864deb06fc30",
+					"itemGuid": "urn:example:ep42-2026-02-02"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P0",
+				"anchorJson": "int:rssitem:f77016bc-fd74-5c94-893f-864deb06fc30:24c1d49d31be0033a0dad44b31121f60",
+				"anchorBytesHex": "696e743a7273736974656d3a66373730313662632d666437342d356339342d383933662d3836346465623036666333303a3234633164343964333162653030333361306461643434623331313231663630",
+				"anchorByteLength": 81,
+				"atomId": "0x50f431a7754d019a60019ec67f5d95c741cf9c4207c8e3afae2d9c1c3629e7ca",
+				"atomIdRecomputedFromBytes": "0x50f431a7754d019a60019ec67f5d95c741cf9c4207c8e3afae2d9c1c3629e7ca",
+				"atomIdMatches": true,
+				"iid": "int:rssitem:f77016bc-fd74-5c94-893f-864deb06fc30:24c1d49d31be0033a0dad44b31121f60",
+				"searchText": "",
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": null,
+				"raw": {
+					"profile": "P0",
+					"data": "int:rssitem:f77016bc-fd74-5c94-893f-864deb06fc30:24c1d49d31be0033a0dad44b31121f60",
+					"id": "0x50f431a7754d019a60019ec67f5d95c741cf9c4207c8e3afae2d9c1c3629e7ca",
+					"iid": "int:rssitem:f77016bc-fd74-5c94-893f-864deb06fc30:24c1d49d31be0033a0dad44b31121f60",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "synthetic: podcast-series declared podcastGuid P0",
+			"origin": "synthetic",
+			"classificationType": "PodcastSeries",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "podcast-series",
+				"values": {
+					"name": "The Example Show",
+					"podcastGuid": "917393E3-1B1E-5CEF-ACE4-EDAA54E1F810"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P0",
+				"anchorJson": "int:podcastguid:917393e3-1b1e-5cef-ace4-edaa54e1f810",
+				"anchorBytesHex": "696e743a706f6463617374677569643a39313733393365332d316231652d356365662d616365342d656461613534653166383130",
+				"anchorByteLength": 52,
+				"atomId": "0xbd566e2e2f15c5f06f357c708de27b540e8c15309a3a9c7f7eba0f73c47a37b1",
+				"atomIdRecomputedFromBytes": "0xbd566e2e2f15c5f06f357c708de27b540e8c15309a3a9c7f7eba0f73c47a37b1",
+				"atomIdMatches": true,
+				"iid": "int:podcastguid:917393e3-1b1e-5cef-ace4-edaa54e1f810",
+				"searchText": "",
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": null,
+				"raw": {
+					"profile": "P0",
+					"data": "int:podcastguid:917393e3-1b1e-5cef-ace4-edaa54e1f810",
+					"id": "0xbd566e2e2f15c5f06f357c708de27b540e8c15309a3a9c7f7eba0f73c47a37b1",
+					"iid": "int:podcastguid:917393e3-1b1e-5cef-ace4-edaa54e1f810",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "synthetic: product gtin P0 zero-padded to 14",
+			"origin": "synthetic",
+			"classificationType": "Product",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "product",
+				"values": {
+					"name": "Cheerios",
+					"gtin": "036000291452"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P0",
+				"anchorJson": "int:gtin:00036000291452",
+				"anchorBytesHex": "696e743a6774696e3a3030303336303030323931343532",
+				"anchorByteLength": 23,
+				"atomId": "0x07aa16b43bb251731dcb2baf8beadb4ca3272d53cfb75a95e368d46c500a87aa",
+				"atomIdRecomputedFromBytes": "0x07aa16b43bb251731dcb2baf8beadb4ca3272d53cfb75a95e368d46c500a87aa",
+				"atomIdMatches": true,
+				"iid": "int:gtin:00036000291452",
+				"searchText": "",
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": null,
+				"raw": {
+					"profile": "P0",
+					"data": "int:gtin:00036000291452",
+					"id": "0x07aa16b43bb251731dcb2baf8beadb4ca3272d53cfb75a95e368d46c500a87aa",
+					"iid": "int:gtin:00036000291452",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "synthetic: review fallback envelope missing required field throws plain Error",
+			"origin": "synthetic",
+			"classificationType": "Review",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "review",
+				"values": {},
+				"options": null
+			},
+			"expected": {
+				"ok": false,
+				"profile": null,
+				"anchorJson": null,
+				"anchorBytesHex": null,
+				"anchorByteLength": null,
+				"atomId": null,
+				"atomIdRecomputedFromBytes": null,
+				"atomIdMatches": null,
+				"iid": null,
+				"searchText": null,
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": "Error",
+				"raw": {
+					"thrown": {
+						"name": "Error",
+						"code": null,
+						"message": "Invalid values for classification \"review\": Missing required field \"reviewBody\"."
+					}
+				}
+			}
+		},
+		{
+			"label": "synthetic: review fallback envelope with sameAs deduplicated and sorted",
+			"origin": "synthetic",
+			"classificationType": "Review",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "review",
+				"values": {
+					"reviewBody": "Great.",
+					"sameAs": ["not a url", "also not", "not a url"]
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"Review\",\"reviewBody\":\"Great.\",\"sameAs\":[\"also not\",\"not a url\"]}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a22526576696577222c22726576696577426f6479223a2247726561742e222c2273616d654173223a5b22616c736f206e6f74222c226e6f7420612075726c225d7d",
+				"anchorByteLength": 107,
+				"atomId": "0xd10d1647ee9813fd3038c360193bcf4310b7f5ec9ca6493d913b48682bbb9616",
+				"atomIdRecomputedFromBytes": "0xd10d1647ee9813fd3038c360193bcf4310b7f5ec9ca6493d913b48682bbb9616",
+				"atomIdMatches": true,
+				"iid": null,
+				"searchText": "",
+				"envelopeKeyOrder": ["@context", "@type", "reviewBody", "sameAs"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "Review",
+					"reviewBody": "Great.",
+					"sameAs": ["also not", "not a url"]
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"Review\",\"reviewBody\":\"Great.\",\"sameAs\":[\"also not\",\"not a url\"]}",
+					"id": "0xd10d1647ee9813fd3038c360193bcf4310b7f5ec9ca6493d913b48682bbb9616",
+					"iid": null,
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "synthetic: social-media-account strong acct P0",
+			"origin": "synthetic",
+			"classificationType": "SocialMediaAccount",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "social-media-account",
+				"values": {
+					"username": "jack",
+					"platform": "x",
+					"platformUserId": "44196397"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P0",
+				"anchorJson": "int:acct:x:44196397",
+				"anchorBytesHex": "696e743a616363743a783a3434313936333937",
+				"anchorByteLength": 19,
+				"atomId": "0xd6bd22027909c747e22ecff252c5fa18c6f2c36dc9b261b6dcd70aa59e43e6da",
+				"atomIdRecomputedFromBytes": "0xd6bd22027909c747e22ecff252c5fa18c6f2c36dc9b261b6dcd70aa59e43e6da",
+				"atomIdMatches": true,
+				"iid": "int:acct:x:44196397",
+				"searchText": "",
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": null,
+				"raw": {
+					"profile": "P0",
+					"data": "int:acct:x:44196397",
+					"id": "0xd6bd22027909c747e22ecff252c5fa18c6f2c36dc9b261b6dcd70aa59e43e6da",
+					"iid": "int:acct:x:44196397",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "synthetic: social-media-account weak acct derived P1 identity envelope",
+			"origin": "synthetic",
+			"classificationType": "SocialMediaAccount",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "social-media-account",
+				"values": {
+					"username": "Jack",
+					"platform": "X"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"SocialMediaAccount\",\"identifier\":\"int:acct:x:@jack\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a22536f6369616c4d656469614163636f756e74222c226964656e746966696572223a22696e743a616363743a783a406a61636b227d",
+				"anchorByteLength": 95,
+				"atomId": "0x6f6e6cddc00b86681497bc1f8c8e5d8b7c4adcb449845ea781569f141c0f6e93",
+				"atomIdRecomputedFromBytes": "0x6f6e6cddc00b86681497bc1f8c8e5d8b7c4adcb449845ea781569f141c0f6e93",
+				"atomIdMatches": true,
+				"iid": "int:acct:x:@jack",
+				"searchText": "",
+				"envelopeKeyOrder": ["@context", "@type", "identifier"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "SocialMediaAccount",
+					"identifier": "int:acct:x:@jack"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"SocialMediaAccount\",\"identifier\":\"int:acct:x:@jack\"}",
+					"id": "0x6f6e6cddc00b86681497bc1f8c8e5d8b7c4adcb449845ea781569f141c0f6e93",
+					"iid": "int:acct:x:@jack",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "synthetic: social-media-posting gen1 r2 hashed text field",
+			"origin": "synthetic",
+			"classificationType": "SocialMediaPosting",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "social-media-posting",
+				"values": {
+					"name": "A post",
+					"text": "Hello, world!"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"SocialMediaPosting\",\"identifier\":\"int:gen1:social-media-posting:r2:ccf9aa81c0ef8873521aa1d2b7e15848\",\"textHash\":\"fbc3a5b569f80319726d3cc77c708b0d\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a22536f6369616c4d65646961506f7374696e67222c226964656e746966696572223a22696e743a67656e313a736f6369616c2d6d656469612d706f7374696e673a72323a6363663961613831633065663838373335323161613164326237653135383438222c227465787448617368223a226662633361356235363966383033313937323664336363373763373038623064227d",
+				"anchorByteLength": 190,
+				"atomId": "0xcca088bf2391d4749b11aa872ebcd37f3975a8be0afd4bb1e9dd3d0a5851408d",
+				"atomIdRecomputedFromBytes": "0xcca088bf2391d4749b11aa872ebcd37f3975a8be0afd4bb1e9dd3d0a5851408d",
+				"atomIdMatches": true,
+				"iid": "int:gen1:social-media-posting:r2:ccf9aa81c0ef8873521aa1d2b7e15848",
+				"searchText": "A post",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "textHash"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "SocialMediaPosting",
+					"identifier": "int:gen1:social-media-posting:r2:ccf9aa81c0ef8873521aa1d2b7e15848",
+					"textHash": "fbc3a5b569f80319726d3cc77c708b0d"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"SocialMediaPosting\",\"identifier\":\"int:gen1:social-media-posting:r2:ccf9aa81c0ef8873521aa1d2b7e15848\",\"textHash\":\"fbc3a5b569f80319726d3cc77c708b0d\"}",
+					"id": "0xcca088bf2391d4749b11aa872ebcd37f3975a8be0afd4bb1e9dd3d0a5851408d",
+					"iid": "int:gen1:social-media-posting:r2:ccf9aa81c0ef8873521aa1d2b7e15848",
+					"searchText": "A post"
+				}
+			}
+		},
+		{
+			"label": "synthetic: software purl P0",
+			"origin": "synthetic",
+			"classificationType": "SoftwareSourceCode",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "software",
+				"values": {
+					"name": "React",
+					"codeRepository": "https://github.com/facebook/react",
+					"packageUrl": "pkg:npm/react@18.2.0"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P0",
+				"anchorJson": "int:purl:npm/react",
+				"anchorBytesHex": "696e743a7075726c3a6e706d2f7265616374",
+				"anchorByteLength": 18,
+				"atomId": "0x5b20923c46fc106e99dfae6a7448cfd149bce732bde80c8614cfdced0348d9ca",
+				"atomIdRecomputedFromBytes": "0x5b20923c46fc106e99dfae6a7448cfd149bce732bde80c8614cfdced0348d9ca",
+				"atomIdMatches": true,
+				"iid": "int:purl:npm/react",
+				"searchText": "",
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": null,
+				"raw": {
+					"profile": "P0",
+					"data": "int:purl:npm/react",
+					"id": "0x5b20923c46fc106e99dfae6a7448cfd149bce732bde80c8614cfdced0348d9ca",
+					"iid": "int:purl:npm/react",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "synthetic: software-application url P1",
+			"origin": "synthetic",
+			"classificationType": "SoftwareApplication",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "software-application",
+				"values": {
+					"name": "Example App",
+					"url": "https://www.example.com/app/?utm_source=x&b=2&a=1#frag"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"SoftwareApplication\",\"identifier\":\"int:url:https://example.com/app?a=1&b=2\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a22536f6674776172654170706c69636174696f6e222c226964656e746966696572223a22696e743a75726c3a68747470733a2f2f6578616d706c652e636f6d2f6170703f613d3126623d32227d",
+				"anchorByteLength": 119,
+				"atomId": "0xb2822d47fa5cfd9ff4548ae4a42c3813e6cc2e913c9f330f35225d30bdd4b14d",
+				"atomIdRecomputedFromBytes": "0xb2822d47fa5cfd9ff4548ae4a42c3813e6cc2e913c9f330f35225d30bdd4b14d",
+				"atomIdMatches": true,
+				"iid": "int:url:https://example.com/app?a=1&b=2",
+				"searchText": "Example App",
+				"envelopeKeyOrder": ["@context", "@type", "identifier"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "SoftwareApplication",
+					"identifier": "int:url:https://example.com/app?a=1&b=2"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"SoftwareApplication\",\"identifier\":\"int:url:https://example.com/app?a=1&b=2\"}",
+					"id": "0xb2822d47fa5cfd9ff4548ae4a42c3813e6cc2e913c9f330f35225d30bdd4b14d",
+					"iid": "int:url:https://example.com/app?a=1&b=2",
+					"searchText": "Example App"
+				}
+			}
+		},
+		{
+			"label": "synthetic: thing gen1 r3 one identity field with description in search text",
+			"origin": "synthetic",
+			"classificationType": "Thing",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "thing",
+				"values": {
+					"name": "Widget",
+					"description": "A small thing"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"Thing\",\"identifier\":\"int:gen1:thing:r3:83b315e77a5a5e19e249a7e386852d9b\",\"name\":\"Widget\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a225468696e67222c226964656e746966696572223a22696e743a67656e313a7468696e673a72333a3833623331356537376135613565313965323439613765333836383532643962222c226e616d65223a22576964676574227d",
+				"anchorByteLength": 132,
+				"atomId": "0x9eafb37eef9326b684ab17ccd3d6c33a0caa613278a97eba41fa92447953f4af",
+				"atomIdRecomputedFromBytes": "0x9eafb37eef9326b684ab17ccd3d6c33a0caa613278a97eba41fa92447953f4af",
+				"atomIdMatches": true,
+				"iid": "int:gen1:thing:r3:83b315e77a5a5e19e249a7e386852d9b",
+				"searchText": "Widget A small thing",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "name"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "Thing",
+					"identifier": "int:gen1:thing:r3:83b315e77a5a5e19e249a7e386852d9b",
+					"name": "Widget"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"Thing\",\"identifier\":\"int:gen1:thing:r3:83b315e77a5a5e19e249a7e386852d9b\",\"name\":\"Widget\"}",
+					"id": "0x9eafb37eef9326b684ab17ccd3d6c33a0caa613278a97eba41fa92447953f4af",
+					"iid": "int:gen1:thing:r3:83b315e77a5a5e19e249a7e386852d9b",
+					"searchText": "Widget A small thing"
+				}
+			}
+		},
+		{
+			"label": "synthetic: tv-series gen1 r4 name + startYear (derived from startDate)",
+			"origin": "synthetic",
+			"classificationType": "TVSeries",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "tv-series",
+				"values": {
+					"name": "Game of Thrones",
+					"startDate": "2011-04-17"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"TVSeries\",\"identifier\":\"int:gen1:tv-series:r4:3cf57bf78e0ac33c0e4a17b002228a7e\",\"name\":\"Game of Thrones\",\"startYear\":\"2011\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a225456536572696573222c226964656e746966696572223a22696e743a67656e313a74762d7365726965733a72343a3363663537626637386530616333336330653461313762303032323238613765222c226e616d65223a2247616d65206f66205468726f6e6573222c22737461727459656172223a2232303131227d",
+				"anchorByteLength": 167,
+				"atomId": "0xdd1ebcb128bd96bbe03be028fb0be0807945d983052d73c41d4e341e777e4010",
+				"atomIdRecomputedFromBytes": "0xdd1ebcb128bd96bbe03be028fb0be0807945d983052d73c41d4e341e777e4010",
+				"atomIdMatches": true,
+				"iid": "int:gen1:tv-series:r4:3cf57bf78e0ac33c0e4a17b002228a7e",
+				"searchText": "Game of Thrones",
+				"envelopeKeyOrder": ["@context", "@type", "identifier", "name", "startYear"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "TVSeries",
+					"identifier": "int:gen1:tv-series:r4:3cf57bf78e0ac33c0e4a17b002228a7e",
+					"name": "Game of Thrones",
+					"startYear": "2011"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"TVSeries\",\"identifier\":\"int:gen1:tv-series:r4:3cf57bf78e0ac33c0e4a17b002228a7e\",\"name\":\"Game of Thrones\",\"startYear\":\"2011\"}",
+					"id": "0xdd1ebcb128bd96bbe03be028fb0be0807945d983052d73c41d4e341e777e4010",
+					"iid": "int:gen1:tv-series:r4:3cf57bf78e0ac33c0e4a17b002228a7e",
+					"searchText": "Game of Thrones"
+				}
+			}
+		},
+		{
+			"label": "synthetic: tv-series typed wd television-series P0",
+			"origin": "synthetic",
+			"classificationType": "TVSeries",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "tv-series",
+				"values": {
+					"name": "Game of Thrones",
+					"startDate": "2011-04-17",
+					"sameAs": ["https://www.wikidata.org/wiki/Q1079"]
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P0",
+				"anchorJson": "int:wd:television-series:Q1079",
+				"anchorBytesHex": "696e743a77643a74656c65766973696f6e2d7365726965733a5131303739",
+				"anchorByteLength": 30,
+				"atomId": "0x8d1ee5a4f133f5f1445c04b89d18ee6fe78b324cbf4b87a7e7f84abea8313f28",
+				"atomIdRecomputedFromBytes": "0x8d1ee5a4f133f5f1445c04b89d18ee6fe78b324cbf4b87a7e7f84abea8313f28",
+				"atomIdMatches": true,
+				"iid": "int:wd:television-series:Q1079",
+				"searchText": "",
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": null,
+				"raw": {
+					"profile": "P0",
+					"data": "int:wd:television-series:Q1079",
+					"id": "0x8d1ee5a4f133f5f1445c04b89d18ee6fe78b324cbf4b87a7e7f84abea8313f28",
+					"iid": "int:wd:television-series:Q1079",
+					"searchText": ""
+				}
+			}
+		},
+		{
+			"label": "synthetic: unknown classification slug throws plain Error",
+			"origin": "synthetic",
+			"classificationType": null,
+			"schemaContext": null,
+			"input": {
+				"slug": "does-not-exist",
+				"values": {
+					"name": "x"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": false,
+				"profile": null,
+				"anchorJson": null,
+				"anchorBytesHex": null,
+				"anchorByteLength": null,
+				"atomId": null,
+				"atomIdRecomputedFromBytes": null,
+				"atomIdMatches": null,
+				"iid": null,
+				"searchText": null,
+				"envelopeKeyOrder": null,
+				"envelope": null,
+				"error": "Error",
+				"raw": {
+					"thrown": {
+						"name": "Error",
+						"code": null,
+						"message": "Unknown classification \"does-not-exist\"."
+					}
+				}
+			}
+		},
+		{
+			"label": "synthetic: video-object contentUrl url P1",
+			"origin": "synthetic",
+			"classificationType": "VideoObject",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "video-object",
+				"values": {
+					"name": "Launch Trailer",
+					"contentUrl": "https://cdn.example.com/video.mp4"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"VideoObject\",\"identifier\":\"int:url:https://cdn.example.com/video.mp4\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a22566964656f4f626a656374222c226964656e746966696572223a22696e743a75726c3a68747470733a2f2f63646e2e6578616d706c652e636f6d2f766964656f2e6d7034227d",
+				"anchorByteLength": 113,
+				"atomId": "0x315745224185601facb4c0ec5346fa670b234e1915ccd17e2c15a48f58107890",
+				"atomIdRecomputedFromBytes": "0x315745224185601facb4c0ec5346fa670b234e1915ccd17e2c15a48f58107890",
+				"atomIdMatches": true,
+				"iid": "int:url:https://cdn.example.com/video.mp4",
+				"searchText": "Launch Trailer",
+				"envelopeKeyOrder": ["@context", "@type", "identifier"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "VideoObject",
+					"identifier": "int:url:https://cdn.example.com/video.mp4"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"VideoObject\",\"identifier\":\"int:url:https://cdn.example.com/video.mp4\"}",
+					"id": "0x315745224185601facb4c0ec5346fa670b234e1915ccd17e2c15a48f58107890",
+					"iid": "int:url:https://cdn.example.com/video.mp4",
+					"searchText": "Launch Trailer"
+				}
+			}
+		},
+		{
+			"label": "synthetic: web-page url canonicalized (fold, strip, sort, drop tracking)",
+			"origin": "synthetic",
+			"classificationType": "WebPage",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "web-page",
+				"values": {
+					"name": "Canon",
+					"url": "http://www.Example.com:80/path/?utm_source=x&b=2&a=1#frag"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"WebPage\",\"identifier\":\"int:url:https://example.com/path?a=1&b=2\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a2257656250616765222c226964656e746966696572223a22696e743a75726c3a68747470733a2f2f6578616d706c652e636f6d2f706174683f613d3126623d32227d",
+				"anchorByteLength": 108,
+				"atomId": "0xd8c9bdd2ba68089d35c9548816487be82ddb32316e871baf8b5d10c9288a8221",
+				"atomIdRecomputedFromBytes": "0xd8c9bdd2ba68089d35c9548816487be82ddb32316e871baf8b5d10c9288a8221",
+				"atomIdMatches": true,
+				"iid": "int:url:https://example.com/path?a=1&b=2",
+				"searchText": "Canon",
+				"envelopeKeyOrder": ["@context", "@type", "identifier"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "WebPage",
+					"identifier": "int:url:https://example.com/path?a=1&b=2"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"WebPage\",\"identifier\":\"int:url:https://example.com/path?a=1&b=2\"}",
+					"id": "0xd8c9bdd2ba68089d35c9548816487be82ddb32316e871baf8b5d10c9288a8221",
+					"iid": "int:url:https://example.com/path?a=1&b=2",
+					"searchText": "Canon"
+				}
+			}
+		},
+		{
+			"label": "synthetic: web-page url exactly at the 220-character value cap",
+			"origin": "synthetic",
+			"classificationType": "WebPage",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "web-page",
+				"values": {
+					"name": "At Cap",
+					"url": "https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"WebPage\",\"identifier\":\"int:url:https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a2257656250616765222c226964656e746966696572223a22696e743a75726c3a68747470733a2f2f6578616d706c652e636f6d2f6161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161227d",
+				"anchorByteLength": 296,
+				"atomId": "0xb416eeb566bbddf740e7af679710c1b894f31439f39ea2ec349d31bd8d46ab8a",
+				"atomIdRecomputedFromBytes": "0xb416eeb566bbddf740e7af679710c1b894f31439f39ea2ec349d31bd8d46ab8a",
+				"atomIdMatches": true,
+				"iid": "int:url:https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"searchText": "At Cap",
+				"envelopeKeyOrder": ["@context", "@type", "identifier"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "WebPage",
+					"identifier": "int:url:https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"WebPage\",\"identifier\":\"int:url:https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}",
+					"id": "0xb416eeb566bbddf740e7af679710c1b894f31439f39ea2ec349d31bd8d46ab8a",
+					"iid": "int:url:https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+					"searchText": "At Cap"
+				}
+			}
+		},
+		{
+			"label": "synthetic: web-page url one over the 220-character value cap",
+			"origin": "synthetic",
+			"classificationType": "WebPage",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "web-page",
+				"values": {
+					"name": "Over Cap",
+					"url": "https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"WebPage\",\"name\":\"Over Cap\",\"url\":\"https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a2257656250616765222c226e616d65223a224f76657220436170222c2275726c223a2268747470733a2f2f6578616d706c652e636f6d2f616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161227d",
+				"anchorByteLength": 300,
+				"atomId": "0x6f4550169a2ef0617d8eb8f4540cb020020ea7b3f59ee8626ee2a0417e89009d",
+				"atomIdRecomputedFromBytes": "0x6f4550169a2ef0617d8eb8f4540cb020020ea7b3f59ee8626ee2a0417e89009d",
+				"atomIdMatches": true,
+				"iid": null,
+				"searchText": "Over Cap",
+				"envelopeKeyOrder": ["@context", "@type", "name", "url"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "WebPage",
+					"name": "Over Cap",
+					"url": "https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"WebPage\",\"name\":\"Over Cap\",\"url\":\"https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}",
+					"id": "0x6f4550169a2ef0617d8eb8f4540cb020020ea7b3f59ee8626ee2a0417e89009d",
+					"iid": null,
+					"searchText": "Over Cap"
+				}
+			}
+		},
+		{
+			"label": "synthetic: web-site origin url P1",
+			"origin": "synthetic",
+			"classificationType": "WebSite",
+			"schemaContext": "https://schema.org/",
+			"input": {
+				"slug": "web-site",
+				"values": {
+					"name": "Example",
+					"url": "https://www.example.com/deep/path?x=1"
+				},
+				"options": null
+			},
+			"expected": {
+				"ok": true,
+				"profile": "P1",
+				"anchorJson": "{\"@context\":\"https://schema.org/\",\"@type\":\"WebSite\",\"identifier\":\"int:url:https://example.com\"}",
+				"anchorBytesHex": "7b2240636f6e74657874223a2268747470733a2f2f736368656d612e6f72672f222c224074797065223a2257656253697465222c226964656e746966696572223a22696e743a75726c3a68747470733a2f2f6578616d706c652e636f6d227d",
+				"anchorByteLength": 95,
+				"atomId": "0xa71e8f34fc5199a0b7fcfdb3d006d955a12cf27d389bdc642008da44209d15d4",
+				"atomIdRecomputedFromBytes": "0xa71e8f34fc5199a0b7fcfdb3d006d955a12cf27d389bdc642008da44209d15d4",
+				"atomIdMatches": true,
+				"iid": "int:url:https://example.com",
+				"searchText": "Example",
+				"envelopeKeyOrder": ["@context", "@type", "identifier"],
+				"envelope": {
+					"@context": "https://schema.org/",
+					"@type": "WebSite",
+					"identifier": "int:url:https://example.com"
+				},
+				"error": null,
+				"raw": {
+					"profile": "P1",
+					"data": "{\"@context\":\"https://schema.org/\",\"@type\":\"WebSite\",\"identifier\":\"int:url:https://example.com\"}",
+					"id": "0xa71e8f34fc5199a0b7fcfdb3d006d955a12cf27d389bdc642008da44209d15d4",
+					"iid": "int:url:https://example.com",
+					"searchText": "Example"
+				}
+			}
+		}
+	],
+	"validators": [
+		{
+			"label": "canonical isbn validates",
+			"input": {
+				"slug": "book",
+				"iid": "int:isbn:9780684832722"
+			},
+			"expected": {
+				"isOverCapUrlIid": false,
+				"validateDerivedAnchorIid": true,
+				"error": null,
+				"raw": {
+					"thrown": null
+				}
+			}
+		},
+		{
+			"label": "canonical over-cap url is the accepted exception (false, no throw)",
+			"input": {
+				"slug": "web-page",
+				"iid": "int:url:https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"expected": {
+				"isOverCapUrlIid": true,
+				"validateDerivedAnchorIid": false,
+				"error": null,
+				"raw": {
+					"thrown": null
+				}
+			}
+		},
+		{
+			"label": "canonical url exactly at cap validates",
+			"input": {
+				"slug": "web-page",
+				"iid": "int:url:https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"expected": {
+				"isOverCapUrlIid": false,
+				"validateDerivedAnchorIid": true,
+				"error": null,
+				"raw": {
+					"thrown": null
+				}
+			}
+		},
+		{
+			"label": "canonical url one over cap is the accepted exception",
+			"input": {
+				"slug": "web-page",
+				"iid": "int:url:https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"expected": {
+				"isOverCapUrlIid": true,
+				"validateDerivedAnchorIid": false,
+				"error": null,
+				"raw": {
+					"thrown": null
+				}
+			}
+		},
+		{
+			"label": "malformed over-cap url throws invalid IID",
+			"input": {
+				"slug": "web-page",
+				"iid": "int:url:not-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-url"
+			},
+			"expected": {
+				"isOverCapUrlIid": false,
+				"validateDerivedAnchorIid": null,
+				"error": "INVALID_IID",
+				"raw": {
+					"thrown": {
+						"name": "AtomAnchorError",
+						"code": "INVALID_IID",
+						"message": "Derived identifier is not canonical for \"web-page\": int:url:not-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-urlnot-a-url"
+					}
+				}
+			}
+		},
+		{
+			"label": "non-canonical isbn throws",
+			"input": {
+				"slug": "book",
+				"iid": "int:isbn:978-0-684-83272-2"
+			},
+			"expected": {
+				"isOverCapUrlIid": false,
+				"validateDerivedAnchorIid": null,
+				"error": "INVALID_IID",
+				"raw": {
+					"thrown": {
+						"name": "AtomAnchorError",
+						"code": "INVALID_IID",
+						"message": "Derived identifier is not canonical for \"book\": int:isbn:978-0-684-83272-2"
+					}
+				}
+			}
+		},
+		{
+			"label": "non-canonical over-cap url (uppercase host) throws",
+			"input": {
+				"slug": "web-page",
+				"iid": "int:url:https://EXAMPLE.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"expected": {
+				"isOverCapUrlIid": false,
+				"validateDerivedAnchorIid": null,
+				"error": "INVALID_IID",
+				"raw": {
+					"thrown": {
+						"name": "AtomAnchorError",
+						"code": "INVALID_IID",
+						"message": "Derived identifier is not canonical for \"web-page\": int:url:https://EXAMPLE.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+					}
+				}
+			}
+		},
+		{
+			"label": "oversized purl throws (not a url)",
+			"input": {
+				"slug": "software",
+				"iid": "int:purl:npm/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"expected": {
+				"isOverCapUrlIid": false,
+				"validateDerivedAnchorIid": null,
+				"error": "INVALID_IID",
+				"raw": {
+					"thrown": {
+						"name": "AtomAnchorError",
+						"code": "INVALID_IID",
+						"message": "Derived identifier is not canonical for \"software\": int:purl:npm/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+					}
+				}
+			}
+		},
+		{
+			"label": "unregistered scheme throws",
+			"input": {
+				"slug": "music-recording",
+				"iid": "int:spotify:track:3UMaczJpikHgJFyBTAJVOz"
+			},
+			"expected": {
+				"isOverCapUrlIid": false,
+				"validateDerivedAnchorIid": null,
+				"error": "INVALID_IID",
+				"raw": {
+					"thrown": {
+						"name": "AtomAnchorError",
+						"code": "INVALID_IID",
+						"message": "Derived identifier is not canonical for \"music-recording\": int:spotify:track:3UMaczJpikHgJFyBTAJVOz"
+					}
+				}
+			}
+		}
+	]
+}
