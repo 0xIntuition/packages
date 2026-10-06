@@ -37,6 +37,18 @@ export function multiVaultValidateCreateAtomsWithUris(inputs: CreateAtomsWithUri
 	if (atomData.length !== assets.length || atomData.length !== uris.length) {
 		throw new Error('atom data, assets, and URI outer arrays must have the same length');
 	}
+	for (const data of atomData) {
+		if (typeof data !== 'string' || !/^0x(?:[0-9a-fA-F]{2})*$/.test(data)) {
+			throw new Error('atom data must be even-length hex bytes');
+		}
+	}
+	for (const atomUris of uris) {
+		for (const uri of atomUris) {
+			if (typeof uri !== 'string' || !/^0x(?:[0-9a-fA-F]{2})*$/.test(uri)) {
+				throw new Error('atom URI must be even-length hex bytes');
+			}
+		}
+	}
 	const requiredValue = assets.reduce((total, amount) => total + amount, 0n);
 	if (inputs.value !== requiredValue) {
 		throw new Error('value must equal the sum of atom assets');

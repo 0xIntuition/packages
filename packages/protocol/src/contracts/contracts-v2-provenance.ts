@@ -2,6 +2,7 @@
 export const contractsV2Provenance = {
 	package: '@0xintuition/contracts-v2',
 	version: '1.1.0-alpha.0',
+	source: 'registry',
 	integrity:
 		'sha512-vt9GFaFXYAeigLyl/4i6hPpLO4NBrZDyWJrM2M7aHuQ39/qSpxqMmIzetoAtpBWWx4AzM5wccUsXJvVST02saA==',
 	abiFingerprint: '23e4cbd1a7686264e064aab0003a7fbcdaedc4d968828fc80f420d25b612e311',

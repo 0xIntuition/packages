@@ -53,6 +53,13 @@ describe('@0xintuition/protocol wrapper entrypoints', () => {
 	const entrypoints: Record<string, unknown> = protocol;
 
 	it.each([
+		'multiVaultGetAtomUriConfig',
+		'multiVaultValidateCreateAtomsWithUris',
+		'multiVaultCreateAtomsWithUrisEncode',
+		'multiVaultCreateAtomsWithUris',
+		'eventParseAtomContextRegistered',
+		'eventParseAtomUriConfigUpdated',
+		'associateAtomCreationContext',
 		'atomWardenBatchGrantAtomWalletOwnership',
 		'atomWardenClaimAsCreatorAfterExpiry',
 		'atomWardenClaimAuthorizationTypehash',
@@ -113,6 +120,15 @@ describe('@0xintuition/protocol wrapper entrypoints', () => {
 		'multiVaultMulticallEncode',
 	])('exports %s', (name) => {
 		expect(entrypoints[name]).toBeTypeOf('function');
+	});
+
+	it('exports contracts-v2 provenance', () => {
+		expect(protocol.contractsV2Provenance).toMatchObject({
+			package: '@0xintuition/contracts-v2',
+			version: '1.1.0-alpha.0',
+			source: 'registry',
+		});
+		expect(protocol.contractsV2Provenance.integrity).toMatch(/^sha512-/);
 	});
 
 	it('exports the new ABIs and deployment bytecode', () => {
