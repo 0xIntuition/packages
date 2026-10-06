@@ -161,3 +161,5 @@ const creations = associateAtomCreationContext(atoms, contexts)
 `eventParseAtomContextRegistered` preserves the ordered URI bytes in creation receipts. `associateAtomCreationContext` joins these events to `AtomCreated` by `termId`, even when other events interleave, and returns an empty context list for atoms without context. `eventParseAtomUriConfigUpdated(publicClient, hash)` parses limit changes from configuration transaction receipts. Receipt parsers currently consider all emitters; callers that require address scoping must filter parsed logs by the expected MultiVault address before associating them.
 
 `contractsV2Provenance` records the registry package/version, lockfile integrity, and ABI/bytecode fingerprints shipped by the package. The legacy `multiVaultCreateAtoms` helpers remain available with their existing signatures.
+
+Artifact sync stays offline and records `verified: false` by default; `--verify-registry` fetches the locked registry tarball, checks SHA-512 and the installed ABI/bytecode modules, and records `verified: true` with an ISO `verifiedAt`, while integrity drift requires the printed `--accept-integrity-change` flag.
