@@ -8,7 +8,7 @@ bun run conformance:check
 bunx --no-install biome check conformance
 ```
 
-Build first: resolution must reach each package's exported `dist` entrypoint. The root script is exactly `bun test conformance`. Bun treats that argument as a path filter and additionally runs the existing package file named `conformance.test.ts` (146 tests); those incidental tests are reported separately from the five proofs below. For just the five root files, `bun test ./conformance` is an optional focused command.
+Build first: resolution must reach each package's exported `dist` entrypoint. The root script is exactly `bun test conformance`. Bun treats that argument as a path filter and additionally runs the existing package file named `conformance.test.ts` (146 tests); those incidental tests are reported separately from the five proofs below. For just the root harness and its integrity self-tests, `bun test ./conformance` is an optional focused command.
 
 The runner prints agreement, known-divergence, unexpected-failure, and OPEN counts for each proof. It exits nonzero for any unexpected difference, agreement on a listed divergence, or fingerprint drift. An OPEN test uses `test.todo` with the concrete missing capability in its name. Typed-wd vectors are excluded explicitly and enumerated in the report; they enter with the typed-wd stack.
 
@@ -18,7 +18,7 @@ The runner prints agreement, known-divergence, unexpected-failure, and OPEN coun
 | Anchor/build/hash | Supported non-typed inputs compare the complete serialized string, UTF-8 hex, length, key order, profile, IID, and salted atom ID; the builder's own data/string/hex/id invariant is checked. | Candidate overrides, direct reference validators, search text, and fallback field-validation semantics lack equivalent public APIs. Five single-field anchor findings are carried as exact, self-retiring divergence entries. |
 | Encode/decode | Every supported successful train anchor is encoded with its IID as the sole URI, decoded against the exported ABI, hashed, and linked across synthetic AtomCreated/AtomContextRegistered logs using the public event parsers. | Synthetic receipts prove local ABI/event handling; no transaction is submitted. The odd-length hex probe explicitly records the current validation/padding/hash discrepancy. |
 | Ladder differential | All retained value maps use `deriveIntuitionId` with the classification's inline declarative ladder; compare IID, winning rung, full derivation, canonical validation, and anchor eligibility. Compare all 37 ladder structures, including aggregate-rating's null ladder. | The strong-identifier projection is a different evaluator and is not substituted. The reference classification wrapper is unavailable publicly; its three invalid derivations are checked as derived strings followed by validation false. |
-| Canonicalization | All 131 vectors compare the train and the recorded reference separately with corpus expectations using SCHEMES canonicalize, parse, norm1, and buildGen1Iid. gen1 preimages are reconstructed and hashed through public norm1/keccak16. | No preimage export is assumed; no typed-wd canonicalizer is tested at this base. |
+| Canonicalization | All 131 vectors compare the train and the recorded reference separately with corpus expectations using SCHEMES canonicalize, parse, norm1, and buildGen1Iid. Every recorded agrees flag is recomputed and the false-id set must equal disagreements. gen1 preimages are reconstructed and hashed through public norm1/keccak16. | No preimage export is assumed; no typed-wd canonicalizer is tested at this base. |
 
 No proof covers a database-backed runner, devnet, publication, live registry, provider calls, live configuration, or deployed behavior. The golden runner's database header is transcribed evidence only.
 
@@ -28,7 +28,29 @@ No proof covers a database-backed runner, devnet, publication, live registry, pr
 - `sameAs` omitted from identity envelopes → public-builder defect; the two movie cases retain the same gen1 IID but change anchor bytes and atom id.
 - Derived recipe values not materialised → public-builder defect; the social-media-posting case emits raw text under `textHash`, the same class as geo7 evidence defects.
 
-The required command reports **981 pass, 23 todo, 0 fail** across 6 files (1004 tests). Of those, the five harness files report 725 agreements and 110 known divergences (anchor proof: 32 agreements, 26 divergences, 23 OPEN); 146 passing tests come from the existing package conformance file.
+The required command reports **1004 pass, 23 todo, 0 fail** across 7 files (1027 tests). Of those, the five harness files report 725 agreements and 110 known divergences (anchor proof: 32 agreements, 26 divergences, 23 OPEN); 23 passing integrity self-tests cover malformed parser shapes, undefined/null distinctions, corpus loss, id drift, agreement metadata, orphan divergences, and documentation accounting; 146 passing tests come from the existing package conformance file.
+
+## Runtime enumeration
+
+The manifest pins sorted ids and counts for every vector file, every canonicalization subcorpus, direct validators, ladder structures, and the five registered proof sets. Each file's afterAll check asserts that executed cases and divergence counts match its inventory. The integrity self-test checks this README table against the same registrations; a truncated corpus fails before any proof can run.
+
+| Proof file | Registered | Executed | Agreements | Divergences | OPEN |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| parse-and-classify.test.ts | 10 | 10 | 9 | 1 | 0 |
+| anchor-build-hash.test.ts | 81 | 58 | 32 | 26 | 23 |
+| encode-decode.test.ts | 51 | 51 | 50 | 1 | 0 |
+| ladder-differential.test.ts | 454 | 454 | 374 | 80 | 0 |
+| canonicalization-parity.test.ts | 262 | 262 | 260 | 2 | 0 |
+
+## Parser result shapes
+
+The public parseIntuitionId contract returns undefined for rejection: there is no rejection object and no scheme/value field. Success is exactly an object with own string fields scheme and value; scheme must be registered and value nonempty. The adapter validates that shape before projecting fields. Only the documented rejection sentinel becomes the corpus's explicit {scheme: null, value: null}. Empty objects, null, missing fields, undefined-valued fields, and mixed null/string fields fail. Public scheme canonicalizers also document undefined for rejection; their adapter maps that sentinel once to canonical: null.
+
+Comparisons use strict structural equality. Shared normalization sorts object keys and converts bigint to decimal strings; it never converts undefined to null. Proof comparison and fingerprinting reject unexpected undefined, so JSON serialization cannot hide it. Recorded reference fields are checked directly rather than filled in when absent.
+
+## Typed-wd exclusions
+
+34 anchor/ladder cases (7 anchors + 27 ladders) enter with the typed-wd stack. Additionally, 36 parser-corpus cases excluded from C1 at this base; enter with the typed-wd stack. Total typed-wd exclusions: 70. The complete parser corpus has 73 cases; parser-corpus-inventory.json preserves their names only, and the test derives and prints the count by filtering iid_typed_wd_ names. It executes none of their inputs or expectations. The selected C1 corpus remains exactly nine cases, including iid_legacy_bare_wd_parse_only. All exclusions and loaded inventories are pinned in manifest.json.
 
 ## Mappings
 
@@ -54,7 +76,7 @@ All five wd canonicalization cases use bare QIDs and agree at this base. No wd c
 
 ## Adding a vector
 
-Copy a new oracle case into the appropriate checked-in vector file, preserving its provenance, raw input, and recorded output. The historical parser corpus intentionally contains only the nine selected cases, with a provenance note identifying its different origin. Generated vector files retain the original provenance headers. Existing adapters enumerate all cases dynamically; an unknown corpus type, public derivation source, or provenance SHA fails explicitly. Add an adapter only using public exports. Run the harness before adding an entry to the divergence table, inspect the complete byte and identity difference, and keep the failing regression.
+Copy a new oracle case into the appropriate checked-in vector file, preserving its provenance, raw input, and recorded output. The historical parser corpus intentionally contains only the nine selected cases, with a provenance note identifying its different origin. Generated vector files retain the original provenance headers. Existing adapters enumerate all cases dynamically against vectors/manifest.json; a missing, duplicate, or replaced id, changed count, unknown corpus type, public derivation source, or provenance SHA fails explicitly. Deliberate oracle additions require a reviewed manifest update (sorted ids and counts for the file, affected subcorpus, and registered proof inventory); never regenerate the manifest during a test to accommodate missing data. Add an adapter only using public exports. Run the harness before adding an entry to the divergence table, inspect the complete byte and identity difference, and keep the failing regression.
 
 A package defect cannot be fixed here. Record its concrete input and output in the report and an explicit case entry with reason `defect, follow-up`. Keep unsupported capabilities OPEN with a specific reason. Never change an oracle expectation to make the train agree.
 

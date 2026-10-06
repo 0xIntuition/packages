@@ -9,12 +9,14 @@ import { ids, iid, protocol, registry, viem } from './public';
 import {
 	anchorCases,
 	anchors,
+	assertCanonicalAgreement,
 	canonicalization,
 	equal,
 	golden,
 	ladderCases,
 	ladders,
 	parser,
+	recordedCanonicalOutput,
 	utf8Hex,
 } from './vectors';
 
@@ -27,8 +29,26 @@ export interface ProofCase {
 	policy?: 'single-field-anchor';
 }
 
-function parseOutcome(input: string) {
+function checkedPublicParse(input: string) {
 	const parsed = iid.parseIntuitionId(input);
+	// Public parseIntuitionId rejects with undefined (no object and no fields).
+	// Success is exactly { scheme: string, value: string }; validate before projection.
+	if (parsed === undefined) return parsed;
+	if (
+		!parsed ||
+		typeof parsed !== 'object' ||
+		!equal(Object.keys(parsed).sort(), ['scheme', 'value']) ||
+		typeof parsed.scheme !== 'string' ||
+		!iid.SCHEMES[parsed.scheme] ||
+		typeof parsed.value !== 'string' ||
+		parsed.value.length === 0
+	)
+		throw new Error('Malformed public parseIntuitionId result');
+	return parsed;
+}
+
+function parseOutcome(input: string) {
+	const parsed = checkedPublicParse(input);
 	const inspection = iid.inspectIntuitionId(input);
 	if (!inspection.valid && inspection.reason === 'unknown-scheme')
 		return { outcome: 'unknown-scheme', canonical: null, reason: 'unknown_or_malformed_iid' };
@@ -86,7 +106,7 @@ parseCases.push({
 	run: () => {
 		const classification = registry.classificationForIid(golden.iid);
 		return {
-			parse: iid.parseIntuitionId(golden.iid),
+			parse: checkedPublicParse(golden.iid),
 			valid: iid.validateIntuitionId(golden.iid),
 			canonical: parseOutcome(golden.iid).canonical,
 			anchorEligible: iid.isAnchorEligible(golden.iid),
@@ -324,32 +344,39 @@ export const structureCases: ProofCase[] = Object.entries(ladders.ladders).map(
 );
 
 function canonicalOutput(c: any, reference: boolean) {
-	const r = c.referenceOutput;
+	if (reference) {
+		assertCanonicalAgreement(c);
+		const recorded = recordedCanonicalOutput(c);
+		if (
+			c.corpusFile === 'gen1.json' &&
+			iid.keccak16(recorded.preimage) !== recorded.iid.split(':').at(-1)
+		)
+			throw new Error('Gen1 preimage hash differs from IID');
+		return recorded;
+	}
 	switch (c.corpusFile) {
-		case 'canonicalization.json':
-			return {
-				canonical: reference
-					? r.canonical
-					: (iid.SCHEMES[c.input.scheme].canonicalize(c.input.raw) ?? null),
-			};
+		case 'canonicalization.json': {
+			const canonical = iid.SCHEMES[c.input.scheme].canonicalize(c.input.raw);
+			// This API documents undefined for rejection; map only that sentinel here.
+			if (canonical !== undefined && typeof canonical !== 'string')
+				throw new Error('Malformed public canonicalize result');
+			return { canonical: canonical === undefined ? null : canonical };
+		}
 		case 'parse.json': {
-			const p = reference ? r : iid.parseIntuitionId(c.input);
-			return { scheme: p?.scheme ?? null, value: p?.value ?? null };
+			const p = checkedPublicParse(c.input);
+			// Map the documented public rejection sentinel once to the corpus null pair.
+			return p === undefined ? { scheme: null, value: null } : p;
 		}
 		case 'norm1.json':
-			return { output: reference ? r.output : iid.norm1(c.input) };
+			return { output: iid.norm1(c.input) };
 		case 'gen1.json': {
 			const fields = Object.fromEntries(
 				Object.keys(c.input.fields)
 					.sort()
 					.map((k) => [k, iid.norm1(c.input.fields[k])])
 			);
-			const preimage = reference
-				? r.preimageReconstructed
-				: JSON.stringify({ c: c.input.slug, f: fields });
-			const output = reference
-				? r.iid
-				: iid.buildGen1Iid(c.input.slug, c.input.tag, c.input.fields);
+			const preimage = JSON.stringify({ c: c.input.slug, f: fields });
+			const output = iid.buildGen1Iid(c.input.slug, c.input.tag, c.input.fields);
 			if (iid.keccak16(preimage) !== output.split(':').at(-1))
 				throw new Error('Gen1 preimage hash differs from IID');
 			return { preimage, iid: output };

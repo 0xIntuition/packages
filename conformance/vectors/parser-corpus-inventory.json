@@ -1,0 +1,228 @@
+{
+	"provenance": {
+		"referenceSha": "31b62f35a787b6a7b9318f7a5d245ba6d0c76e9b",
+		"reference": "reference implementation @ 31b62f3"
+	},
+	"description": "Names only from the complete parser corpus; inputs and expectations outside the nine-case proof are not executed.",
+	"cases": [
+		{
+			"name": "ipfs_uri_with_gateway"
+		},
+		{
+			"name": "ethereum_address_lowercase"
+		},
+		{
+			"name": "ens_name_mixed_case"
+		},
+		{
+			"name": "json_object"
+		},
+		{
+			"name": "iid_canonical_p0_isrc"
+		},
+		{
+			"name": "iid_legacy_bare_wd_parse_only"
+		},
+		{
+			"name": "iid_typed_active_wd_film"
+		},
+		{
+			"name": "iid_typed_wd_television_series"
+		},
+		{
+			"name": "iid_typed_wd_television_series_season"
+		},
+		{
+			"name": "iid_typed_wd_television_series_episode"
+		},
+		{
+			"name": "iid_typed_wd_written_work"
+		},
+		{
+			"name": "iid_typed_wd_human"
+		},
+		{
+			"name": "iid_typed_wd_podcast"
+		},
+		{
+			"name": "iid_typed_wd_podcast_episode"
+		},
+		{
+			"name": "iid_typed_wd_video_game"
+		},
+		{
+			"name": "iid_typed_wd_album"
+		},
+		{
+			"name": "iid_typed_wd_organization"
+		},
+		{
+			"name": "iid_typed_wd_qid_case_normalization"
+		},
+		{
+			"name": "iid_typed_wd_rejects_non_ascii_slug"
+		},
+		{
+			"name": "iid_typed_wd_rejects_mixed_case_unicode_slug"
+		},
+		{
+			"name": "iid_typed_wd_rejects_non_ascii_edge_whitespace"
+		},
+		{
+			"name": "iid_typed_wd_mixed_case_slug_and_qid"
+		},
+		{
+			"name": "iid_typed_wd_rejects_leading_zero_qid"
+		},
+		{
+			"name": "iid_typed_wd_rejects_non_qid"
+		},
+		{
+			"name": "iid_typed_wd_rejects_trailing_u_feff"
+		},
+		{
+			"name": "iid_typed_wd_rejects_trailing_u_00a0"
+		},
+		{
+			"name": "iid_typed_wd_rejects_trailing_u_1680"
+		},
+		{
+			"name": "iid_typed_wd_rejects_trailing_u_2000"
+		},
+		{
+			"name": "iid_typed_wd_rejects_trailing_u_2001"
+		},
+		{
+			"name": "iid_typed_wd_rejects_trailing_u_2002"
+		},
+		{
+			"name": "iid_typed_wd_rejects_trailing_u_2003"
+		},
+		{
+			"name": "iid_typed_wd_rejects_trailing_u_2004"
+		},
+		{
+			"name": "iid_typed_wd_rejects_trailing_u_2005"
+		},
+		{
+			"name": "iid_typed_wd_rejects_trailing_u_2006"
+		},
+		{
+			"name": "iid_typed_wd_rejects_trailing_u_2007"
+		},
+		{
+			"name": "iid_typed_wd_rejects_trailing_u_2008"
+		},
+		{
+			"name": "iid_typed_wd_rejects_trailing_u_2009"
+		},
+		{
+			"name": "iid_typed_wd_rejects_trailing_u_200a"
+		},
+		{
+			"name": "iid_typed_wd_rejects_trailing_u_2028"
+		},
+		{
+			"name": "iid_typed_wd_rejects_trailing_u_2029"
+		},
+		{
+			"name": "iid_typed_wd_rejects_trailing_u_202f"
+		},
+		{
+			"name": "iid_typed_wd_rejects_trailing_u_205f"
+		},
+		{
+			"name": "iid_typed_wd_rejects_trailing_u_3000"
+		},
+		{
+			"name": "iid_typed_mbid_recording"
+		},
+		{
+			"name": "iid_acct_weak_handle_not_anchor_eligible"
+		},
+		{
+			"name": "iid_acct_numeric_id_anchor_eligible"
+		},
+		{
+			"name": "iid_noncanonical_isbn10"
+		},
+		{
+			"name": "iid_unknown_scheme"
+		},
+		{
+			"name": "iid_invalid_isrc_value"
+		},
+		{
+			"name": "iid_whatwg_url_trap"
+		},
+		{
+			"name": "iid_uppercase_prefix_scheme"
+		},
+		{
+			"name": "iid_remote_enabled_short_circuit"
+		},
+		{
+			"name": "url_with_query"
+		},
+		{
+			"name": "isbn_13"
+		},
+		{
+			"name": "plain_string"
+		},
+		{
+			"name": "url_remote_webpage"
+		},
+		{
+			"name": "url_remote_json_document"
+		},
+		{
+			"name": "url_remote_json_sniffed"
+		},
+		{
+			"name": "url_remote_html_sniffed"
+		},
+		{
+			"name": "url_remote_image_sniffed"
+		},
+		{
+			"name": "url_remote_audio_sniffed"
+		},
+		{
+			"name": "url_remote_unknown_empty"
+		},
+		{
+			"name": "url_remote_generic_file"
+		},
+		{
+			"name": "url_remote_redirect_limit_exceeded"
+		},
+		{
+			"name": "url_remote_redirect_missing_location"
+		},
+		{
+			"name": "url_remote_oversized"
+		},
+		{
+			"name": "url_remote_timeout"
+		},
+		{
+			"name": "url_remote_redirect_image"
+		},
+		{
+			"name": "ipfs_remote_audio_via_gateway"
+		},
+		{
+			"name": "ipfs_remote_skipped_without_gateway"
+		},
+		{
+			"name": "url_remote_denied_localhost"
+		},
+		{
+			"name": "empty_input"
+		},
+		{
+			"name": "oversized_input"
+		}
+	]
+}
