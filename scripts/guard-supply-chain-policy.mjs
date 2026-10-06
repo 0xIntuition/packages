@@ -174,6 +174,45 @@ const parseExcludes = (value) => {
 	return names;
 };
 
+// Find value boundaries without interpreting unrelated TOML keys or values.
+// Quotes are stateful: opposite quotes and # inside a string are content.
+const scanValueBoundary = (lines, startLine, startColumn) => {
+	let quote = null;
+	let multilineString = false;
+	const stack = [];
+	let malformed = false;
+	for (let endLine = startLine; endLine < lines.length; endLine++) {
+		const line = lines[endLine];
+		for (let i = endLine === startLine ? startColumn : 0; i < line.length; i++) {
+			const c = line[i];
+			if (quote) {
+				if (quote[0] === '"' && c === '\\') { i++; continue; }
+				if (quote.length === 3) {
+					if (line.startsWith(quote, i)) {
+						// TOML allows one or two content quotes immediately before
+						// the closing delimiter (a run of four or five quotes).
+						while (line[i + 1] === c) i++;
+						quote = null;
+					}
+				} else if (c === quote) quote = null;
+				continue;
+			}
+			if (c === '#') break;
+			if (c === '"' || c === "'") {
+				quote = line.startsWith(c.repeat(3), i) ? c.repeat(3) : c;
+				if (quote.length === 3) { multilineString = true; i += 2; }
+			} else if (c === '[' || c === '{') stack.push(c);
+			else if (c === ']' || c === '}') {
+				if (stack.pop() !== (c === ']' ? '[' : '{')) malformed = true;
+			}
+		}
+		if ((!quote && stack.length === 0) || malformed || quote?.length === 1) {
+			return { endLine, complete: !quote && !stack.length && !malformed, multilineString };
+		}
+	}
+	return { endLine: lines.length - 1, complete: false, multilineString };
+};
+
 const checkBunPolicy = () => {
 	/*
 	 * Canonical form: exactly one bare [install] header (bracket whitespace and
@@ -183,8 +222,9 @@ const checkBunPolicy = () => {
 	 * start only outside strings. Quoted/dotted policy keys and alternate install
 	 * table forms fail closed. [install.scopes], [install.cache], [install.lockfile]
 	 * are independent tables, never sources of these policy values.
-	 * This is a canonical-form linter, not TOML: multiline/ambiguous syntax is
-	 * rejected so it cannot hide policy or change the interpretation of lines.
+	 * This is a canonical-form linter, not TOML: unrelated values are opaque,
+	 * including multiline arrays and strings. Consume their boundaries before
+	 * looking for the next assignment/header; policy values stay single-line.
 	 */
 	const bunfigPath = path.join(repoRoot, 'bunfig.toml');
 
@@ -201,7 +241,9 @@ const checkBunPolicy = () => {
 	let configuredExcludes = [];
 	const seenPolicyKeys = new Set();
 	const unsupported = (message) => addFailure(bunfigPath, `unsupported bunfig representation: ${message}`);
-	for (const rawLine of readTextFile(bunfigPath).split(/\r?\n/)) {
+	const lines = readTextFile(bunfigPath).split(/\r?\n/);
+	for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+		const rawLine = lines[lineIndex];
 		if (rawLine.trimStart().startsWith('#')) continue;
 		const comment = outsideStringIndex(rawLine, '#');
 		const line = (comment < 0 ? rawLine : rawLine.slice(0, comment)).trim();
@@ -252,6 +294,10 @@ const checkBunPolicy = () => {
 			unsupported(`assignment/key syntax ${line}`);
 			continue;
 		}
+		// Use the original text: stripping comments with single-line quote rules
+		// would discard # content inside a multiline string's opening line.
+		const boundary = scanValueBoundary(lines, lineIndex, outsideStringIndex(rawLine, '=') + 1);
+		lineIndex = boundary.endLine;
 		const policySegment = segments.find(({ value }) => value === 'minimumReleaseAge' || value === 'minimumReleaseAgeExcludes');
 		if (policySegment?.value === 'minimumReleaseAge') ageSeen = true;
 		if (table === 'root' && segments[0].value === 'install' && !policySegment) {
@@ -283,24 +329,10 @@ const checkBunPolicy = () => {
 			}
 			continue;
 		}
-		// Reject multiline values anywhere; apparent headers/policy may be content.
-		if (value.includes('"""') || value.includes("'''")) {
-			unsupported(`multiline string value for ${key}`);
-		} else {
-			let quote = null;
-			const stack = [];
-			let malformed = false;
-			for (let i = 0; i < value.length; i++) {
-				const c = value[i];
-				if (quote === '"' && c === '\\') { i++; continue; }
-				if (quote) { if (c === quote) quote = null; continue; }
-				if (c === '"' || c === "'") quote = c;
-				else if (c === '[' || c === '{') stack.push(c);
-				else if (c === ']' || c === '}') {
-					if (stack.pop() !== (c === ']' ? '[' : '{')) malformed = true;
-				}
-			}
-			if (quote || stack.length || malformed) unsupported(`multiline or unbalanced value for ${key}`);
+		if (!boundary.complete) {
+			unsupported(boundary.multilineString
+				? `multiline string value for ${key}`
+				: `multiline or unbalanced value for ${key}`);
 		}
 	}
 	if (!ageSeen && !installRejected) addFailure(bunfigPath, 'missing minimumReleaseAge');

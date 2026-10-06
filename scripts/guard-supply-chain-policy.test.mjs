@@ -249,6 +249,19 @@ for (const [name, change] of [
 	['age trailing comment', (s) => s.replace('1209600', '1209600 # note')],
 	['header whitespace and comment', (s) => s.replace('[install]', '[ install ] # note')],
 	['hash inside basic string', (s) => `${s}\n[run]\nshell = "value#still-a-string" # note\n`],
+	['F1 multiline preload reproduction', () => '[install]\nminimumReleaseAge = 1209600\n\n[test]\npreload = [\n  "./setup.ts",\n]\n'],
+	['F1 multiline cache reproduction', () => '[install]\nminimumReleaseAge = 1209600\n\n[install.cache]\ndir = """\n.bun-cache"""\n'],
+	['F1 nested array and comments', (s) => `${s}\n[test]\npreload = [\n  # [install] and minimumReleaseAge = 0 are comment content\n  ["./setup.ts",], # nested array\n]\n`],
+	['F1 literal multiline string with basic delimiters', (s) => `${s}\n[install.cache]\ndir = '''\n.cache"""dir\n'''\n`],
+	['F1 policy-looking basic string content', (s) => `${s}\n[install.cache]\ndir = """\nminimumReleaseAge = 0\n[install]\n# content, not a comment\n"""\n`],
+	['F2 triple literal quotes in preload', () => `[install]\nminimumReleaseAge = 1209600\n\n[test]\npreload = ["./has'''quotes.ts"]\n`],
+	['F2 triple literal quotes in cache', () => `[install]\nminimumReleaseAge = 1209600\n\n[install.cache]\ndir = ".cache'''dir"\n`],
+	['F2 triple basic quotes in literal preload', () => `[install]\nminimumReleaseAge = 1209600\n\n[test]\npreload = ['./has"""quotes.ts']\n`],
+	['F2 escaped quote and hash', (s) => `${s}\n[test]\npreload = ["a\\"#b"] # note\n`],
+	['F2 hash in literal string', (s) => `${s}\n[install.cache]\ndir = 'a#b' # note\n`],
+	['multiline basic line-ending backslash', (s) => `${s}\n[install.cache]\ndir = """\n.cache\\\n  continued\\\n\n  dir""" # note\n`],
+	['multiline array strings and closing quote runs', (s) => `${s}\n[test]\npreload = [\n  """a\\"#b\nminimumReleaseAge = 0"""",\n  '''c\n[install]''''',\n]\n[install.cache]\ndir = "cache"\n`],
+	['canonical install after root multiline value', (s) => `description = """\n[install]\nminimumReleaseAge = 0\n"""\n${s}`],
 ]) {
 	test(`accepts canonical bunfig with ${name}`, (t) => {
 		const fixtureRoot = createPolicyFixture();
@@ -257,6 +270,22 @@ for (const [name, change] of [
 		fs.writeFileSync(bunfigPath, change(fs.readFileSync(bunfigPath, 'utf8')));
 		const result = runGuard(fixtureRoot);
 		assert.equal(result.status, 0, result.stderr);
+	});
+}
+
+for (const [name, suffix, diagnostic] of [
+	['duplicate install header', '[install]\n', 'duplicate [install] header'],
+	['policy in cache table', '[install.cache]\nminimumReleaseAge = 0\n', 'policy key minimumReleaseAge must be bare inside [install]'],
+]) {
+	test(`rejects ${name} after an opaque multiline value`, (t) => {
+		const fixtureRoot = createPolicyFixture();
+		t.after(() => fs.rmSync(fixtureRoot, { recursive: true, force: true }));
+		const bunfigPath = path.join(fixtureRoot, 'bunfig.toml');
+		fs.appendFileSync(bunfigPath, `\n[test]\npreload = [\n  "./setup.ts",\n]\n${suffix}`);
+		const result = runGuard(fixtureRoot);
+		assert.notEqual(result.status, 0);
+		assert.ok(result.stderr.includes(`unsupported bunfig representation: ${diagnostic}`), result.stderr);
+		assert.equal(result.stderr.split('\n').filter((line) => line.startsWith('- ')).length, 1, result.stderr);
 	});
 }
 
