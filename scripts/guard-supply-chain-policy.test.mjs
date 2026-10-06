@@ -204,6 +204,62 @@ test('reports malformed exception policy without crashing', (t) => {
 	assert.doesNotMatch(result.stderr, /SyntaxError/);
 });
 
+const representationProbes = [
+	['quoted excludes without approval', (s) => `${s}"minimumReleaseAgeExcludes" = ["typescript"]\n`, 'policy key "minimumReleaseAgeExcludes" must be bare inside [install]'],
+	['dotted excludes above install', (s) => `install.minimumReleaseAgeExcludes = ["typescript"]\n${s}`, 'policy key install.minimumReleaseAgeExcludes must be bare inside [install]'],
+	['literal quoted age', (s) => s.replace('minimumReleaseAge = 1209600', "'minimumReleaseAge' = 0"), "policy key 'minimumReleaseAge' must be bare inside [install]"],
+	['quoted install header', (s) => s.replace('[install]', '["install"]'), 'install table must use bare [install]; found ["install"]'],
+	['age under run table', (s) => `${s.replace('minimumReleaseAge = 1209600', '')}\n[run]\nminimumReleaseAge = 1209600\n`, 'policy key minimumReleaseAge must be bare inside [install]'],
+	['inline install table', (s) => `install = { minimumReleaseAge = 0 }\n${s.replace('[install]', '').replace('minimumReleaseAge = 1209600', '')}`, 'install table must use bare [install]; found assignment install'],
+	['duplicate install header', (s) => `${s}\n[install]\n`, 'duplicate [install] header'],
+	['underscored age', (s) => s.replace('1209600', '1_209_600'), 'minimumReleaseAge must be plain decimal digits; found 1_209_600'],
+	['multiline excludes with approval', (s) => s.replace(`["${EXCEPTION_PACKAGE}"]`, `[\n"${EXCEPTION_PACKAGE}"\n]`), 'minimumReleaseAgeExcludes must be a single-line string array', true],
+	['literal install header', (s) => s.replace('[install]', "['install']"), "install table must use bare [install]; found ['install']"],
+	['array install header', (s) => s.replace('[install]', '[[install]]'), 'install table must use bare [install]; found [[install]]'],
+	['quoted dotted install header', (s) => `${s}\n["install".scopes]\nexample = "value"\n`, 'install table must use bare [install]; found ["install".scopes]'],
+	['quoted dotted policy segment', (s) => `install."minimumReleaseAgeExcludes" = ["typescript"]\n${s}`, 'policy key install."minimumReleaseAgeExcludes" must be bare inside [install]'],
+	['policy inside install subtable', (s) => `${s}\n[install.cache]\nminimumReleaseAge = 0\n`, 'policy key minimumReleaseAge must be bare inside [install]'],
+	['escaped policy key', (s) => `${s}"minimumReleaseAge\\u0045xcludes" = ["typescript"]\n`, 'policy key "minimumReleaseAge\\u0045xcludes" must be bare inside [install]'],
+	['policy table header', (s) => `${s}\n[install.minimumReleaseAgeExcludes]\n`, 'policy table [install.minimumReleaseAgeExcludes] must use a bare assignment inside [install]'],
+	['duplicate age', (s) => `${s}minimumReleaseAge = 0\n`, 'duplicate policy key minimumReleaseAge'],
+	['ambiguous multiline string', (s) => `${s}description = \"\"\"\n`, 'multiline string value for description'],
+	['non-string excludes', (s) => `${s}minimumReleaseAgeExcludes = [42]\n`, 'minimumReleaseAgeExcludes must be a single-line string array'],
+	...['"1209600"', '+1209600', '-1209600', '0x127500', '0o4472400', '0b100100111010100000000', '1209600oops'].map((value) => [
+		`noncanonical age ${value}`, (s) => s.replace('1209600', value), `minimumReleaseAge must be plain decimal digits; found ${value}`,
+	]),
+];
+
+for (const [name, change, diagnostic, activeException] of representationProbes) {
+	test(`rejects unsupported bunfig representation: ${name}`, (t) => {
+		const fixtureRoot = createPolicyFixture();
+		t.after(() => fs.rmSync(fixtureRoot, { recursive: true, force: true }));
+		if (activeException) installActiveException(fixtureRoot);
+		const bunfigPath = path.join(fixtureRoot, 'bunfig.toml');
+		fs.writeFileSync(bunfigPath, change(fs.readFileSync(bunfigPath, 'utf8')));
+		const result = runGuard(fixtureRoot);
+		assert.notEqual(result.status, 0);
+		assert.ok(result.stderr.includes(`unsupported bunfig representation: ${diagnostic}`), result.stderr);
+		t.diagnostic(result.stderr.split('\n').find((line) => line.includes(`unsupported bunfig representation: ${diagnostic}`)));
+		assert.doesNotMatch(result.stderr, /missing minimumReleaseAge|must exactly match supply-chain-exceptions/);
+	});
+}
+
+for (const [name, change] of [
+	['install scopes', (s) => `${s}\n[install.scopes]\nexample = "harmless"\n`],
+	['age trailing comment', (s) => s.replace('1209600', '1209600 # note')],
+	['header whitespace and comment', (s) => s.replace('[install]', '[ install ] # note')],
+	['hash inside basic string', (s) => `${s}\n[run]\nshell = "value#still-a-string" # note\n`],
+]) {
+	test(`accepts canonical bunfig with ${name}`, (t) => {
+		const fixtureRoot = createPolicyFixture();
+		t.after(() => fs.rmSync(fixtureRoot, { recursive: true, force: true }));
+		const bunfigPath = path.join(fixtureRoot, 'bunfig.toml');
+		fs.writeFileSync(bunfigPath, change(fs.readFileSync(bunfigPath, 'utf8')));
+		const result = runGuard(fixtureRoot);
+		assert.equal(result.status, 0, result.stderr);
+	});
+}
+
 test('frozen install remains reproducible without an exception', () => {
 	const lockfilePath = path.join(repoRoot, 'bun.lock');
 	const before = fs.readFileSync(lockfilePath, 'utf8');
