@@ -72,7 +72,7 @@ The golden reference's application category `song` corresponds to the public cla
 | gen1 | 6 | 6 / 0 | 6 / 0 |
 | Total | 131 | 131 / 0 | 129 / 2 |
 
-All five wd canonicalization cases use bare QIDs and agree at this base. No wd case is hidden by an unconditional scheme exclusion. The two parse divergences are parse-009 (space) and parse-010 (non-ASCII); the reference parser must tighten to the corpus grammar. The separate uppercase parser-contract divergence also records the corpus's case-sensitive namespace rule.
+All five wd canonicalization cases use bare QIDs and agree at this base. No wd case is hidden by an unconditional scheme exclusion. The two parse divergences are parse-009 (space) and parse-010 (non-ASCII); the reference parser must tighten to the corpus grammar. The separate uppercase parser-contract divergence also records the corpus's case-sensitive namespace rule. The reference keeps a lenient ingest parse on purpose: its consumers canonicalize raw values after parsing, and a tightening audit showed that a strict parser changes behaviour at several write and identity paths there, so these entries record a ruling rather than a defect on either side.
 
 ## Adding a vector
 
