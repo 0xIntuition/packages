@@ -8,7 +8,7 @@ export const socialMediaAccountCreationProfile = {
 		description: 'A social profile identity keyed by username and platform.',
 		category: 'Web',
 		schema: {
-			context: 'https://schema.intuition.systems/v1/social-media-account.jsonld',
+			context: 'https://schema.org/',
 			type: 'SocialMediaAccount',
 		},
 	},

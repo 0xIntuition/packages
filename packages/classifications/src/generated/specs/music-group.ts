@@ -4,8 +4,10 @@ export const musicGroup: ClassificationSpec = {
 	slug: 'music-group',
 	type: 'MusicGroup',
 	displayName: 'Music Group',
+	commonName: 'Artist/Band',
 	description: 'A band or artist identity.',
 	category: 'Media',
+	atomCategory: 'song',
 	schema: { context: 'https://schema.org/', type: 'MusicGroup' },
 	metadataPredicates: ['musicGroupMember', 'track', 'contain', 'hasCategory', 'sameAs'] as const,
 	fields: [

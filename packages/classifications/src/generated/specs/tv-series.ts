@@ -6,6 +6,7 @@ export const tvSeries: ClassificationSpec = {
 	displayName: 'TV Series',
 	description: 'A television series identity with optional start and end dates.',
 	category: 'Media',
+	atomCategory: 'thing',
 	schema: { context: 'https://schema.org/', type: 'TVSeries' },
 	metadataPredicates: ['actor', 'director', 'productionCompany', 'trailer', 'sameAs'] as const,
 	fields: [
@@ -51,7 +52,7 @@ export const tvSeries: ClassificationSpec = {
 		identifies: 'the series (seasons/episodes are unmodeled levels)',
 		ladder: [
 			// D27: open registries first
-			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' } },
+			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' }, wdSlug: 'television-series' },
 			{ kind: 'scheme', scheme: 'tmdb', source: { kind: 'same-as' } },
 			{ kind: 'scheme', scheme: 'imdb', source: { kind: 'same-as' } },
 			{

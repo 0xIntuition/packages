@@ -6,6 +6,7 @@ export const videoObject: ClassificationSpec = {
 	displayName: 'Video Object',
 	description: 'A video identity with optional description and content URL.',
 	category: 'Media',
+	atomCategory: 'thing',
 	schema: { context: 'https://schema.org/', type: 'VideoObject' },
 	metadataPredicates: [
 		'actor',

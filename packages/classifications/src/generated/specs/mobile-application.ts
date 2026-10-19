@@ -6,6 +6,7 @@ export const mobileApplication: ClassificationSpec = {
 	displayName: 'Mobile Application',
 	description: 'A mobile app identity with the app name and target platforms.',
 	category: 'Product',
+	atomCategory: 'software',
 	schema: { context: 'https://schema.org/', type: 'MobileApplication' },
 	metadataPredicates: ['availableOn', 'url', 'imgUrl', 'hasCategory', 'sameAs'] as const,
 	fields: [

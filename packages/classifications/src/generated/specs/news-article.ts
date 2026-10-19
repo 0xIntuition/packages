@@ -6,6 +6,7 @@ export const newsArticle: ClassificationSpec = {
 	displayName: 'News Article',
 	description: 'A news article with durable publication identity fields.',
 	category: 'Creative Work',
+	atomCategory: 'thing',
 	schema: { context: 'https://schema.org/', type: 'NewsArticle' },
 	metadataPredicates: [
 		'authoredBy',

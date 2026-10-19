@@ -6,6 +6,7 @@ export const definedTerm: ClassificationSpec = {
 	displayName: 'Defined Term',
 	description: 'A dictionary-style defined term with a short description.',
 	category: 'Entity',
+	atomCategory: 'thing',
 	schema: { context: 'https://schema.org/', type: 'DefinedTerm' },
 	metadataPredicates: ['hasDescription', 'sameAs', 'url', 'hasCategory', 'hasTag'] as const,
 	fields: [

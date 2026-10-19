@@ -6,8 +6,9 @@ export const ethereumSmartContract: ClassificationSpec = {
 	displayName: 'Ethereum Smart Contract',
 	description: 'A deployed smart contract identity on an EVM chain.',
 	category: 'Blockchain',
+	atomCategory: 'thing',
 	schema: {
-		context: 'https://schema.intuition.systems/v1/ethereum.jsonld',
+		context: 'https://schemas.intuition.systems/v1',
 		type: 'EthereumSmartContract',
 	},
 	metadataPredicates: ['implement', 'governedBy', 'use'] as const,

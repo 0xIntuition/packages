@@ -1,4 +1,11 @@
-import { getClassification } from './classifications.js';
+import {
+	type DerivedIid,
+	deriveIntuitionId,
+	normalizePodcastFeedUrl,
+	validateIntuitionId,
+} from '@0xintuition/iid';
+
+import { getClassification, identityLadderFor } from './classifications.js';
 import type {
 	ClassificationFieldSpec,
 	ClassificationValidationIssue,
@@ -6,13 +13,29 @@ import type {
 	FieldType,
 } from './types.js';
 
-export function buildAtomData(slug: string, values: ClassificationValueMap): string {
-	return JSON.stringify(buildAtomDataObject(slug, values));
+export interface BuildAtomDataOptions {
+	/**
+	 * Derive the classification's Intuition Identifier (IID) from its
+	 * identity ladder and inject it as the schema.org `identifier` property,
+	 * positioned right after `@type` (IID spec §6, decision D4). Opt-in while
+	 * minting pipelines adopt IIDs deliberately; injection changes atom data
+	 * bytes and therefore on-chain atom IDs.
+	 */
+	identifier?: boolean;
+}
+
+export function buildAtomData(
+	slug: string,
+	values: ClassificationValueMap,
+	options?: BuildAtomDataOptions
+): string {
+	return JSON.stringify(buildAtomDataObject(slug, values, options));
 }
 
 export function buildAtomDataObject(
 	slug: string,
-	values: ClassificationValueMap
+	values: ClassificationValueMap,
+	options?: BuildAtomDataOptions
 ): Record<string, unknown> {
 	const spec = requireClassification(slug);
 	const issues = validateClassificationValues(slug, values);
@@ -27,6 +50,14 @@ export function buildAtomDataObject(
 		dataEntries.push(['@context', spec.schema.context], ['@type', spec.type]);
 	}
 
+	if (options?.identifier) {
+		const derived = deriveClassificationIdentifier(slug, values);
+
+		if (derived) {
+			dataEntries.push(['identifier', derived.iid]);
+		}
+	}
+
 	for (const field of spec.fields) {
 		const value = values[field.key];
 
@@ -38,6 +69,43 @@ export function buildAtomDataObject(
 	}
 
 	return Object.fromEntries(dataEntries);
+}
+
+/**
+ * Derive the IID for a classification's values via its identity ladder.
+ * Returns `undefined` when the classification has no ladder (out of IID
+ * scope) or no rung fires. Unknown classifications and invalid derived
+ * identifiers throw.
+ */
+export function deriveClassificationIdentifier(
+	slug: string,
+	values: ClassificationValueMap
+): DerivedIid | undefined {
+	const spec = requireClassification(slug);
+
+	if (!spec.identity) {
+		return undefined;
+	}
+
+	const ladder = identityLadderFor(slug);
+	if (!ladder) return undefined;
+
+	// The train's declarative podcast-guid source hashes its input verbatim.
+	// Match the reference source's normalization at this adapter boundary.
+	const normalizedValues = { ...values };
+	for (const rung of ladder.rungs) {
+		if (rung.kind !== 'scheme' || rung.source.kind !== 'podcast-guid') continue;
+		const key = rung.source.key;
+		const value = values[key];
+		if (typeof value === 'string') normalizedValues[key] = normalizePodcastFeedUrl(value);
+	}
+	const derived = deriveIntuitionId(ladder, normalizedValues);
+
+	if (derived && !validateIntuitionId(derived.iid)) {
+		throw new Error(`Derived identifier failed validation for "${slug}": ${derived.iid}`);
+	}
+
+	return derived;
 }
 
 export function validateClassificationValues(

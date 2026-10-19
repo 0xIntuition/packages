@@ -6,6 +6,7 @@ export const softwareApplication: ClassificationSpec = {
 	displayName: 'Software Application',
 	description: 'A software application identity with optional category and platform metadata.',
 	category: 'Product',
+	atomCategory: 'software',
 	schema: { context: 'https://schema.org/', type: 'SoftwareApplication' },
 	metadataPredicates: [
 		'url',

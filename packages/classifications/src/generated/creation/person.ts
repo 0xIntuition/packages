@@ -37,7 +37,7 @@ export const personCreationProfile = {
 			label: 'Last Name',
 			description: 'The person’s family or last name.',
 			fieldType: 'string',
-			required: true,
+			required: false,
 			placeholder: 'Buterin',
 			schemaProperty: 'familyName',
 			schema: {

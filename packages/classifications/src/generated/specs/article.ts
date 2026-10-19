@@ -6,6 +6,7 @@ export const article: ClassificationSpec = {
 	displayName: 'Article',
 	description: 'A written article with a durable headline and canonical URL.',
 	category: 'Creative Work',
+	atomCategory: 'thing',
 	schema: { context: 'https://schema.org/', type: 'Article' },
 	metadataPredicates: [
 		'authoredBy',

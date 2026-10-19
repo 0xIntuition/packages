@@ -6,6 +6,7 @@ export const review: ClassificationSpec = {
 	displayName: 'Review',
 	description: 'A review identity linked to a durable target reference.',
 	category: 'Creative Work',
+	atomCategory: 'thing',
 	schema: { context: 'https://schema.org/', type: 'Review' },
 	metadataPredicates: ['itemReviewed', 'authoredBy', 'sameAs'] as const,
 	fields: [
