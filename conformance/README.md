@@ -28,7 +28,7 @@ No proof covers a database-backed runner, devnet, publication, live registry, pr
 - `sameAs` omitted from identity envelopes → public-builder defect; the two movie cases retain the same gen1 IID but change anchor bytes and atom id.
 - Derived recipe values not materialised → public-builder defect; the social-media-posting case emits raw text under `textHash`, the same class as geo7 evidence defects.
 
-The required command reports **1027 pass, 23 todo, 0 fail** across 7 files (1050 tests). Of those, the five harness files report 737 agreements and 98 known divergences (anchor proof: 32 agreements, 26 divergences, 23 OPEN); 23 passing integrity self-tests cover malformed parser shapes, undefined/null distinctions, corpus loss, id drift, agreement metadata, orphan divergences, and documentation accounting; 169 passing tests come from the existing package conformance file.
+The required command reports **1027 pass, 23 todo, 0 fail** across 7 files (1050 tests). Of those, the five harness files report 765 agreements and 70 known divergences (anchor proof: 33 agreements, 25 divergences, 23 OPEN); 23 passing integrity self-tests cover malformed parser shapes, undefined/null distinctions, corpus loss, id drift, agreement metadata, orphan divergences, and documentation accounting; 169 passing tests come from the existing package conformance file.
 
 ## Runtime enumeration
 
@@ -37,9 +37,9 @@ The manifest pins sorted ids and counts for every vector file, every canonicaliz
 | Proof file | Registered | Executed | Agreements | Divergences | OPEN |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | parse-and-classify.test.ts | 10 | 10 | 9 | 1 | 0 |
-| anchor-build-hash.test.ts | 81 | 58 | 32 | 26 | 23 |
+| anchor-build-hash.test.ts | 81 | 58 | 33 | 25 | 23 |
 | encode-decode.test.ts | 51 | 51 | 51 | 0 | 0 |
-| ladder-differential.test.ts | 454 | 454 | 385 | 69 | 0 |
+| ladder-differential.test.ts | 454 | 454 | 412 | 42 | 0 |
 | canonicalization-parity.test.ts | 262 | 262 | 260 | 2 | 0 |
 
 ## Parser result shapes
@@ -56,7 +56,7 @@ Comparisons use strict structural equality. Shared normalization sorts object ke
 
 `support/public.ts` resolves packages by name via public exports, asserts built `dist` resolution, and imports that resolved entry. The isolated workspace install does not link these packages at the root. Root resolution is attempted first; otherwise package self-references resolve through their existing public manifests, and viem resolves from its existing protocol consumer. No source entrypoints, new dependencies, or new workspace links are introduced.
 
-`support/mappings.ts` matches each reference slug to the unique train classification with the same schema type. All 37 slugs currently map identically. The public evaluator receives `{slug, identifies, rungs: spec.identity.ladder}`. Winning rungs compare kind, scheme, stable tag, input field keys, and ordered recipe fields. Numeric indices are local to each declaration: structural sequence comparison separately detects missing/reordered rungs, including the missing Person OLID author rung.
+`support/mappings.ts` matches each reference slug to the unique train classification with the same schema type. All 37 slugs currently map identically. The public evaluator receives `{slug, identifies, rungs: spec.identity.ladder}`. Winning rungs compare kind, scheme, stable tag, input field keys, and ordered recipe fields. Numeric indices are local to each declaration: structural sequence comparison separately detects missing/reordered rungs. The Person OLID author rung and all 37 recorded ladder structures now agree with the reference.
 
 Reference `buildAtomAnchor(spec, values, {candidateIid})` maps to public `buildIidAnchor(slug, values, options)`. Values pass unchanged. None of the reference options has an equivalent public option at this base: the candidateIid cases are explicitly OPEN; no override is manufactured by injecting fields. Public structured failures are normalized by meaning to INVALID_IID (failed identifier inspection) or Error; this does not establish parity of exception types/messages or fallback validation. Such gaps remain OPEN.
 
@@ -92,4 +92,4 @@ After combining #24–#34, eleven ISNI ladder cases now match the unchanged refe
 
 The person ISNI anchor case is only partially fixed. Its identifier now matches `int:isni:0000000121032683`, but the public P1 builder still omits `sameAs`. The reviewed public output is the 92-byte envelope containing only `@context`, `@type`, and `identifier`, with atom ID `0x1907130d1e3daafe1208dc1fc86354846b5a17392d7e69856504d30ff1e0874f`. The unchanged reference includes `sameAs`, has 144 bytes, and hashes to `0xb763b2a00d5dad1b6c3ccd18cdb5009d7e4954c8eec50974999151be6da250fa`. The remaining divergence records this specific builder defect and the inspected output fingerprint; it is not treated as agreement.
 
-The typed-wd stack does **not** reconcile the classifications package's inline declarative ladders: their slugless rungs remain unchanged. All 59 divergences assigned to the typed-wd follow-up still reproduce with their original fingerprints. The 70 historical typed-wd exclusions also remain outstanding, including 36 parser cases for which the checked-in oracle contains names only. Typed-wd package unit tests pass separately, but completing these cross-package proofs and reconciling classifications remains a release gate. A passing harness establishes its recorded agreements and known differences, not full parity with the internal application.
+The classifications parity port reconciles 26 ladder comparisons: six Book dormant written-work cases, eight Company dormant organization cases, six MusicAlbum dormant album cases, five Person OLID author cases, and the Person ladder structure. Each public output exactly matches the unchanged oracle; their divergence entries are retired and their permanent tests enforce ordinary equality. The coordinator's podcast normalization fix also retired one ladder divergence and one anchor divergence before this reconciliation. The remaining 39 divergences assigned to the typed-wd follow-up still reproduce with their original fingerprints; the remaining slugless rungs are unchanged. The 70 historical typed-wd exclusions also remain outstanding, including 36 parser cases for which the checked-in oracle contains names only. Typed-wd package unit tests pass separately, but completing these cross-package proofs and reconciling classifications remains a release gate. A passing harness establishes its recorded agreements and known differences, not full parity with the internal application.
