@@ -426,10 +426,14 @@ describe('reference public anchor validators', () => {
 describe('candidate profile selection', () => {
 	it('takes the profile from eligibility and ignores an explicit profile, as the reference does', () => {
 		// Eligible candidate with `profile: 'p1'` requested: the reference mints bare P0.
-		const eligible = primitives.buildAtomAnchor('book', { name: 'Probe' }, {
-			candidateIid: 'int:isbn:9780306406157',
-			profile: 'p1',
-		});
+		const eligible = primitives.buildAtomAnchor(
+			'book',
+			{ name: 'Probe' },
+			{
+				candidateIid: 'int:isbn:9780306406157',
+				profile: 'p1',
+			}
+		);
 		expect(eligible.success).toBe(true);
 		if (eligible.success) {
 			expect(eligible.value.profile).toBe('p0');
@@ -440,10 +444,14 @@ describe('candidate profile selection', () => {
 		}
 
 		// Ineligible candidate with `profile: 'p0'` requested: the reference mints a P1 envelope.
-		const ineligible = primitives.buildAtomAnchor('movie', { name: 'Probe' }, {
-			candidateIid: 'int:tmdb:movie:603',
-			profile: 'p0',
-		});
+		const ineligible = primitives.buildAtomAnchor(
+			'movie',
+			{ name: 'Probe' },
+			{
+				candidateIid: 'int:tmdb:movie:603',
+				profile: 'p0',
+			}
+		);
 		expect(ineligible.success).toBe(true);
 		if (ineligible.success) {
 			expect(ineligible.value.profile).toBe('p1');
