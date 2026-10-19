@@ -302,16 +302,12 @@ function buildCandidateAnchor(
 		return { success: false, errors: [error.message] };
 	}
 
+	// The reference selects the profile from the candidate's eligibility alone:
+	// an eligible candidate mints as bare P0 bytes, any other admitted candidate
+	// as a P1 envelope. `options.profile` is not consulted on this path, so a
+	// candidate always yields the atom the reference would mint for it.
 	const eligible = isAnchorEligible(candidateIid) && !/^int:acct:[^:]+:@/.test(candidateIid);
-	const profile = options.profile ?? (eligible ? 'p0' : 'p1');
-	if (profile === 'p0' && !eligible) {
-		return {
-			success: false,
-			errors: [
-				`${candidateIid} cannot mint as a bare P0 anchor: candidate is not anchor-eligible.`,
-			],
-		};
-	}
+	const profile = eligible ? 'p0' : 'p1';
 	const errors: string[] = [];
 	const contextUris = normalizeContextUris(
 		options.contextUris ?? [],

@@ -107,9 +107,10 @@ validated classification values envelope, with `identifier` inserted immediately
 after `@type`, declared fields in declaration order, and every declared `string[]`
 field deduplicated and sorted. This includes unknown schemes, weak account handles,
 polymorphic schemes, and Class C identifiers. P0 skips field validation; candidate
-P1 requires the full classification values. Explicit profile and URI context
-options continue to apply. Candidate validation runs before either option is
-applied. Unknown-scheme candidates retain their scheme with `class: null` and an
+P1 requires the full classification values. The profile follows the candidate's
+eligibility, as in the reference; an explicit `profile` option is not consulted on
+this path, so a candidate always yields the atom the reference would mint for it.
+URI context options continue to apply, after candidate validation. Unknown-scheme candidates retain their scheme with `class: null` and an
 empty provider plan. Omitting `candidateIid` preserves the existing derivation and
 serialization paths.
 

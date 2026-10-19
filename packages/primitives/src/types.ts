@@ -65,12 +65,17 @@ export interface UriLimits {
 
 /** Options for the IID anchor builder. */
 export interface IidAnchorOptions {
-	/** Authoritative candidate IID; validated without re-deriving it from values. */
+	/**
+	 * Authoritative candidate IID; validated without re-deriving it from values.
+	 * The profile then follows the candidate's eligibility (`p0` when eligible,
+	 * otherwise `p1`), as in the reference; `profile` is not consulted.
+	 */
 	readonly candidateIid?: string;
 	/**
 	 * Requested profile. Default: the strongest legal one (`p0` when the
 	 * derived identifier is anchor-eligible, otherwise `p1`). Requesting
-	 * `p0` for an ineligible identifier is a structured error.
+	 * `p0` for an ineligible identifier is a structured error. Not consulted
+	 * when `candidateIid` is set.
 	 */
 	readonly profile?: AnchorProfile;
 	/** Ordered URI context manifest (deduplicated, order-preserving). */
