@@ -7,4 +7,5 @@ minimumReleaseAge = 1209600
 # and mirrored here as `minimumReleaseAgeExcludes = ["<package>"]`. Bun can exempt
 # only by package name, so scripts/guard-supply-chain-policy.mjs binds each entry
 # to the exact version, integrity, and removal date in that manifest and fails the
-# build once the normal age is reached. No exception is currently active.
+# build once the normal age is reached. Remove these exceptions on 2026-11-02.
+minimumReleaseAgeExcludes = ["@0xintuition/contracts-v2", "@0xintuition/contracts-v2-periphery"]

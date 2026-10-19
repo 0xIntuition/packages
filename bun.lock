@@ -5,7 +5,8 @@
     "": {
       "name": "@0xintuition/packages-monorepo",
       "devDependencies": {
-        "@0xintuition/contracts-v2": "1.1.0-alpha.0",
+        "@0xintuition/contracts-v2": "1.1.0-alpha.1",
+        "@0xintuition/contracts-v2-periphery": "1.1.0-alpha.0",
         "@biomejs/biome": "catalog:",
         "@types/bun": "catalog:",
         "turbo": "catalog:",
@@ -287,7 +288,9 @@
 
     "@0xintuition/cli": ["@0xintuition/cli@workspace:packages/cli"],
 
-    "@0xintuition/contracts-v2": ["@0xintuition/contracts-v2@1.1.0-alpha.0", "", { "dependencies": { "@account-abstraction/contracts": "^0.8.0", "@openzeppelin-v4/contracts": "npm:@openzeppelin/contracts@^4.9.6", "@openzeppelin-v4/contracts-upgradeable": "npm:@openzeppelin/contracts-upgradeable@^4.9.6", "@openzeppelin/contracts": "5.4.0", "@openzeppelin/contracts-upgradeable": "5.4.0", "@prb/math": "^4.1.0", "solady": "^0.1.26" } }, "sha512-vt9GFaFXYAeigLyl/4i6hPpLO4NBrZDyWJrM2M7aHuQ39/qSpxqMmIzetoAtpBWWx4AzM5wccUsXJvVST02saA=="],
+    "@0xintuition/contracts-v2": ["@0xintuition/contracts-v2@1.1.0-alpha.1", "", { "dependencies": { "@account-abstraction/contracts": "0.8.0", "@openzeppelin-v4/contracts": "npm:@openzeppelin/contracts@4.9.6", "@openzeppelin-v4/contracts-upgradeable": "npm:@openzeppelin/contracts-upgradeable@4.9.6", "@openzeppelin/contracts": "5.4.0", "@openzeppelin/contracts-upgradeable": "5.4.0", "@prb/math": "4.1.0", "solady": "0.1.26" } }, "sha512-SyeZAbsc/IuFgxt5wx0XywrqnVspssFwhf+PHkbUD8KAjZfI3fnEXvI+K07sprOXTYm87jDslV02j3x6NSSaDg=="],
+
+    "@0xintuition/contracts-v2-periphery": ["@0xintuition/contracts-v2-periphery@1.1.0-alpha.0", "", { "dependencies": { "@openzeppelin/contracts": "5.4.0" } }, "sha512-wG4tby9RkYdjz/k246dWJtu0yo1duylxo+6iGjnx+JcRVtLNWPXILMCE24yHzunoq0796F4FLpCSYzGyjzgoGA=="],
 
     "@0xintuition/curves": ["@0xintuition/curves@workspace:packages/curves"],
 
@@ -479,7 +482,7 @@
 
     "@paulmillr/qr": ["@paulmillr/qr@0.2.1", "", {}, "sha512-IHnV6A+zxU7XwmKFinmYjUcwlyK9+xkG3/s9KcQhI9BjQKycrJ1JRO+FbNYPwZiPKW3je/DR0k7w8/gLa5eaxQ=="],
 
-    "@prb/math": ["@prb/math@4.1.2", "", {}, "sha512-CBSg0SyOYfs4X+GD16klIYE39sqDs1skPmGP5SVKJPVfthmooAriaSkWC8NqBrkIi129XDnxm7f1cBXnu55FyQ=="],
+    "@prb/math": ["@prb/math@4.1.0", "", {}, "sha512-ef5Xrlh3BeX4xT5/Wi810dpEPq2bYPndRxgFIaKSU1F/Op/s8af03kyom+mfU7gEpvfIZ46xu8W0duiHplbBMg=="],
 
     "@reown/appkit": ["@reown/appkit@1.7.8", "", { "dependencies": { "@reown/appkit-common": "1.7.8", "@reown/appkit-controllers": "1.7.8", "@reown/appkit-pay": "1.7.8", "@reown/appkit-polyfills": "1.7.8", "@reown/appkit-scaffold-ui": "1.7.8", "@reown/appkit-ui": "1.7.8", "@reown/appkit-utils": "1.7.8", "@reown/appkit-wallet": "1.7.8", "@walletconnect/types": "2.21.0", "@walletconnect/universal-provider": "2.21.0", "bs58": "6.0.0", "valtio": "1.13.2", "viem": ">=2.29.0" } }, "sha512-51kTleozhA618T1UvMghkhKfaPcc9JlKwLJ5uV+riHyvSoWPKPRIa5A6M1Wano5puNyW0s3fwywhyqTHSilkaA=="],
 

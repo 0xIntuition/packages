@@ -8,7 +8,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { gunzipSync } from 'node:zlib';
 
 const EXPECTED_PACKAGE = '@0xintuition/contracts-v2';
-const EXPECTED_VERSION = '1.1.0-alpha.0';
+const EXPECTED_VERSION = '1.1.0-alpha.1';
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const protocolRoot = resolve(repoRoot, 'packages/protocol');
 const artifactPaths = ['dist/abis/index.js', 'dist/bytecodes/index.js'];
@@ -75,55 +75,16 @@ export async function syncProtocolArtifacts({
 	}
 
 	if (verifyRegistry) {
-		const url = registryTarballUrl(locked.url);
-		let archive;
-		try {
-			const response = await fetch(url);
-			if (!response.ok) throw new Error(`HTTP ${response.status}`);
-			archive = Buffer.from(await response.arrayBuffer());
-		} catch (error) {
-			throw new Error(`Registry verification fetch failed for ${url}: ${error.message}`, {
-				cause: error,
-			});
-		}
-		if (`sha512-${createHash('sha512').update(archive).digest('base64')}` !== integrity) {
-			throw new Error(
-				`Registry tarball SHA-512 mismatch for ${EXPECTED_PACKAGE}@${EXPECTED_VERSION}`
-			);
-		}
-		let entries;
-		try {
-			entries = await tarballReader(archive);
-		} catch (error) {
-			throw new Error(`Registry tarball could not be read: ${error.message}`, { cause: error });
-		}
-		// The installed entry modules re-export bundled chunks. Bind every local
-		// static import as well, so unchanged wrappers cannot verify a mutated ABI.
-		const modulePaths = new Set(artifactPaths);
-		for (const path of modulePaths) {
-			const published = entries.get(`package/${path}`);
-			if (!published || !Buffer.from(published).equals(readFileSync(resolve(sourceRoot, path)))) {
-				throw new Error(`Registry artifact mismatch: ${path}`);
-			}
-			for (const match of Buffer.from(published)
-				.toString('utf8')
-				.matchAll(
-					/^\s*(?:import|export)\s+(?:\{[^}]*\}\s+from\s*|[^'"\n]*?\s+from\s*)?['"]([^'"]+)['"]/gm
-				)) {
-				const dependency = posix.normalize(posix.join(posix.dirname(path), match[1]));
-				if (
-					!match[1].startsWith('.') ||
-					!dependency.startsWith('dist/') ||
-					!dependency.endsWith('.js')
-				) {
-					throw new Error(`Unsupported registry artifact import in ${path}: ${match[1]}`);
-				}
-				modulePaths.add(dependency);
-			}
-		}
-		log(
-			`Verified registry tarball SHA-512 and installed ABI/bytecode modules for ${EXPECTED_PACKAGE}@${EXPECTED_VERSION}.`
-		);
+		await verifyRegistryArtifact({
+			packageName: EXPECTED_PACKAGE,
+			version: EXPECTED_VERSION,
+			sourceRoot,
+			locked,
+			readFileSync,
+			fetch,
+			tarballReader,
+			log,
+		});
 	}
 
 	const abiModule = await loadArtifact(resolve(sourceRoot, artifactPaths[0]));
@@ -213,6 +174,73 @@ export async function syncProtocolArtifacts({
 	if (checkOnly) log(`Protocol artifacts match ${EXPECTED_PACKAGE}@${EXPECTED_VERSION}.`);
 }
 
+/** Bind installed artifact modules (including transitive chunks) to the exact registry tarball. */
+export async function verifyRegistryArtifact({
+	packageName,
+	version,
+	sourceRoot,
+	locked,
+	readFileSync = fsReadFileSync,
+	fetch = globalThis.fetch,
+	tarballReader = readTarball,
+	log = (message) => console.log(message),
+}) {
+	const installed = JSON.parse(readFileSync(resolve(sourceRoot, 'package.json'), 'utf8'));
+	if (installed.name !== packageName || installed.version !== version) {
+		throw new Error(
+			`Expected ${packageName}@${version}, found ${installed.name}@${installed.version}`
+		);
+	}
+	const integrity = locked.integrity;
+	const url = registryTarballUrl(locked.url, packageName, version);
+	let archive;
+	try {
+		const response = await fetch(url);
+		if (!response.ok) throw new Error(`HTTP ${response.status}`);
+		archive = Buffer.from(await response.arrayBuffer());
+	} catch (error) {
+		throw new Error(`Registry verification fetch failed for ${url}: ${error.message}`, {
+			cause: error,
+		});
+	}
+	if (`sha512-${createHash('sha512').update(archive).digest('base64')}` !== integrity) {
+		throw new Error(`Registry tarball SHA-512 mismatch for ${packageName}@${version}`);
+	}
+	let entries;
+	try {
+		entries = await tarballReader(archive);
+	} catch (error) {
+		throw new Error(`Registry tarball could not be read: ${error.message}`, { cause: error });
+	}
+	// The installed entry modules re-export bundled chunks. Bind every local
+	// static import as well, so unchanged wrappers cannot verify a mutated ABI.
+	const modulePaths = new Set(artifactPaths);
+	for (const path of modulePaths) {
+		const published = entries.get(`package/${path}`);
+		if (!published || !Buffer.from(published).equals(readFileSync(resolve(sourceRoot, path)))) {
+			throw new Error(`Registry artifact mismatch: ${path}`);
+		}
+		for (const match of Buffer.from(published)
+			.toString('utf8')
+			.matchAll(
+				/^\s*(?:import|export)\s+(?:\{[^}]*\}\s+from\s*|[^'"\n]*?\s+from\s*)?['"]([^'"]+)['"]/gm
+			)) {
+			const dependency = posix.normalize(posix.join(posix.dirname(path), match[1]));
+			if (
+				!match[1].startsWith('.') ||
+				!dependency.startsWith('dist/') ||
+				!dependency.endsWith('.js')
+			) {
+				throw new Error(`Unsupported registry artifact import in ${path}: ${match[1]}`);
+			}
+			modulePaths.add(dependency);
+		}
+	}
+	log(
+		`Verified registry tarball SHA-512 and installed ABI/bytecode modules for ${packageName}@${version}.`
+	);
+}
+
 function readCommittedProvenance(path, readFileSync) {
 	let content;
 	try {
@@ -232,8 +260,12 @@ function readCommittedProvenance(path, readFileSync) {
 	};
 }
 
-function lockedResolution(readFileSync) {
-	const resolution = `${EXPECTED_PACKAGE}@${EXPECTED_VERSION}`;
+export function lockedResolution(
+	readFileSync,
+	packageName = EXPECTED_PACKAGE,
+	version = EXPECTED_VERSION
+) {
+	const resolution = `${packageName}@${version}`;
 	// Bun's text lockfile has trailing commas; each registry tuple is JSON.
 	const lockfile = readFileSync(resolve(repoRoot, 'bun.lock'), 'utf8');
 	for (const line of lockfile.split('\n')) {
@@ -250,15 +282,15 @@ function lockedResolution(readFileSync) {
 	throw new Error(`Missing lockfile integrity for ${resolution} in bun.lock`);
 }
 
-function registryTarballUrl(lockedUrl) {
+function registryTarballUrl(lockedUrl, packageName = EXPECTED_PACKAGE, version = EXPECTED_VERSION) {
 	const url =
 		lockedUrl ||
-		`https://registry.npmjs.org/${EXPECTED_PACKAGE}/-/contracts-v2-${EXPECTED_VERSION}.tgz`;
+		`https://registry.npmjs.org/${packageName}/-/${packageName.split('/').at(-1)}-${version}.tgz`;
 	try {
 		const parsed = new URL(url);
 		if (!['https:', 'http:'].includes(parsed.protocol)) throw new Error('Expected HTTP(S)');
 	} catch {
-		throw new Error(`Invalid registry tarball URL for ${EXPECTED_PACKAGE}@${EXPECTED_VERSION}`);
+		throw new Error(`Invalid registry tarball URL for ${packageName}@${version}`);
 	}
 	return url;
 }

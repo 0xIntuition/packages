@@ -54,6 +54,15 @@ export function readWorkspaceManifest(repoRoot, dirName) {
 	return JSON.parse(readFileSync(manifestPath, 'utf8'));
 }
 
+/** Internal assistant configuration and working notes are never package API. */
+export function assertPublicTarballFiles(files, packageName) {
+	const internalPath =
+		/(?:^|\/)(?:\.local|\.planning|\.agents|\.claude|\.codex)(?:\/|$)|(?:^|\/)(?:AGENTS(?:\.local)?|CLAUDE|GEMINI|SKILL)\.md$/i;
+	const leaked = files.filter((file) => internalPath.test(file.replaceAll('\\', '/')));
+	if (leaked.length)
+		throw new Error(`${packageName}: internal agent files in npm tarball: ${leaked.join(', ')}`);
+}
+
 export function requiredTarballFiles(kind) {
 	if (kind === 'docs-only') {
 		return ['README.md', 'LICENSE'];

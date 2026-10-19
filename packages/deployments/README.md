@@ -44,16 +44,17 @@ ABIs and bytecode are generated from the Intuition contracts build.
 
 ## Candidate compatibility
 
-These v1.1.0 artifacts are pending publication in the authoritative contracts npm
-package. A deployment address alone does not imply support for the new ABI:
+Core v1.1.0 artifacts match `@0xintuition/contracts-v2@1.1.0-alpha.1`; router artifacts match `@0xintuition/contracts-v2-periphery@1.1.0-alpha.0`. A deployment address alone does not imply support for the new ABI:
 mainnet must be upgraded before new functions can be used there. See the
-[contract release checklist](https://github.com/0xIntuition/packages/blob/update/v1.1.0-alpha/docs/contract-artifacts.md).
+[contract artifact provenance](https://github.com/0xIntuition/packages/blob/update/v1.1.0-alpha/docs/contract-artifacts.md).
 
 `MultiVaultBytecode` includes an unresolved `MultiVaultLib` link placeholder.
 Link the library using the matching Foundry build's link references before deployment.
-`MultiVaultMigrationModeAbi` and `MultiVaultMigrationModeBytecode` are retained from
-`@0xintuition/contracts-v2@1.1.0-alpha.0`; they are migration artifacts, not the
-new canonical MultiVault implementation.
+`MultiVaultMigrationModeAbi` and `MultiVaultMigrationModeBytecode` now match
+`@0xintuition/contracts-v2@1.1.0-alpha.1`. Its `previewTripleCreate` accepts
+subject, predicate, and object IDs; decoded parameter/event names follow the new
+implementation. Do not use this ABI as evidence that an older deployed migration
+contract has been upgraded.
 
 Historical or custom addresses can be supplied through `AddressOverrides` as the
 last argument to the core address helpers. Both generic call orders,

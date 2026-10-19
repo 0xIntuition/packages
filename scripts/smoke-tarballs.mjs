@@ -340,7 +340,7 @@ try {
 	// wagmi's published declarations fail standalone checking under this peer
 	// matrix, independently of our packages. Keep the core/IID check above
 	// strict; check React consumer calls with the same skipLibCheck setting as
-	// this repository, and record that limitation in release-readiness.md.
+	// this repository, and document that limitation in the release notes.
 	writeFileSync(
 		resolve(tempRoot, 'consumer-react.ts'),
 		`

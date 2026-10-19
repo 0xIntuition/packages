@@ -59,8 +59,8 @@ Core deployment ownership in this release:
 
 This is the `4.0.0` candidate. New v1.1.0 functions require a matching contract
 deployment; existing mainnet addresses may still run the older implementation.
-Authoritative contract npm publication and verification remain release gates.
-See the [contract release checklist](https://github.com/0xIntuition/packages/blob/update/v1.1.0-alpha/docs/contract-artifacts.md).
+Core artifacts are verified against `@0xintuition/contracts-v2@1.1.0-alpha.1`.
+See the [contract artifact provenance](https://github.com/0xIntuition/packages/blob/update/v1.1.0-alpha/docs/contract-artifacts.md).
 
 `previewTripleCreate` now takes subject, predicate, object, and assets. Dynamic-fee
 read models use redeem lots and separate deposit/redeem configuration. Receipt

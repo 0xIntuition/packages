@@ -201,3 +201,9 @@ packages, but published versions must never be reused.
 - Keep detailed internal provenance, meeting notes, and private project-management
   context out of public docs unless the team explicitly chooses to publish it.
 - Keep PR descriptions focused on what changed, why, and how it was validated.
+
+## Local working notes
+
+Keep assistant instructions, prompts, and planning notes in ignored local directories
+such as `.local/`. Commit public API documentation, tests, and reproducible release
+checks. Package publication checks reject internal agent files in npm tarballs.

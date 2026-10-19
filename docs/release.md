@@ -4,10 +4,9 @@ This repository publishes the public `@0xintuition/*` packages. When a release
 changes how developers install packages, import files, resolve schema URLs, or
 receive default npm versions, call that out clearly in the release notes.
 
-This candidate is **not yet cleared to merge or publish**. Complete the
-[contract artifact release](./contract-artifacts.md) and the remaining
-[review gates](./release-readiness.md) first. `release-plan.json` records candidate
-versions and publish order; it does not authorize publication.
+`release-plan.json` records candidate versions and publish order. Before a
+release, validate [contract artifact provenance](./contract-artifacts.md),
+identity compatibility, and consuming applications using the checks below.
 
 ## Current Policy
 
@@ -103,8 +102,8 @@ bun run release:check
 
 This checks unused candidate versions, availability of omitted internal
 dependencies, the pinned MultiVault registry artifact, and broader contract
-artifact parity. It currently fails on the unpublished contract revisions; see
-[contract publishing instructions](./contract-artifacts.md). A green workspace
+artifact parity against both core and router registry packages; see
+[contract artifact provenance](./contract-artifacts.md). A green workspace
 CI run alone does not satisfy this gate or consumer acceptance.
 
 For docs-only release-strategy edits, at minimum run:

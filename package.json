@@ -63,12 +63,13 @@
 		"wagmi": "^2.15.4"
 	},
 	"devDependencies": {
-		"@0xintuition/contracts-v2": "1.1.0-alpha.0",
+		"@0xintuition/contracts-v2": "1.1.0-alpha.1",
 		"@biomejs/biome": "catalog:",
 		"@types/bun": "catalog:",
 		"turbo": "catalog:",
 		"typescript": "catalog:",
-		"vitest": "catalog:"
+		"vitest": "catalog:",
+		"@0xintuition/contracts-v2-periphery": "1.1.0-alpha.0"
 	},
 	"engines": {
 		"node": ">=20"

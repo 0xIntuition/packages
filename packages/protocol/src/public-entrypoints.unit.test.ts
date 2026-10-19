@@ -125,11 +125,14 @@ describe('@0xintuition/protocol wrapper entrypoints', () => {
 	it('exports contracts-v2 provenance', () => {
 		expect(protocol.contractsV2Provenance).toMatchObject({
 			package: '@0xintuition/contracts-v2',
-			version: null,
-			source: 'unpublished',
-			verified: false,
+			version: '1.1.0-alpha.1',
+			source: 'registry',
+			verified: true,
 		});
-		expect(protocol.contractsV2Provenance.integrity).toBeNull();
+		expect(protocol.contractsV2Provenance.integrity).toMatch(/^sha512-[A-Za-z0-9+/]+={0,2}$/);
+		expect(new Date(protocol.contractsV2Provenance.verifiedAt).toISOString()).toBe(
+			protocol.contractsV2Provenance.verifiedAt
+		);
 	});
 
 	it('exports the new ABIs and deployment bytecode', () => {

@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
+import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
-import { PACKAGES } from './package-registry.mjs';
+import { assertPublicTarballFiles, PACKAGES } from './package-registry.mjs';
 
 const packageRoot = process.cwd();
 const packageJsonPath = resolve(packageRoot, 'package.json');
@@ -81,12 +82,7 @@ function entrypointExists(path) {
 		return existsSync(resolve(packageRoot, relativePath));
 	}
 
-	const pattern = new RegExp(
-		`^${relativePath
-			.split('*')
-			.map(escapeRegExp)
-			.join('.*')}$`
-	);
+	const pattern = new RegExp(`^${relativePath.split('*').map(escapeRegExp).join('.*')}$`);
 
 	return walkPackageFiles().some((candidatePath) => pattern.test(candidatePath));
 }
@@ -177,6 +173,25 @@ if (!isDocsOnly) {
 
 	if (!existsSync(resolve(packageRoot, 'dist/index.d.ts'))) {
 		addFailure('missing dist/index.d.ts; run the package build first');
+	}
+}
+
+if (!failures.length) {
+	// Inspect npm's actual file selection, including nested files under allowed directories.
+	const [packed] = JSON.parse(
+		execFileSync('npm', ['pack', '--ignore-scripts', '--dry-run', '--json'], {
+			cwd: packageRoot,
+			encoding: 'utf8',
+			maxBuffer: 10 * 1024 * 1024,
+		})
+	);
+	try {
+		assertPublicTarballFiles(
+			packed.files.map((file) => file.path),
+			packageJson.name
+		);
+	} catch (error) {
+		addFailure(error.message);
 	}
 }
 

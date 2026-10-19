@@ -25,8 +25,8 @@ result.value.id;      // deterministic bytes32 atom ID
 ```
 
 The IID packages and anchor API are new in this release candidate; the existing
-npm `alpha` tags do not yet contain them. See [release readiness](./docs/release-readiness.md)
-for the remaining gates, including [publishing the updated contract artifacts](./docs/contract-artifacts.md).
+npm `alpha` tags do not yet contain them. See the [release guide](./docs/release.md)
+for package versions and validation requirements.
 
 To run the dry-run UI example from a checkout, use Node 22.12+ and the Bun version
 pinned in `package.json`:
@@ -156,7 +156,6 @@ After `bun run build`, run `bun run conformance:check` for five public-surface p
 
 - [Contributing guide](./CONTRIBUTING.md)
 - [Release strategy and runbook](./docs/release.md)
-- [Contract artifact publishing checklist](./docs/contract-artifacts.md)
-- [Review findings and remaining release gates](./docs/release-readiness.md)
+- [Contract artifact provenance](./docs/contract-artifacts.md)
 
 Package roots are npm-publishable artifacts. Release PRs should follow the validation gate, dist-tag policy, and publish order documented in [docs/release.md](./docs/release.md).

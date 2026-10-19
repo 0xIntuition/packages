@@ -464,7 +464,7 @@ export const MultiVaultMigrationModeAbi = [
 		name: 'claimAtomWalletDepositFees',
 		inputs: [
 			{
-				name: 'termId',
+				name: 'atomId',
 				type: 'bytes32',
 				internalType: 'bytes32',
 			},
@@ -967,7 +967,7 @@ export const MultiVaultMigrationModeAbi = [
 		name: 'getAtomCreatedAt',
 		inputs: [
 			{
-				name: 'termId',
+				name: 'atomId',
 				type: 'bytes32',
 				internalType: 'bytes32',
 			},
@@ -986,7 +986,7 @@ export const MultiVaultMigrationModeAbi = [
 		name: 'getAtomCreator',
 		inputs: [
 			{
-				name: 'termId',
+				name: 'atomId',
 				type: 'bytes32',
 				internalType: 'bytes32',
 			},
@@ -1288,7 +1288,7 @@ export const MultiVaultMigrationModeAbi = [
 		name: 'getTripleIdFromCounterId',
 		inputs: [
 			{
-				name: 'counterId',
+				name: 'counterTripleId',
 				type: 'bytes32',
 				internalType: 'bytes32',
 			},
@@ -1775,7 +1775,7 @@ export const MultiVaultMigrationModeAbi = [
 		name: 'isAtom',
 		inputs: [
 			{
-				name: 'atomId',
+				name: 'termId',
 				type: 'bytes32',
 				internalType: 'bytes32',
 			},
@@ -1813,7 +1813,7 @@ export const MultiVaultMigrationModeAbi = [
 		name: 'isTermCreated',
 		inputs: [
 			{
-				name: 'id',
+				name: 'termId',
 				type: 'bytes32',
 				internalType: 'bytes32',
 			},
@@ -1864,7 +1864,7 @@ export const MultiVaultMigrationModeAbi = [
 		name: 'maxRedeem',
 		inputs: [
 			{
-				name: 'sender',
+				name: 'account',
 				type: 'address',
 				internalType: 'address',
 			},
@@ -1978,7 +1978,7 @@ export const MultiVaultMigrationModeAbi = [
 				internalType: 'uint256',
 			},
 			{
-				name: 'assetsAfterFixedFees',
+				name: 'feeBaseAssets',
 				type: 'uint256',
 				internalType: 'uint256',
 			},
@@ -2063,7 +2063,17 @@ export const MultiVaultMigrationModeAbi = [
 		name: 'previewTripleCreate',
 		inputs: [
 			{
-				name: 'termId',
+				name: 'subjectId',
+				type: 'bytes32',
+				internalType: 'bytes32',
+			},
+			{
+				name: 'predicateId',
+				type: 'bytes32',
+				internalType: 'bytes32',
+			},
+			{
+				name: 'objectId',
 				type: 'bytes32',
 				internalType: 'bytes32',
 			},
@@ -2080,7 +2090,7 @@ export const MultiVaultMigrationModeAbi = [
 				internalType: 'uint256',
 			},
 			{
-				name: 'assetsAfterFixedFees',
+				name: 'feeBaseAssets',
 				type: 'uint256',
 				internalType: 'uint256',
 			},
@@ -2819,7 +2829,7 @@ export const MultiVaultMigrationModeAbi = [
 				internalType: 'address',
 			},
 			{
-				name: 'amount',
+				name: 'feeAmount',
 				type: 'uint256',
 				indexed: false,
 				internalType: 'uint256',
@@ -2918,7 +2928,7 @@ export const MultiVaultMigrationModeAbi = [
 				internalType: 'uint256',
 			},
 			{
-				name: 'totalShares',
+				name: 'receiverSharesAfter',
 				type: 'uint256',
 				indexed: false,
 				internalType: 'uint256',
@@ -3092,7 +3102,7 @@ export const MultiVaultMigrationModeAbi = [
 				internalType: 'address',
 			},
 			{
-				name: 'amount',
+				name: 'feeAmount',
 				type: 'uint256',
 				indexed: false,
 				internalType: 'uint256',
@@ -3117,7 +3127,7 @@ export const MultiVaultMigrationModeAbi = [
 				internalType: 'address',
 			},
 			{
-				name: 'amount',
+				name: 'feeAmount',
 				type: 'uint256',
 				indexed: false,
 				internalType: 'uint256',
@@ -3136,7 +3146,7 @@ export const MultiVaultMigrationModeAbi = [
 				internalType: 'address',
 			},
 			{
-				name: 'receiver',
+				name: 'account',
 				type: 'address',
 				indexed: true,
 				internalType: 'address',
@@ -3160,19 +3170,19 @@ export const MultiVaultMigrationModeAbi = [
 				internalType: 'uint256',
 			},
 			{
-				name: 'totalShares',
+				name: 'accountSharesAfter',
 				type: 'uint256',
 				indexed: false,
 				internalType: 'uint256',
 			},
 			{
-				name: 'assets',
+				name: 'assetsAfterFees',
 				type: 'uint256',
 				indexed: false,
 				internalType: 'uint256',
 			},
 			{
-				name: 'fees',
+				name: 'totalFees',
 				type: 'uint256',
 				indexed: false,
 				internalType: 'uint256',
@@ -3554,7 +3564,7 @@ export const MultiVaultMigrationModeAbi = [
 		name: 'MultiVaultCore_AtomDoesNotExist',
 		inputs: [
 			{
-				name: 'termId',
+				name: 'atomId',
 				type: 'bytes32',
 				internalType: 'bytes32',
 			},
@@ -3581,7 +3591,7 @@ export const MultiVaultMigrationModeAbi = [
 		name: 'MultiVaultCore_TripleDoesNotExist',
 		inputs: [
 			{
-				name: 'termId',
+				name: 'tripleId',
 				type: 'bytes32',
 				internalType: 'bytes32',
 			},
@@ -3666,7 +3676,17 @@ export const MultiVaultMigrationModeAbi = [
 	},
 	{
 		type: 'error',
+		name: 'MultiVault_DefaultCurveHasFeeHook',
+		inputs: [],
+	},
+	{
+		type: 'error',
 		name: 'MultiVault_DefaultCurveMustBeInitializedViaCreatePaths',
+		inputs: [],
+	},
+	{
+		type: 'error',
+		name: 'MultiVault_DefaultCurveNotRegistered',
 		inputs: [],
 	},
 	{
@@ -3806,7 +3826,7 @@ export const MultiVaultMigrationModeAbi = [
 		name: 'MultiVault_TripleExists',
 		inputs: [
 			{
-				name: 'termId',
+				name: 'tripleId',
 				type: 'bytes32',
 				internalType: 'bytes32',
 			},

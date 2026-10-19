@@ -10,7 +10,9 @@ import { gzipSync } from 'node:zlib';
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const scriptPath = resolve(repoRoot, 'scripts/sync-protocol-artifacts.mjs');
 const source = readFileSync(scriptPath, 'utf8');
-const { syncProtocolArtifacts } = await import('./sync-protocol-artifacts.mjs');
+const { syncProtocolArtifacts, verifyRegistryArtifact } = await import(
+	'./sync-protocol-artifacts.mjs'
+);
 const contractsRoot = resolve(repoRoot, 'packages/deployments/src/abis');
 const provenancePath = resolve(
 	repoRoot,
@@ -21,17 +23,16 @@ const installedRoot = resolve(repoRoot, 'node_modules/@0xintuition/contracts-v2'
 const virtualRoot = resolve(repoRoot, '.virtual-p07b/contracts-v2');
 const manifest = JSON.parse(readFileSync(resolve(installedRoot, 'package.json'), 'utf8'));
 const artifactPaths = ['dist/abis/index.js', 'dist/bytecodes/index.js'];
-const chunkPaths = [
-	...new Set(
-		artifactPaths.map((path) => {
-			const reference = readFileSync(resolve(installedRoot, path), 'utf8').match(
-				/from "([^"]+)"/
-			)[1];
-			return posix.normalize(posix.join(posix.dirname(path), reference));
-		})
-	),
-];
-const registryPaths = [...artifactPaths, ...chunkPaths];
+const registryModulePaths = new Set(artifactPaths);
+for (const path of registryModulePaths) {
+	for (const match of readFileSync(resolve(installedRoot, path), 'utf8').matchAll(
+		/from ["'](\.[^"']+)["']/g
+	)) {
+		registryModulePaths.add(posix.normalize(posix.join(posix.dirname(path), match[1])));
+	}
+}
+const registryPaths = [...registryModulePaths];
+const chunkPaths = registryPaths.filter((path) => !artifactPaths.includes(path));
 const lockedIntegrity = readFileSync(lockPath, 'utf8').match(
 	/"@0xintuition\/contracts-v2": \[.*"(sha512-[^"]+)"\]/
 )[1];
@@ -173,10 +174,15 @@ function suppliedFiles(version = '9.9.9-supplied') {
 	return { files, mutatedAbi };
 }
 
-function tarball({ mutateAbi = false } = {}) {
+function tarball({
+	mutateAbi = false,
+	entries = new Map(
+		registryPaths.map((path) => [path, readFileSync(resolve(installedRoot, path))])
+	),
+} = {}) {
 	const chunks = [];
-	for (const path of registryPaths) {
-		let data = readFileSync(resolve(installedRoot, path));
+	for (const [path, entry] of entries) {
+		let data = entry;
 		if (mutateAbi && path === artifactPaths[0]) {
 			data = Buffer.from(data);
 			data[0] ^= 1;
@@ -203,8 +209,8 @@ function registryFixture(archive, url) {
 	let lock = readFileSync(lockPath, 'utf8').replace(lockedIntegrity, sri(archive));
 	if (url)
 		lock = lock.replace(
-			'"@0xintuition/contracts-v2@1.1.0-alpha.0", ""',
-			`"@0xintuition/contracts-v2@1.1.0-alpha.0", "${url}"`
+			'"@0xintuition/contracts-v2@1.1.0-alpha.1", ""',
+			`"@0xintuition/contracts-v2@1.1.0-alpha.1", "${url}"`
 		);
 	const committed = baselineProvenance.replace(lockedIntegrity, sri(archive));
 	return new Map([
@@ -232,7 +238,7 @@ test('registry provenance uses the locked integrity, is unverified offline, and 
 });
 
 test('ordinary sync refuses lockfile integrity drift before writing', async () => {
-	const lock = readFileSync(lockPath, 'utf8').replace('sha512-vt9GFaF', 'sha512-changed');
+	const lock = readFileSync(lockPath, 'utf8').replace(lockedIntegrity, 'sha512-changed');
 	await rejectsWithoutWrites(
 		{ files: new Map([[lockPath, lock]]) },
 		/Integrity changed.*--accept-integrity-change/
@@ -240,7 +246,7 @@ test('ordinary sync refuses lockfile integrity drift before writing', async () =
 });
 
 test('explicit integrity change acceptance records the new integrity and prints the flag', async () => {
-	const lock = readFileSync(lockPath, 'utf8').replace('sha512-vt9GFaF', 'sha512-changed');
+	const lock = readFileSync(lockPath, 'utf8').replace(lockedIntegrity, 'sha512-changed');
 	const { writes, messages } = await runScript({
 		args: ['--accept-integrity-change'],
 		files: new Map([[lockPath, lock]]),
@@ -250,7 +256,7 @@ test('explicit integrity change acceptance records the new integrity and prints 
 });
 
 test('lockfile integrity drift fails the offline artifact check', async () => {
-	const lock = readFileSync(lockPath, 'utf8').replace('sha512-vt9GFaF', 'sha512-changed');
+	const lock = readFileSync(lockPath, 'utf8').replace(lockedIntegrity, 'sha512-changed');
 	await rejectsWithoutWrites(
 		{ args: ['--check'], files: new Map([[lockPath, lock]]) },
 		/Integrity changed/
@@ -259,12 +265,12 @@ test('lockfile integrity drift fails the offline artifact check', async () => {
 
 test('missing exact lock entry fails clearly', async () => {
 	const lock = readFileSync(lockPath, 'utf8').replaceAll(
-		'@0xintuition/contracts-v2@1.1.0-alpha.0',
+		'@0xintuition/contracts-v2@1.1.0-alpha.1',
 		'@0xintuition/contracts-v2@9.9.9'
 	);
 	await rejectsWithoutWrites(
 		{ files: new Map([[lockPath, lock]]) },
-		/Missing lockfile integrity for @0xintuition\/contracts-v2@1.1.0-alpha.0/
+		/Missing lockfile integrity for @0xintuition\/contracts-v2@1.1.0-alpha.1/
 	);
 });
 
@@ -330,7 +336,7 @@ test('wrong version for a registry record is rejected', async () => {
 				],
 			]),
 		},
-		/Expected @0xintuition\/contracts-v2@1.1.0-alpha.0/
+		/Expected @0xintuition\/contracts-v2@1.1.0-alpha.1/
 	);
 });
 
@@ -380,7 +386,7 @@ test('matching registry tarball verifies SHA-512 and both installed modules', as
 	assert.match(record(writes), /verified: true/);
 	assert.match(record(writes), /verifiedAt: '2026-10-05T12:00:00.000Z'/);
 	assert.deepEqual(requests, [
-		'https://registry.npmjs.org/@0xintuition/contracts-v2/-/contracts-v2-1.1.0-alpha.0.tgz',
+		'https://registry.npmjs.org/@0xintuition/contracts-v2/-/contracts-v2-1.1.0-alpha.1.tgz',
 	]);
 });
 
@@ -526,15 +532,23 @@ test('verified provenance passes verified check without changing its verificatio
 	assert.match(record((await runScript({ files })).writes), /verified: false/);
 });
 
-// The pinned package's indexes are wrappers: mutating the actual exported ABI
-// in its bundled chunk must not inherit registry verification from the wrappers.
+// Keep transitive-module coverage even when the current release has self-contained indexes.
 test('mutated installed ABI chunk with matching generated ABI fails registry verification', async () => {
-	const archive = tarball();
+	const chunk = 'dist/chunk-test.js';
+	const original = readFileSync(resolve(installedRoot, artifactPaths[0]), 'utf8');
+	const wrapper = Buffer.from("export * from '../chunk-test.js';\n");
+	const entries = new Map(
+		registryPaths.map((path) => [path, readFileSync(resolve(installedRoot, path))])
+	);
+	entries.set(artifactPaths[0], wrapper);
+	entries.set(chunk, Buffer.from(original));
+	const archive = tarball({ entries });
 	const files = registryFixture(archive);
-	const chunkPath = resolve(installedRoot, chunkPaths[0]);
-	const original = readFileSync(chunkPath, 'utf8');
+	files.set(resolve(installedRoot, artifactPaths[0]), wrapper);
 	assert.ok(original.includes('AtomCreated'));
-	files.set(chunkPath, original.replace('"name": "AtomCreated"', '"name": "AtomCreatee"'));
+	const mutated = original.replace('"name": "AtomCreated"', '"name": "AtomCreatee"');
+	assert.notEqual(mutated, original);
+	files.set(resolve(installedRoot, chunk), mutated);
 	files.set(
 		resolve(contractsRoot, 'MultiVault-abi.ts'),
 		suppliedFiles().files.get(resolve(contractsRoot, 'MultiVault-abi.ts'))
@@ -542,7 +556,46 @@ test('mutated installed ABI chunk with matching generated ABI fails registry ver
 	for (const args of [['--verify-registry'], ['--check', '--verify-registry']]) {
 		await rejectsWithoutWrites(
 			{ args, files, fetch: async () => response(archive) },
-			/Registry artifact mismatch: dist\/chunk-/
+			/Registry artifact mismatch: dist\/chunk-test.js/
 		);
 	}
+});
+
+test('router registry verification binds the separate package identity and rejects module tampering', async () => {
+	const packageName = '@0xintuition/contracts-v2-periphery';
+	const version = '1.1.0-alpha.0';
+	const archive = tarball();
+	const options = {
+		packageName,
+		version,
+		sourceRoot: installedRoot,
+		locked: { integrity: sri(archive), url: '' },
+		log: () => {},
+		fetch: async (url) => {
+			assert.equal(
+				url,
+				'https://registry.npmjs.org/@0xintuition/contracts-v2-periphery/-/contracts-v2-periphery-1.1.0-alpha.0.tgz'
+			);
+			return response(archive);
+		},
+		readFileSync: (path, encoding) =>
+			String(path).endsWith('package.json')
+				? JSON.stringify({ name: packageName, version })
+				: readFileSync(path, encoding),
+	};
+	await verifyRegistryArtifact(options);
+	await assert.rejects(
+		verifyRegistryArtifact({
+			...options,
+			readFileSync: (path, encoding) =>
+				String(path).endsWith('dist/abis/index.js')
+					? Buffer.from('tampered')
+					: options.readFileSync(path, encoding),
+		}),
+		/Registry artifact mismatch/
+	);
+	await assert.rejects(
+		verifyRegistryArtifact({ ...options, readFileSync }),
+		/Expected @0xintuition\/contracts-v2-periphery/
+	);
 });

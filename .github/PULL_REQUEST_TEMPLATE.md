@@ -1,6 +1,6 @@
 # Summary
 
-<!-- What this PR does and why. For release-train child PRs, include the P-number (e.g. P03). -->
+<!-- Describe the user-visible change and why it is needed. -->
 
 ## Package impact
 

@@ -1,5 +1,5 @@
 {
-	"description": "Candidate versions in dependency order. Does not authorize publication; see docs/release-readiness.md for unresolved gates. schema-org is unchanged and already published.",
+	"description": "Candidate versions in dependency order. Validate the release using docs/release.md. schema-org is unchanged and already published.",
 	"packages": [
 		{
 			"directory": "iid-spec",

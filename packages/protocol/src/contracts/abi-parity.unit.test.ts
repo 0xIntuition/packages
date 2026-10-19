@@ -106,6 +106,7 @@ function semanticMismatches(actual: Abi, expected: Abi): string[] {
 
 describe('installed contracts-v2 semantic ABI parity', () => {
 	it.each([
+		['MultiVault', MultiVaultAbi, installed.MultiVaultAbi],
 		['MultiVaultMigrationMode', MultiVaultMigrationModeAbi, installed.MultiVaultMigrationModeAbi],
 	] as const)('%s matches every function, event, and error', (_name, shipped, source) => {
 		expect(semanticMismatches(shipped, source)).toEqual([]);
