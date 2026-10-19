@@ -141,6 +141,69 @@ describe('projectIdentifierLadder', () => {
 	});
 
 	it.each([
+		['isbn', 'isbn:9780140328721', 'int:isbn:9780140328721', undefined],
+		['isbn', 'isbn:9780140328721', 'int:isbn:9780140328721', 'https://example.com/item'],
+		['wd', 'wd:film:Q2', 'int:wd:film:Q2', undefined],
+		['wd', 'wd:film:Q2', 'int:wd:film:Q2', 'https://example.com/item'],
+	] as const)('ignores malformed direct %s for provider %s yielding %s with URL %s', (scheme, providerCanonicalId, iid, canonicalUrl) => {
+		expect(
+			projectIdentifierLadder({
+				strongIdentifierOrder: [scheme],
+				strongIdentifiers: { [scheme]: 'garbage' },
+				providerCanonicalId,
+				canonicalUrl,
+			})
+		).toEqual({ iid, rung: 'handle' });
+	});
+
+	it('keeps provider-last precedence for competing valid ISBN values', () => {
+		expect(
+			projectIdentifierLadder({
+				strongIdentifierOrder: ['isbn'],
+				strongIdentifiers: { isbn: '9780140328721' },
+				providerCanonicalId: 'isbn:9780306406157',
+			})
+		).toEqual({ iid: 'int:isbn:9780306406157', rung: 'handle' });
+	});
+
+	it('keeps provider-last precedence for valid WD values of the same subtype', () => {
+		expect(
+			projectIdentifierLadder({
+				strongIdentifierOrder: ['wd'],
+				strongIdentifiers: { wd: 'film:Q1' },
+				providerCanonicalId: 'wd:film:Q2',
+			})
+		).toEqual({ iid: 'int:wd:film:Q2', rung: 'handle' });
+	});
+
+	it.each([
+		false,
+		true,
+	])('keeps provider-last precedence for bare direct WD with plain policy %s', (allowPlainWd) => {
+		expect(
+			projectIdentifierLadder({
+				strongIdentifierOrder: ['wd'],
+				strongIdentifiers: { wd: 'Q1' },
+				providerCanonicalId: 'wd:human:Q2',
+				allowPlainWd,
+			})
+		).toEqual({ iid: 'int:wd:human:Q2', rung: 'handle' });
+	});
+
+	it.each([
+		'wd:human:Q2',
+		'int:wd:human:Q2',
+	])('keeps direct typed WD ahead of conflicting promotion without wdSlug %s', (providerCanonicalId) => {
+		expect(
+			projectIdentifierLadder({
+				strongIdentifierOrder: ['wd'],
+				strongIdentifiers: { wd: 'film:Q1' },
+				providerCanonicalId,
+			})
+		).toEqual({ iid: 'int:wd:film:Q1', rung: 'strong' });
+	});
+
+	it.each([
 		'wd:human:Q2',
 		'int:wd:human:Q2',
 	])('keeps direct WD evidence ahead of conflicting promotion %s', (providerCanonicalId) => {

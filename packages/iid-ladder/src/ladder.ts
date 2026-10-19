@@ -65,9 +65,19 @@ export function projectIdentifierLadder(input: LadderInput): LadderResult {
 		input.strongIdentifierOrder,
 		input.allowPlainWd
 	);
-	// Keep direct values intact before running the same conflict checks on promotion.
+	const directWdIid =
+		providerStrong?.scheme === 'wd'
+			? selectStrongIdentifier(input.strongIdentifiers, ['wd'], input.allowPlainWd)
+			: undefined;
+	const directWdValue = directWdIid && parseIntuitionId(directWdIid)?.value;
+	const conflictingWdSubtype =
+		directWdValue?.includes(':') &&
+		directWdValue.split(':')[0] !== providerStrong?.value.split(':')[0];
+	// Only valid typed WD evidence can veto a conflicting subtype; otherwise preserve provider-last precedence.
 	const promotedIdentifiers = providerStrong
-		? { [providerStrong.scheme]: providerStrong.value, ...input.strongIdentifiers }
+		? conflictingWdSubtype
+			? { [providerStrong.scheme]: providerStrong.value, ...input.strongIdentifiers }
+			: { ...input.strongIdentifiers, [providerStrong.scheme]: providerStrong.value }
 		: input.strongIdentifiers;
 	const rejectedProvider =
 		providerStrong &&
