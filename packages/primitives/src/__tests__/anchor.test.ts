@@ -46,9 +46,9 @@ describe('buildIidAnchor', () => {
 	});
 
 	it('polymorphic schemes cannot emit bare P0', () => {
-		// movie ladder tops out at wd via sameAs — polymorphic.
+		// brand ladder tops out at a slugless wd rung via sameAs: polymorphic.
 		const result = buildIidAnchor(
-			'movie',
+			'brand',
 			{ sameAs: ['https://www.wikidata.org/wiki/Q25188'] },
 			{ profile: 'p0' }
 		);
