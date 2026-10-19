@@ -12,6 +12,9 @@ const IID_SHAPE = /^int:([a-z0-9-]{1,32}):([\x21-\x7E]{1,220})$/;
 /** Matches the shape without requiring a registered scheme. */
 const IID_SHAPE_ANY_SCHEME = IID_SHAPE;
 
+/** Handles can be renamed or recycled; only strong account IDs may anchor. */
+const WEAK_ACCOUNT_VALUE = /^[^:]+:@/;
+
 /**
  * Parse an IID into scheme + value. Splits on the FIRST TWO colons only —
  * everything after the second colon is an opaque, scheme-owned value
@@ -65,6 +68,7 @@ export function isIntuitionId(input: string): input is IntuitionId {
  * preimage evidence and must travel in a P1 payload), and an IID that
  * implies its classification (spec §7.2 / §7.3). Typed `wd` values qualify
  * only with an active EntitySchema binding; bare `wd` remains polymorphic.
+ * Weak `acct` handles remain valid and typed but cannot anchor.
  */
 export function isAnchorEligible(input: string): boolean {
 	const inspection = inspectIntuitionId(input);
@@ -135,7 +139,9 @@ export function inspectIntuitionId(input: string): IidInspection {
 			? ('class-c' as const)
 			: typing === 'polymorphic'
 				? ('polymorphic-scheme' as const)
-				: undefined;
+				: scheme.scheme === 'acct' && WEAK_ACCOUNT_VALUE.test(value)
+					? ('weak-account' as const)
+					: undefined;
 
 	return {
 		valid: true,

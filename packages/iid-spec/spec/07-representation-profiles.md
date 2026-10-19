@@ -35,6 +35,8 @@ Identity becomes a pure function of the identifier. Two parties who derive the s
 1. Its scheme is Class **A or B**. Class C never qualifies ([§6.6](./06-gen1.md)).
 2. Its identifier is **unambiguously typed** ([§7.3](#73-scheme-typing)) — the identifier implies the entity's type on its own, and any EntitySchema binding it carries is active.
 
+The [`acct` weak form](../schemes/acct.md) (`<platform>:@<handle>`) is an exception: it remains valid and unambiguously typed, but MUST NOT anchor at P0 and has a P1 floor because handles can be renamed or recycled.
+
 ### P1 — identity context
 
 Atom data is an object containing the type, the identifier, the identity-recipe fields, and any corroborating evidence.
