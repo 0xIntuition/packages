@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { deriveIntuitionId } from '../derive.js';
 import { keccak16 } from '../hash.js';
 import { norm1 } from '../norm.js';
-import { isAnchorEligible, validateIntuitionId } from '../parse.js';
+import { isAnchorEligible, parseIntuitionId, validateIntuitionId } from '../parse.js';
 import type { IdentityLadder } from '../types.js';
 import { derivePodcastGuid } from '../uuid5.js';
 
@@ -16,7 +16,163 @@ const bookLadder: IdentityLadder = {
 	],
 };
 
+const typedWdLadder: IdentityLadder = {
+	slug: 'movie',
+	identifies: 'a film',
+	rungs: [
+		{ kind: 'scheme', scheme: 'wd', wdSlug: 'film', source: { kind: 'field', key: 'wikidataId' } },
+	],
+};
+
+const typedWdArrayLadder: IdentityLadder = {
+	slug: 'movie',
+	identifies: 'a film',
+	rungs: [
+		{
+			kind: 'scheme',
+			scheme: 'wd',
+			wdSlug: 'film',
+			source: { kind: 'same-as' },
+		},
+	],
+};
+
+const bareWdLadder: IdentityLadder = {
+	slug: 'movie',
+	identifies: 'a film',
+	rungs: [{ kind: 'scheme', scheme: 'wd', source: { kind: 'field', key: 'wikidataId' } }],
+};
+
+const bareWdSameAsLadder: IdentityLadder = {
+	slug: 'movie',
+	identifies: 'a film',
+	rungs: [{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' } }],
+};
+
+const dormantWdLadder: IdentityLadder = {
+	slug: 'book',
+	identifies: 'a written work',
+	rungs: [
+		{
+			kind: 'scheme',
+			scheme: 'wd',
+			wdSlug: 'written-work',
+			source: { kind: 'field', key: 'wikidataId' },
+		},
+	],
+};
+
 describe('deriveIntuitionId (declarative engine)', () => {
+	it('mints a typed wd value when a synthetic ladder supplies a slug', () => {
+		expect(deriveIntuitionId(typedWdLadder, { wikidataId: 'q188035' })).toEqual({
+			iid: 'int:wd:film:Q188035',
+			scheme: 'wd',
+			class: 'A',
+		});
+	});
+
+	it('canonicalizes a typed wd raw value before prepending its slug', () => {
+		for (const wikidataId of ['https://www.wikidata.org/wiki/Q188035', ' \tq188035 \n']) {
+			expect(deriveIntuitionId(typedWdLadder, { wikidataId }), wikidataId).toEqual({
+				iid: 'int:wd:film:Q188035',
+				scheme: 'wd',
+				class: 'A',
+			});
+		}
+	});
+
+	it('prefixes a bare-canonicalizable wd value returned by same-as', () => {
+		expect(
+			deriveIntuitionId(typedWdArrayLadder, {
+				sameAs: ['https://www.wikidata.org/wiki/Q188035'],
+			})
+		).toEqual({ iid: 'int:wd:film:Q188035', scheme: 'wd', class: 'A' });
+	});
+
+	it('keeps an already-typed same-slug wd value idempotent through same-as', () => {
+		expect(deriveIntuitionId(typedWdArrayLadder, { sameAs: ['film:Q188035'] })).toEqual({
+			iid: 'int:wd:film:Q188035',
+			scheme: 'wd',
+			class: 'A',
+		});
+	});
+
+	it('rejects an already-typed different-slug wd value returned by same-as', () => {
+		expect(deriveIntuitionId(typedWdArrayLadder, { sameAs: ['human:Q188035'] })).toBeUndefined();
+	});
+
+	it('refuses a typed wd IID that exceeds the parser value limit', () => {
+		const overlongQid = `Q${'1'.repeat(215)}`;
+		expect(deriveIntuitionId(typedWdLadder, { wikidataId: overlongQid })).toBeUndefined();
+	});
+
+	it('never derives dormant-slug wd values', () => {
+		expect(deriveIntuitionId(dormantWdLadder, { wikidataId: 'Q47461344' })).toBeUndefined();
+	});
+
+	it('legacy: a slugless wd rung still mints bare (D-P16-1, flips with the classifications lane)', () => {
+		expect(deriveIntuitionId(bareWdLadder, { wikidataId: 'Q188035' })).toEqual({
+			iid: 'int:wd:Q188035',
+			scheme: 'wd',
+			class: 'A',
+		});
+	});
+
+	it('legacy: BOM- and NBSP-wrapped bare QIDs keep minting through slugless rungs (D-P16-4)', () => {
+		for (const wikidataId of ['\uFEFFQ188035\uFEFF', '\u00A0Q188035\u00A0']) {
+			expect(deriveIntuitionId(bareWdLadder, { wikidataId })?.iid, JSON.stringify(wikidataId)).toBe(
+				'int:wd:Q188035'
+			);
+		}
+		expect(deriveIntuitionId(bareWdSameAsLadder, { sameAs: ['\uFEFFQ42\uFEFF', 'Q9'] })?.iid).toBe(
+			'int:wd:Q42'
+		);
+	});
+
+	it('legacy: a slugless wd rung mints bare values only; typed values need a declared active slug (D-P16-5)', () => {
+		for (const wikidataId of ['written-work:Q47461344', 'human:Q42', 'film:Q188035']) {
+			expect(deriveIntuitionId(bareWdLadder, { wikidataId }), wikidataId).toBeUndefined();
+		}
+		expect(
+			deriveIntuitionId(bareWdSameAsLadder, { sameAs: ['written-work:Q47461344'] })
+		).toBeUndefined();
+		expect(deriveIntuitionId(bareWdSameAsLadder, { sameAs: ['human:Q42'] })).toBeUndefined();
+		expect(deriveIntuitionId(bareWdSameAsLadder, { sameAs: ['human:Q42', 'Q7'] })?.iid).toBe(
+			'int:wd:Q7'
+		);
+	});
+
+	it('selects the smallest canonical same-as value before matching the rung slug', () => {
+		for (const sameAs of [
+			['film:Q1', 'https://www.wikidata.org/wiki/Q42', 'Q42', 42, 'bogus:Q1'],
+			['bogus:Q1', 42, 'Q42', 'https://www.wikidata.org/wiki/Q42', 'film:Q1'],
+		]) {
+			expect(deriveIntuitionId(typedWdArrayLadder, { sameAs })?.iid).toBe('int:wd:film:Q42');
+		}
+		for (const sameAs of [
+			['human:Q1', 'album:Q1'],
+			['album:Q1', 'human:Q1'],
+		]) {
+			expect(deriveIntuitionId(typedWdArrayLadder, { sameAs })).toBeUndefined();
+		}
+	});
+
+	it('accepts the 220-character typed value boundary and falls through rejected typed rungs', () => {
+		const boundaryQid = `Q${'1'.repeat(214)}`;
+		expect(deriveIntuitionId(typedWdLadder, { wikidataId: boundaryQid })?.iid).toBe(
+			`int:wd:film:${boundaryQid}`
+		);
+		for (const wikidataId of ['human:Q42', `Q${'1'.repeat(215)}`, 'bogus:Q1']) {
+			const ladder: IdentityLadder = {
+				...typedWdLadder,
+				rungs: [...typedWdLadder.rungs, ...bookLadder.rungs],
+			};
+			expect(deriveIntuitionId(ladder, { wikidataId, isbn: '9780684832722' })?.iid).toBe(
+				'int:isbn:9780684832722'
+			);
+		}
+	});
+
 	it('uses the highest rung with available data', () => {
 		const derived = deriveIntuitionId(bookLadder, {
 			name: 'The Sovereign Individual',
@@ -339,5 +495,51 @@ describe('deriveIntuitionId (declarative engine)', () => {
 		const gen1 = deriveIntuitionId(bookLadder, { name: 'Some Obscure Manuscript' });
 		expect(gen1 && validateIntuitionId(gen1.iid)).toBe(true);
 		expect(gen1 && isAnchorEligible(gen1.iid)).toBe(false); // Class C floors at P1
+	});
+});
+
+describe('typed wd eligibility', () => {
+	it('allows active typed wd while refusing legacy bare and dormant typed values', () => {
+		expect(isAnchorEligible('int:wd:film:Q188035')).toBe(true);
+		expect(isAnchorEligible('int:wd:television-series:Q137400033')).toBe(true);
+		expect(isAnchorEligible('int:wd:human:Q42')).toBe(true);
+		expect(isAnchorEligible('int:wd:Q165219')).toBe(false);
+		expect(isAnchorEligible('int:wd:written-work:Q47461344')).toBe(false);
+		expect(isAnchorEligible('int:wd:television-series-season:Q3464665')).toBe(false);
+	});
+});
+
+describe('parse and validate', () => {
+	it('splits on the first two colons only', () => {
+		expect(
+			parseIntuitionId('int:caip10:eip155:1:0xd8da6bf26964af9d7eed9e03e53415d37aa96045')
+		).toEqual({
+			scheme: 'caip10',
+			value: 'eip155:1:0xd8da6bf26964af9d7eed9e03e53415d37aa96045',
+		});
+	});
+
+	it('rejects unknown schemes and malformed strings', () => {
+		expect(parseIntuitionId('int:bogus:123')).toBeUndefined();
+		expect(parseIntuitionId('isbn:9780684832722')).toBeUndefined();
+	});
+
+	it('validates canonical form byte-exactly', () => {
+		expect(validateIntuitionId('int:isbn:9780684832722')).toBe(true);
+		expect(validateIntuitionId('int:isbn:978-0-684-83272-2')).toBe(false);
+		expect(validateIntuitionId('int:wd:film:Q42')).toBe(true);
+		expect(validateIntuitionId('int:wd:film:q42')).toBe(false);
+		expect(validateIntuitionId('int:wd:bogus:Q1')).toBe(false);
+		expect(validateIntuitionId('int:wd:q42')).toBe(false);
+		expect(validateIntuitionId('int:wd:Q42')).toBe(true);
+		expect(validateIntuitionId('int:gen1:book:r3:59a02a73cbe0d2a4223719fdc4d006ab')).toBe(true);
+	});
+
+	it('parses typed and legacy wd values without changing the pinned bare form', () => {
+		expect(parseIntuitionId('int:wd:film:Q188035')).toEqual({
+			scheme: 'wd',
+			value: 'film:Q188035',
+		});
+		expect(parseIntuitionId('int:wd:Q42')).toEqual({ scheme: 'wd', value: 'Q42' });
 	});
 });

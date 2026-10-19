@@ -33,7 +33,7 @@ Identity becomes a pure function of the identifier. Two parties who derive the s
 **Eligibility.** An IID MAY be minted as P0 only if **both** hold:
 
 1. Its scheme is Class **A or B**. Class C never qualifies ([§6.6](./06-gen1.md)).
-2. Its scheme is **unambiguously typed** ([§7.3](#73-scheme-typing)) — the identifier implies the entity's type on its own.
+2. Its identifier is **unambiguously typed** ([§7.3](#73-scheme-typing)) — the identifier implies the entity's type on its own, and any EntitySchema binding it carries is active.
 
 ### P1 — identity context
 
@@ -52,7 +52,7 @@ Atom data is an object containing the type, the identifier, the identity-recipe 
 P1 is the **REQUIRED floor** for:
 
 - **Class C identifiers** — the recipe fields are the hash's preimage evidence. Without them the identifier cannot be verified or re-derived, and there is nothing to display.
-- **Polymorphically typed schemes** — a bare `int:wd:Q42` does not say whether Q42 is a person, a book, or a concept. The `@type` must live in the payload.
+- **Polymorphically typed identifiers** — a bare `int:wd:Q42` does not say whether Q42 is a person, a book, or a concept. The `@type` must live in the payload.
 
 ### P2 — enriched
 
@@ -82,15 +82,18 @@ A scheme is **unambiguously typed** if knowing an identifier's scheme and value 
 | Typing | Schemes |
 | :-- | :-- |
 | **Unambiguous** | `isbn`, `isrc`, `iswc`, `lei`, `gtin`, `eidr`, `mbid`, `olid`, `podcastguid`, `caip19`, `appid`, `purl`, `acct`, `rssitem`, `termset`, `gen1` |
-| **Polymorphic** | `isni`, `orcid`, `doi`, `wd`, `imdb`, `tmdb`, `url`, `caip10`, `hash`, `geo` |
+| **Polymorphic** | `isni`, `orcid`, `doi`, bare `wd`, `imdb`, `tmdb`, `url`, `caip10`, `hash`, `geo` |
 
 Some schemes are unambiguous because their domain is narrow: an ISBN is always a book edition, an ISRC always a sound recording. Others carry the type inside the value: `mbid` values begin with an entity-type segment (`artist:`, `recording:`), `olid` values end with `W`/`M`/`A`, and `gen1` values begin with the entity type's slug.
+
+A **value-typed scheme** has polymorphic bare values but MAY carry the entity type inside a value. `wd` is value-typed: bare `Q…` is polymorphic, while `<slug>:Q…` with an active [EntitySchema binding](../schemes/wd.md) is unambiguous; a dormant binding is valid and unambiguous but not mintable. The conformance corpus marks value-typed schemes with `valueTyped` and MAY state per-value `typing` on validation vectors, defaulting to the scheme's typing when omitted.
 
 The polymorphic cases are polymorphic for concrete reasons:
 
 | Scheme | Why polymorphic |
 | :-- | :-- |
-| `wd` | Wikidata covers every kind of thing |
+| Bare `wd` | A QID alone can name any kind of thing |
+| Typed `wd` | `<slug>:Q…` carries the type, like the `mbid` type segment; active bindings are unambiguous and P0-eligible |
 | `isni` / `orcid` | Assigned to persons *and* to bands and organizations |
 | `doi` | Articles, datasets, and — via EIDR — films |
 | `imdb` / `tmdb` | Values span films, series, and people |
@@ -119,7 +122,7 @@ Separating these matters. The anchor is the stable thing to point at — it neve
 ## 7.5 Requirements
 
 1. An implementation MUST NOT mint P0 for a Class C identifier.
-2. An implementation MUST NOT mint P0 for a polymorphically typed scheme.
+2. An implementation MUST NOT mint P0 for a polymorphically typed identifier or a dormant EntitySchema binding.
 3. An implementation MUST include the recipe fields when minting a Class C identifier.
 4. Profiles are **additive**. Introducing or preferring a profile MUST NOT require re-minting anything that already exists.
 5. An implementation consuming atoms MUST accept all three profiles for any entity type.
@@ -129,7 +132,7 @@ Separating these matters. The anchor is the stable thing to point at — it neve
 Non-normative guidance:
 
 - If the identifier is anchor-eligible and the goal is a stable point for claims to attach to — **P0**. It is the cheapest atom possible and the only one with protocol-level dedupe.
-- If the identifier is Class C, or the scheme is polymorphic — **P1**. This is a floor, not a preference; it is the minimum that is verifiable and renderable.
+- If the identifier is Class C or polymorphically typed — **P1**. This is a floor, not a preference; it is the minimum that is verifiable and renderable.
 - If the atom is the primary record for an entity and descriptive data must be on-chain rather than in enrichment — **P2**. Prefer to justify this case rather than default to it.
 
 ---

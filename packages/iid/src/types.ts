@@ -13,6 +13,8 @@
  * JSON, and be audited without running code.
  */
 
+import type { WdEntitySchemaSlug } from './wd-entityschema-bindings.js';
+
 /** Every IID starts with the `int:` namespace followed by a registered scheme. */
 export type IntuitionId = `int:${string}:${string}`;
 
@@ -128,6 +130,11 @@ export type IdentityRung =
 			readonly kind: 'scheme';
 			readonly scheme: ExternalSchemeName;
 			readonly source: IdentityValueSource;
+			/**
+			 * EntitySchema binding slug for a typed `wd` rung (spec `schemes/wd.md`).
+			 * Only active bindings mint; see D-P16-1 for slugless rungs.
+			 */
+			readonly wdSlug?: WdEntitySchemaSlug;
 			readonly note?: string;
 	  }
 	| {
@@ -175,7 +182,7 @@ export interface ParsedIid {
 export type IidInvalidReason = 'malformed' | 'unknown-scheme' | 'noncanonical';
 
 /** Why a valid IID may still not mint as a bare P0 anchor (spec §7.2). */
-export type AnchorIneligibilityReason = 'class-c' | 'polymorphic-scheme';
+export type AnchorIneligibilityReason = 'class-c' | 'polymorphic-scheme' | 'dormant-wd-binding';
 
 export type IidInspection =
 	| {
@@ -185,6 +192,7 @@ export type IidInspection =
 			readonly value: string;
 			readonly class: IdentityClass;
 			readonly typing: SchemeTyping;
+			readonly wdSlug?: WdEntitySchemaSlug;
 			readonly anchorEligible: boolean;
 			readonly anchorIneligibilityReason?: AnchorIneligibilityReason;
 	  }

@@ -113,11 +113,26 @@ for (const vector of fixtures.gen1.vectors) {
 
 // --- validation vectors: anchor eligibility is consistent with class/typing ---
 for (const vector of fixtures.validation.vectors) {
+	const scheme = vector.iid.split(':')[1];
+	if (vector.typing !== undefined) {
+		assert.equal(
+			schemes[scheme].valueTyped,
+			true,
+			`${vector.id}: per-value typing only for value-typed schemes`
+		);
+	}
+	if (vector.typing !== undefined && vector.typing !== schemes[scheme].typing) {
+		assert.equal(
+			vector.iid.split(':').slice(2).join(':').includes(':'),
+			true,
+			`${vector.id}: a typed value carries its type inside the value`
+		);
+	}
 	if (vector.anchorEligible) {
 		assert.ok(vector.valid, `${vector.id}: anchor-eligible implies valid`);
-		const scheme = vector.iid.split(':')[1];
 		assert.ok(schemes[scheme].class !== 'C', `${vector.id}: Class C never anchors`);
-		assert.equal(schemes[scheme].typing, 'unambiguous', `${vector.id}: polymorphic never anchors`);
+		const effectiveTyping = vector.typing ?? schemes[scheme].typing;
+		assert.equal(effectiveTyping, 'unambiguous', `${vector.id}: polymorphic never anchors`);
 	}
 }
 

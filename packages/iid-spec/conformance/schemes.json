@@ -105,7 +105,8 @@
 		},
 		"wd": {
 			"class": "A",
-			"typing": "polymorphic"
+			"typing": "polymorphic",
+			"valueTyped": true
 		}
 	}
 }
