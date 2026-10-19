@@ -1,3 +1,4 @@
+import type { IdentityClass } from '@0xintuition/iid';
 import type { Hex } from 'viem';
 
 /**
@@ -92,8 +93,8 @@ export interface AtomAnchor {
 	iid: string;
 	/** IID scheme that fired. */
 	scheme: string;
-	/** Identity class of that scheme (A/B/C). */
-	class: 'A' | 'B' | 'C';
+	/** Identity class of that scheme (A, B, C or the provider-local D). */
+	class: IdentityClass;
 	/** Stable gen1 rung tag when a derived rung fired. */
 	tag?: number;
 	/** Exact atom data string (bare IID at p0; deterministic JSON at p1/p2). */
