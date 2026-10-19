@@ -8,9 +8,9 @@
  *   actually read — key names are a frozen consumer contract.
  * - Hints derive from the CANONICAL parsed IID only; uncanonicalizable input
  *   yields an empty map. Never emit an empty value.
- * - `mbid` bends the scheme-named rule deliberately: readers expect the bare
- *   MBID UUID, so `mbid`/`musicbrainz` carry the UUID and the entity type
- *   travels as `mbidType`.
+ * - `mbid` and typed `wd` bend the scheme-named rule deliberately: readers
+ *   expect a bare authority id, so the entity type travels separately as
+ *   `mbidType` or `wdSlug`.
  */
 import { parseCanonical } from './canonical.js';
 
@@ -88,6 +88,17 @@ function mbidHints(value: string): Record<string, string> {
 	return { mbid: uuid, musicbrainz: uuid, mbidType: value.slice(0, separator) };
 }
 
+function wdHints(value: string): Record<string, string> {
+	const separator = value.indexOf(':');
+
+	if (separator <= 0) {
+		return { wd: value, wikidata: value };
+	}
+
+	const qid = value.slice(separator + 1);
+	return { wd: qid, wikidata: qid, wdSlug: value.slice(0, separator) };
+}
+
 /**
  * Build the `hints.identifiers` map for an IID. Empty map for malformed or
  * uncanonicalizable input. Never throws.
@@ -103,7 +114,7 @@ export function identifierHintsForIid(iid: string): Record<string, string> {
 
 	switch (scheme) {
 		case 'wd':
-			return { wd: value, wikidata: value };
+			return wdHints(value);
 		case 'tmdb':
 			return { tmdb: value, tmdbId: value };
 		case 'mbid':

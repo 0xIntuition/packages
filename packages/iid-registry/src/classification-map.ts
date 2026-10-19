@@ -1,16 +1,47 @@
 /**
  * The scheme => classification table: the read-side inverse of the identity
- * ladders, legal only for ratified-unambiguous schemes (spec §7.3) (a bare P0 anchor must
- * imply its classification).
+ * ladders for unambiguous and value-typed schemes (spec §7.3).
  *
- * Typed total over `UnambiguousScheme` — when `@0xintuition/iid` ratifies a
- * new unambiguous scheme, this table (and its tests) must gain an entry
- * before the registry builds again. Slugs are validated against
- * `@0xintuition/classifications` at resolution time, never trusted as raw
- * strings.
+ * Typed total over `ClassifiableScheme` — when a new unambiguous or
+ * value-typed scheme is added, this table (and its tests) must gain an entry.
+ * Value-typed schemes classify only through an active binding. Slugs are
+ * validated against `@0xintuition/classifications` at resolution time,
+ * never trusted as raw strings.
  */
-import { hasClassification } from '@0xintuition/classifications';
-import type { ClassificationEntry, UnambiguousScheme } from './types.js';
+import { CLASSIFICATION_SPECS, hasClassification } from '@0xintuition/classifications';
+import { WD_ENTITYSCHEMA_BINDINGS } from '@0xintuition/iid';
+import type { ClassifiableScheme, ClassificationEntry } from './types.js';
+
+const CLASSIFICATION_SLUGS_BY_TYPE = new Map<string, string | undefined>();
+
+function classificationSlugForType(type: string): string | undefined {
+	if (!CLASSIFICATION_SLUGS_BY_TYPE.has(type)) {
+		CLASSIFICATION_SLUGS_BY_TYPE.set(
+			type,
+			CLASSIFICATION_SPECS.find((spec) => spec.type === type)?.slug
+		);
+	}
+
+	return CLASSIFICATION_SLUGS_BY_TYPE.get(type);
+}
+
+const ACTIVE_WD_BINDINGS: ReadonlyMap<string, (typeof WD_ENTITYSCHEMA_BINDINGS)[number]> = new Map(
+	WD_ENTITYSCHEMA_BINDINGS.filter(({ status }) => status === 'active').map((binding) => [
+		binding.slug,
+		binding,
+	])
+);
+
+function resolveWdSlug(canonicalValue: string): string | undefined {
+	const separator = canonicalValue.indexOf(':');
+
+	if (separator <= 0) {
+		return undefined;
+	}
+
+	const binding = ACTIVE_WD_BINDINGS.get(canonicalValue.slice(0, separator));
+	return binding ? classificationSlugForType(binding.classification) : undefined;
+}
 
 /**
  * MBID uniqueness is per entity type; the type segment travels in the value.
@@ -74,7 +105,8 @@ function resolveGen1Slug(canonicalValue: string): string | undefined {
 	return hasClassification(slug) ? slug : undefined;
 }
 
-export const SCHEME_CLASSIFICATIONS: Readonly<Record<UnambiguousScheme, ClassificationEntry>> = {
+export const SCHEME_CLASSIFICATIONS: Readonly<Record<ClassifiableScheme, ClassificationEntry>> = {
+	wd: { kind: 'value-typed', resolveSlug: resolveWdSlug },
 	isbn: { kind: 'direct', slug: 'book' },
 	isrc: { kind: 'direct', slug: 'music-recording' },
 	iswc: {

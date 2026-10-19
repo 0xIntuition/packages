@@ -89,6 +89,12 @@ describe('providersForIid', () => {
 		expect(providersForIid('int:wd:Q42')).toEqual(['wikidata']);
 	});
 
+	it('uses the same wikidata provider for active typed and bare wd', () => {
+		const bareProviders = providersForIid('int:wd:Q42');
+		expect(bareProviders).toEqual(['wikidata']);
+		expect(providersForIid('int:wd:film:Q188035')).toEqual(bareProviders);
+	});
+
 	it('returns no providers for malformed or uncanonicalizable IIDs', () => {
 		expect(providersForIid('int:isrc:nope')).toEqual([]);
 		expect(providersForIid('not an iid')).toEqual([]);
