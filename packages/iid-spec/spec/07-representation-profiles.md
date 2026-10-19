@@ -88,7 +88,7 @@ A scheme is **unambiguously typed** if knowing an identifier's scheme and value 
 
 Some schemes are unambiguous because their domain is narrow: an ISBN is always a book edition, an ISRC always a sound recording. Others carry the type inside the value: `mbid` values begin with an entity-type segment (`artist:`, `recording:`), `olid` values end with `W`/`M`/`A`, and `gen1` values begin with the entity type's slug.
 
-A **value-typed scheme** has polymorphic bare values but MAY carry the entity type inside a value. `wd` is value-typed: bare `Q…` is polymorphic, while `<slug>:Q…` with an active [EntitySchema binding](../schemes/wd.md) is unambiguous; a dormant binding is valid and unambiguous but not mintable. The conformance corpus marks value-typed schemes with `valueTyped` and MAY state per-value `typing` on validation vectors, defaulting to the scheme's typing when omitted.
+A **value-typed scheme** has polymorphic bare values but MAY carry the entity type inside a value. `wd` is value-typed: bare `Q…` is polymorphic, while `<slug>:Q…` with an active [EntitySchema binding](../schemes/wd.md) is unambiguous; a dormant binding is valid and unambiguous but not mintable. The conformance corpus marks value-typed schemes with `valueTyped` and MAY state per-value `typing` on validation vectors, defaulting to the scheme's typing when omitted. A scheme's optional `anchorIneligibleValuePattern` is a regular expression applied to the value after the scheme; matching values may be valid but are never anchor-eligible, regardless of effective typing.
 
 The polymorphic cases are polymorphic for concrete reasons:
 

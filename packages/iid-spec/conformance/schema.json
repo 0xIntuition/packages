@@ -168,6 +168,11 @@
 						"properties": {
 							"class": { "enum": ["A", "B", "C"] },
 							"typing": { "enum": ["unambiguous", "polymorphic"] },
+							"anchorIneligibleValuePattern": {
+								"type": "string",
+								"format": "regex",
+								"description": "Optional regular expression applied to the value after the scheme; matching values may be valid but are never anchor-eligible, regardless of effective typing."
+							},
 							"valueTyped": {
 								"type": "boolean",
 								"description": "Bare values are polymorphic, but a value MAY carry the entity type inside the value (spec §7.3); validation vectors for such a scheme MAY state per-value typing."

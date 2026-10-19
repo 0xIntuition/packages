@@ -47,7 +47,7 @@
 		"pack:dry-run": "npm pack --ignore-scripts --dry-run --json",
 		"pack:release": "node ../../scripts/pack-release.mjs",
 		"prepublishOnly": "node ../../scripts/guard-direct-publish.mjs",
-		"test": "node test/validate-fixtures.mjs",
+		"test": "node test/validate-fixtures.mjs && node --test test/validate-fixtures.test.mjs",
 		"ci": "biome check",
 		"lint": "biome lint",
 		"format": "biome format",
