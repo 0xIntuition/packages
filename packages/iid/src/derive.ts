@@ -30,8 +30,7 @@ import { isActiveWdEntitySchemaSlug } from './wd-entityschema-bindings.js';
  * | `wd` rung | Behavior |
  * | --------- | -------- |
  * | Active `wdSlug` | Prefix bare QIDs; retain matching typed values; skip conflicting slugs or invalid IIDs (including values over 220 characters). |
- * | Dormant `wdSlug` | Skip the rung. |
- * | No `wdSlug` | Legacy bare minting only (D-P16-1, D-P16-5): a typed value reaching a slugless rung is skipped; typed minting requires a declared active binding. |
+ * | Missing or dormant `wdSlug` | Skip the rung; D-P16-1 and D-P16-5 are withdrawn in favor of reference parity. |
  *
  * `same-as` canonicalizes the whole set and selects its lexicographically
  * smallest value before checking the rung's slug, including typed values.
@@ -45,7 +44,10 @@ export function deriveIntuitionId(
 	for (const rung of ladder.rungs) {
 		if (rung.kind === 'scheme') {
 			const wdSlug = rung.scheme === 'wd' ? rung.wdSlug : undefined;
-			if (wdSlug !== undefined && !isActiveWdEntitySchemaSlug(wdSlug)) {
+			if (
+				rung.scheme === 'wd' &&
+				(rung.wdSlug === undefined || !isActiveWdEntitySchemaSlug(rung.wdSlug))
+			) {
 				continue;
 			}
 
@@ -59,11 +61,6 @@ export function deriveIntuitionId(
 			let canonical = definition.canonicalize(raw);
 
 			if (canonical === undefined) {
-				continue;
-			}
-
-			if (rung.scheme === 'wd' && wdSlug === undefined && canonical.includes(':')) {
-				// D-P16-5: a slugless rung keeps the base accepted-value domain (bare QIDs only).
 				continue;
 			}
 
