@@ -1,0 +1,139 @@
+{
+	"provenance": {
+		"referenceSha": "31b62f35a787b6a7b9318f7a5d245ba6d0c76e9b",
+		"reference": "reference implementation @ 31b62f35a787b6a7b9318f7a5d245ba6d0c76e9b",
+		"generatedAt": "2026-10-06T03:23:56.859Z",
+		"generator": "gen-golden-fixture.ts"
+	},
+	"description": "The one bare-IID golden fixture: the pipeline contract transcribed from the fixture runner's header (the runner needs a database and was not executed) plus everything the pure reference functions (parser, scheme registry, classification registry, identity ladder, anchor builder, atom-id) say about the same IID.",
+	"iid": "int:isrc:USQX91300108",
+	"expected": {
+		"raw_type": "iid",
+		"raw_type_rule": "raw_type stays 'iid' and the node's iid column carries the validated canonical id",
+		"canonical_iid": "int:isrc:USQX91300108",
+		"search_text": "",
+		"search_text_rule": "no identifier in search text until enrichment",
+		"classification_type": "MusicRecording",
+		"classification_type_rule": "from the IID classification registry; isrc is an unambiguous scheme",
+		"data_resolved": {
+			"shape": "enrichment-fed JSON object",
+			"requiredKeys": ["@type"],
+			"rule": "data_resolved is enrichment-fed and carries @type"
+		}
+	},
+	"transcribed": {
+		"fixtureIid": "int:isrc:USQX91300108",
+		"purpose": "Drive ONE bare-IID atom through the real knowledge-graph worker pipeline (parse → classification → enrichment) and assert the golden contract below.",
+		"pipelineStages": ["parse", "classification", "enrichment"],
+		"workerVersions": {
+			"parse": "iid-golden-fixture-parser-v1",
+			"classification": "iid-golden-fixture-classifier-v1",
+			"enrichment": "iid-golden-fixture-enrichment-v1"
+		},
+		"stageTimeoutMs": 120000,
+		"contract": {
+			"raw_type": "iid",
+			"raw_type_rule": "raw_type stays 'iid' and the node's iid column carries the validated canonical id",
+			"canonical_iid": "int:isrc:USQX91300108",
+			"search_text": "",
+			"search_text_rule": "no identifier in search text until enrichment",
+			"classification_type": "MusicRecording",
+			"classification_type_rule": "from the IID classification registry; isrc is an unambiguous scheme",
+			"data_resolved": {
+				"shape": "enrichment-fed JSON object",
+				"requiredKeys": ["@type"],
+				"rule": "data_resolved is enrichment-fed and carries @type"
+			}
+		},
+		"runModes": {
+			"default": "spawn local workers for each stage",
+			"--reset": "delete the fixture atom (artifacts + moderation changes + node) before recreating it so it reprocesses from scratch",
+			"--cluster": "do not spawn local workers; wait for the cluster's deployed workers to claim and complete each stage"
+		},
+		"safety": "Requires a loopback database URL; writes exactly one content-addressed fixture atom and leaves it in place; re-runs are idempotent (a node whose stages already completed is re-verified, not re-processed).",
+		"executed": false,
+		"executedNote": "The fixture runner needs a database and was not run; only its header contract was transcribed."
+	},
+	"pure": {
+		"parse": {
+			"scheme": "isrc",
+			"value": "USQX91300108"
+		},
+		"isIntuitionId": true,
+		"validateIntuitionId": true,
+		"isCanonicalNodeIid": true,
+		"isAnchorEligible": true,
+		"scheme": {
+			"name": "isrc",
+			"class": "A",
+			"typing": "unambiguous",
+			"canonicalizeValue": "USQX91300108",
+			"canonicalizeFormatted": "USQX91300108",
+			"canonicalizeLowercase": "USQX91300108",
+			"isCanonicalValue": true
+		},
+		"registry": {
+			"classificationForIid": {
+				"slug": "music-recording",
+				"schemaType": "MusicRecording",
+				"atomCategory": "song"
+			},
+			"classificationForIidThrown": null,
+			"classificationForScheme": {
+				"slug": "music-recording",
+				"schemaType": "MusicRecording",
+				"atomCategory": "song"
+			},
+			"classificationForSchemeThrown": null,
+			"identifierHintsForIid": {
+				"isrc": "USQX91300108"
+			},
+			"identifierHintsThrown": null,
+			"providersForIid": ["musicbrainz", "spotify", "apple-music"],
+			"providersThrown": null
+		},
+		"classificationSpec": {
+			"slug": "music-recording",
+			"type": "MusicRecording",
+			"displayName": "Music Recording",
+			"commonName": "Song",
+			"atomCategory": "song",
+			"schemaContext": "https://schema.org/",
+			"fields": ["name", "byArtist", "inAlbum", "isrc", "sameAs"],
+			"resolvedByType": "music-recording"
+		},
+		"ladderClassificationsWithIsrcRung": [
+			{
+				"slug": "music-recording",
+				"type": "MusicRecording"
+			}
+		],
+		"ladderDerivation": {
+			"iid": "int:isrc:USQX91300108",
+			"scheme": "isrc",
+			"class": "A",
+			"tag": null
+		},
+		"ladderDerivationThrown": null,
+		"anchor": {
+			"profile": "P0",
+			"data": "int:isrc:USQX91300108",
+			"dataBytesHex": "696e743a697372633a555351583931333030313038",
+			"dataByteLength": 21,
+			"atomId": "0x42eea046949fed98884bad097ac5c7ec5a81b0b3ace46313f46abd9dcf6bd858",
+			"iid": "int:isrc:USQX91300108",
+			"searchText": ""
+		},
+		"anchorThrown": null,
+		"anchorFromFormattedIsrcIsIdentical": true,
+		"anchorFromCandidate": {
+			"profile": "P0",
+			"data": "int:isrc:USQX91300108",
+			"atomId": "0x42eea046949fed98884bad097ac5c7ec5a81b0b3ace46313f46abd9dcf6bd858",
+			"searchText": ""
+		},
+		"anchorFromCandidateThrown": null,
+		"atomIdOfBareIid": "0x42eea046949fed98884bad097ac5c7ec5a81b0b3ace46313f46abd9dcf6bd858",
+		"atomIdOfBareIidMatchesAnchor": true
+	}
+}

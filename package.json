@@ -12,6 +12,7 @@
 	],
 	"scripts": {
 		"build": "turbo run build",
+		"conformance:check": "bun test conformance",
 		"typecheck": "turbo run typecheck",
 		"test": "turbo run test",
 		"check": "turbo run check",
