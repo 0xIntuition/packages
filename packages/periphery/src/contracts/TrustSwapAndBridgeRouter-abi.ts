@@ -1,391 +1,498 @@
 export const TrustSwapAndBridgeRouterAbi = [
-	{ inputs: [], stateMutability: 'nonpayable', type: 'constructor' },
-	{ inputs: [], name: 'InvalidInitialization', type: 'error' },
-	{ inputs: [], name: 'NotInitializing', type: 'error' },
 	{
-		inputs: [{ internalType: 'address', name: 'owner', type: 'address' }],
-		name: 'OwnableInvalidOwner',
-		type: 'error',
+		type: 'receive',
+		stateMutability: 'payable',
 	},
 	{
-		inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
-		name: 'OwnableUnauthorizedAccount',
-		type: 'error',
-	},
-	{ inputs: [], name: 'ReentrancyGuardReentrantCall', type: 'error' },
-	{
-		inputs: [{ internalType: 'address', name: 'token', type: 'address' }],
-		name: 'SafeERC20FailedOperation',
-		type: 'error',
-	},
-	{ inputs: [], name: 'TrustSwapAndBridgeRouter_AmountInZero', type: 'error' },
-	{ inputs: [], name: 'TrustSwapAndBridgeRouter_InsufficientBridgeFee', type: 'error' },
-	{ inputs: [], name: 'TrustSwapAndBridgeRouter_InsufficientETH', type: 'error' },
-	{ inputs: [], name: 'TrustSwapAndBridgeRouter_InvalidAddress', type: 'error' },
-	{ inputs: [], name: 'TrustSwapAndBridgeRouter_InvalidBridgeGasLimit', type: 'error' },
-	{ inputs: [], name: 'TrustSwapAndBridgeRouter_InvalidPath', type: 'error' },
-	{ inputs: [], name: 'TrustSwapAndBridgeRouter_InvalidRecipient', type: 'error' },
-	{ inputs: [], name: 'TrustSwapAndBridgeRouter_InvalidRecipientDomain', type: 'error' },
-	{ inputs: [], name: 'TrustSwapAndBridgeRouter_InvalidToken', type: 'error' },
-	{ inputs: [], name: 'TrustSwapAndBridgeRouter_PathDoesNotEndWithTRUST', type: 'error' },
-	{ inputs: [], name: 'TrustSwapAndBridgeRouter_PathDoesNotStartWithToken', type: 'error' },
-	{ inputs: [], name: 'TrustSwapAndBridgeRouter_PathDoesNotStartWithWETH', type: 'error' },
-	{ inputs: [], name: 'TrustSwapAndBridgeRouter_PoolDoesNotExist', type: 'error' },
-	{ inputs: [], name: 'TrustSwapAndBridgeRouter_TokenMismatch', type: 'error' },
-	{
-		anonymous: false,
-		inputs: [
-			{ indexed: false, internalType: 'uint256', name: 'newBridgeGasLimit', type: 'uint256' },
-		],
-		name: 'BridgeGasLimitSet',
-		type: 'event',
-	},
-	{
-		anonymous: false,
-		inputs: [
-			{
-				indexed: false,
-				internalType: 'enum FinalityState',
-				name: 'newFinalityState',
-				type: 'uint8',
-			},
-		],
-		name: 'FinalityStateSet',
-		type: 'event',
-	},
-	{
-		anonymous: false,
-		inputs: [{ indexed: false, internalType: 'uint64', name: 'version', type: 'uint64' }],
-		name: 'Initialized',
-		type: 'event',
-	},
-	{
-		anonymous: false,
-		inputs: [{ indexed: true, internalType: 'address', name: 'newMetaERC20Hub', type: 'address' }],
-		name: 'MetaERC20HubSet',
-		type: 'event',
-	},
-	{
-		anonymous: false,
-		inputs: [
-			{ indexed: true, internalType: 'address', name: 'previousOwner', type: 'address' },
-			{ indexed: true, internalType: 'address', name: 'newOwner', type: 'address' },
-		],
-		name: 'OwnershipTransferStarted',
-		type: 'event',
-	},
-	{
-		anonymous: false,
-		inputs: [
-			{ indexed: true, internalType: 'address', name: 'previousOwner', type: 'address' },
-			{ indexed: true, internalType: 'address', name: 'newOwner', type: 'address' },
-		],
-		name: 'OwnershipTransferred',
-		type: 'event',
-	},
-	{
-		anonymous: false,
-		inputs: [
-			{ indexed: false, internalType: 'uint32', name: 'newRecipientDomain', type: 'uint32' },
-		],
-		name: 'RecipientDomainSet',
-		type: 'event',
-	},
-	{
-		anonymous: false,
-		inputs: [
-			{ indexed: true, internalType: 'address', name: 'newSlipstreamFactory', type: 'address' },
-		],
-		name: 'SlipstreamFactorySet',
-		type: 'event',
-	},
-	{
-		anonymous: false,
-		inputs: [
-			{ indexed: true, internalType: 'address', name: 'newSlipstreamQuoter', type: 'address' },
-		],
-		name: 'SlipstreamQuoterSet',
-		type: 'event',
-	},
-	{
-		anonymous: false,
-		inputs: [
-			{ indexed: true, internalType: 'address', name: 'newSlipstreamSwapRouter', type: 'address' },
-		],
-		name: 'SlipstreamSwapRouterSet',
-		type: 'event',
-	},
-	{
-		anonymous: false,
-		inputs: [
-			{ indexed: true, internalType: 'address', name: 'user', type: 'address' },
-			{ indexed: true, internalType: 'address', name: 'tokenIn', type: 'address' },
-			{ indexed: false, internalType: 'uint256', name: 'amountIn', type: 'uint256' },
-			{ indexed: false, internalType: 'uint256', name: 'trustOut', type: 'uint256' },
-			{ indexed: false, internalType: 'bytes32', name: 'recipientAddress', type: 'bytes32' },
-			{ indexed: false, internalType: 'bytes32', name: 'transferId', type: 'bytes32' },
-		],
-		name: 'SwappedAndBridgedFromERC20',
-		type: 'event',
-	},
-	{
-		anonymous: false,
-		inputs: [
-			{ indexed: true, internalType: 'address', name: 'user', type: 'address' },
-			{ indexed: false, internalType: 'uint256', name: 'ethSwapped', type: 'uint256' },
-			{ indexed: false, internalType: 'uint256', name: 'trustOut', type: 'uint256' },
-			{ indexed: false, internalType: 'bytes32', name: 'recipientAddress', type: 'bytes32' },
-			{ indexed: false, internalType: 'bytes32', name: 'transferId', type: 'bytes32' },
-		],
-		name: 'SwappedAndBridgedFromETH',
-		type: 'event',
-	},
-	{
-		anonymous: false,
-		inputs: [
-			{ indexed: true, internalType: 'address', name: 'user', type: 'address' },
-			{ indexed: false, internalType: 'uint256', name: 'trustAmount', type: 'uint256' },
-			{ indexed: false, internalType: 'bytes32', name: 'recipientAddress', type: 'bytes32' },
-			{ indexed: false, internalType: 'bytes32', name: 'transferId', type: 'bytes32' },
-		],
-		name: 'TrustBridged',
-		type: 'event',
-	},
-	{
-		inputs: [],
+		type: 'function',
 		name: 'TRUST_ADDRESS',
-		outputs: [{ internalType: 'address', name: '', type: 'address' }],
-		stateMutability: 'view',
-		type: 'function',
-	},
-	{
 		inputs: [],
-		name: 'WETH_ADDRESS',
-		outputs: [{ internalType: 'address', name: '', type: 'address' }],
-		stateMutability: 'view',
-		type: 'function',
-	},
-	{
-		inputs: [],
-		name: 'acceptOwnership',
-		outputs: [],
-		stateMutability: 'nonpayable',
-		type: 'function',
-	},
-	{
-		inputs: [],
-		name: 'bridgeGasLimit',
-		outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-		stateMutability: 'view',
-		type: 'function',
-	},
-	{
-		inputs: [
-			{ internalType: 'uint256', name: 'trustAmount', type: 'uint256' },
-			{ internalType: 'address', name: 'recipient', type: 'address' },
-		],
-		name: 'bridgeTrust',
-		outputs: [{ internalType: 'bytes32', name: 'transferId', type: 'bytes32' }],
-		stateMutability: 'payable',
-		type: 'function',
-	},
-	{
-		inputs: [],
-		name: 'finalityState',
-		outputs: [{ internalType: 'enum FinalityState', name: '', type: 'uint8' }],
-		stateMutability: 'view',
-		type: 'function',
-	},
-	{
-		inputs: [
-			{ internalType: 'address', name: '_owner', type: 'address' },
+		outputs: [
 			{
-				components: [
-					{ internalType: 'address', name: 'slipstreamSwapRouter', type: 'address' },
-					{ internalType: 'address', name: 'slipstreamFactory', type: 'address' },
-					{ internalType: 'address', name: 'slipstreamQuoter', type: 'address' },
-					{ internalType: 'address', name: 'metaERC20Hub', type: 'address' },
-					{ internalType: 'uint32', name: 'recipientDomain', type: 'uint32' },
-					{ internalType: 'uint256', name: 'bridgeGasLimit', type: 'uint256' },
-					{ internalType: 'enum FinalityState', name: 'finalityState', type: 'uint8' },
-				],
-				internalType: 'struct RouterConfig',
-				name: 'config',
-				type: 'tuple',
+				name: '',
+				type: 'address',
+				internalType: 'address',
 			},
 		],
-		name: 'initialize',
-		outputs: [],
-		stateMutability: 'nonpayable',
-		type: 'function',
+		stateMutability: 'view',
 	},
 	{
+		type: 'function',
+		name: 'WETH_ADDRESS',
 		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'address',
+				internalType: 'address',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'bridgeGasLimit',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
+		name: 'bridgeTrust',
+		inputs: [
+			{
+				name: 'trustAmount',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+			{
+				name: 'recipient',
+				type: 'address',
+				internalType: 'address',
+			},
+		],
+		outputs: [
+			{
+				name: 'transferId',
+				type: 'bytes32',
+				internalType: 'bytes32',
+			},
+		],
+		stateMutability: 'payable',
+	},
+	{
+		type: 'function',
+		name: 'finalityState',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'uint8',
+				internalType: 'enum FinalityState',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
 		name: 'metaERC20Hub',
-		outputs: [{ internalType: 'contract IMetaERC20Hub', name: '', type: 'address' }],
-		stateMutability: 'view',
-		type: 'function',
-	},
-	{
 		inputs: [],
-		name: 'owner',
-		outputs: [{ internalType: 'address', name: '', type: 'address' }],
-		stateMutability: 'view',
-		type: 'function',
-	},
-	{
-		inputs: [],
-		name: 'pendingOwner',
-		outputs: [{ internalType: 'address', name: '', type: 'address' }],
-		stateMutability: 'view',
-		type: 'function',
-	},
-	{
-		inputs: [
-			{ internalType: 'uint256', name: 'trustAmount', type: 'uint256' },
-			{ internalType: 'address', name: 'recipient', type: 'address' },
+		outputs: [
+			{
+				name: '',
+				type: 'address',
+				internalType: 'contract IMetaERC20Hub',
+			},
 		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'function',
 		name: 'quoteBridgeFee',
-		outputs: [{ internalType: 'uint256', name: 'bridgeFee', type: 'uint256' }],
+		inputs: [
+			{
+				name: 'trustAmount',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+			{
+				name: 'recipient',
+				type: 'address',
+				internalType: 'address',
+			},
+		],
+		outputs: [
+			{
+				name: 'bridgeFee',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+		],
 		stateMutability: 'view',
-		type: 'function',
 	},
 	{
-		inputs: [
-			{ internalType: 'bytes', name: 'path', type: 'bytes' },
-			{ internalType: 'uint256', name: 'amountIn', type: 'uint256' },
-		],
+		type: 'function',
 		name: 'quoteExactInput',
-		outputs: [{ internalType: 'uint256', name: 'amountOut', type: 'uint256' }],
+		inputs: [
+			{
+				name: 'path',
+				type: 'bytes',
+				internalType: 'bytes',
+			},
+			{
+				name: 'amountIn',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+		],
+		outputs: [
+			{
+				name: 'amountOut',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+			{
+				name: 'success',
+				type: 'bool',
+				internalType: 'bool',
+			},
+		],
 		stateMutability: 'nonpayable',
-		type: 'function',
 	},
 	{
-		inputs: [],
+		type: 'function',
 		name: 'recipientDomain',
-		outputs: [{ internalType: 'uint32', name: '', type: 'uint32' }],
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'uint32',
+				internalType: 'uint32',
+			},
+		],
 		stateMutability: 'view',
-		type: 'function',
 	},
 	{
-		inputs: [],
-		name: 'renounceOwnership',
-		outputs: [],
-		stateMutability: 'nonpayable',
 		type: 'function',
-	},
-	{
-		inputs: [{ internalType: 'uint256', name: 'newBridgeGasLimit', type: 'uint256' }],
-		name: 'setBridgeGasLimit',
-		outputs: [],
-		stateMutability: 'nonpayable',
-		type: 'function',
-	},
-	{
-		inputs: [{ internalType: 'enum FinalityState', name: 'newFinalityState', type: 'uint8' }],
-		name: 'setFinalityState',
-		outputs: [],
-		stateMutability: 'nonpayable',
-		type: 'function',
-	},
-	{
-		inputs: [{ internalType: 'address', name: 'newMetaERC20Hub', type: 'address' }],
-		name: 'setMetaERC20Hub',
-		outputs: [],
-		stateMutability: 'nonpayable',
-		type: 'function',
-	},
-	{
-		inputs: [{ internalType: 'uint32', name: 'newRecipientDomain', type: 'uint32' }],
-		name: 'setRecipientDomain',
-		outputs: [],
-		stateMutability: 'nonpayable',
-		type: 'function',
-	},
-	{
-		inputs: [{ internalType: 'address', name: 'newSlipstreamFactory', type: 'address' }],
-		name: 'setSlipstreamFactory',
-		outputs: [],
-		stateMutability: 'nonpayable',
-		type: 'function',
-	},
-	{
-		inputs: [{ internalType: 'address', name: 'newSlipstreamQuoter', type: 'address' }],
-		name: 'setSlipstreamQuoter',
-		outputs: [],
-		stateMutability: 'nonpayable',
-		type: 'function',
-	},
-	{
-		inputs: [{ internalType: 'address', name: 'newSlipstreamSwapRouter', type: 'address' }],
-		name: 'setSlipstreamSwapRouter',
-		outputs: [],
-		stateMutability: 'nonpayable',
-		type: 'function',
-	},
-	{
-		inputs: [],
 		name: 'slipstreamFactory',
-		outputs: [{ internalType: 'contract ICLFactory', name: '', type: 'address' }],
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'address',
+				internalType: 'contract ICLFactory',
+			},
+		],
 		stateMutability: 'view',
-		type: 'function',
 	},
 	{
-		inputs: [],
+		type: 'function',
 		name: 'slipstreamQuoter',
-		outputs: [{ internalType: 'address', name: '', type: 'address' }],
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'address',
+				internalType: 'address',
+			},
+		],
 		stateMutability: 'view',
-		type: 'function',
 	},
 	{
-		inputs: [],
+		type: 'function',
 		name: 'slipstreamSwapRouter',
-		outputs: [{ internalType: 'address', name: '', type: 'address' }],
-		stateMutability: 'view',
-		type: 'function',
-	},
-	{
-		inputs: [
-			{ internalType: 'address', name: 'tokenIn', type: 'address' },
-			{ internalType: 'uint256', name: 'amountIn', type: 'uint256' },
-			{ internalType: 'bytes', name: 'path', type: 'bytes' },
-			{ internalType: 'uint256', name: 'minTrustOut', type: 'uint256' },
-			{ internalType: 'address', name: 'recipient', type: 'address' },
-		],
-		name: 'swapAndBridgeWithERC20',
-		outputs: [
-			{ internalType: 'uint256', name: 'amountOut', type: 'uint256' },
-			{ internalType: 'bytes32', name: 'transferId', type: 'bytes32' },
-		],
-		stateMutability: 'payable',
-		type: 'function',
-	},
-	{
-		inputs: [
-			{ internalType: 'bytes', name: 'path', type: 'bytes' },
-			{ internalType: 'uint256', name: 'minTrustOut', type: 'uint256' },
-			{ internalType: 'address', name: 'recipient', type: 'address' },
-		],
-		name: 'swapAndBridgeWithETH',
-		outputs: [
-			{ internalType: 'uint256', name: 'amountOut', type: 'uint256' },
-			{ internalType: 'bytes32', name: 'transferId', type: 'bytes32' },
-		],
-		stateMutability: 'payable',
-		type: 'function',
-	},
-	{
-		inputs: [{ internalType: 'address', name: 'newOwner', type: 'address' }],
-		name: 'transferOwnership',
-		outputs: [],
-		stateMutability: 'nonpayable',
-		type: 'function',
-	},
-	{
 		inputs: [],
-		name: 'trustToken',
-		outputs: [{ internalType: 'contract IERC20', name: '', type: 'address' }],
+		outputs: [
+			{
+				name: '',
+				type: 'address',
+				internalType: 'address',
+			},
+		],
 		stateMutability: 'view',
+	},
+	{
 		type: 'function',
+		name: 'swapAndBridgeWithERC20',
+		inputs: [
+			{
+				name: 'tokenIn',
+				type: 'address',
+				internalType: 'address',
+			},
+			{
+				name: 'amountIn',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+			{
+				name: 'path',
+				type: 'bytes',
+				internalType: 'bytes',
+			},
+			{
+				name: 'minTrustOut',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+			{
+				name: 'recipient',
+				type: 'address',
+				internalType: 'address',
+			},
+			{
+				name: 'deadline',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+		],
+		outputs: [
+			{
+				name: 'amountOut',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+			{
+				name: 'transferId',
+				type: 'bytes32',
+				internalType: 'bytes32',
+			},
+		],
+		stateMutability: 'payable',
+	},
+	{
+		type: 'function',
+		name: 'swapAndBridgeWithETH',
+		inputs: [
+			{
+				name: 'path',
+				type: 'bytes',
+				internalType: 'bytes',
+			},
+			{
+				name: 'minTrustOut',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+			{
+				name: 'recipient',
+				type: 'address',
+				internalType: 'address',
+			},
+			{
+				name: 'deadline',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+		],
+		outputs: [
+			{
+				name: 'amountOut',
+				type: 'uint256',
+				internalType: 'uint256',
+			},
+			{
+				name: 'transferId',
+				type: 'bytes32',
+				internalType: 'bytes32',
+			},
+		],
+		stateMutability: 'payable',
+	},
+	{
+		type: 'function',
+		name: 'trustToken',
+		inputs: [],
+		outputs: [
+			{
+				name: '',
+				type: 'address',
+				internalType: 'contract IERC20',
+			},
+		],
+		stateMutability: 'view',
+	},
+	{
+		type: 'event',
+		name: 'SwappedAndBridgedFromERC20',
+		inputs: [
+			{
+				name: 'user',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+			{
+				name: 'tokenIn',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+			{
+				name: 'amountIn',
+				type: 'uint256',
+				indexed: false,
+				internalType: 'uint256',
+			},
+			{
+				name: 'trustOut',
+				type: 'uint256',
+				indexed: false,
+				internalType: 'uint256',
+			},
+			{
+				name: 'recipientAddress',
+				type: 'bytes32',
+				indexed: false,
+				internalType: 'bytes32',
+			},
+			{
+				name: 'transferId',
+				type: 'bytes32',
+				indexed: false,
+				internalType: 'bytes32',
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: 'event',
+		name: 'SwappedAndBridgedFromETH',
+		inputs: [
+			{
+				name: 'user',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+			{
+				name: 'ethSwapped',
+				type: 'uint256',
+				indexed: false,
+				internalType: 'uint256',
+			},
+			{
+				name: 'trustOut',
+				type: 'uint256',
+				indexed: false,
+				internalType: 'uint256',
+			},
+			{
+				name: 'recipientAddress',
+				type: 'bytes32',
+				indexed: false,
+				internalType: 'bytes32',
+			},
+			{
+				name: 'transferId',
+				type: 'bytes32',
+				indexed: false,
+				internalType: 'bytes32',
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: 'event',
+		name: 'TrustBridged',
+		inputs: [
+			{
+				name: 'user',
+				type: 'address',
+				indexed: true,
+				internalType: 'address',
+			},
+			{
+				name: 'trustAmount',
+				type: 'uint256',
+				indexed: false,
+				internalType: 'uint256',
+			},
+			{
+				name: 'recipientAddress',
+				type: 'bytes32',
+				indexed: false,
+				internalType: 'bytes32',
+			},
+			{
+				name: 'transferId',
+				type: 'bytes32',
+				indexed: false,
+				internalType: 'bytes32',
+			},
+		],
+		anonymous: false,
+	},
+	{
+		type: 'error',
+		name: 'ReentrancyGuardReentrantCall',
+		inputs: [],
+	},
+	{
+		type: 'error',
+		name: 'SafeERC20FailedOperation',
+		inputs: [
+			{
+				name: 'token',
+				type: 'address',
+				internalType: 'address',
+			},
+		],
+	},
+	{
+		type: 'error',
+		name: 'TrustSwapAndBridgeRouter_AmountInZero',
+		inputs: [],
+	},
+	{
+		type: 'error',
+		name: 'TrustSwapAndBridgeRouter_DeadlineExpired',
+		inputs: [],
+	},
+	{
+		type: 'error',
+		name: 'TrustSwapAndBridgeRouter_ETHRefundFailed',
+		inputs: [],
+	},
+	{
+		type: 'error',
+		name: 'TrustSwapAndBridgeRouter_InsufficientBridgeFee',
+		inputs: [],
+	},
+	{
+		type: 'error',
+		name: 'TrustSwapAndBridgeRouter_InsufficientETH',
+		inputs: [],
+	},
+	{
+		type: 'error',
+		name: 'TrustSwapAndBridgeRouter_InvalidAddress',
+		inputs: [],
+	},
+	{
+		type: 'error',
+		name: 'TrustSwapAndBridgeRouter_InvalidPath',
+		inputs: [],
+	},
+	{
+		type: 'error',
+		name: 'TrustSwapAndBridgeRouter_InvalidRecipient',
+		inputs: [],
+	},
+	{
+		type: 'error',
+		name: 'TrustSwapAndBridgeRouter_InvalidToken',
+		inputs: [],
+	},
+	{
+		type: 'error',
+		name: 'TrustSwapAndBridgeRouter_MinTrustOutZero',
+		inputs: [],
+	},
+	{
+		type: 'error',
+		name: 'TrustSwapAndBridgeRouter_PathDoesNotEndWithTRUST',
+		inputs: [],
+	},
+	{
+		type: 'error',
+		name: 'TrustSwapAndBridgeRouter_PathDoesNotStartWithToken',
+		inputs: [],
+	},
+	{
+		type: 'error',
+		name: 'TrustSwapAndBridgeRouter_PathDoesNotStartWithWETH',
+		inputs: [],
+	},
+	{
+		type: 'error',
+		name: 'TrustSwapAndBridgeRouter_PoolDoesNotExist',
+		inputs: [],
 	},
 ] as const;

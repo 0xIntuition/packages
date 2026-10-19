@@ -13,7 +13,7 @@ import {
 describe('intuitionPeripheryDeployments', () => {
 	it('includes TrustSwapAndBridgeRouter on Base', () => {
 		expect(intuitionPeripheryDeployments.TrustSwapAndBridgeRouter?.[base.id]).toBe(
-			'0xA1EC6f95A88Bfc7A8Fd35f1296b64ebaf91C93fb'
+			'0xE485D9a5Dc39774b7A80864B625969Cf9d93E5D7'
 		);
 	});
 
@@ -43,6 +43,10 @@ describe('intuitionPeripheryDeployments', () => {
 
 	it('does not claim ownership of WrappedTrust deployments', () => {
 		expect(intuitionPeripheryDeployments.WrappedTrust).toBeUndefined();
+	});
+
+	it('carries no FeeProxy addresses yet — nothing has been deployed', () => {
+		expect(intuitionPeripheryDeployments.FeeProxy).toEqual({});
 	});
 
 	it('maps recipient domains by direction', () => {
