@@ -22,8 +22,15 @@ vi.mock('../provider', () => ({
 	}),
 }));
 
+import { MultiVaultAbi } from '@0xintuition/protocol';
 import { act, renderHook } from '@testing-library/react';
-import type { Hex } from 'viem';
+import {
+	type Address,
+	encodeAbiParameters,
+	encodeEventTopics,
+	type Hex,
+	type TransactionReceipt,
+} from 'viem';
 import { useCreateAtomFlow } from '../hooks/use-create-atom-flow';
 
 describe('useCreateAtomFlow', () => {
@@ -194,5 +201,42 @@ describe('useCreateAtomFlow', () => {
 		expect(result.current.status).toBe('idle');
 		expect(result.current.hash).toBeUndefined();
 		expect(result.current.error).toBeUndefined();
+	});
+	it('returns and reports only atoms emitted by the configured MultiVault', async () => {
+		const vault = '0xeBc49d356B7f64D888130D85CC6D17114a6843ec' as Address;
+		const foreign = '0x1111111111111111111111111111111111111111' as Address;
+		const termId = `0x${'aa'.repeat(32)}` as Hex;
+		const foreignTerm = `0x${'bb'.repeat(32)}` as Hex;
+		const hash = `0x${'cc'.repeat(32)}` as Hex;
+		const log = (address: Address, id: Hex) => ({
+			address,
+			topics: encodeEventTopics({
+				abi: MultiVaultAbi,
+				eventName: 'AtomCreated',
+				args: { creator: foreign, termId: id },
+			}),
+			data: encodeAbiParameters([{ type: 'bytes' }, { type: 'address' }], ['0x01', foreign]),
+		});
+		const receipt = {
+			status: 'success',
+			transactionHash: hash,
+			logs: [log(foreign, foreignTerm), log(vault, termId)],
+		} as TransactionReceipt;
+		mockUseReadContract.mockReturnValue({ data: 1n });
+		mockUseWriteContract.mockReturnValue({
+			writeContractAsync: vi.fn().mockResolvedValue(hash),
+			reset: vi.fn(),
+		});
+		mockUseWaitForTransactionReceipt.mockReturnValue({ data: undefined, error: undefined });
+		const onConfirmed = vi.fn();
+		const { result, rerender } = renderHook(() => useCreateAtomFlow({ onConfirmed }));
+		let completion!: ReturnType<typeof result.current.createAtom>;
+		await act(async () => {
+			completion = result.current.createAtom({ data: ['0x01'], assets: [1n] });
+		});
+		mockUseWaitForTransactionReceipt.mockReturnValue({ data: receipt, error: undefined });
+		act(() => rerender());
+		expect((await completion).termIds).toEqual([termId]);
+		expect(onConfirmed).toHaveBeenCalledExactlyOnceWith(receipt, termId);
 	});
 });

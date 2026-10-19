@@ -1,6 +1,6 @@
 {
 	"name": "@0xintuition/ids",
-	"version": "0.1.0-alpha.0",
+	"version": "0.1.0-alpha.1",
 	"description": "Deterministic content-addressable ID utilities for the Intuition protocol",
 	"private": false,
 	"license": "MIT",

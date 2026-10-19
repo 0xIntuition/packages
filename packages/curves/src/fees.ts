@@ -18,8 +18,6 @@ import type {
 	TripleFees,
 } from './types.js';
 
-const MAX_GROSS_UP_FIXUP_ITERATIONS = 1_000_000;
-
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -79,12 +77,32 @@ function grossUpFeeBase(
 	let assetsAfterFees = netFromFeeBase(feeBase);
 	let fixupIterations = 0;
 
-	while (assetsAfterFees < netAssets) {
-		if (fixupIterations >= MAX_GROSS_UP_FIXUP_ITERATIONS) {
-			throw new Error('Unable to solve an exact gross deposit within the iteration limit.');
+	if (assetsAfterFees < netAssets) {
+		// Each separately rounded fee loses less than one unit compared with
+		// the continuous estimate. This gives a finite upper bound even when
+		// the total rate approaches 100% and a linear scan would take millions
+		// of steps (or more).
+		const activeFees = BigInt(feeNumerators.filter((fee) => fee > 0n).length);
+		let low = feeBase;
+		let high =
+			((netAssets + activeFees) * denominator + denominator - totalNumerator - 1n) /
+			(denominator - totalNumerator);
+		// Net is NOT monotonic: several ceil-rounded fees can jump together.
+		// Maintain only net(low) < target <= net(high). Net can rise by at
+		// most one per unit of gross, so adjacent endpoints prove an exact
+		// solution. This does not promise the smallest possible gross value.
+		while (high - low > 1n) {
+			const middle = (low + high) / 2n;
+			const net = netFromFeeBase(middle);
+			fixupIterations += 1;
+			if (net === netAssets) {
+				high = middle;
+				break;
+			}
+			if (net < netAssets) low = middle;
+			else high = middle;
 		}
-		feeBase += 1n;
-		fixupIterations += 1;
+		feeBase = high;
 		assetsAfterFees = netFromFeeBase(feeBase);
 	}
 

@@ -9,7 +9,7 @@ Pure and offline by contract: no network I/O, no clock, no locale, no configurat
 ## Install
 
 ```sh
-npm install @0xintuition/iid viem
+npm install @0xintuition/iid@alpha viem@^2
 ```
 
 `viem` is a peer dependency (keccak-256).

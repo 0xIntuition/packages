@@ -17,7 +17,7 @@
  * - 'docs-only' — normative documents/fixtures only; no build step, no dist/
  */
 
-import { readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 export const PACKAGES = [
@@ -97,14 +97,29 @@ export function readAllWorkspaceManifests(repoRoot) {
 export function assertRegistryIntegrity(repoRoot) {
 	const manifests = readAllWorkspaceManifests(repoRoot);
 	const failures = [];
+	for (const entry of readdirSync(resolve(repoRoot, 'packages'), { withFileTypes: true })) {
+		if (!entry.isDirectory()) continue;
+		const path = resolve(repoRoot, 'packages', entry.name, 'package.json');
+		if (!existsSync(path)) continue;
+		const manifest = JSON.parse(readFileSync(path, 'utf8'));
+		if (manifest.private !== true && !manifests.has(entry.name)) {
+			failures.push(`${entry.name}: publishable package is missing from PACKAGES`);
+		}
+	}
+	if (new Set(PACKAGE_ORDER).size !== PACKAGE_ORDER.length) {
+		failures.push('PACKAGES contains duplicate directories');
+	}
 
 	const nameToDirName = new Map();
 	const versionsByName = new Map();
 	for (const [dirName, manifest] of manifests) {
+		if (manifest.private !== false) failures.push(`${dirName}: registered package must be public`);
 		if (!manifest.name?.startsWith('@0xintuition/')) {
 			failures.push(`${dirName}: package name ${manifest.name} is not in the @0xintuition scope`);
 			continue;
 		}
+		if (nameToDirName.has(manifest.name))
+			failures.push(`${dirName}: duplicate name ${manifest.name}`);
 		nameToDirName.set(manifest.name, dirName);
 		versionsByName.set(manifest.name, manifest.version);
 	}

@@ -427,7 +427,7 @@ describe('fees', () => {
 			expect(flagsOff.grossAssets).toBe(123n);
 		});
 
-		it('continues past two fixups for valid high-fee schedules', () => {
+		it('solves valid high-fee schedules', () => {
 			const quote = grossUpAtomDeposit(
 				1n,
 				{
@@ -441,7 +441,41 @@ describe('fees', () => {
 			);
 
 			expect(quote.assetsAfterFees).toBe(1n);
-			expect(quote.fixupIterations).toBeGreaterThan(2);
+			expect(quote.fixupIterations).toBeGreaterThan(0);
+		});
+
+		it('solves near-total fee schedules without a linear scan', () => {
+			const denominator = 10n ** 30n + 1n;
+			const fees = { denominator, protocolFee: 2n, entryFee: denominator - 4n, exitFee: 0n };
+			const quote = grossUpAtomDeposit(1n, fees, { atomWalletDepositFee: 0n }, true);
+			expect(
+				previewAtomDeposit(curve, quote.feeBase, state, fees, { atomWalletDepositFee: 0n }, true)
+					.assetsAfterFees
+			).toBe(1n);
+			expect(quote.fixupIterations).toBeLessThan(110);
+		});
+
+		it('handles simultaneous fee jumps across exhaustive small schedules', () => {
+			for (let denominator = 2n; denominator <= 18n; denominator++) {
+				for (let first = 0n; first < denominator; first++) {
+					for (let second = 0n; first + second < denominator; second++) {
+						for (const net of [0n, 1n, 2n, 7n]) {
+							const fees = { denominator, protocolFee: first, entryFee: second, exitFee: 0n };
+							const quote = grossUpAtomDeposit(net, fees, { atomWalletDepositFee: 0n }, true);
+							expect(
+								previewAtomDeposit(
+									curve,
+									quote.feeBase,
+									state,
+									fees,
+									{ atomWalletDepositFee: 0n },
+									true
+								).assetsAfterFees
+							).toBe(net);
+						}
+					}
+				}
+			}
 		});
 
 		it('property-checks exact net values across deterministic randomized fee combinations', () => {

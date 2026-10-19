@@ -1,6 +1,11 @@
 # @0xintuition/iid-ladder
 
 Shared identifier-projection ladder for application, seed, and import pipelines.
+ESM-only.
+
+```bash
+npm install @0xintuition/iid-ladder@alpha viem@^2
+```
 
 The ladder selects the first canonical identity available in this order:
 
@@ -62,7 +67,9 @@ vocabulary and schema-to-category mapping.
 
 When `strongIdentifierOrder` is present, it is an allowlist as well as an
 ordering for strong selection. A mapped provider identifier joins that
-selection in its scheme's position. A winning provider handle keeps the
+selection in its scheme's position. Candidates in the same scheme are ranked
+lexically by canonical IID; provider input does not overwrite direct input.
+Wikidata conflict detection includes both sources. A winning provider handle keeps the
 `handle` rung; a winning `int:` identifier keeps the `strong` rung. The normal
 provider-handle and URL fallback rules still apply if no strong candidate wins.
 

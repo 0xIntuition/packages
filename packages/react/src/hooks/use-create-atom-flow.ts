@@ -2,9 +2,10 @@
 
 import { MultiVaultAbi } from '@0xintuition/protocol';
 import { useCallback } from 'react';
-import type { Hex, TransactionReceipt } from 'viem';
+import type { Address, Hex, TransactionReceipt } from 'viem';
 import { parseEventLogs } from 'viem';
 
+import { useChainConfig } from '../provider';
 import type { TransactionFlowStatus } from '../types';
 import { useCreateAtom } from './use-atom';
 import { useAtomCost } from './use-protocol';
@@ -61,10 +62,10 @@ type UseCreateAtomFlowReturn = {
  * @param receipt - The transaction receipt containing AtomCreated event logs.
  * @returns Array of term IDs extracted from the events.
  */
-function extractAtomTermIds(receipt: TransactionReceipt): Hex[] {
+function extractAtomTermIds(receipt: TransactionReceipt, address: Address): Hex[] {
 	const events = parseEventLogs({
 		abi: MultiVaultAbi,
-		logs: receipt.logs,
+		logs: receipt.logs.filter((log) => log.address.toLowerCase() === address.toLowerCase()),
 		eventName: 'AtomCreated',
 	});
 
@@ -102,6 +103,7 @@ function extractAtomTermIds(receipt: TransactionReceipt): Hex[] {
  * ```
  */
 export function useCreateAtomFlow(options?: UseCreateAtomFlowOptions): UseCreateAtomFlowReturn {
+	const { multivaultAddress } = useChainConfig();
 	const { createAtom: rawCreateAtom } = useCreateAtom();
 	const { data: atomCost } = useAtomCost();
 
@@ -112,7 +114,7 @@ export function useCreateAtomFlow(options?: UseCreateAtomFlowOptions): UseCreate
 				assets: params.assets,
 			}),
 		onConfirmed: (receipt) => {
-			const termIds = extractAtomTermIds(receipt);
+			const termIds = extractAtomTermIds(receipt, multivaultAddress);
 			const firstTermId = termIds[0];
 			if (firstTermId && options?.onConfirmed) {
 				options.onConfirmed(receipt, firstTermId);
@@ -125,10 +127,10 @@ export function useCreateAtomFlow(options?: UseCreateAtomFlowOptions): UseCreate
 	const createAtom = useCallback(
 		async (params: CreateAtomParams): Promise<{ receipt: TransactionReceipt; termIds: Hex[] }> => {
 			const receipt = await flow.execute(params);
-			const termIds = extractAtomTermIds(receipt);
+			const termIds = extractAtomTermIds(receipt, multivaultAddress);
 			return { receipt, termIds };
 		},
-		[flow.execute]
+		[flow.execute, multivaultAddress]
 	);
 
 	return {

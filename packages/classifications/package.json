@@ -74,7 +74,7 @@
 		"check:unsafe:write": "biome check --write --unsafe"
 	},
 	"devDependencies": {
-		"@0xintuition/predicates": "0.1.0-alpha.0",
+		"@0xintuition/predicates": "0.1.0-alpha.1",
 		"@0xintuition/schema-org": "0.1.0-alpha.0",
 		"typescript": "^5.9.3",
 		"viem": "^2.31.4",

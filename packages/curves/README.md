@@ -13,13 +13,19 @@ bun add @0xintuition/curves@alpha
 ## Usage
 
 ```ts
-import { createLinearCurve, linearPreviewDeposit } from '@0xintuition/curves'
+import { createLinearCurve } from '@0xintuition/curves'
 
 const curve = createLinearCurve()
-const preview = linearPreviewDeposit(curve, 100n)
+const preview = curve.previewDeposit(100n, { totalAssets: 0n, totalShares: 0n })
+// 100n shares
 ```
 
 ## Dynamic-fee curve
+
+This candidate targets a newer, not-yet-published contract revision. Its
+net-anchored deposit bands differ from `@0xintuition/contracts-v2@1.1.0-alpha.0`.
+Exact contract parity, including uint256 overflow/revert behavior, remains a
+release gate. See the [artifact publishing checklist](https://github.com/0xIntuition/packages/blob/update/v1.1.0-alpha/docs/contract-artifacts.md).
 
 Preview tier boundaries and deposit or withdrawal fees for the flat-price dynamic-fee curve. Deposits pay each traversed tier's rate; manual overrides remain capped by the configured maximum. The tier ladder reports `null` for the top tier's edge and width because that tier is unbounded. Supply the curve's current configuration when quoting.
 
@@ -48,7 +54,7 @@ const depositFee = dynamicFeeQuoteDepositFee(0n, 10n * WAD, config)
 
 ## Gross-up quotes
 
-Use `grossUpAtomDeposit`, `grossUpTripleDeposit`, `grossUpAtomCreate`, or `grossUpTripleCreate` to solve the wallet debit for an exact net deposit after percentage fees. Deposit helpers take explicit fee-applicability flags and an optional first-vault minimum-share cost; create helpers take the fixed creation cost and omit entry fees. The returned `GrossDepositQuote` includes `grossAssets`, `feeBase`, `assetsAfterFees`, and `fixupIterations`. Invalid inputs or a quote exceeding the fixup limit throw.
+Use `grossUpAtomDeposit`, `grossUpTripleDeposit`, `grossUpAtomCreate`, or `grossUpTripleCreate` to solve the wallet debit for an exact net deposit after percentage fees. Deposit helpers take explicit fee-applicability flags and an optional first-vault minimum-share cost; create helpers take the fixed creation cost and omit entry fees. The returned `GrossDepositQuote` includes `grossAssets`, `feeBase`, `assetsAfterFees`, and `fixupIterations`. Invalid inputs throw. The solver uses a bounded logarithmic search, including near-total fee schedules. `fixupIterations` counts search steps. The quote achieves the exact net amount but does not guarantee the smallest gross amount when independently rounded fees produce multiple solutions.
 
 ```ts
 import { grossUpAtomDeposit, WAD } from '@0xintuition/curves'

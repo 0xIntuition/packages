@@ -4,6 +4,11 @@ This repository publishes the public `@0xintuition/*` packages. When a release
 changes how developers install packages, import files, resolve schema URLs, or
 receive default npm versions, call that out clearly in the release notes.
 
+This candidate is **not yet cleared to merge or publish**. Complete the
+[contract artifact release](./contract-artifacts.md) and the remaining
+[review gates](./release-readiness.md) first. `release-plan.json` records candidate
+versions and publish order; it does not authorize publication.
+
 ## Current Policy
 
 - `main` is the integration branch.
@@ -21,7 +26,7 @@ The first public package set has two release tracks:
 | Package family | Current version line | Intended dist-tags |
 | --- | --- | --- |
 | Fresh public packages | `0.1.0-alpha.*` | `alpha` and `latest` can both point at the current alpha while no stable line exists |
-| `@0xintuition/protocol` | `3.x` | `latest` should point at the current v3 release; `alpha` may also point at v3 while the package family remains alpha-oriented |
+| `@0xintuition/protocol` | `3.x` | Publish this candidate to `alpha`; leave the existing `latest` line unchanged until a release owner explicitly promotes it |
 
 For new packages, using both `alpha` and `latest` is acceptable because there is
 no previous stable public line to protect. Consumer docs may still prefer
@@ -75,10 +80,29 @@ bun run schema:validate
 bun run schema-org:check-generated
 bun run classifications:check-creation-profiles
 bun run predicates:check-generated
+bun run registry:check
+bun run registry:test
+bun run release:registry:test
+bun run conformance:check
+bun run protocol:check-artifacts
+bun run protocol:sync-artifacts:test
+bun run guard:supply-chain:test
 bun run guard:supply-chain
 bun run pack:dry-run
 bun run smoke:tarballs
 ```
+
+Also run the read-only publication preflight immediately before release:
+
+```bash
+bun run release:check
+```
+
+This checks unused candidate versions, availability of omitted internal
+dependencies, the pinned MultiVault registry artifact, and broader contract
+artifact parity. It currently fails on the unpublished contract revisions; see
+[contract publishing instructions](./contract-artifacts.md). A green workspace
+CI run alone does not satisfy this gate or consumer acceptance.
 
 For docs-only release-strategy edits, at minimum run:
 
@@ -169,17 +193,20 @@ bun run pack:dry-run
 bun run smoke:tarballs
 ```
 
-Then publish from each package root in the graph order above:
+Publish only the packages listed in `release-plan.json`, in that order, after
+all gates and release-owner review. The unchanged `schema-org@0.1.0-alpha.0`
+is already published and must not be republished. Then publish from each selected
+package root:
 
 ```bash
 cd packages/deployments
-npm publish --access public
+npm publish --access public --tag alpha
 ```
 
-Package manifests own their `publishConfig.tag` values. Fresh alpha packages set
-`publishConfig.tag = "alpha"`. `@0xintuition/protocol` intentionally omits a
-tag in its manifest so npm publishes it to the default `latest` tag unless a
-release owner passes an explicit tag.
+Every candidate package, including `@0xintuition/protocol`, sets
+`publishConfig.tag = "alpha"`. Promotion to `latest` is a separate explicit
+release-owner action. Record the previous dist-tags before publication so they
+can be restored if needed.
 
 `bun run --cwd packages/<name> pack:release` remains available as an audit
 helper. It builds the package, validates the direct-publish guard, runs

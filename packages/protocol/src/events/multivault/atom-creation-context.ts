@@ -1,11 +1,15 @@
 import type { Address, Hex } from 'viem';
 
-type AtomCreatedLike = { args: { termId: Hex } };
-type AtomContextLike = { args: { termId: Hex; registrant: Address; uris: readonly Hex[] } };
+type AtomCreatedLike = { address?: Address; args: { termId: Hex } };
+type AtomContextLike = {
+	address?: Address;
+	args: { termId: Hex; registrant: Address; uris: readonly Hex[] };
+};
 
 /**
  * Associates creation context by deterministic `termId`. Receipt log position
  * is intentionally irrelevant because other protocol events may interleave.
+ * When an atom has an emitter address, only context from that emitter is linked.
  */
 export function associateAtomCreationContext<
 	TAtom extends AtomCreatedLike,
@@ -20,6 +24,8 @@ export function associateAtomCreationContext<
 
 	return atomEvents.map((atom) => ({
 		atom,
-		contexts: contextsByTermId.get(atom.args.termId) ?? [],
+		contexts: (contextsByTermId.get(atom.args.termId) ?? []).filter(
+			(context) => !atom.address || context.address?.toLowerCase() === atom.address.toLowerCase()
+		),
 	}));
 }

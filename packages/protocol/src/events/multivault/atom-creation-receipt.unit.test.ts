@@ -118,7 +118,7 @@ describe('URI-aware receipt linkage', () => {
 		expect(waitForTransactionReceipt).toHaveBeenCalledWith({ hash });
 	});
 
-	it('documents strict layout rejection and the package-wide emitter-filter follow-up', async () => {
+	it('filters identical foreign events and rejects incompatible layouts', async () => {
 		const original = event('AtomContextRegistered');
 		const differentLayout = {
 			...original,
@@ -129,8 +129,8 @@ describe('URI-aware receipt linkage', () => {
 		const foreignLog = log(differentLayout, { termId: termA, registrant, uris: ['0x99'] }, foreign);
 		expect(foreignLog.topics[0]).toBe(context(termA, ['0x01']).topics[0]);
 		expect(foreignLog.topics).toHaveLength(2);
-		// OPEN follow-up: package-wide emitter filtering. Strict decoding drops the
-		// incompatible layout, but compatible logs from other emitters are accepted today.
+		// Discovery remains receipt-wide for compatibility; explicit filtering
+		// checks the emitter even when the foreign event has the same ABI.
 		const { client } = receiptClient([
 			...interleavedLogs(),
 			foreignLog,
@@ -147,10 +147,9 @@ describe('URI-aware receipt linkage', () => {
 			await eventParseAtomCreated(client, hash),
 			contexts
 		);
-		expect(linked[0]?.contexts.map((context) => context.args.uris)).toEqual([
-			['0x01', '0x0102'],
-			['0x88'],
-		]);
+		expect(linked[0]?.contexts.map((context) => context.args.uris)).toEqual([['0x01', '0x0102']]);
+		const scoped = await eventParseAtomContextRegistered(client, hash, vault);
+		expect(scoped.map((event) => event.args.uris)).toEqual([['0x02'], ['0x01', '0x0102']]);
 	});
 
 	it('parses the shipped URI configuration event', async () => {

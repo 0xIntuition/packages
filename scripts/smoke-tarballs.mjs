@@ -113,6 +113,8 @@ try {
 		'--ignore-scripts',
 		'--no-package-lock',
 		'viem@2.31.4',
+		'typescript@5.9.3',
+		'@types/react@19.1.10',
 		'@tanstack/react-query@5.90.2',
 		'react@19.1.0',
 		'react-dom@19.1.0',
@@ -122,6 +124,20 @@ try {
 
 	const importProgram = `
 		const results = {};
+		const { readFileSync } = await import('node:fs');
+		const { createRequire } = await import('node:module');
+		const require = createRequire(process.cwd() + '/consumer.mjs');
+		results.iidSpec = JSON.parse(readFileSync(require.resolve('@0xintuition/iid-spec/conformance/parse.json'), 'utf8')).vectors.length;
+		const iid = await import('@0xintuition/iid');
+		results.iidValid = iid.inspectIntuitionId('int:isrc:USRC17607839').valid;
+		const registry = await import('@0xintuition/iid-registry');
+		results.iidClassification = registry.classificationForIid('int:isrc:USRC17607839')?.slug;
+		const { buildIidAnchor } = await import('@0xintuition/primitives/anchor');
+		const anchor = buildIidAnchor('music-recording', { isrc: 'US-RC1-76-07839' }, { contextUris: ['https://example.com/track'] });
+		if (!anchor.success) throw new Error(anchor.errors.join(', '));
+		results.anchor = { iid: anchor.value.iid, profile: anchor.value.profile, id: anchor.value.id, dataHex: anchor.value.dataHex };
+		const withOtherContext = buildIidAnchor('music-recording', { isrc: 'USRC17607839' }, { contextUris: ['https://example.com/other'] });
+		results.contextPreservesId = withOtherContext.success && withOtherContext.value.id === anchor.value.id;
 		const deployments = await import('@0xintuition/deployments');
 		results.multiVault = deployments.getMultiVaultAddressFromChainId(deployments.INTUITION_MAINNET_CHAIN_ID);
 		const ids = await import('@0xintuition/ids');
@@ -184,6 +200,13 @@ try {
 	`;
 
 	const nodeResult = JSON.parse(run('node', ['--input-type=module', '-e', importProgram]).trim());
+	assert(nodeResult.iidSpec > 0);
+	assert.equal(nodeResult.iidValid, true);
+	assert.equal(nodeResult.iidClassification, 'music-recording');
+	assert.equal(nodeResult.anchor.iid, 'int:isrc:USRC17607839');
+	assert.equal(nodeResult.anchor.profile, 'p0');
+	assert.match(nodeResult.anchor.id, /^0x[0-9a-f]{64}$/);
+	assert.equal(nodeResult.contextPreservesId, true);
 	assert.match(nodeResult.multiVault, /^0x[0-9a-f]{40}$/i);
 	assert.match(nodeResult.oauth, /schema\.intuition\.systems\/v1\/oauth-atom\.jsonld/);
 	assert.match(nodeResult.predicateId, /^0x[0-9a-f]{64}$/i);
@@ -232,6 +255,73 @@ try {
 	assert.equal(bunResult.primitiveAtomSubpath, 'function');
 	assert.equal(bunResult.hasProtocolDeployments, false);
 	assert.equal(bunResult.react, 'function');
+
+	assert.deepEqual(bunResult, nodeResult, 'Node and Bun must agree on every consumer result');
+
+	// Resolve declarations from packed artifacts, without repository aliases or
+	// skipLibCheck hiding missing declaration dependencies.
+	writeFileSync(
+		resolve(tempRoot, 'consumer.ts'),
+		`
+		import { buildIidAnchor } from '@0xintuition/primitives/anchor';
+		import { inspectIntuitionId } from '@0xintuition/iid';
+		import { classificationForIid } from '@0xintuition/iid-registry';
+		import { projectIdentifierLadder } from '@0xintuition/iid-ladder';
+		import { multiVaultCreateAtomsWithUrisEncode, eventParseAtomCreated } from '@0xintuition/protocol';
+		import type { Hex } from 'viem';
+		const result = buildIidAnchor('music-recording', { isrc: 'USRC17607839' });
+		if (result.success) {
+			const atomData: Hex = result.value.dataHex;
+			multiVaultCreateAtomsWithUrisEncode({ args: ['0x1111111111111111111111111111111111111111', [atomData], [1n], [[]]], value: 1n });
+			inspectIntuitionId(result.value.iid);
+			classificationForIid(result.value.iid);
+		}
+		projectIdentifierLadder({ strongIdentifiers: { isrc: 'USRC17607839' } });
+		type Events = Awaited<ReturnType<typeof eventParseAtomCreated>>;
+	`
+	);
+	run('node', [
+		resolve(tempRoot, 'node_modules/typescript/bin/tsc'),
+		'--noEmit',
+		'--strict',
+		'--target',
+		'ES2022',
+		'--module',
+		'NodeNext',
+		'--moduleResolution',
+		'NodeNext',
+		'consumer.ts',
+	]);
+
+	// wagmi's published declarations fail standalone checking under this peer
+	// matrix, independently of our packages. Keep the core/IID check above
+	// strict; check React consumer calls with the same skipLibCheck setting as
+	// this repository, and record that limitation in release-readiness.md.
+	writeFileSync(
+		resolve(tempRoot, 'consumer-react.ts'),
+		`
+		import { useTransactionFlow, IntuitionProvider } from '@0xintuition/react';
+		import type { Hex, TransactionReceipt } from 'viem';
+		const flow = useTransactionFlow({ mutationFn: async (_input: { amount: bigint }): Promise<Hex> => '0x00' });
+		const receipt: Promise<TransactionReceipt> = flow.execute({ amount: 1n });
+		// @ts-expect-error callers must supply a bigint amount
+		flow.execute({ amount: '1' });
+		type Provider = typeof IntuitionProvider;
+	`
+	);
+	run('node', [
+		resolve(tempRoot, 'node_modules/typescript/bin/tsc'),
+		'--noEmit',
+		'--strict',
+		'--skipLibCheck',
+		'--target',
+		'ES2022',
+		'--module',
+		'NodeNext',
+		'--moduleResolution',
+		'NodeNext',
+		'consumer-react.ts',
+	]);
 
 	console.log('Clean-room tarball smoke passed for all public alpha packages.');
 } finally {

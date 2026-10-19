@@ -9,7 +9,7 @@ Runtime: ESM-only. This package does not publish CommonJS `require` entrypoints.
 ## Install
 
 ```bash
-bun add @0xintuition/protocol @0xintuition/curves@alpha viem
+npm install @0xintuition/protocol@alpha @0xintuition/deployments@alpha viem@^2
 ```
 
 Peer dependency: `viem ^2.0.0`. Release smoke tests install `viem@2.31.4`.
@@ -158,8 +158,21 @@ const contexts = await eventParseAtomContextRegistered(publicClient, hash)
 const creations = associateAtomCreationContext(atoms, contexts)
 ```
 
-`eventParseAtomContextRegistered` preserves the ordered URI bytes in creation receipts. `associateAtomCreationContext` joins these events to `AtomCreated` by `termId`, even when other events interleave, and returns an empty context list for atoms without context. `eventParseAtomUriConfigUpdated(publicClient, hash)` parses limit changes from configuration transaction receipts. Receipt parsers currently consider all emitters; callers that require address scoping must filter parsed logs by the expected MultiVault address before associating them.
+`eventParseAtomContextRegistered` preserves the ordered URI bytes in creation receipts. `associateAtomCreationContext` joins these events to `AtomCreated` by `termId`, even when other events interleave, and returns an empty context list for atoms without context. `eventParseAtomUriConfigUpdated(publicClient, hash)` parses limit changes from configuration transaction receipts. All event parsers accept an optional final `address` argument to filter by the
+emitting contract before decoding. Pass the expected MultiVault (or curve)
+address for application decisions; omitting it preserves receipt-wide discovery
+for compatibility. The transaction recipient may be a router and is not used as
+a substitute. `associateAtomCreationContext` also requires matching emitter
+addresses when the atom events carry an address.
 
-`contractsV2Provenance` records the registry package/version, lockfile integrity, and ABI/bytecode fingerprints shipped by the package. The legacy `multiVaultCreateAtoms` helpers remain available with their existing signatures.
+```ts
+const atoms = await eventParseAtomCreated(publicClient, hash, multivaultAddress)
+const contexts = await eventParseAtomContextRegistered(publicClient, hash, multivaultAddress)
+const linked = associateAtomCreationContext(atoms, contexts)
+// The dynamic helper takes the address after the event name:
+const deposits = await eventParse(publicClient, hash, 'Deposited', multivaultAddress)
+```
+
+`contractsV2Provenance` records the registry package/version, lockfile integrity, and fingerprints for MultiVault and MultiVaultMigrationMode. It does not certify the dynamic-fee or periphery artifacts, whose newer contract release is pending. The legacy `multiVaultCreateAtoms` helpers remain available with their existing signatures.
 
 Artifact sync stays offline and records `verified: false` by default; `--verify-registry` fetches the locked registry tarball, checks SHA-512 and the installed ABI/bytecode modules, and records `verified: true` with an ISO `verifiedAt`, while integrity drift requires the printed `--accept-integrity-change` flag.

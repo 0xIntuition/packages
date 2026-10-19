@@ -37,7 +37,7 @@
         "@0xintuition/iid": "0.1.0-alpha.0",
       },
       "devDependencies": {
-        "@0xintuition/predicates": "0.1.0-alpha.0",
+        "@0xintuition/predicates": "0.1.0-alpha.1",
         "@0xintuition/schema-org": "0.1.0-alpha.0",
         "typescript": "^5.9.3",
         "viem": "^2.31.4",
@@ -49,7 +49,7 @@
     },
     "packages/curves": {
       "name": "@0xintuition/curves",
-      "version": "0.1.0-alpha.0",
+      "version": "0.1.0-alpha.1",
       "devDependencies": {
         "typescript": "^5.9.3",
         "vitest": "^4.0.16",
@@ -57,7 +57,7 @@
     },
     "packages/deployments": {
       "name": "@0xintuition/deployments",
-      "version": "0.1.0-alpha.0",
+      "version": "0.1.0-alpha.1",
       "devDependencies": {
         "typescript": "^5.9.3",
         "viem": "^2.31.4",
@@ -69,7 +69,7 @@
     },
     "packages/ids": {
       "name": "@0xintuition/ids",
-      "version": "0.1.0-alpha.0",
+      "version": "0.1.0-alpha.1",
       "devDependencies": {
         "typescript": "^5.9.3",
         "viem": "^2.31.4",
@@ -127,9 +127,9 @@
     },
     "packages/periphery": {
       "name": "@0xintuition/periphery",
-      "version": "0.1.0-alpha.0",
+      "version": "0.1.0-alpha.1",
       "dependencies": {
-        "@0xintuition/deployments": "0.1.0-alpha.0",
+        "@0xintuition/deployments": "0.1.0-alpha.1",
       },
       "devDependencies": {
         "typescript": "^5.9.3",
@@ -142,9 +142,9 @@
     },
     "packages/predicates": {
       "name": "@0xintuition/predicates",
-      "version": "0.1.0-alpha.0",
+      "version": "0.1.0-alpha.1",
       "dependencies": {
-        "@0xintuition/ids": "0.1.0-alpha.0",
+        "@0xintuition/ids": "0.1.0-alpha.1",
       },
       "devDependencies": {
         "typescript": "^5.9.3",
@@ -160,10 +160,10 @@
       "version": "0.1.0-alpha.1",
       "dependencies": {
         "@0xintuition/classifications": "0.1.0-alpha.1",
-        "@0xintuition/ids": "0.1.0-alpha.0",
+        "@0xintuition/ids": "0.1.0-alpha.1",
         "@0xintuition/iid": "0.1.0-alpha.0",
         "@0xintuition/iid-registry": "0.1.0-alpha.0",
-        "@0xintuition/predicates": "0.1.0-alpha.0",
+        "@0xintuition/predicates": "0.1.0-alpha.1",
       },
       "devDependencies": {
         "typescript": "^5.9.3",
@@ -178,7 +178,7 @@
       "name": "@0xintuition/protocol",
       "version": "3.1.0",
       "dependencies": {
-        "@0xintuition/curves": "0.1.0-alpha.0",
+        "@0xintuition/curves": "0.1.0-alpha.1",
       },
       "devDependencies": {
         "typescript": "^5.9.3",
@@ -193,8 +193,8 @@
       "name": "@0xintuition/react",
       "version": "0.1.0-alpha.1",
       "dependencies": {
-        "@0xintuition/deployments": "0.1.0-alpha.0",
-        "@0xintuition/ids": "0.1.0-alpha.0",
+        "@0xintuition/deployments": "0.1.0-alpha.1",
+        "@0xintuition/ids": "0.1.0-alpha.1",
         "@0xintuition/protocol": "3.1.0",
       },
       "devDependencies": {

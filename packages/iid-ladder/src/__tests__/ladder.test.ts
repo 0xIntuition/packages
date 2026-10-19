@@ -133,6 +133,43 @@ describe('projectIdentifierLadder', () => {
 		).toEqual({ iid: 'int:tmdb:movie:550', rung });
 	});
 
+	it('ranks same-scheme provider and direct candidates without overwriting either', () => {
+		for (const [direct, provider, rung] of [
+			['movie:100', 'movie:550', 'strong'],
+			['movie:550', 'movie:100', 'handle'],
+		] as const) {
+			expect(
+				projectIdentifierLadder({
+					strongIdentifierOrder: ['tmdb'],
+					strongIdentifiers: { tmdb: direct },
+					providerCanonicalId: `tmdb:${provider}`,
+				})
+			).toEqual({ iid: 'int:tmdb:movie:100', rung });
+		}
+	});
+
+	it('retains WD conflicts when a provider contributes another WD candidate', () => {
+		expect(
+			projectIdentifierLadder({
+				strongIdentifierOrder: ['wd', 'tmdb'],
+				strongIdentifiers: { wd: 'film:Q42', tmdb: 'movie:550' },
+				providerCanonicalId: 'int:wd:film:Q43',
+			})
+		).toEqual({ iid: 'int:tmdb:movie:550', rung: 'strong' });
+	});
+
+	it('does not reintroduce conflicting WD through provider fallback', () => {
+		for (const strongIdentifierOrder of [undefined, ['wd']]) {
+			expect(
+				projectIdentifierLadder({
+					strongIdentifierOrder,
+					strongIdentifiers: { wd: 'film:Q42', wikidata: 'Q44' },
+					providerCanonicalId: 'int:wd:film:Q43',
+				})
+			).toEqual({ iid: null, fallback: 'envelope', reason: 'invalid-handle' });
+		}
+	});
+
 	it('keeps a higher category rung ahead of a promoted provider handle', () => {
 		expect(
 			projectIdentifierLadder({

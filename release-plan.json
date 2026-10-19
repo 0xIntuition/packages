@@ -1,0 +1,70 @@
+{
+	"description": "Candidate versions in dependency order. Does not authorize publication; see docs/release-readiness.md for unresolved gates. schema-org is unchanged and already published.",
+	"packages": [
+		{
+			"directory": "iid-spec",
+			"version": "0.1.0-alpha.0",
+			"tag": "alpha"
+		},
+		{
+			"directory": "iid",
+			"version": "0.1.0-alpha.0",
+			"tag": "alpha"
+		},
+		{
+			"directory": "deployments",
+			"version": "0.1.0-alpha.1",
+			"tag": "alpha"
+		},
+		{
+			"directory": "curves",
+			"version": "0.1.0-alpha.1",
+			"tag": "alpha"
+		},
+		{
+			"directory": "ids",
+			"version": "0.1.0-alpha.1",
+			"tag": "alpha"
+		},
+		{
+			"directory": "classifications",
+			"version": "0.1.0-alpha.1",
+			"tag": "alpha"
+		},
+		{
+			"directory": "iid-registry",
+			"version": "0.1.0-alpha.0",
+			"tag": "alpha"
+		},
+		{
+			"directory": "iid-ladder",
+			"version": "0.1.0-alpha.0",
+			"tag": "alpha"
+		},
+		{
+			"directory": "predicates",
+			"version": "0.1.0-alpha.1",
+			"tag": "alpha"
+		},
+		{
+			"directory": "primitives",
+			"version": "0.1.0-alpha.1",
+			"tag": "alpha"
+		},
+		{
+			"directory": "protocol",
+			"version": "3.1.0",
+			"tag": "alpha"
+		},
+		{
+			"directory": "periphery",
+			"version": "0.1.0-alpha.1",
+			"tag": "alpha"
+		},
+		{
+			"directory": "react",
+			"version": "0.1.0-alpha.1",
+			"tag": "alpha"
+		}
+	]
+}

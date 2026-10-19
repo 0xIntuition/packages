@@ -1,25 +1,29 @@
-import { type ContractEventName, type Hex, type PublicClient, parseEventLogs } from 'viem';
-
+import {
+	type Address,
+	type ContractEventName,
+	type Hex,
+	type PublicClient,
+	parseEventLogs,
+} from 'viem';
 import { MultiVaultAbi } from '../../contracts/MultiVault-abi.js';
+import { receiptLogs } from '../receipt-logs.js';
 
 /**
  * Waits for a transaction receipt and parses a specific MultiVault event.
  * @param client Public viem client used to fetch the receipt and logs.
  * @param hash Transaction hash to inspect.
  * @param eventName Event name to filter for in the receipt logs.
+ * @param address Expected emitting contract; omit only for receipt-wide discovery.
  * @returns Parsed event logs for the requested event name.
  * @throws Error if the transaction reverted.
  */
 export async function eventParse(
 	client: PublicClient,
 	hash: Hex,
-	eventName: ContractEventName<typeof MultiVaultAbi>
+	eventName: ContractEventName<typeof MultiVaultAbi>,
+	address: Address | undefined = undefined
 ) {
-	const { logs, status } = await client.waitForTransactionReceipt({ hash });
-
-	if (status === 'reverted') {
-		throw new Error('Transaction reverted');
-	}
+	const logs = await receiptLogs(client, hash, address);
 
 	const events = parseEventLogs({
 		abi: MultiVaultAbi,

@@ -9,7 +9,7 @@ It is deliberately not a resolver. No HTTP, no credentials, no caching, no provi
 ## Install
 
 ```sh
-npm install @0xintuition/iid-registry viem
+npm install @0xintuition/iid-registry@alpha viem@^2
 ```
 
 ## Classify

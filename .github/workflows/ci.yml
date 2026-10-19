@@ -16,6 +16,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -29,6 +34,12 @@ jobs:
 
       - name: Typecheck
         run: bun run typecheck
+
+      - name: Check formatting and lint
+        run: bun run check
+
+      - name: Test release registry guards
+        run: bun run registry:test && bun run release:registry:test
 
       - name: Test
         run: bun run test

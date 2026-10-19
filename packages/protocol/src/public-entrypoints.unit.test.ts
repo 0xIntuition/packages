@@ -18,9 +18,9 @@ const packageJson = JSON.parse(
 };
 
 describe('@0xintuition/protocol package manifest', () => {
-	it('publishes protocol v3 on the default dist-tag', () => {
+	it('publishes the release candidate on alpha without moving latest', () => {
 		expect(packageJson.version).toBe('3.1.0');
-		expect(packageJson.publishConfig).toEqual({ access: 'public' });
+		expect(packageJson.publishConfig).toEqual({ access: 'public', tag: 'alpha' });
 	});
 
 	it('exports built entrypoints for npm consumers', () => {

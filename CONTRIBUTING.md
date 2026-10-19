@@ -38,6 +38,10 @@ Prefer extending the package that owns the concept:
 | `@0xintuition/deployments` | Intuition chain metadata and deployed contract addresses |
 | `@0xintuition/curves` | Bonding curve math helpers |
 | `@0xintuition/schema-org` | Pinned schema.org vocabulary and inherited property lookup |
+| `@0xintuition/iid-spec` | Normative identity specification and fixtures |
+| `@0xintuition/iid` | Canonical parsing, validation, and derivation |
+| `@0xintuition/iid-registry` | Classification and provider capability resolution |
+| `@0xintuition/iid-ladder` | Identifier selection from application/import input |
 | `@0xintuition/ids` | Deterministic atom, predicate, triple, and counter-triple IDs |
 | `@0xintuition/classifications` | Intuition atom classifications, recommended fields, metadata predicates, matrix rows, and creation profiles |
 | `@0xintuition/predicates` | Canonical predicate specs, IDs, predicate atom data, launch sets, and predicate-level semantics |
@@ -115,7 +119,8 @@ and PR before implementation.
 
 ## Local Setup
 
-Use Bun. The repo enforces Bun installs.
+Use Node 22.12+ and the Bun version pinned in `package.json`. The repo enforces
+Bun installs. Package consumers can use npm or another package manager.
 
 ```bash
 bun install --frozen-lockfile
@@ -137,6 +142,13 @@ bun run schema:validate
 bun run schema-org:check-generated
 bun run classifications:check-creation-profiles
 bun run predicates:check-generated
+bun run registry:check
+bun run registry:test
+bun run release:registry:test
+bun run conformance:check
+bun run protocol:check-artifacts
+bun run protocol:sync-artifacts:test
+bun run guard:supply-chain:test
 bun run guard:supply-chain
 bun run pack:dry-run
 bun run smoke:tarballs

@@ -35,7 +35,12 @@
 		"smoke:tarballs": "node scripts/smoke-tarballs.mjs",
 		"guard:supply-chain": "node scripts/guard-supply-chain-policy.mjs",
 		"guard:supply-chain:test": "node --test scripts/guard-supply-chain-policy.test.mjs",
-		"preinstall": "node scripts/enforce-bun-install.mjs"
+		"preinstall": "node scripts/enforce-bun-install.mjs",
+		"registry:test": "node --test scripts/package-registry.test.mjs",
+		"release:registry": "node scripts/check-release-registry.mjs",
+		"release:registry:test": "node --test scripts/check-release-registry.test.mjs",
+		"release:contracts": "bun scripts/check-release-contracts.ts",
+		"release:check": "bun run release:registry && bun run protocol:check-artifacts -- --verify-registry && bun run release:contracts"
 	},
 	"catalog": {
 		"@biomejs/biome": "2.3.10",

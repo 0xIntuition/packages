@@ -5,7 +5,8 @@ export const contractsV2Provenance = {
 	source: 'registry',
 	integrity:
 		'sha512-vt9GFaFXYAeigLyl/4i6hPpLO4NBrZDyWJrM2M7aHuQ39/qSpxqMmIzetoAtpBWWx4AzM5wccUsXJvVST02saA==',
-	verified: false,
+	verified: true,
+	verifiedAt: '2026-10-19T19:58:47.659Z',
 	abiFingerprint: '23e4cbd1a7686264e064aab0003a7fbcdaedc4d968828fc80f420d25b612e311',
 	migrationModeAbiFingerprint: 'f45b684124c3966e98b69c14bd71bd59c29d342853619b502bb633afab0eaeff',
 	bytecodeFingerprint: '14b962d2e352fb77ad50c0b5eed4fc5c15add2cfe739389c19a5b1147a507010',

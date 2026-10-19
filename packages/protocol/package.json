@@ -38,7 +38,8 @@
 	},
 	"homepage": "https://github.com/0xIntuition/packages/tree/main/packages/protocol#readme",
 	"publishConfig": {
-		"access": "public"
+		"access": "public",
+		"tag": "alpha"
 	},
 	"scripts": {
 		"build": "node ../../scripts/clean-dist.mjs && tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
@@ -62,7 +63,7 @@
 		"test:unit": "vitest run -c vitest.unit.config.ts"
 	},
 	"dependencies": {
-		"@0xintuition/curves": "0.1.0-alpha.0"
+		"@0xintuition/curves": "0.1.0-alpha.1"
 	},
 	"peerDependencies": {
 		"viem": "^2.0.0"

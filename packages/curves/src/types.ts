@@ -145,7 +145,7 @@ export type GrossDepositQuote = {
 	feeBase: bigint;
 	/** Exact amount left after all applicable percentage fees. */
 	assetsAfterFees: bigint;
-	/** One-wei increments applied after the closed-form starting estimate; high fees may need many. */
+	/** Number of bounded search steps; not a count of wei added. */
 	fixupIterations: number;
 };
 
