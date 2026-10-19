@@ -121,6 +121,52 @@ const REGISTERED_PROVIDER_EXPECTATIONS = [
 
 describe('projectIdentifierLadder', () => {
 	it.each([
+		['music-album', 'int:gtin:00012345600012', { gtin: '00012345600012' }],
+		['podcast-series', 'wd:human:Q2', { wd: 'human:Q2' }],
+		['podcast-series', 'int:wd:human:Q2', { wd: 'human:Q2' }],
+	] as const)('refuses alias-only provider %s %s like direct evidence', (category, providerCanonicalId, strongIdentifiers) => {
+		const strongIdentifierOrder = schemeOrderForIdentityCategory(category);
+		const expected = { iid: null, fallback: 'envelope', reason: 'no-identifier' };
+		const result = projectIdentifierLadder({ providerCanonicalId, strongIdentifierOrder });
+		expect(result.iid).not.toBe(providerCanonicalId.replace(/^(?!int:)/u, 'int:'));
+		expect(result).toEqual(expected);
+		expect(projectIdentifierLadder({ strongIdentifiers, strongIdentifierOrder })).toEqual(expected);
+		expect(
+			projectIdentifierLadder({
+				providerCanonicalId,
+				strongIdentifierOrder,
+				canonicalUrl: 'https://example.com/item',
+			})
+		).toEqual({ iid: 'int:url:https://example.com/item', rung: 'url' });
+	});
+
+	it.each([
+		'wd:human:Q2',
+		'int:wd:human:Q2',
+	])('keeps direct WD evidence ahead of conflicting promotion %s', (providerCanonicalId) => {
+		const result = projectIdentifierLadder({
+			strongIdentifiers: { wd: 'film:Q1', wdSlug: 'film' },
+			strongIdentifierOrder: ['wd'],
+			providerCanonicalId,
+		});
+		expect(result.iid).not.toBe('int:wd:human:Q2');
+		expect(result).toEqual({ iid: 'int:wd:film:Q1', rung: 'strong' });
+	});
+
+	it.each([
+		'wd:human:Q2',
+		'int:wd:human:Q2',
+	])('does not re-enter fallback with conflict-rejected provider %s', (providerCanonicalId) => {
+		const result = projectIdentifierLadder({
+			strongIdentifiers: { wdSlug: 'film' },
+			strongIdentifierOrder: ['wd'],
+			providerCanonicalId,
+			canonicalUrl: 'https://example.com/item',
+		});
+		expect(result.iid).not.toBe('int:wd:human:Q2');
+		expect(result).toEqual({ iid: 'int:url:https://example.com/item', rung: 'url' });
+	});
+	it.each([
 		['tmdb:movie:550', 'handle'],
 		['int:tmdb:movie:550', 'strong'],
 	] as const)('ranks provider %s with direct strong identifiers in category order', (providerCanonicalId, rung) => {

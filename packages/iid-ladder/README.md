@@ -65,6 +65,14 @@ ordering for strong selection. A mapped provider identifier joins that
 selection in its scheme's position. A winning provider handle keeps the
 `handle` rung; a winning `int:` identifier keeps the `strong` rung. The normal
 provider-handle and URL fallback rules still apply if no strong candidate wins.
+For the category orders above, alias-only provider schemes are excluded from
+primary selection, including the provider fallback path. With no other identifier,
+the result is `no-identifier`; a supplied canonical URL can still win. The ladder
+does not record aliases in its result.
+
+Direct values are retained when a provider candidate supplies the same scheme.
+Promotion runs conflict checks against those direct hints, and a rejected
+candidate cannot re-enter through the provider fallback path.
 
 ```ts
 import {
@@ -85,6 +93,9 @@ projectIdentifierLadder({
 `iidForIdentityRung(token, value, primarySchemaType?)` canonicalizes a descriptive
 identity alias for matching. It does not select a primary IID. It returns `undefined` for
 invalid values, mismatched subtypes, and provider-local tokens under the hold.
+When `primarySchemaType` identifies a category, its alias-only rungs are also
+refused (including typed WD values for `PodcastSeries`). Without that category
+context, registered aliases such as GTIN remain available for matching.
 
 ```ts
 import { iidForIdentityRung } from '@0xintuition/iid-ladder';
@@ -129,6 +140,7 @@ the result. `PINNED_ACTIVE_WD_P31_CLOSURE` and
 value from the requested locale, then `en`, `en-gb`, `en-us`, `en-ca`, `en-au`,
 and `mul`, in that order. It skips malformed entries and returns `undefined`
 when no allowed locale has a usable value.
+The labels root must be an object; arrays and other non-object roots are refused.
 
 The package is pure and offline. It performs no network I/O, provider
 enrichment, contract calls, or atom serialization; P31 resolution uses only

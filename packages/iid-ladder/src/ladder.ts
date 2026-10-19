@@ -7,6 +7,7 @@ import {
 	type SchemeName,
 	validateIntuitionId,
 } from '@0xintuition/iid';
+import { aliasOnlySchemesForIdentityOrder } from './category-rungs.js';
 import { PROVIDER_PREFIX_MAPPINGS } from './provider-prefixes.js';
 
 export type LadderInput = {
@@ -64,16 +65,21 @@ export function projectIdentifierLadder(input: LadderInput): LadderResult {
 		input.strongIdentifierOrder,
 		input.allowPlainWd
 	);
-	const strongIid = providerStrong
-		? selectStrongIdentifier(
-				{
-					...(input.strongIdentifiers ?? {}),
-					[providerStrong.scheme]: providerStrong.value,
-				},
-				input.strongIdentifierOrder,
-				input.allowPlainWd
-			)
-		: directStrongIid;
+	// Keep direct values intact before running the same conflict checks on promotion.
+	const promotedIdentifiers = providerStrong
+		? { [providerStrong.scheme]: providerStrong.value, ...input.strongIdentifiers }
+		: input.strongIdentifiers;
+	const rejectedProvider =
+		providerStrong &&
+		(aliasOnlySchemesForIdentityOrder(input.strongIdentifierOrder).includes(
+			providerStrong.scheme
+		) ||
+			selectStrongIdentifier(promotedIdentifiers, [providerStrong.scheme], input.allowPlainWd) !==
+				providerStrong.iid);
+	const strongIid =
+		providerStrong && !rejectedProvider
+			? selectStrongIdentifier(promotedIdentifiers, input.strongIdentifierOrder, input.allowPlainWd)
+			: directStrongIid;
 	if (strongIid) {
 		return {
 			iid: strongIid,
@@ -85,7 +91,7 @@ export function projectIdentifierLadder(input: LadderInput): LadderResult {
 	}
 
 	let canonicalUrl = input.canonicalUrl;
-	const providerCanonicalId = input.providerCanonicalId;
+	const providerCanonicalId = rejectedProvider ? undefined : input.providerCanonicalId;
 	if (providerCanonicalId?.startsWith('int:')) {
 		return validateIntuitionId(providerCanonicalId) &&
 			isMintableWdIid(providerCanonicalId, input.allowPlainWd)

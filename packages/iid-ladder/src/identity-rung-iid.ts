@@ -1,8 +1,10 @@
 import { getScheme, isCanonicalNodeIid } from '@0xintuition/iid';
 import {
+	IDENTITY_CATEGORY_ALIAS_ONLY_POLICY,
 	IDENTITY_RUNG_TOKENS,
 	type IdentityRungToken,
 	isPlainWdPrimaryAllowed,
+	SCHEMA_TYPE_IDENTITY_CATEGORIES,
 } from './category-rungs.js';
 import { projectIdentifierLadder } from './ladder.js';
 import { PROVIDER_PREFIX_MAPPINGS } from './provider-prefixes.js';
@@ -18,6 +20,13 @@ export function iidForIdentityRung(
 	if (!TOKENS.has(rung) || typeof value !== 'string') return undefined;
 	const [schemeName, subtype] = rung.split(':');
 	if (!schemeName) return undefined;
+	const category = primarySchemaType && SCHEMA_TYPE_IDENTITY_CATEGORIES[primarySchemaType];
+	const aliasOnlyRungs: readonly string[] = category
+		? (IDENTITY_CATEGORY_ALIAS_ONLY_POLICY[
+				category as keyof typeof IDENTITY_CATEGORY_ALIAS_ONLY_POLICY
+			] ?? [])
+		: [];
+	if (aliasOnlyRungs.includes(rung) || aliasOnlyRungs.includes(schemeName)) return undefined;
 	const mapping = PROVIDER_PREFIX_MAPPINGS.find((row) => row.providerPrefix === `${rung}:`);
 	if (mapping?.kind === 'provider-local') {
 		const result = projectIdentifierLadder({

@@ -2,6 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { pickWikidataLabel } from '../index.js';
 
 describe('Wikidata locale policy', () => {
+	it('rejects array and non-object roots before locale indexing', () => {
+		for (const root of [[{ value: 'x' }], null, 'x', 42, true]) {
+			const result = pickWikidataLabel(root as unknown as Readonly<Record<string, unknown>>, '0');
+			expect(result).not.toBe('x');
+			expect(result).toBeUndefined();
+		}
+	});
 	it('uses mul ahead of arbitrary languages', () => {
 		expect(pickWikidataLabel({ dv: { value: 'ޓޯއި ސްޓޯރީ' }, mul: { value: 'Toy Story' } })).toBe(
 			'Toy Story'
