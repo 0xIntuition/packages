@@ -65,6 +65,8 @@ export interface UriLimits {
 
 /** Options for the IID anchor builder. */
 export interface IidAnchorOptions {
+	/** Authoritative candidate IID; validated without re-deriving it from values. */
+	readonly candidateIid?: string;
 	/**
 	 * Requested profile. Default: the strongest legal one (`p0` when the
 	 * derived identifier is anchor-eligible, otherwise `p1`). Requesting

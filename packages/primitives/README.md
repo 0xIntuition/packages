@@ -72,3 +72,51 @@ Fallback metadata is `profile: 'p1'`, `iid: null`, `scheme: null`, `class: null`
 Serialize envelopes with compact `JSON.stringify`: insertion-ordered keys, no added whitespace or newline, and JavaScript JSON escaping. Encode the resulting string as UTF-8; `dataHex` is `0x` followed by lowercase byte hex. Compute `id = keccak256(ATOM_SALT || keccak256(utf8(data)))`, with `ATOM_SALT = 0xc50959b2b0264fed58f3489f13cdf8345df0911245cc2b741070787ee7aceaa2`, through `calculateAtomId`. Thus field order and string forms are part of the atom's identity.
 
 Legacy JSON-LD builders (`buildAtom`, `buildPerson`, …) are unchanged and remain the explicit compatibility path for descriptive atom data. `recognizeAtomData` distinguishes canonical IID anchors from JSON payloads without reclassifying arbitrary strings.
+
+
+`buildAtomAnchor` is the reference implementation's helper name and an alias of
+`buildIidAnchor`: both exports are the same function object and accept the same
+options. Consumers switching from the in-tree helper can change only the package
+path; the public builder returns the package's existing `BuildResult` shape.
+
+```ts
+import {
+  buildAtomAnchor,
+  isOverCapUrlIid,
+  validateDerivedAnchorIid,
+} from '@0xintuition/primitives';
+
+const anchor = buildAtomAnchor('music-recording', { name: "I'm Shady" }, {
+  candidateIid: 'int:spotify:track:3UMaczJpikHgJFyBTAJVOz',
+});
+```
+
+`options.candidateIid`, when defined (including an empty string), takes precedence
+over ladder derivation. The candidate must already be canonical; it is never
+repaired or replaced with a derived identifier. Registered schemes use IID
+validation. Unknown schemes may carry provider-local handles when they match
+`^int:([a-z0-9-]{1,32}):(.{1,220})$`, have no whitespace, and need no trimming.
+The reference does not restrict ordinary candidate schemes to the classification's
+ladder. Wikidata candidates additionally require an active binding to the selected
+classification; bare QIDs are admitted only for MusicAlbum and MusicGroup and
+remain P1. Parse-only or mismatched Wikidata candidates fail with the reference's
+message in `errors`.
+
+An eligible candidate defaults to bare P0 bytes. Other admitted candidates use a
+validated classification values envelope, with `identifier` inserted immediately
+after `@type`, declared fields in declaration order, and every declared `string[]`
+field deduplicated and sorted. This includes unknown schemes, weak account handles,
+polymorphic schemes, and Class C identifiers. P0 skips field validation; candidate
+P1 requires the full classification values. Explicit profile and URI context
+options continue to apply. Candidate validation runs before either option is
+applied. Unknown-scheme candidates retain their scheme with `class: null` and an
+empty provider plan. Omitting `candidateIid` preserves the existing derivation and
+serialization paths.
+
+`validateDerivedAnchorIid(slug, iid)` returns `true` for a canonical registered IID,
+returns `false` only for a canonical URL whose value exceeds 220 characters, and
+otherwise throws an error named `AtomAnchorError` with `code: 'INVALID_IID'` and
+the reference's message. `isOverCapUrlIid(iid)` returns `true` only for that canonical
+`int:url:` exception; malformed or noncanonical URLs and other schemes return
+`false`. A URL exactly at the cap is valid. This exception is exclusive to derived
+identifiers: an over-cap candidate is rejected, even when its URL is canonical.
