@@ -45,6 +45,15 @@ export type UnambiguousScheme =
 	| 'termset'
 	| 'gen1';
 
+/**
+ * Bare values are polymorphic; a value MAY carry the entity type — spec §7.3 —
+ * and classifies only when it does, through an active binding.
+ */
+export type ValueTypedScheme = 'wd';
+
+/** Schemes that can classify directly or through a typed value. */
+export type ClassifiableScheme = UnambiguousScheme | ValueTypedScheme;
+
 /** Scheme alone decides the classification. */
 export interface DirectClassificationEntry {
 	readonly kind: 'direct';

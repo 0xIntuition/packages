@@ -5,6 +5,7 @@ import * as multiVault from './index';
 describe('core/multivault index exports', () => {
 	it('exports core read and write helpers', () => {
 		expect(typeof multiVault.multiVaultCreateAtoms).toBe('function');
+		expect(typeof multiVault.multiVaultValidateCreateAtomsWithUris).toBe('function');
 		expect(typeof multiVault.multiVaultCreateAtomsWithUris).toBe('function');
 		expect(typeof multiVault.multiVaultCreateAtomsWithUrisEncode).toBe('function');
 		expect(typeof multiVault.multiVaultGetAtomUriConfig).toBe('function');

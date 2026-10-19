@@ -18,6 +18,11 @@ describe('identifierHintsForIid', () => {
 
 	it('adds reader aliases for wikidata and tmdb', () => {
 		expect(identifierHintsForIid('int:wd:Q42')).toEqual({ wd: 'Q42', wikidata: 'Q42' });
+		expect(identifierHintsForIid('int:wd:film:Q188035')).toEqual({
+			wd: 'Q188035',
+			wikidata: 'Q188035',
+			wdSlug: 'film',
+		});
 		expect(identifierHintsForIid('int:tmdb:movie:603')).toEqual({
 			tmdb: 'movie:603',
 			tmdbId: 'movie:603',
@@ -115,7 +120,7 @@ describe('identifierHintsForIid', () => {
 			gtin: 'int:gtin:00012345678905',
 			doi: 'int:doi:10.1000/xyz123',
 			eidr: 'int:eidr:10.5240/7791-8534-2C23-9030-8610-5',
-			wd: 'int:wd:Q42',
+			wd: 'int:wd:film:Q42',
 			mbid: 'int:mbid:artist:056e4f3e-d505-4dad-8ec1-d04f521cbb56',
 			olid: 'int:olid:OL45804W',
 			imdb: 'int:imdb:tt0133093',

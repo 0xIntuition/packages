@@ -41,7 +41,8 @@ export const intuitionDeployments: {
 		[intuitionMainnet.id]: '0x81cFb09cb44f7184Ad934C09F82000701A4bF672',
 	},
 	MultiVault: {
-		[intuitionTestnet.id]: '0xeBc49d356B7f64D888130D85CC6D17114a6843ec',
+		// Reference canonical testnet deployment; historical instances use overrides.
+		[intuitionTestnet.id]: '0xF76d6976DeBFbB012ebc53e925BC4AEFCaA7C6c6',
 		[intuitionMainnet.id]: '0x6E35cF57A41fA15eA0EaE9C33e751b01A784Fe7e',
 	},
 	TrustBonding: {

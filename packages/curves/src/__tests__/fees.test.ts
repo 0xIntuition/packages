@@ -1,22 +1,26 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+	grossUpAtomCreate,
+	grossUpAtomDeposit,
+	grossUpTripleCreate,
+	grossUpTripleDeposit,
 	previewAtomDeposit,
 	previewDepositWithFees,
 	previewRedeemWithFees,
 	previewTripleDeposit,
 	totalFees,
-} from '../fees';
-import { createLinearCurve } from '../linear-curve';
-import { WAD } from '../math';
-import { createOffsetProgressiveCurve } from '../offset-progressive-curve';
+} from '../fees.js';
+import { createLinearCurve } from '../linear-curve.js';
+import { feeOnRaw, WAD } from '../math.js';
+import { createOffsetProgressiveCurve } from '../offset-progressive-curve.js';
 import type {
 	AtomFees,
 	CurveState,
 	FeeSchedule,
 	OffsetProgressiveCurveConfig,
 	TripleFees,
-} from '../types';
+} from '../types.js';
 
 const E18 = WAD;
 
@@ -308,6 +312,251 @@ describe('fees', () => {
 			const deposit = previewDepositWithFees(curve, E18, state, fees, true);
 			expect(deposit.fees.protocolFee).toBe(0n);
 			expect(deposit.fees.entryFee).toBeGreaterThan(0n);
+		});
+	});
+
+	describe('exact-net gross-up', () => {
+		const curve = createLinearCurve();
+		const state: CurveState = {
+			totalAssets: 10n * E18,
+			totalShares: 10n * E18,
+		};
+
+		it('round-trips atom and triple deposits through the preview mirrors', () => {
+			const fees: FeeSchedule = {
+				denominator: 10_000n,
+				protocolFee: 125n,
+				entryFee: 50n,
+				exitFee: 0n,
+			};
+			const atomFees: AtomFees = { atomWalletDepositFee: 50n };
+			const tripleFees: TripleFees = { atomDepositFraction: 90n };
+			const netAssets = E18;
+			const minShareCost = 12_345n;
+
+			const atom = grossUpAtomDeposit(netAssets, fees, atomFees, true, minShareCost);
+			const atomPreview = previewAtomDeposit(
+				curve,
+				atom.grossAssets - minShareCost,
+				state,
+				fees,
+				atomFees,
+				true
+			);
+			expect(atom.grossAssets).toBeGreaterThan(netAssets + minShareCost);
+			expect(atomPreview.assetsAfterFees).toBe(netAssets);
+			expect(atom.assetsAfterFees).toBe(netAssets);
+
+			const triple = grossUpTripleDeposit(netAssets, fees, tripleFees, true, true, minShareCost);
+			const triplePreview = previewTripleDeposit(
+				curve,
+				triple.grossAssets - minShareCost,
+				state,
+				fees,
+				tripleFees,
+				true,
+				true
+			);
+			expect(triplePreview.assetsAfterFees).toBe(netAssets);
+			expect(triple.assetsAfterFees).toBe(netAssets);
+		});
+
+		it('round-trips create deposits after their fixed costs without entry fees', () => {
+			const fees: FeeSchedule = {
+				denominator: 10_000n,
+				protocolFee: 125n,
+				entryFee: 9_999n,
+				exitFee: 0n,
+			};
+			const atomFees: AtomFees = { atomWalletDepositFee: 50n };
+			const tripleFees: TripleFees = { atomDepositFraction: 90n };
+			const netAssets = E18;
+			const atomCost = 10n ** 16n;
+			const tripleCost = 2n * 10n ** 16n;
+
+			const atom = grossUpAtomCreate(netAssets, fees, atomFees, atomCost);
+			const atomBase = atom.grossAssets - atomCost;
+			expect(
+				atomBase -
+					feeOnRaw(atomBase, fees.protocolFee, fees.denominator) -
+					feeOnRaw(atomBase, atomFees.atomWalletDepositFee, fees.denominator)
+			).toBe(netAssets);
+
+			const triple = grossUpTripleCreate(netAssets, fees, tripleFees, true, tripleCost);
+			const tripleBase = triple.grossAssets - tripleCost;
+			expect(
+				tripleBase -
+					feeOnRaw(tripleBase, fees.protocolFee, fees.denominator) -
+					feeOnRaw(tripleBase, tripleFees.atomDepositFraction, fees.denominator)
+			).toBe(netAssets);
+		});
+
+		it('supports zero fees, disabled conditionals, tiny values, and D−T edge cases', () => {
+			const zeroFees: FeeSchedule = {
+				denominator: 10_000n,
+				protocolFee: 0n,
+				entryFee: 0n,
+				exitFee: 0n,
+			};
+			expect(
+				grossUpAtomDeposit(1n, zeroFees, { atomWalletDepositFee: 0n }, false).grossAssets
+			).toBe(1n);
+
+			const edgeFees: FeeSchedule = {
+				denominator: 10_000n,
+				protocolFee: 9_997n,
+				entryFee: 1n,
+				exitFee: 0n,
+			};
+			const edge = grossUpTripleDeposit(
+				10n ** 16n,
+				edgeFees,
+				{ atomDepositFraction: 1n },
+				true,
+				true
+			);
+			expect(edge.assetsAfterFees).toBe(10n ** 16n);
+
+			const flagsOff = grossUpTripleDeposit(
+				123n,
+				{ ...edgeFees, protocolFee: 0n },
+				{ atomDepositFraction: 9_999n },
+				false,
+				false
+			);
+			expect(flagsOff.grossAssets).toBe(123n);
+		});
+
+		it('continues past two fixups for valid high-fee schedules', () => {
+			const quote = grossUpAtomDeposit(
+				1n,
+				{
+					denominator: 79n,
+					protocolFee: 2n,
+					entryFee: 75n,
+					exitFee: 0n,
+				},
+				{ atomWalletDepositFee: 0n },
+				true
+			);
+
+			expect(quote.assetsAfterFees).toBe(1n);
+			expect(quote.fixupIterations).toBeGreaterThan(2);
+		});
+
+		it('property-checks exact net values across deterministic randomized fee combinations', () => {
+			let seed = 0x5eed_1392n;
+			const next = (limit: bigint) => {
+				seed =
+					(seed * 6_364_136_223_846_793_005n + 1_442_695_040_888_963_407n) & ((1n << 64n) - 1n);
+				return seed % limit;
+			};
+
+			for (let sample = 0; sample < 20_000; sample += 1) {
+				const denominator = 10_000n + next(90_000n);
+				const protocolFee = next(denominator / 75n + 1n);
+				const entryFee = next(denominator / 75n + 1n);
+				const specializedFee = next(denominator / 75n + 1n);
+				const chargeEntryFee = next(2n) === 1n;
+				const chargeSpecializedFee = next(2n) === 1n;
+
+				const fees: FeeSchedule = {
+					denominator,
+					protocolFee,
+					entryFee,
+					exitFee: 0n,
+				};
+				const netAssets = sample % 5 === 0 ? 10n ** 16n + next(10_000n) : 1n + next(10n ** 24n);
+				const minShareCost = next(10n ** 18n);
+
+				const atom = grossUpAtomDeposit(
+					netAssets,
+					fees,
+					{ atomWalletDepositFee: specializedFee },
+					chargeEntryFee,
+					minShareCost
+				);
+				const atomPreview = previewAtomDeposit(
+					curve,
+					atom.grossAssets - minShareCost,
+					state,
+					fees,
+					{ atomWalletDepositFee: specializedFee },
+					chargeEntryFee
+				);
+				expect(atomPreview.assetsAfterFees).toBe(netAssets);
+
+				const triple = grossUpTripleDeposit(
+					netAssets,
+					fees,
+					{ atomDepositFraction: specializedFee },
+					chargeEntryFee,
+					chargeSpecializedFee,
+					minShareCost
+				);
+				const triplePreview = previewTripleDeposit(
+					curve,
+					triple.grossAssets - minShareCost,
+					state,
+					fees,
+					{ atomDepositFraction: specializedFee },
+					chargeEntryFee,
+					chargeSpecializedFee
+				);
+				expect(triplePreview.assetsAfterFees).toBe(netAssets);
+
+				const atomCreate = grossUpAtomCreate(
+					netAssets,
+					fees,
+					{ atomWalletDepositFee: specializedFee },
+					minShareCost
+				);
+				const atomCreatePreview = previewAtomDeposit(
+					curve,
+					atomCreate.grossAssets - minShareCost,
+					state,
+					fees,
+					{ atomWalletDepositFee: specializedFee },
+					false
+				);
+				expect(atomCreatePreview.assetsAfterFees).toBe(netAssets);
+
+				const tripleCreate = grossUpTripleCreate(
+					netAssets,
+					fees,
+					{ atomDepositFraction: specializedFee },
+					chargeSpecializedFee,
+					minShareCost
+				);
+				const tripleCreatePreview = previewTripleDeposit(
+					curve,
+					tripleCreate.grossAssets - minShareCost,
+					state,
+					fees,
+					{ atomDepositFraction: specializedFee },
+					false,
+					chargeSpecializedFee
+				);
+				expect(tripleCreatePreview.assetsAfterFees).toBe(netAssets);
+			}
+		});
+
+		it('rejects fee schedules with no positive net and invalid inputs', () => {
+			const invalidFees: FeeSchedule = {
+				denominator: 100n,
+				protocolFee: 50n,
+				entryFee: 50n,
+				exitFee: 0n,
+			};
+			expect(() => grossUpAtomDeposit(1n, invalidFees, { atomWalletDepositFee: 0n }, true)).toThrow(
+				'Applicable fees must total less than the fee denominator.'
+			);
+			expect(() =>
+				grossUpAtomDeposit(-1n, defaultFees, { atomWalletDepositFee: 0n }, false)
+			).toThrow('Net assets must be zero or greater.');
+			expect(() => grossUpAtomCreate(1n, defaultFees, { atomWalletDepositFee: 0n }, -1n)).toThrow(
+				'Additive cost must be zero or greater.'
+			);
 		});
 	});
 });
