@@ -42,6 +42,10 @@ describe('multiVaultMultiCallIntuitionConfigs', () => {
 		expect(result.entry_fee).toBe((7n * E18).toString());
 		expect(result.protocol_fee).toBe((9n * E18).toString());
 		expect(result.min_deposit).toBe((11n * E18).toString());
+		expect(result.atom_creation_protocol_fee).toBe((3n * E18).toString());
+		expect(result.atom_wallet_initial_deposit_amount).toBe((4n * E18).toString());
+		expect(result.triple_creation_protocol_fee).toBe((5n * E18).toString());
+		expect(result.atom_deposit_fraction_on_triple_creation).toBe((6n * E18).toString());
 		expect(result.formatted_atom_cost).toBe('1');
 		expect(result.formatted_triple_cost).toBe('2');
 	});

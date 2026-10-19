@@ -128,7 +128,10 @@ describe('Redeems', () => {
 			expect(largeAssets).toBeGreaterThan(smallAssets);
 		});
 
-		it('should preview with zero shares', async () => {
+		it('reverts previewing a zero-share redemption instead of returning zero assets', async () => {
+			// Zero shares convert to zero assets, so fees (even zero fees) are >= assets — the
+			// MultiVault_RedeemYieldsNoAssets floor in _calculateRedeem rejects this rather than
+			// reporting a silent no-op preview. See IMultiVault.sol's previewRedeem NatSpec.
 			const zeroShares = 0n;
 			const value = parseEther('100');
 			const atomData = toHex(`multiVaultRedeem test atom ${Math.random()}`);
@@ -147,19 +150,18 @@ describe('Redeems', () => {
 			);
 			await publicClient.waitForTransactionReceipt({ hash: createAtomHash });
 
-			const [assets, assetsAfterFees] = await multiVaultPreviewRedeem(
-				{
-					walletClient,
-					publicClient,
-					address: address,
-				},
-				{
-					args: [atomId, curveId, zeroShares],
-				}
-			);
-
-			expect(assets).toBe(0n);
-			expect(assetsAfterFees).toBe(0n);
+			await expect(
+				multiVaultPreviewRedeem(
+					{
+						walletClient,
+						publicClient,
+						address: address,
+					},
+					{
+						args: [atomId, curveId, zeroShares],
+					}
+				)
+			).rejects.toThrow(/0xdfaf7333/); // MultiVault_RedeemYieldsNoAssets()
 		});
 	});
 

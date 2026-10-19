@@ -1,6 +1,6 @@
 import { type Hex, type PublicClient, parseEventLogs } from 'viem';
 
-import { MultiVaultAbi } from '../../contracts/MultiVault-abi.js';
+import { MultiVaultAbi } from '../../contracts';
 
 /**
  * Waits for a transaction receipt and parses PersonalUtilizationRemoved events.

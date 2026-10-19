@@ -35,15 +35,17 @@ Prefer extending the package that owns the concept:
 
 | Package | Owns |
 | --- | --- |
-| `@0xintuition/deployments` | Intuition chain metadata and deployed contract addresses |
+| `@0xintuition/deployments` | Contract ABIs, deploy bytecode, Intuition chain metadata, and deployed core and periphery contract addresses |
 | `@0xintuition/curves` | Bonding curve math helpers |
 | `@0xintuition/schema-org` | Pinned schema.org vocabulary and inherited property lookup |
 | `@0xintuition/ids` | Deterministic atom, predicate, triple, and counter-triple IDs |
 | `@0xintuition/classifications` | Intuition atom classifications, recommended fields, metadata predicates, matrix rows, and creation profiles |
 | `@0xintuition/predicates` | Canonical predicate specs, IDs, predicate atom data, launch sets, and predicate-level semantics |
 | `@0xintuition/primitives` | Higher-level builders and validators composed from lower-level packages |
-| `@0xintuition/protocol` | Core contract ABIs, event parsing, and protocol interaction helpers |
-| `@0xintuition/periphery` | Periphery contract addresses and helpers |
+| `@0xintuition/protocol` | Core contract wrappers, event parsing, and protocol interaction helpers; re-exports core ABIs and addresses from `deployments` |
+| `@0xintuition/periphery` | Periphery contract helpers (bridge, router, FeeProxy); re-exports periphery ABIs and addresses from `deployments` |
+| `@0xintuition/sdk` | Integration-level API reads, onchain action planning, and deterministic utilities composed from the protocol packages |
+| `@0xintuition/cli` | Side-effect-free calldata encoders, agent action plan builders, and the `intuition` executable |
 | `@0xintuition/react` | React providers and hooks |
 
 Keep package dependencies one-way. Focused foundation packages should stay

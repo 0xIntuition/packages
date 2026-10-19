@@ -1,6 +1,6 @@
 import type { Address } from 'viem';
 
-import { type IntuitionDeploymentName, intuitionDeployments } from './deployments.js';
+import { type IntuitionDeploymentName, intuitionDeployments } from './deployments';
 
 export function getContractAddressFromChainId(
 	name: IntuitionDeploymentName,

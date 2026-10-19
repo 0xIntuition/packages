@@ -28,7 +28,7 @@ describe('Deposits', () => {
 			const atomData = toHex(`multiVaultDeposit test atom ${Math.random()}`);
 			const atomId = calculateAtomId(atomData);
 
-			await multiVaultCreateAtoms(
+			const createAtomHash = await multiVaultCreateAtoms(
 				{
 					walletClient,
 					publicClient,
@@ -39,6 +39,7 @@ describe('Deposits', () => {
 					value: parseEther('100'),
 				}
 			);
+			await publicClient.waitForTransactionReceipt({ hash: createAtomHash });
 
 			const txHash = await multiVaultDeposit(
 				{
@@ -62,7 +63,7 @@ describe('Deposits', () => {
 			const atomData = toHex(`multiVaultDeposit test atom ${Math.random()}`);
 			const atomId = calculateAtomId(atomData);
 
-			await multiVaultCreateAtoms(
+			const createAtomHash = await multiVaultCreateAtoms(
 				{
 					walletClient,
 					publicClient,
@@ -73,6 +74,7 @@ describe('Deposits', () => {
 					value: parseEther('100'),
 				}
 			);
+			await publicClient.waitForTransactionReceipt({ hash: createAtomHash });
 
 			const txHash = await multiVaultDeposit(
 				{
@@ -134,7 +136,7 @@ describe('Deposits', () => {
 			const atomData1 = toHex(`batch multiVaultDeposit atom 1 ${Math.random()}`);
 			const atomData2 = toHex(`batch multiVaultDeposit atom 2 ${Math.random()}`);
 
-			await multiVaultCreateAtoms(
+			const createAtomHash = await multiVaultCreateAtoms(
 				{
 					walletClient,
 					publicClient,
@@ -148,6 +150,7 @@ describe('Deposits', () => {
 					value: parseEther('200'),
 				}
 			);
+			await publicClient.waitForTransactionReceipt({ hash: createAtomHash });
 
 			const atomId1 = calculateAtomId(atomData1);
 			const atomId2 = calculateAtomId(atomData2);
@@ -183,7 +186,7 @@ describe('Deposits', () => {
 			const atomData = toHex(`batch multiVaultDeposit atom ${Math.random()}`);
 			const atomId = calculateAtomId(atomData);
 
-			await multiVaultCreateAtoms(
+			const createAtomHash = await multiVaultCreateAtoms(
 				{
 					walletClient,
 					publicClient,
@@ -194,6 +197,7 @@ describe('Deposits', () => {
 					value: parseEther('100'),
 				}
 			);
+			await publicClient.waitForTransactionReceipt({ hash: createAtomHash });
 
 			const txHash = await multiVaultDepositBatch(
 				{

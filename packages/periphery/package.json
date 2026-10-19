@@ -1,6 +1,6 @@
 {
 	"name": "@0xintuition/periphery",
-	"version": "0.1.0-alpha.0",
+	"version": "0.1.0",
 	"description": "Intuition periphery contract ABIs and bridge helper utilities",
 	"private": false,
 	"license": "MIT",
@@ -36,8 +36,7 @@
 	},
 	"homepage": "https://github.com/0xIntuition/packages/tree/main/packages/periphery#readme",
 	"publishConfig": {
-		"access": "public",
-		"tag": "alpha"
+		"access": "public"
 	},
 	"scripts": {
 		"build": "node ../../scripts/clean-dist.mjs && tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
@@ -60,7 +59,7 @@
 		"check:unsafe:write": "biome check --write --unsafe"
 	},
 	"dependencies": {
-		"@0xintuition/deployments": "0.1.0-alpha.0"
+		"@0xintuition/deployments": "0.1.0"
 	},
 	"peerDependencies": {
 		"viem": "^2.0.0"

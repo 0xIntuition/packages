@@ -1,5 +1,6 @@
 export * from './event-parse';
 export * from './event-parse-atom-config-updated';
+export * from './event-parse-atom-context-registered';
 export * from './event-parse-atom-created';
 export * from './event-parse-atom-wallet-fee-claimed';
 export * from './event-parse-atom-wallet-fee-collected';

@@ -1,0 +1,28 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"noEmit": false,
+		"incremental": false,
+		"allowJs": false,
+		"checkJs": false,
+		"baseUrl": ".",
+		"paths": {
+			"@0xintuition/periphery": ["../periphery/src/index.ts"],
+			"@0xintuition/protocol": ["../protocol/src/index.ts"],
+			"@0xintuition/sdk": ["../sdk/src/index.ts"]
+		},
+		"declaration": true,
+		"declarationMap": true,
+		"emitDeclarationOnly": true,
+		"outDir": "dist"
+	},
+	"include": ["src"],
+	"exclude": [
+		"node_modules",
+		"dist",
+		"scripts",
+		"**/*.test.ts",
+		"**/test-helpers.ts",
+		"src/plans/helpers.ts"
+	]
+}

@@ -15,6 +15,8 @@ const packageOrder = [
 	'primitives',
 	'protocol',
 	'periphery',
+	'sdk',
+	'cli',
 	'react',
 ];
 

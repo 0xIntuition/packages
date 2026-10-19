@@ -85,12 +85,13 @@ export async function multiVaultMultiCallIntuitionConfigs(config: MultiCallIntui
 	const tripleCost = rawResults[1] as bigint;
 	const formattedTripleCost = formatUnits(tripleCost, 18);
 
+	// `atomConfig()` returns `(atomCreationProtocolFee, atomWalletDepositFee)`.
 	const atomConfig = rawResults[2] as readonly bigint[];
-	const atomWalletInitialDepositAmount = atomConfig[0] as bigint;
-	const formattedAtomWalletInitialDepositAmount = formatUnits(atomWalletInitialDepositAmount, 18);
-
-	const atomCreationProtocolFee = atomConfig[1] as bigint;
+	const atomCreationProtocolFee = atomConfig[0] as bigint;
 	const formattedAtomCreationProtocolFee = formatUnits(atomCreationProtocolFee, 18);
+
+	const atomWalletInitialDepositAmount = atomConfig[1] as bigint;
+	const formattedAtomWalletInitialDepositAmount = formatUnits(atomWalletInitialDepositAmount, 18);
 
 	const tripleConfig = rawResults[3] as readonly bigint[];
 	const tripleCreationProtocolFee = tripleConfig[0] as bigint;

@@ -16,12 +16,13 @@ receive default npm versions, call that out clearly in the release notes.
 
 ## Dist-Tag Policy
 
-The first public package set has two release tracks:
+The public package set has three release tracks:
 
 | Package family | Current version line | Intended dist-tags |
 | --- | --- | --- |
 | Fresh public packages | `0.1.0-alpha.*` | `alpha` and `latest` can both point at the current alpha while no stable line exists |
-| `@0xintuition/protocol` | `3.x` | `latest` should point at the current v3 release; `alpha` may also point at v3 while the package family remains alpha-oriented |
+| Stable protocol stack: `@0xintuition/deployments`, `@0xintuition/curves`, `@0xintuition/periphery`, `@0xintuition/cli` | `0.1.x` | `latest` points at the current stable release |
+| `@0xintuition/protocol`, `@0xintuition/sdk` | `4.x` | `latest` should point at the current v4 release |
 
 For new packages, using both `alpha` and `latest` is acceptable because there is
 no previous stable public line to protect. Consumer docs may still prefer
@@ -52,8 +53,10 @@ packages.
 
 ### Stable / Major Packages
 
-`@0xintuition/protocol` follows normal semver because it supersedes an existing
-`2.x` line.
+`@0xintuition/protocol` and `@0xintuition/sdk` follow normal semver because they
+continue existing npm lines. The stable `0.x` protocol-stack packages
+(`deployments`, `curves`, `periphery`, `cli`) also follow semver; while they stay
+below `1.0.0`, a breaking change bumps the minor version.
 
 - Patch: compatible fixes and clarifications.
 - Minor: backward-compatible API additions.
@@ -99,7 +102,9 @@ Publish in dependency order:
 7. `@0xintuition/primitives`
 8. `@0xintuition/protocol`
 9. `@0xintuition/periphery`
-10. `@0xintuition/react`
+10. `@0xintuition/sdk`
+11. `@0xintuition/cli`
+12. `@0xintuition/react`
 
 This order matches the release packing/smoke scripts and keeps internal
 dependency pins resolvable as each package is published.
@@ -117,21 +122,28 @@ version.
 
 Common cascades:
 
-- `deployments`: also release `periphery` and `react` when their address helpers
-  or package pins should consume the new deployment data.
-- `curves`: also release `protocol` when protocol should consume the new curve
-  version.
+- `deployments`: also release `protocol`, `periphery`, `sdk`, `cli`, and `react`
+  when their ABIs, address helpers, vendored ABIs, or package pins should consume
+  the new artifacts or deployment data.
+- `curves`: also release `protocol`, `sdk`, and `cli` when they should consume
+  the new curve version.
 - `schema-org`: also release `classifications` when schema validation, Creation
   Profiles, or generated classification output changes.
-- `ids`: also release `predicates`, `primitives`, or `react` when their ID
+- `ids`: also release `predicates`, `primitives`, `sdk`, or `react` when their ID
   behavior or exact pins should move with the ID package.
 - `classifications`: also release `primitives` when primitive builders or pins
   should consume the new classification data.
 - `predicates`: also release `primitives`; also release `classifications` when
   metadata predicate refs, matrix rows, or Creation Profiles change.
-- `protocol`: also release `react` when React should consume the new protocol
-  version.
-- Leaf packages such as `primitives`, `periphery`, and `react` usually release
+- `protocol`: also release `sdk`, `cli`, and `react` when they should consume the
+  new protocol version.
+- `periphery`: also release `sdk` and `cli` when they should consume the new
+  periphery version.
+- `sdk`: also release `cli` when its plans should consume the new SDK version.
+  `cli` bundles `protocol`, `periphery`, and `sdk` and pins them as exact
+  devDependencies, so any change to those packages that should reach the
+  executable needs a `cli` release.
+- Leaf packages such as `primitives`, `cli`, and `react` usually release
   on their own unless shared data, examples, or docs need to move with them.
 
 Use the dependency graph as the starting point, but validate with the diff:
@@ -169,9 +181,10 @@ npm publish --access public
 ```
 
 Package manifests own their `publishConfig.tag` values. Fresh alpha packages set
-`publishConfig.tag = "alpha"`. `@0xintuition/protocol` intentionally omits a
-tag in its manifest so npm publishes it to the default `latest` tag unless a
-release owner passes an explicit tag.
+`publishConfig.tag = "alpha"`. Stable packages (`deployments`, `curves`,
+`protocol`, `periphery`, `sdk`, and `cli`) intentionally omit a tag in their
+manifests so npm publishes them to the default `latest` tag unless a release
+owner passes an explicit tag.
 
 `bun run --cwd packages/<name> pack:release` remains available as an audit
 helper. It builds the package, validates the direct-publish guard, runs
@@ -196,6 +209,8 @@ After publishing or changing dist-tags:
 npm view @0xintuition/deployments dist-tags version --json
 npm view @0xintuition/classifications dist-tags version --json
 npm view @0xintuition/protocol dist-tags version --json
+npm view @0xintuition/sdk dist-tags version --json
+npm view @0xintuition/cli dist-tags version --json
 ```
 
 ## Schema Host Policy
