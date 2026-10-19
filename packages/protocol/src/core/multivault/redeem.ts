@@ -1,6 +1,6 @@
 import type { Address, ContractFunctionArgs, PublicClient, WalletClient } from 'viem';
 
-import { MultiVaultAbi } from '../../contracts';
+import { type MultiVaultAbi, MultiVaultWithRevertsAbi } from '../../contracts';
 
 export type RedeemConfig = {
 	address: Address;
@@ -27,7 +27,7 @@ export async function multiVaultRedeem(config: RedeemConfig, inputs: RedeemInput
 	const { request } = await publicClient.simulateContract({
 		account: walletClient.account,
 		address,
-		abi: MultiVaultAbi,
+		abi: MultiVaultWithRevertsAbi,
 		functionName: 'redeem',
 		args,
 	});

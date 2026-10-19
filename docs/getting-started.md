@@ -27,6 +27,8 @@ the checked-out candidate, use the repository's workspace packages after
 | Resolve an IID to a classification or provider plan | `@0xintuition/iid-registry` |
 | Render classification fields and relationship suggestions | `@0xintuition/classifications` |
 | Choose shared predicates | `@0xintuition/predicates` |
+| Compose higher-level transaction plans and API reads | `@0xintuition/sdk` |
+| Generate calldata and plans from a command line | `@0xintuition/cli` |
 | Read, simulate, encode, or write contract calls | `@0xintuition/protocol` |
 | Integrate contract calls with React and wagmi | `@0xintuition/react` |
 

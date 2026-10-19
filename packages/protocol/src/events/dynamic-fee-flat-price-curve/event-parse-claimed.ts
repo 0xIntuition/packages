@@ -1,5 +1,5 @@
 import { type Address, type Hex, type PublicClient, parseEventLogs } from 'viem';
-import { DynamicFeeFlatPriceCurveAbi } from '../../contracts/DynamicFeeFlatPriceCurve-abi';
+import { DynamicFeeFlatPriceCurveAbi } from '../../contracts';
 import { receiptLogs } from '../receipt-logs.js';
 
 /**

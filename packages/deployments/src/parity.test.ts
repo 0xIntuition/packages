@@ -66,7 +66,53 @@ const REFERENCE_DEPLOYMENTS = {
 		13579: '0x4337084D9E255Ff0702461CF8895CE9E3b5Ff108',
 		1155: '0x4337084D9E255Ff0702461CF8895CE9E3b5Ff108',
 	},
-} as const satisfies Record<IntuitionDeploymentName, Record<number, Address>>;
+} as const satisfies Partial<Record<IntuitionDeploymentName, Record<number, Address>>>;
+
+// Explicit migration from PR #38; these addresses are not evidence of historical app parity.
+const V110_UPDATES = {
+	BaseEmissionsController: {
+		'84532': '0x6B96fB3867b666A7957fa589866627ea902ec2C6',
+	},
+	TrustBonding: {
+		'13579': '0x9E79446fE4B1683eF1678654554535a9c90B1C3D',
+	},
+	SatelliteEmissionsController: {
+		'13579': '0x2f4ef00b05f5AA9976154125Cc46D47CAB75B1b7',
+	},
+	BondingCurveRegistry: {
+		'13579': '0xb3bfd62d259E07d623844fC7bDB7D54F74Ff9052',
+	},
+	LinearCurve: {
+		'13579': '0x7499bFa918DBc73Ace4A05D6194a5Cd343AE32Dd',
+	},
+	OffsetProgressiveCurve: {
+		'13579': '0x96bb9020ba4D027E42C29eCB3CEcc2471E505E6C',
+	},
+	AtomWalletFactory: {
+		'13579': '0x900cff1007055c850FB48695a3CB121290d6f17b',
+	},
+	AtomWalletBeacon: {
+		'13579': '0x16deCCF5484bE9FFb5c8a2d800E0fdf27b876012',
+	},
+	AtomWarden: {
+		'13579': '0xf3f875E0d390C9bA8Aa21881E983baDe91866A38',
+	},
+	DynamicFeeFlatPriceCurve: {
+		'13579': '0x3Bd2D1335161f3F2FA9eaA35a537415F7b10156A',
+	},
+} as const;
+const CANDIDATE_DEPLOYMENTS = { ...REFERENCE_DEPLOYMENTS };
+const expectedDeployments = Object.fromEntries(
+	[...new Set([...Object.keys(CANDIDATE_DEPLOYMENTS), ...Object.keys(V110_UPDATES)])].map(
+		(name) => [
+			name,
+			{
+				...(CANDIDATE_DEPLOYMENTS as Record<string, Record<number, Address>>)[name],
+				...(V110_UPDATES as Record<string, Record<number, Address>>)[name],
+			},
+		]
+	)
+) as Record<IntuitionDeploymentName, Record<number, Address>>;
 
 const CHAIN_IDS = [
 	BASE_CHAIN_ID,
@@ -75,14 +121,14 @@ const CHAIN_IDS = [
 	INTUITION_TESTNET_CHAIN_ID,
 ];
 
-describe('reference deployment parity', () => {
+describe('reference deployments with explicit v1.1.0 migrations', () => {
 	it('matches every reference name and address, with no extra entries', () => {
-		expect(intuitionDeployments).toEqual(REFERENCE_DEPLOYMENTS);
+		expect(intuitionDeployments).toEqual(expectedDeployments);
 	});
-	for (const name of Object.keys(REFERENCE_DEPLOYMENTS) as IntuitionDeploymentName[]) {
+	for (const name of Object.keys(expectedDeployments) as IntuitionDeploymentName[]) {
 		for (const chainId of CHAIN_IDS) {
 			it(`${name} on ${chainId} preserves both generic call orders`, () => {
-				const expected = (REFERENCE_DEPLOYMENTS[name] as Record<number, Address>)[chainId];
+				const expected = expectedDeployments[name][chainId];
 				if (expected) {
 					expect(getContractAddressFromChainId(name, chainId)).toBe(expected);
 					expect(getContractAddressFromChainId(chainId, name)).toBe(expected);
@@ -100,7 +146,7 @@ describe('reference deployment parity', () => {
 				['Trust', getTrustAddressFromChainId],
 				['MultiVault', getMultiVaultAddressFromChainId],
 			] as const) {
-				const expected = (REFERENCE_DEPLOYMENTS[name] as Record<number, Address>)[chainId];
+				const expected = expectedDeployments[name][chainId];
 				if (expected) expect(helper(chainId)).toBe(expected);
 				else
 					expect(() => helper(chainId)).toThrow(

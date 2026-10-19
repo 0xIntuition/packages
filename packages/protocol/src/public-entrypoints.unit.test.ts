@@ -19,7 +19,7 @@ const packageJson = JSON.parse(
 
 describe('@0xintuition/protocol package manifest', () => {
 	it('publishes the release candidate on alpha without moving latest', () => {
-		expect(packageJson.version).toBe('3.1.0');
+		expect(packageJson.version).toBe('4.0.0');
 		expect(packageJson.publishConfig).toEqual({ access: 'public', tag: 'alpha' });
 	});
 
@@ -103,7 +103,7 @@ describe('@0xintuition/protocol wrapper entrypoints', () => {
 		'dynamicFeeFlatPriceCurveQuoteRedeemFee',
 		'dynamicFeeFlatPriceCurveTierFeeOverride',
 		'dynamicFeeFlatPriceCurveUserStake',
-		'dynamicFeeFlatPriceCurveUserTier',
+		'dynamicFeeFlatPriceCurveUserTopTier',
 		'dynamicFeeFlatPriceCurveVaultStake',
 		'eventParseClaimed',
 		'eventParseDepositBandRecorded',
@@ -125,10 +125,11 @@ describe('@0xintuition/protocol wrapper entrypoints', () => {
 	it('exports contracts-v2 provenance', () => {
 		expect(protocol.contractsV2Provenance).toMatchObject({
 			package: '@0xintuition/contracts-v2',
-			version: '1.1.0-alpha.0',
-			source: 'registry',
+			version: null,
+			source: 'unpublished',
+			verified: false,
 		});
-		expect(protocol.contractsV2Provenance.integrity).toMatch(/^sha512-/);
+		expect(protocol.contractsV2Provenance.integrity).toBeNull();
 	});
 
 	it('exports the new ABIs and deployment bytecode', () => {

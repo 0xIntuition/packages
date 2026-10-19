@@ -296,30 +296,37 @@ export function usePreviewAtomCreate(
 
 /**
  * Previews triple creation: returns expected shares and fees for a given asset amount.
+ * Keyed on the three atom ids, since the contract evaluates the atom-deposit fraction against the
+ * atom vaults and the triple does not exist yet.
  *
- * @param termId - The term ID of the triple to create.
+ * @param subjectId - The subject atom ID.
+ * @param predicateId - The predicate atom ID.
+ * @param objectId - The object atom ID.
  * @param assets - The asset amount in wei.
  * @param options - Optional settings.
  * @param options.enabled - Whether the query is enabled.
  *
  * @example
  * ```tsx
- * const { data: preview } = usePreviewTripleCreate(tripleTermId, parseEther('0.01'))
+ * const { data: preview } = usePreviewTripleCreate(subjectId, predicateId, objectId, parseEther('0.01'))
  * ```
  */
 export function usePreviewTripleCreate(
-	termId: Hex | undefined,
+	subjectId: Hex | undefined,
+	predicateId: Hex | undefined,
+	objectId: Hex | undefined,
 	assets: bigint,
 	options?: { chainId?: number; enabled?: boolean }
 ) {
 	const { multivaultAddress, chainId } = useChainConfig(options?.chainId);
-	const enabled = options?.enabled !== false && termId !== undefined && assets > 0n;
+	const hasAtoms = subjectId !== undefined && predicateId !== undefined && objectId !== undefined;
+	const enabled = options?.enabled !== false && hasAtoms && assets > 0n;
 
 	return useReadContract({
 		address: multivaultAddress,
 		abi: MultiVaultAbi,
 		functionName: 'previewTripleCreate',
-		args: termId ? [termId, assets] : undefined,
+		args: hasAtoms ? [subjectId, predicateId, objectId, assets] : undefined,
 		chainId,
 		query: { enabled },
 	});

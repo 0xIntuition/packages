@@ -47,9 +47,28 @@
         "viem": "^2.0.0",
       },
     },
+    "packages/cli": {
+      "name": "@0xintuition/cli",
+      "version": "0.1.0",
+      "bin": {
+        "intuition": "./dist/bin/intuition.js",
+      },
+      "dependencies": {
+        "@0xintuition/periphery": "0.1.0",
+        "@0xintuition/protocol": "4.0.0",
+        "@0xintuition/sdk": "4.0.0",
+        "viem": "^2.31.4",
+      },
+      "devDependencies": {
+        "@0xintuition/curves": "0.1.0",
+        "@0xintuition/deployments": "0.1.0",
+        "typescript": "^5.9.3",
+        "vitest": "^4.0.16",
+      },
+    },
     "packages/curves": {
       "name": "@0xintuition/curves",
-      "version": "0.1.0-alpha.1",
+      "version": "0.1.0",
       "devDependencies": {
         "typescript": "^5.9.3",
         "vitest": "^4.0.16",
@@ -57,7 +76,7 @@
     },
     "packages/deployments": {
       "name": "@0xintuition/deployments",
-      "version": "0.1.0-alpha.1",
+      "version": "0.1.0",
       "devDependencies": {
         "typescript": "^5.9.3",
         "viem": "^2.31.4",
@@ -127,9 +146,9 @@
     },
     "packages/periphery": {
       "name": "@0xintuition/periphery",
-      "version": "0.1.0-alpha.1",
+      "version": "0.1.0",
       "dependencies": {
-        "@0xintuition/deployments": "0.1.0-alpha.1",
+        "@0xintuition/deployments": "0.1.0",
       },
       "devDependencies": {
         "typescript": "^5.9.3",
@@ -176,9 +195,10 @@
     },
     "packages/protocol": {
       "name": "@0xintuition/protocol",
-      "version": "3.1.0",
+      "version": "4.0.0",
       "dependencies": {
-        "@0xintuition/curves": "0.1.0-alpha.1",
+        "@0xintuition/curves": "0.1.0",
+        "@0xintuition/deployments": "0.1.0",
       },
       "devDependencies": {
         "typescript": "^5.9.3",
@@ -193,9 +213,9 @@
       "name": "@0xintuition/react",
       "version": "0.1.0-alpha.1",
       "dependencies": {
-        "@0xintuition/deployments": "0.1.0-alpha.1",
+        "@0xintuition/deployments": "0.1.0",
         "@0xintuition/ids": "0.1.0-alpha.1",
-        "@0xintuition/protocol": "3.1.0",
+        "@0xintuition/protocol": "4.0.0",
       },
       "devDependencies": {
         "@tanstack/react-query": "^5.90.2",
@@ -224,6 +244,25 @@
         "vitest": "^4.0.16",
       },
     },
+    "packages/sdk": {
+      "name": "@0xintuition/sdk",
+      "version": "4.0.0",
+      "dependencies": {
+        "@0xintuition/curves": "0.1.0",
+        "@0xintuition/deployments": "0.1.0",
+        "@0xintuition/ids": "0.1.0-alpha.1",
+        "@0xintuition/periphery": "0.1.0",
+        "@0xintuition/protocol": "4.0.0",
+      },
+      "devDependencies": {
+        "typescript": "^5.9.3",
+        "viem": "^2.31.4",
+        "vitest": "^4.0.16",
+      },
+      "peerDependencies": {
+        "viem": "^2.0.0",
+      },
+    },
   },
   "catalog": {
     "@biomejs/biome": "2.3.10",
@@ -245,6 +284,8 @@
   },
   "packages": {
     "@0xintuition/classifications": ["@0xintuition/classifications@workspace:packages/classifications"],
+
+    "@0xintuition/cli": ["@0xintuition/cli@workspace:packages/cli"],
 
     "@0xintuition/contracts-v2": ["@0xintuition/contracts-v2@1.1.0-alpha.0", "", { "dependencies": { "@account-abstraction/contracts": "^0.8.0", "@openzeppelin-v4/contracts": "npm:@openzeppelin/contracts@^4.9.6", "@openzeppelin-v4/contracts-upgradeable": "npm:@openzeppelin/contracts-upgradeable@^4.9.6", "@openzeppelin/contracts": "5.4.0", "@openzeppelin/contracts-upgradeable": "5.4.0", "@prb/math": "^4.1.0", "solady": "^0.1.26" } }, "sha512-vt9GFaFXYAeigLyl/4i6hPpLO4NBrZDyWJrM2M7aHuQ39/qSpxqMmIzetoAtpBWWx4AzM5wccUsXJvVST02saA=="],
 
@@ -275,6 +316,8 @@
     "@0xintuition/react": ["@0xintuition/react@workspace:packages/react"],
 
     "@0xintuition/schema-org": ["@0xintuition/schema-org@workspace:packages/schema-org"],
+
+    "@0xintuition/sdk": ["@0xintuition/sdk@workspace:packages/sdk"],
 
     "@account-abstraction/contracts": ["@account-abstraction/contracts@0.8.0", "", { "dependencies": { "@openzeppelin/contracts": "^5.1.0", "@uniswap/v3-periphery": "^1.4.3" } }, "sha512-8krPx/gpnoT+5xAroagVCbeA7FbUigMZWXFKKPm+oghyr29Dksssdx5sI7xGv9212i4JPaDDUGFk58dpuwVgHA=="],
 

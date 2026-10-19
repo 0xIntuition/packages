@@ -5,7 +5,7 @@ import {
 	type PublicClient,
 	parseEventLogs,
 } from 'viem';
-import { MultiVaultAbi } from '../../contracts/MultiVault-abi.js';
+import { MultiVaultAbi } from '../../contracts';
 import { receiptLogs } from '../receipt-logs.js';
 
 /**

@@ -16,9 +16,8 @@ export type WriteConfig = {
  * (`IMultiVault.sol`) member-for-member: DEPOSIT (0b001), REDEMPTION (0b010), CREATION
  * (0b100), and their unions.
  *
- * Plain object + type alias rather than a real `enum`: some consumers (e.g.
- * lab/curve-demo) build with `erasableSyntaxOnly`, which forbids non-erasable `enum`
- * declarations.
+ * Plain object + type alias rather than a real `enum`: some consumers build with
+ * `erasableSyntaxOnly`, which forbids non-erasable `enum` declarations.
  */
 export const ApprovalTypes = {
 	NONE: 0,

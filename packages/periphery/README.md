@@ -1,61 +1,71 @@
 # @0xintuition/periphery
 
-TypeScript helpers for Intuition periphery contracts, including `FeeProxy`, `TrustSwapAndBridgeRouter`, and direct meta-bridge wrappers.
+TypeScript helpers for Intuition periphery contracts, currently focused on `TrustSwapAndBridgeRouter` and the direct meta-bridge wrappers.
 
-Alpha status: published under the alpha dist-tag. Periphery bridge/router addresses stay in this package; shared Intuition chain IDs come from `@0xintuition/deployments`.
+Periphery ABIs, bytecode and deployment addresses are defined in `@0xintuition/deployments` and re-exported here.
 
 Runtime: ESM-only. This package does not publish CommonJS `require` entrypoints.
 
 ## Install
 
 ```bash
-bun add @0xintuition/periphery@alpha @0xintuition/deployments@alpha viem
+npm install viem @0xintuition/periphery@alpha
 ```
 
-Peer dependency: `viem ^2.0.0`. Release smoke tests install `viem@2.31.4`.
+**Peer Dependencies:** `viem ^2.0.0`. Release smoke tests install `viem@2.31.4`.
 
 ## Scope
 
-- Deployment helpers for published Intuition periphery contracts.
-- FeeProxy artifacts, URI-aware atom creation encoders and client wrappers, affiliate registration and fee reads, and refund helpers.
-- Calldata encoders and client wrappers for `TrustSwapAndBridgeRouter`.
-- Direct bridge helpers for `MetaERC20Hub`, `MetaERC20Spoke`, and `MetaNativeSpoke`.
-- Base bridge asset address helpers for `USDC` and `WETH` approval flows.
+- deployment helpers for published Intuition periphery contracts
+- calldata encoders and client-based wrappers for `TrustSwapAndBridgeRouter`
+- direct bridge helpers for `MetaERC20Hub`, `MetaERC20Spoke`, and `MetaNativeSpoke`
+- Base bridge asset address helpers for `USDC` and `WETH` approval flows
+- calldata encoders and client wrappers for `FeeProxy`; `getFeeProxyAddressFromChainId` resolves the Intuition Testnet (`13579`) FeeProxy and throws for Intuition mainnet until FeeProxy is deployed there
 
 Current deployments are mainnet-oriented:
 
-- Base mainnet for `TrustSwapAndBridgeRouter` and `MetaERC20Hub`.
-- Intuition mainnet for `MetaERC20Spoke` and `MetaNativeSpoke`.
-- Base mainnet bridge asset addresses for `USDC` and `WETH`.
+- Base mainnet for `MetaERC20Hub`
+- Intuition mainnet for `MetaERC20Spoke` and `MetaNativeSpoke`
+- Base mainnet bridge asset addresses for `USDC` and `WETH`
+- `TrustSwapAndBridgeRouter`: pending redeployment on Base mainnet. The router deployed there predates the `deadline` parameter this package's ABI carries, so no address is published until the new deployment exists, and `getTrustSwapAndBridgeRouterAddressFromChainId(base.id)` throws until then.
 
-Bridge helpers cover router-based TRUST transfers from Base to Intuition, direct TRUST transfers from Intuition to Base, and direct USDC and WETH transfers in both directions. No periphery testnet deployments are included.
+That means the package now covers:
 
-The FeeProxy deployment map is empty. `getFeeProxyAddressFromChainId` throws until an address is published; FeeProxy wrappers accept an explicit contract address.
+- router-based TRUST bridge flows from Base to Intuition
+- direct TRUST bridge flows from Intuition to Base
+- direct USDC and WETH bridge flows between Base and Intuition in both directions
+
+`WrappedTrust` is a core contract and resolves from `@0xintuition/protocol`, not from `@0xintuition/periphery`.
+
+Bridge helpers cover router-based TRUST transfers from Base to Intuition, direct TRUST transfers from Intuition to Base, and direct USDC and WETH transfers in both directions. FeeProxy is available on Intuition Testnet; the bridge contracts remain mainnet-only.
+
+`getFeeProxyAddressFromChainId(13579)` resolves the candidate testnet FeeProxy. Mainnet lookup throws until deployment; wrappers also accept an explicit address.
 
 ## Usage
 
-```ts
-import { getTrustSwapAndBridgeRouterAddressFromChainId } from '@0xintuition/periphery'
-import { base } from 'viem/chains'
+Resolve a published deployment address:
 
-const routerAddress = getTrustSwapAndBridgeRouterAddressFromChainId(base.id)
+```ts
+import { getMetaNativeSpokeAddressFromChainId } from '@0xintuition/periphery';
+
+const spokeAddress = getMetaNativeSpokeAddressFromChainId(1155);
 ```
+
+`getTrustSwapAndBridgeRouterAddressFromChainId(base.id)` throws `Contract TrustSwapAndBridgeRouter not found for chain ID 8453` while the router is pending redeployment.
 
 Generate deterministic calldata for a bridge call:
 
 ```ts
-import { trustSwapAndBridgeRouterBridgeTrustEncode } from '@0xintuition/periphery'
+import { trustSwapAndBridgeRouterBridgeTrustEncode } from '@0xintuition/periphery';
 
 const calldata = trustSwapAndBridgeRouterBridgeTrustEncode(
 	1_000n,
 	'0x2222222222222222222222222222222222222222'
-)
+);
 ```
 
-Router swap encoders and client wrappers require a `deadline` Unix timestamp. `trustSwapAndBridgeRouterQuoteExactInput` returns `[amountOut, success]`; check `success` and abort the swap when it is `false` before deriving a minimum output.
+## Relationship to Other Packages
 
-`feeProxyCreateAtomsWithUrisViaEncode` encodes the affiliate, atom data, gross assets, URI lists, and a `FeeGuard` with `maxFeeBps` and `maxFixedFee`. `feeProxyCreateAtomsWithUrisVia` simulates and submits that call with the gross transaction value. Use `feeProxyPreviewCreationFee` to read the fee and forwarded amount, and `feeProxyPendingRefund` / `feeProxyClaimRefund` for pull-fallback refunds.
-
-`WrappedTrust`, `MultiVault`, and other core protocol deployment addresses resolve from `@0xintuition/deployments`, not this package.
-
-`@0xintuition/protocol` provides core contract helpers; router, bridge, meta-bridge, and FeeProxy helpers belong to `@0xintuition/periphery`.
+- `@0xintuition/periphery` is the direct periphery helper package.
+- `@0xintuition/protocol` is core-only and does not own router, bridge, or meta-bridge helpers.
+- `@0xintuition/cli` uses these helpers as part of the shipped executable/library release stack.

@@ -9,7 +9,7 @@ import {
 } from 'viem';
 import { describe, expect, it, vi } from 'vitest';
 
-import { MultiVaultAbi } from '../../contracts/MultiVault-abi.js';
+import { MultiVaultAbi } from '../../contracts';
 import { associateAtomCreationContext } from './atom-creation-context.js';
 import { eventParseAtomContextRegistered } from './event-parse-atom-context-registered.js';
 import { eventParseAtomCreated } from './event-parse-atom-created.js';
@@ -79,7 +79,7 @@ function interleavedLogs() {
 			assets: 10n,
 			assetsAfterFees: 9n,
 			shares: 8n,
-			totalShares: 8n,
+			receiverSharesAfter: 8n,
 			vaultType: 0,
 		}),
 		atom(termB),

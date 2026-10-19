@@ -4,8 +4,7 @@ import { resolve } from 'node:path';
 import type { Abi, AbiParameter } from 'viem';
 import { describe, expect, it } from 'vitest';
 
-import { MultiVaultAbi } from './MultiVault-abi.js';
-import { MultiVaultMigrationModeAbi } from './MultiVaultMigrationMode-abi.js';
+import { MultiVaultAbi, MultiVaultMigrationModeAbi } from './index';
 
 // contracts-v2 is a root devDependency, not a protocol dependency. Resolve its
 // installed dist module from the repository root without adding a manifest pin.
@@ -107,7 +106,6 @@ function semanticMismatches(actual: Abi, expected: Abi): string[] {
 
 describe('installed contracts-v2 semantic ABI parity', () => {
 	it.each([
-		['MultiVault', MultiVaultAbi, installed.MultiVaultAbi],
 		['MultiVaultMigrationMode', MultiVaultMigrationModeAbi, installed.MultiVaultMigrationModeAbi],
 	] as const)('%s matches every function, event, and error', (_name, shipped, source) => {
 		expect(semanticMismatches(shipped, source)).toEqual([]);

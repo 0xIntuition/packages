@@ -43,6 +43,17 @@ const baseInputs = {
 };
 
 describe('createAtomsWithUris', () => {
+	it('keeps positional encoding compatible without bypassing validation', () => {
+		expect(multiVaultCreateAtomsWithUrisEncode(creator, ['0x00'], [10n], [[]])).toBe(
+			multiVaultCreateAtomsWithUrisEncode({ args: [creator, ['0x00'], [10n], [[]]], value: 10n })
+		);
+		expect(() => multiVaultCreateAtomsWithUrisEncode(creator, ['0xabc'], [10n], [[]])).toThrow(
+			'even-length hex'
+		);
+		expect(() => multiVaultCreateAtomsWithUrisEncode(creator, ['0x00'], [], [[]])).toThrow(
+			'same length'
+		);
+	});
 	it('matches pinned calldata, selector, and ABI argument names', () => {
 		const item = MultiVaultAbi.find(
 			(item) => item.type === 'function' && item.name === 'createAtomsWithUris'

@@ -1,6 +1,6 @@
 # Publish contract artifacts before merging this release
 
-The SDK branch contains newer dynamic-fee, FeeProxy, and router artifacts than
+The SDK branch contains newer MultiVault, dynamic-fee, FeeProxy, and router artifacts than
 the currently pinned npm source. The contract changes have not yet been
 published. Keep the intended newer code; release the matching contract artifacts
 and reconcile this repository against them before merging PR #15.
@@ -12,8 +12,9 @@ and reconcile this repository against them before merging PR #15.
 | **`@0xintuition/contracts-v2`** | Public npm package containing Solidity source, ABIs, and bytecode; published from [0xIntuition/intuition-contracts-v2](https://github.com/0xIntuition/intuition-contracts-v2), whose root `package.json` owns the npm name/version |
 | `intuition-contracts-v2` | Private application-monorepo workspace at `contracts/core`; not the public scoped npm package |
 | `intuition-contracts-v2-periphery` | Private application-monorepo workspace at `contracts/periphery`; contains router sources and is not configured for npm publication |
-| `@0xintuition/protocol` | Public SDK in this repository's `packages/protocol`; ships copied core ABIs/bytecode and wrappers |
-| `@0xintuition/periphery` | Public SDK in `packages/periphery`; ships FeeProxy/router ABIs/bytecode and wrappers; it is not the Solidity source package |
+| `@0xintuition/deployments` | Central ABI/bytecode source in `packages/deployments/src/abis` and `src/bytecode`; also owns core/periphery addresses |
+| `@0xintuition/protocol` | Low-level wrappers in `packages/protocol`; re-exports central core artifacts |
+| `@0xintuition/periphery` | Public SDK in `packages/periphery`; provides FeeProxy/router wrappers and re-exports central artifacts; it is not the Solidity source package |
 
 This repository consumes `@0xintuition/contracts-v2` in these places:
 
@@ -22,9 +23,8 @@ This repository consumes `@0xintuition/contracts-v2` in these places:
 - `scripts/sync-protocol-artifacts.mjs`: expected package/version, registry
   verification, and MultiVault/MigrationMode generated-file comparison.
 - `packages/protocol/src/contracts/contracts-v2-provenance.ts`: generated
-  verification record for those MultiVault artifacts.
-- `packages/protocol/src/contracts/abi-parity.unit.test.ts`: semantic comparison
-  with the installed npm artifact.
+  verification record for MultiVault/MigrationMode. It currently says `source: unpublished`, `verified: false`; do not restore the old npm verification flag.
+- `packages/protocol/src/contracts/abi-parity.unit.test.ts`: migration-mode semantic comparison with the installed npm artifact and URI/event invariants. Changed MultiVault parity is enforced by the release gate.
 - `scripts/check-release-contracts.ts`: broader release-only artifact comparison.
 
 SDK consumers do not install the Solidity source package at runtime.
@@ -33,17 +33,16 @@ SDK consumers do not install the Solidity source package at runtime.
 
 Against `@0xintuition/contracts-v2@1.1.0-alpha.0`:
 
-- MultiVault, MultiVaultMigrationMode, and AtomWarden ABI/bytecode match.
+- MultiVault ABI and bytecode differ after integrating PR #38; the bytecode has an unresolved MultiVaultLib link placeholder. MultiVaultMigrationMode and AtomWarden still match the pinned artifact.
 - DynamicFeeFlatPriceCurve ABI/bytecode differ. The candidate has `vaultStake`
   and `DepositBandRecorded`; the published source has `vaultAssets` and a
   different `DepositRecorded` layout. Published deposit-fee math advances across
   gross bands; the candidate helper uses net-anchored gross-up.
 - FeeProxy ABI/bytecode differ, including `maxFeeBps` versus `maxBps` and affiliate
   event names.
-- TrustSwapAndBridgeRouter is not exported by the pinned source package.
+- TrustSwapAndBridgeRouter, TimelockController, and IBaseCurve are not exported by the pinned source package.
 
-The verified MultiVault provenance record does **not** certify those other
-contracts. `bun run release:contracts` deliberately fails until their sources
+`contract-artifacts.json` fingerprints the complete candidate export set from PR #38 plus the retained MigrationMode artifacts. `bun run artifacts:check` detects drift but does **not** certify npm provenance or deployment compatibility. The old MultiVault verification record has been invalidated. `bun run release:contracts` deliberately fails until their sources
 are reconciled. It currently checks all listed contracts against the core
 artifact. If the router gets a separate public artifact package, add its exact
 root dependency and route the comparison to that package; do not simply exclude
@@ -59,7 +58,7 @@ revision. The scripts below are present in its package manifest.
    Confirm the source commit with the contract maintainers.
 2. Ensure `extract-abis.ts` and `extract-bytecodes.ts` export MultiVault,
    MultiVaultMigrationMode, AtomWarden, DynamicFeeFlatPriceCurve, FeeProxy, and the
-   bridge router. Include the router in this artifact or establish a separately
+   bridge router, plus the base-curve interface and TimelockController added in PR #38. Include library link references for unlinked MultiVault bytecode. Include the router in this artifact or establish a separately
    versioned public package with equivalent source/build provenance.
 3. Choose an **unused** version. `1.1.0-alpha.1` is an example next candidate,
    not a reserved version. Check the live inventory first:
@@ -112,11 +111,12 @@ revision. The scripts below are present in its package manifest.
    bun run protocol:sync-artifacts -- --verify-registry
    bun run protocol:check-artifacts -- --verify-registry
    bun run release:contracts
+   bun run artifacts:check
    ```
 
    The sync script refuses to overwrite changed ABI/bytecode. If it reports a
    difference, review and regenerate the affected contract files deliberately,
-   update the ABI/bytecode fingerprints and affected wrappers/tests, then rerun.
+   update the reviewed `contract-artifacts.json` fingerprints and affected wrappers/tests, then rerun. The central files live in `packages/deployments/src/abis` and `src/bytecode`; also run the CLI's `vendor:abis` command and its ABI parity tests after changes.
    Do not use the old source to overwrite the newer intended contract behavior.
    Extend recorded provenance to every newly shipped artifact family.
 4. Run all [release validation](./release.md#required-validation), including

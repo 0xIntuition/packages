@@ -4,14 +4,35 @@
 export {
 	DYNAMIC_FEE_BPS,
 	dynamicFeeDepositFeeBps,
+	dynamicFeeQuoteDepositBands,
 	dynamicFeeQuoteDepositFee,
-	dynamicFeeQuoteWithdrawalFee,
+	dynamicFeeQuoteRedeemFee,
+	dynamicFeeQuoteRedeemFeeForLots,
+	dynamicFeeQuoteRedeemFeeLots,
+	dynamicFeeRedeemFeeBps,
 	dynamicFeeTierLadder,
 	dynamicFeeTierOf,
 	dynamicFeeTierUpperEdge,
 	dynamicFeeTierWidthAt,
-	dynamicFeeWithdrawalFeeBps,
-} from './dynamic-fee-curve.js';
+} from './dynamic-fee-curve';
+export type {
+	DynamicFeeDepositBandLanding,
+	DynamicFeeDepositDistribution,
+	DynamicFeeRedeemDistribution,
+	DynamicFeeRedeemLotDraw,
+	DynamicFeeTierOccupancy,
+	DynamicFeeTierPayout,
+} from './dynamic-fee-distribution';
+// Dynamic fee distribution (the fulcrum kernel)
+export {
+	DYNAMIC_FEE_ACC_PRECISION,
+	DYNAMIC_FEE_NO_LOT,
+	DYNAMIC_FEE_TIER_PRECISION,
+	DYNAMIC_FEE_WEIGHT_PRECISION,
+	dynamicFeeDistributeDeposit,
+	dynamicFeeDistributeRedeem,
+	dynamicFeeProjectHolderEarning,
+} from './dynamic-fee-distribution';
 // Fee simulation
 export {
 	grossUpAtomCreate,
@@ -53,8 +74,7 @@ export {
 	squareWadDown,
 	squareWadUp,
 	WAD,
-} from './math.js';
-
+} from './math';
 // Offset progressive curve
 export {
 	createOffsetProgressiveCurve,
@@ -82,7 +102,12 @@ export type {
 	Curve,
 	CurveState,
 	DepositQuote,
+	DynamicFeeAccumulators,
 	DynamicFeeConfig,
+	DynamicFeeDepositBand,
+	DynamicFeeLot,
+	DynamicFeeLots,
+	DynamicFeeRedeemLotCharge,
 	DynamicFeeTierLadderEntry,
 	DynamicFeeTierOverride,
 	FeeBreakdown,

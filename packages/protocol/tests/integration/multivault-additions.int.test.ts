@@ -137,10 +137,15 @@ describe('MultiVault additional wrappers', () => {
 		);
 
 		const previewTripleCreate = await multiVaultPreviewTripleCreate(readConfig, {
-			args: [tripleId, parseEther('3')],
+			args: [subjectAtomId, predicateAtomId, objectAtomId, parseEther('3')],
 		});
 		expect(previewTripleCreate).toEqual(
-			await readDirect('previewTripleCreate', [tripleId, parseEther('3')])
+			await readDirect('previewTripleCreate', [
+				subjectAtomId,
+				predicateAtomId,
+				objectAtomId,
+				parseEther('3'),
+			])
 		);
 	});
 

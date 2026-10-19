@@ -1,29 +1,40 @@
-/** Release-only gate: CI's MultiVault check does not cover every imported contract. */
+/** Authoritative release gate; offline candidate fingerprints do not establish source parity. */
 import * as publishedAbis from '@0xintuition/contracts-v2/abis';
 import * as publishedBytecodes from '@0xintuition/contracts-v2/bytecodes';
-import * as periphery from '../packages/periphery/src/contracts';
-import * as protocol from '../packages/protocol/src/contracts';
+import * as abis from '../packages/deployments/src/abis/index';
+import * as bytecodes from '../packages/deployments/src/bytecode/index';
 
 const source = { ...publishedAbis, ...publishedBytecodes } as Record<string, unknown>;
-const shipped = { ...protocol, ...periphery } as Record<string, unknown>;
+const shipped = { ...abis, ...bytecodes } as Record<string, unknown>;
 const failures: string[] = [];
-for (const contract of [
-	'MultiVault',
-	'MultiVaultMigrationMode',
-	'AtomWarden',
-	'DynamicFeeFlatPriceCurve',
-	'FeeProxy',
-	'TrustSwapAndBridgeRouter',
-]) {
-	for (const suffix of ['Abi', 'Bytecode']) {
-		const name = `${contract}${suffix}`;
-		if (!source[name])
-			failures.push(
-				`${name}: absent from the pinned contracts artifact; an authoritative source is required`
-			);
-		else if (JSON.stringify(source[name]) !== JSON.stringify(shipped[name]))
-			failures.push(`${name}: differs from the pinned contracts artifact`);
-	}
+// Verify every central export present upstream and require sources for new
+// artifact families. Legacy Metalayer/OpenZeppelin exports remain vendored;
+// their fingerprints alone are not an assertion of upstream authenticity.
+const required = new Set([
+	...Object.keys(shipped).filter((name) => name in source),
+	'MultiVaultAbi',
+	'MultiVaultBytecode',
+	'MultiVaultMigrationModeAbi',
+	'MultiVaultMigrationModeBytecode',
+	'AtomWardenAbi',
+	'AtomWardenBytecode',
+	'DynamicFeeFlatPriceCurveAbi',
+	'DynamicFeeFlatPriceCurveBytecode',
+	'FeeProxyAbi',
+	'FeeProxyBytecode',
+	'IBaseCurveAbi',
+	'TimelockControllerAbi',
+	'TimelockControllerBytecode',
+	'TrustSwapAndBridgeRouterAbi',
+	'TrustSwapAndBridgeRouterBytecode',
+]);
+for (const name of required) {
+	if (!source[name])
+		failures.push(
+			`${name}: absent from the pinned contracts artifact; an authoritative source is required`
+		);
+	else if (JSON.stringify(source[name]) !== JSON.stringify(shipped[name]))
+		failures.push(`${name}: differs from the pinned contracts artifact`);
 }
 if (failures.length)
 	throw new Error(

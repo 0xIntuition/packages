@@ -1,6 +1,6 @@
 import type { ContractFunctionArgs } from 'viem';
 
-import { MultiVaultAbi } from '../../contracts';
+import { type MultiVaultAbi, MultiVaultWithRevertsAbi } from '../../contracts';
 import type { WriteConfig } from '../../types';
 
 export type CreateTriplesForInputs = {
@@ -27,7 +27,7 @@ export async function multiVaultCreateTriplesFor(
 	const { request } = await publicClient.simulateContract({
 		account: walletClient.account,
 		address,
-		abi: MultiVaultAbi,
+		abi: MultiVaultWithRevertsAbi,
 		functionName: 'createTriplesFor',
 		args,
 		value,

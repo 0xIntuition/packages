@@ -1,13 +1,12 @@
 import { base } from 'viem/chains';
 import { describe, expect, it } from 'vitest';
 
-import { intuitionPeripheryDeployments } from '../deployments';
 import { getTrustSwapAndBridgeRouterAddressFromChainId } from './get-trust-swap-and-bridge-router-address-from-chain-id';
 
 describe('getTrustSwapAndBridgeRouterAddressFromChainId', () => {
-	it('returns configured Base deployment', () => {
-		expect(getTrustSwapAndBridgeRouterAddressFromChainId(base.id)).toBe(
-			intuitionPeripheryDeployments.TrustSwapAndBridgeRouter?.[base.id]
+	it('throws for Base while the deadline router awaits redeployment', () => {
+		expect(() => getTrustSwapAndBridgeRouterAddressFromChainId(base.id)).toThrow(
+			`Contract TrustSwapAndBridgeRouter not found for chain ID ${base.id}`
 		);
 	});
 

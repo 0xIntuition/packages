@@ -87,7 +87,9 @@ Use `fields` to render atom inputs and `relationships` to suggest triples such a
 | Semantic / data modeling | `schema-org`, `classifications`, `predicates` | Canonical vocabulary, schema references, recommended atom fields, metadata predicates, and relationship guardrails |
 | Identity | `iid-spec`, `iid`, `iid-registry`, `iid-ladder`, `ids` | Canonical real-world identifiers, semantic/provider resolution, deterministic input projection, and content-addressable protocol IDs |
 | Builder helpers | `primitives` | Higher-level atom, predicate, triple, discovery, and validation helpers |
-| Protocol plumbing | `protocol`, `deployments`, `periphery`, `curves`, `react` | ABIs, chain/deployment metadata, bridge/router helpers, curve math, and React hooks |
+| Application integration | `sdk`, `cli` | Typed action plans, API reads, and deterministic command-line calldata generation |
+| Protocol plumbing | `protocol`, `deployments`, `periphery`, `curves`, `react` | ABIs, bytecode, chain/deployment metadata, bridge/router and fee-proxy helpers, curve math, and React hooks |
+| Integration and agents | `sdk`, `cli` | Action planning and read helpers over the protocol packages, plus side-effect-free calldata encoders, plan builders, and the `intuition` executable |
 
 ## Packages
 
@@ -100,10 +102,12 @@ Use `fields` to render atom inputs and `relationships` to suggest triples such a
 - [`@0xintuition/iid-registry`](https://www.npmjs.com/package/@0xintuition/iid-registry) - pure IID-to-classification, provider, and identifier-hint resolution.
 - [`@0xintuition/iid-ladder`](https://www.npmjs.com/package/@0xintuition/iid-ladder) - strong identifier, registered provider-handle, and canonical-URL projection for application and seed inputs.
 - [`@0xintuition/primitives`](https://www.npmjs.com/package/@0xintuition/primitives) - high-level builders and validators for off-chain Intuition data.
-- [`@0xintuition/protocol`](https://www.npmjs.com/package/@0xintuition/protocol) - core contract ABIs, event parsers, and protocol interaction helpers.
-- [`@0xintuition/deployments`](https://www.npmjs.com/package/@0xintuition/deployments) - Intuition chain metadata and core protocol deployment addresses.
-- [`@0xintuition/periphery`](https://www.npmjs.com/package/@0xintuition/periphery) - periphery bridge/router deployment helpers and calldata utilities.
-- [`@0xintuition/curves`](https://www.npmjs.com/package/@0xintuition/curves) - bonding curve math helpers.
+- [`@0xintuition/protocol`](https://www.npmjs.com/package/@0xintuition/protocol) - core contract wrappers, event parsers, and protocol interaction helpers; re-exports core ABIs, deployment addresses, and chain metadata from `@0xintuition/deployments`.
+- [`@0xintuition/deployments`](https://www.npmjs.com/package/@0xintuition/deployments) - the single source of Intuition contract ABIs, deploy bytecode, core and periphery deployment addresses, and chain metadata.
+- [`@0xintuition/periphery`](https://www.npmjs.com/package/@0xintuition/periphery) - periphery bridge/router and FeeProxy helpers and calldata utilities; addresses come from `@0xintuition/deployments`.
+- [`@0xintuition/curves`](https://www.npmjs.com/package/@0xintuition/curves) - bonding curve math helpers, including dynamic-fee curve quotes and exact-net gross-up quotes.
+- [`@0xintuition/sdk`](https://www.npmjs.com/package/@0xintuition/sdk) - integration SDK with API reads, onchain action planning helpers, and deterministic utilities.
+- [`@0xintuition/cli`](https://www.npmjs.com/package/@0xintuition/cli) - agent-oriented calldata encoders, action plan builders, and the `intuition` executable.
 - [`@0xintuition/react`](https://www.npmjs.com/package/@0xintuition/react) - React provider and hooks for protocol reads/writes.
 
 ## Install
@@ -116,7 +120,7 @@ For the currently published semantic APIs:
 npm install @0xintuition/classifications@alpha @0xintuition/predicates@alpha viem@^2
 ```
 
-`@0xintuition/protocol` uses the `3.x` line. This candidate publishes to `alpha`;
+`@0xintuition/protocol` uses the `4.x` line. This candidate publishes to `alpha`;
 changing `latest` is a separate release-owner decision. Consult each package
 README for peers and public subpaths.
 

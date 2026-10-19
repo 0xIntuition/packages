@@ -22,7 +22,7 @@ describe('Atoms', () => {
 	describe('multiVaultPreviewAtomCreate', () => {
 		it('should calculate atom create cost with valid value', async () => {
 			const value = parseEther('100');
-			const [shares, assetsAfterFixedFees, assetsAfterFees] = await multiVaultPreviewAtomCreate(
+			const [shares, feeBaseAssets, assetsAfterFees] = await multiVaultPreviewAtomCreate(
 				{
 					walletClient,
 					publicClient,
@@ -35,15 +35,15 @@ describe('Atoms', () => {
 			expect(shares).toBeDefined();
 			expect(typeof shares).toBe('bigint');
 			expect(shares).toBeGreaterThan(0n);
-			expect(assetsAfterFixedFees).toBeDefined();
-			expect(typeof assetsAfterFixedFees).toBe('bigint');
+			expect(feeBaseAssets).toBeDefined();
+			expect(typeof feeBaseAssets).toBe('bigint');
 			expect(assetsAfterFees).toBeDefined();
 			expect(typeof assetsAfterFees).toBe('bigint');
 		});
 
 		it('should calculate with minimum value', async () => {
 			const value = parseEther('1');
-			const [shares, assetsAfterFixedFees, assetsAfterFees] = await multiVaultPreviewAtomCreate(
+			const [shares, feeBaseAssets, assetsAfterFees] = await multiVaultPreviewAtomCreate(
 				{
 					walletClient,
 					publicClient,
@@ -54,13 +54,13 @@ describe('Atoms', () => {
 				}
 			);
 			expect(shares).toBeGreaterThanOrEqual(0n);
-			expect(assetsAfterFixedFees).toBeGreaterThanOrEqual(0n);
+			expect(feeBaseAssets).toBeGreaterThanOrEqual(0n);
 			expect(assetsAfterFees).toBeGreaterThanOrEqual(0n);
 		});
 
 		it('should calculate with large value', async () => {
 			const value = parseEther('10000');
-			const [shares, assetsAfterFixedFees, assetsAfterFees] = await multiVaultPreviewAtomCreate(
+			const [shares, feeBaseAssets, assetsAfterFees] = await multiVaultPreviewAtomCreate(
 				{
 					walletClient,
 					publicClient,
@@ -71,8 +71,8 @@ describe('Atoms', () => {
 				}
 			);
 			expect(shares).toBeGreaterThan(0n);
-			expect(assetsAfterFixedFees).toBeLessThanOrEqual(value);
-			expect(assetsAfterFees).toBeLessThanOrEqual(assetsAfterFixedFees);
+			expect(feeBaseAssets).toBeLessThanOrEqual(value);
+			expect(assetsAfterFees).toBeLessThanOrEqual(feeBaseAssets);
 		});
 	});
 
@@ -184,7 +184,7 @@ describe('Atoms', () => {
 			const value = parseEther('100');
 			const atomData = toHex(`retrievable atom ${Math.random()}`);
 
-			await multiVaultCreateAtoms(
+			const createAtomHash = await multiVaultCreateAtoms(
 				{
 					walletClient,
 					publicClient,
@@ -195,6 +195,7 @@ describe('Atoms', () => {
 					value: parseEther('100'),
 				}
 			);
+			await publicClient.waitForTransactionReceipt({ hash: createAtomHash });
 
 			const atomId = calculateAtomId(atomData);
 

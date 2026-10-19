@@ -140,6 +140,8 @@ try {
 		results.contextPreservesId = withOtherContext.success && withOtherContext.value.id === anchor.value.id;
 		const deployments = await import('@0xintuition/deployments');
 		results.multiVault = deployments.getMultiVaultAddressFromChainId(deployments.INTUITION_MAINNET_CHAIN_ID);
+		const deploymentsBytecode = await import('@0xintuition/deployments/bytecode');
+		results.deploymentsBytecode = deploymentsBytecode.TrustBytecode;
 		const ids = await import('@0xintuition/ids');
 		results.oauth = ids.serializeOAuthAtomData({ provider: 'google', providerAccountId: '123' });
 		results.predicateId = ids.calculatePredicateId('follow', 'Directional subscription or tracking of the object entity');
@@ -192,8 +194,30 @@ try {
 		const protocol = await import('@0xintuition/protocol');
 		results.protocol = Array.isArray(protocol.MultiVaultAbi);
 		results.hasProtocolDeployments = 'intuitionDeployments' in protocol;
+		results.protocolMultiVault = protocol.getMultiVaultAddressFromChainId(deployments.INTUITION_MAINNET_CHAIN_ID);
 		const periphery = await import('@0xintuition/periphery');
-		results.periphery = periphery.getTrustSwapAndBridgeRouterAddressFromChainId(8453);
+		results.periphery = periphery.getMetaNativeSpokeAddressFromChainId(1155);
+		try {
+			periphery.getTrustSwapAndBridgeRouterAddressFromChainId(8453);
+			results.peripheryRouterError = null;
+		} catch (error) {
+			results.peripheryRouterError = error instanceof Error ? error.message : String(error);
+		}
+		const sdk = await import('@0xintuition/sdk');
+		results.sdk = typeof sdk.multivaultPrepareDepositTx;
+		results.sdkMultiVault = sdk.getMultiVaultAddressFromChainId(deployments.INTUITION_MAINNET_CHAIN_ID);
+		const sdkApi = await import('@0xintuition/sdk/api');
+		const sdkActions = await import('@0xintuition/sdk/actions');
+		const sdkProtocol = await import('@0xintuition/sdk/protocol');
+		const sdkTrustSwapAndBridgeRouter = await import('@0xintuition/sdk/trust-swap-and-bridge-router');
+		const sdkUtils = await import('@0xintuition/sdk/utils');
+		results.sdkApiSubpath = typeof sdkApi.createIntuitionApiClient;
+		results.sdkActionsSubpath = typeof sdkActions.multivaultPrepareDepositTx;
+		results.sdkProtocolSubpath = typeof sdkProtocol.getMultiVaultAddressFromChainId;
+		results.sdkTrustSwapAndBridgeRouterSubpath = typeof sdkTrustSwapAndBridgeRouter.sameAddress;
+		results.sdkUtilsSubpath = typeof sdkUtils.formatCompactHex;
+		const cli = await import('@0xintuition/cli');
+		results.cli = typeof cli.buildMultiVaultDepositPlan;
 		const react = await import('@0xintuition/react');
 		results.react = typeof react.IntuitionProvider;
 		console.log(JSON.stringify(results));
@@ -208,6 +232,7 @@ try {
 	assert.match(nodeResult.anchor.id, /^0x[0-9a-f]{64}$/);
 	assert.equal(nodeResult.contextPreservesId, true);
 	assert.match(nodeResult.multiVault, /^0x[0-9a-f]{40}$/i);
+	assert.match(nodeResult.deploymentsBytecode, /^0x[0-9a-f]+$/i);
 	assert.match(nodeResult.oauth, /schema\.intuition\.systems\/v1\/oauth-atom\.jsonld/);
 	assert.match(nodeResult.predicateId, /^0x[0-9a-f]{64}$/i);
 	assert.match(nodeResult.predicateAtomData, /"@type":"DefinedTerm"/);
@@ -243,8 +268,21 @@ try {
 	assert.equal(nodeResult.primitiveTypesSubpath, true);
 	assert.equal(nodeResult.curve, 'function');
 	assert.equal(nodeResult.protocol, true);
-	assert.equal(nodeResult.hasProtocolDeployments, false);
+	assert.equal(nodeResult.hasProtocolDeployments, true);
+	assert.equal(nodeResult.protocolMultiVault, nodeResult.multiVault);
 	assert.match(nodeResult.periphery, /^0x[0-9a-f]{40}$/i);
+	assert.match(
+		nodeResult.peripheryRouterError,
+		/Contract TrustSwapAndBridgeRouter not found for chain ID 8453/
+	);
+	assert.equal(nodeResult.sdk, 'function');
+	assert.equal(nodeResult.sdkMultiVault, nodeResult.multiVault);
+	assert.equal(nodeResult.sdkApiSubpath, 'function');
+	assert.equal(nodeResult.sdkActionsSubpath, 'function');
+	assert.equal(nodeResult.sdkProtocolSubpath, 'function');
+	assert.equal(nodeResult.sdkTrustSwapAndBridgeRouterSubpath, 'function');
+	assert.equal(nodeResult.sdkUtilsSubpath, 'function');
+	assert.equal(nodeResult.cli, 'function');
 	assert.equal(nodeResult.react, 'function');
 
 	const bunResult = JSON.parse(run('bun', ['--eval', importProgram]).trim());
@@ -253,7 +291,9 @@ try {
 	assert.equal(bunResult.creationProfileIncludesMusicRecording, true);
 	assert.equal(bunResult.followSubpath, 'follow');
 	assert.equal(bunResult.primitiveAtomSubpath, 'function');
-	assert.equal(bunResult.hasProtocolDeployments, false);
+	assert.equal(bunResult.hasProtocolDeployments, true);
+	assert.equal(bunResult.sdk, 'function');
+	assert.equal(bunResult.cli, 'function');
 	assert.equal(bunResult.react, 'function');
 
 	assert.deepEqual(bunResult, nodeResult, 'Node and Bun must agree on every consumer result');
@@ -268,6 +308,10 @@ try {
 		import { classificationForIid } from '@0xintuition/iid-registry';
 		import { projectIdentifierLadder } from '@0xintuition/iid-ladder';
 		import { multiVaultCreateAtomsWithUrisEncode, eventParseAtomCreated } from '@0xintuition/protocol';
+		import { buildMultiVaultDepositPlan } from '@0xintuition/cli';
+		import { multivaultPrepareDepositTx } from '@0xintuition/sdk/actions';
+		type CliPlan = ReturnType<typeof buildMultiVaultDepositPlan>;
+		type SdkPlan = Awaited<ReturnType<typeof multivaultPrepareDepositTx>>;
 		import type { Hex } from 'viem';
 		const result = buildIidAnchor('music-recording', { isrc: 'USRC17607839' });
 		if (result.success) {
@@ -322,6 +366,23 @@ try {
 		'NodeNext',
 		'consumer-react.ts',
 	]);
+
+	const cliHelp = run('node', [
+		resolve(tempRoot, 'node_modules/@0xintuition/cli/dist/bin/intuition.js'),
+		'--help',
+	]);
+	assert.match(cliHelp, /intuition encoders list/);
+	const cliCalldata = run('node', [
+		resolve(tempRoot, 'node_modules/@0xintuition/cli/dist/bin/intuition.js'),
+		'encode',
+		'trustApproveEncode',
+		'--args',
+		'["0x1111111111111111111111111111111111111111","1000"]',
+	]).trim();
+	assert.equal(
+		cliCalldata,
+		'0x095ea7b3000000000000000000000000111111111111111111111111111111111111111100000000000000000000000000000000000000000000000000000000000003e8'
+	);
 
 	console.log('Clean-room tarball smoke passed for all public alpha packages.');
 } finally {

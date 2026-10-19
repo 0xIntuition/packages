@@ -1,5 +1,6 @@
 export * from './contracts';
 export * from './core/atom-warden';
+export * from './core/base-curve';
 export * from './core/base-emissions-controller';
 export * from './core/bonding-curve-registry';
 export * from './core/curves';
@@ -9,6 +10,9 @@ export * from './core/satellite-emissions-controller';
 export * from './core/trust';
 export * from './core/trustbonding';
 export * from './core/wrapped-trust';
+export * from './deployments';
 export * from './events/dynamic-fee-flat-price-curve';
 export * from './events/multivault';
+export * from './networks';
 export * from './types';
+export * from './utils';

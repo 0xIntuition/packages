@@ -21,16 +21,16 @@ versions and publish order; it does not authorize publication.
 
 ## Dist-Tag Policy
 
-The first public package set has two release tracks:
+The public package set has three release tracks:
 
 | Package family | Current version line | Intended dist-tags |
 | --- | --- | --- |
 | Fresh public packages | `0.1.0-alpha.*` | `alpha` and `latest` can both point at the current alpha while no stable line exists |
-| `@0xintuition/protocol` | `3.x` | Publish this candidate to `alpha`; leave the existing `latest` line unchanged until a release owner explicitly promotes it |
+| `@0xintuition/protocol` | `4.x` | Publish this candidate to `alpha`; leave the existing `latest` line unchanged until a release owner explicitly promotes it |
 
-For new packages, using both `alpha` and `latest` is acceptable because there is
-no previous stable public line to protect. Consumer docs may still prefer
-`@alpha` while the API is settling.
+For this candidate, every entry in `release-plan.json` uses `alpha`, including
+protocol/SDK `4.0.0` and deployments/curves/periphery/CLI `0.1.0`. The absence of
+a prerelease suffix does not authorize promotion to `latest`.
 
 For packages with an existing stable line, keep `latest` pointed at the current
 recommended public version. Older versions remain installable by exact version.
@@ -57,8 +57,10 @@ packages.
 
 ### Stable / Major Packages
 
-`@0xintuition/protocol` follows normal semver because it supersedes an existing
-`2.x` line.
+`@0xintuition/protocol` and `@0xintuition/sdk` follow normal semver because they
+continue existing npm lines. The stable `0.x` protocol-stack packages
+(`deployments`, `curves`, `periphery`, `cli`) also follow semver; while they stay
+below `1.0.0`, a breaking change bumps the minor version.
 
 - Patch: compatible fixes and clarifications.
 - Minor: backward-compatible API additions.
@@ -84,7 +86,8 @@ bun run registry:check
 bun run registry:test
 bun run release:registry:test
 bun run conformance:check
-bun run protocol:check-artifacts
+bun run artifacts:check
+bun run artifacts:test
 bun run protocol:sync-artifacts:test
 bun run guard:supply-chain:test
 bun run guard:supply-chain
@@ -127,7 +130,9 @@ Publish in dependency order:
 11. `@0xintuition/primitives`
 12. `@0xintuition/protocol`
 13. `@0xintuition/periphery`
-14. `@0xintuition/react`
+14. `@0xintuition/sdk`
+15. `@0xintuition/cli`
+16. `@0xintuition/react`
 
 This order matches the release packing/smoke scripts and keeps internal
 dependency pins resolvable as each package is published.
@@ -145,13 +150,14 @@ version.
 
 Common cascades:
 
-- `deployments`: also release `periphery` and `react` when their address helpers
-  or package pins should consume the new deployment data.
-- `curves`: also release `protocol` when protocol should consume the new curve
-  version.
+- `deployments`: also release `protocol`, `periphery`, `sdk`, `cli`, and `react`
+  when their ABIs, address helpers, vendored ABIs, or package pins should consume
+  the new artifacts or deployment data.
+- `curves`: also release `protocol`, `sdk`, and `cli` when they should consume
+  the new curve version.
 - `schema-org`: also release `classifications` when schema validation, Creation
   Profiles, or generated classification output changes.
-- `ids`: also release `predicates`, `primitives`, or `react` when their ID
+- `ids`: also release `predicates`, `primitives`, `sdk`, or `react` when their ID
   behavior or exact pins should move with the ID package.
 - `classifications`: also release `primitives` when primitive builders or pins
   should consume the new classification data.
@@ -161,9 +167,15 @@ Common cascades:
   translation expectations change.
 - `predicates`: also release `primitives`; also release `classifications` when
   metadata predicate refs, matrix rows, or Creation Profiles change.
-- `protocol`: also release `react` when React should consume the new protocol
-  version.
-- Leaf packages such as `primitives`, `periphery`, and `react` usually release
+- `protocol`: also release `sdk`, `cli`, and `react` when they should consume the
+  new protocol version.
+- `periphery`: also release `sdk` and `cli` when they should consume the new
+  periphery version.
+- `sdk`: also release `cli` when its plans should consume the new SDK version.
+  `cli` bundles `protocol`, `periphery`, and `sdk` and pins them as exact
+  dependencies (also required by its TypeScript declarations), so any change to those packages that should reach the
+  executable needs a `cli` release.
+- Leaf packages such as `primitives`, `cli`, and `react` usually release
   on their own unless shared data, examples, or docs need to move with them.
 
 Use the dependency graph as the starting point, but validate with the diff:
@@ -231,6 +243,8 @@ After publishing or changing dist-tags:
 npm view @0xintuition/deployments dist-tags version --json
 npm view @0xintuition/classifications dist-tags version --json
 npm view @0xintuition/protocol dist-tags version --json
+npm view @0xintuition/sdk dist-tags version --json
+npm view @0xintuition/cli dist-tags version --json
 ```
 
 ## Schema Host Policy

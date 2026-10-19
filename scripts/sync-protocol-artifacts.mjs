@@ -175,14 +175,23 @@ export async function syncProtocolArtifacts({
 		`export const contractsV2Provenance = ${JSON.stringify(provenance, null, '\t')} as const;\n`;
 
 	const formattedArtifacts = Object.entries(artifacts).map(([filename, content]) => {
-		const destination = resolve(protocolRoot, 'src/contracts', filename);
+		const destination =
+			filename === 'contracts-v2-provenance.ts'
+				? resolve(protocolRoot, 'src/contracts', filename)
+				: resolve(
+						repoRoot,
+						'packages/deployments/src',
+						filename.endsWith('-abi.ts') ? 'abis' : 'bytecode',
+						filename
+					);
 		return { filename, destination, content: formatTypeScript(content, destination) };
 	});
 	// Preflight every ABI/bytecode before writing anything. Artifact changes need
 	// a separate ruling; sync may only update provenance in this lane.
 	const changedArtifacts = formattedArtifacts.filter(
 		({ filename, destination, content }) =>
-			filename !== 'contracts-v2-provenance.ts' && readFileSync(destination, 'utf8') !== content
+			filename !== 'contracts-v2-provenance.ts' &&
+			artifactLiteral(readFileSync(destination, 'utf8')) !== artifactLiteral(content)
 	);
 	if (changedArtifacts.length > 0) {
 		throw new Error(
@@ -191,7 +200,7 @@ export async function syncProtocolArtifacts({
 	}
 	for (const { filename, destination, content } of formattedArtifacts) {
 		if (filename !== 'contracts-v2-provenance.ts') {
-			log(`byte-identical packages/protocol/src/contracts/${filename}`);
+			log(`byte-identical packages/deployments/src/${filename}`);
 		} else if (checkOnly) {
 			if (readFileSync(destination, 'utf8') !== content) {
 				throw new Error(`Protocol artifacts are stale: ${filename}`);
@@ -314,4 +323,15 @@ function formatTypeScript(content, destination) {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
 	await syncProtocolArtifacts();
+}
+
+function artifactLiteral(content) {
+	// Formatting and generator comments are not artifact differences. Keep all
+	// literal contents and declarations intact; never execute candidate source.
+	const normalized = content.replace(/^\/\*\*[\s\S]*?\*\/\s*/, '');
+	try {
+		return formatTypeScript(normalized, 'artifact.ts').trim();
+	} catch {
+		return normalized;
+	}
 }

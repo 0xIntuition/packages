@@ -7,7 +7,7 @@ import type { ReadConfig } from '../../types';
  * Reads a tier's sparse manual fee override, if one is set.
  * @param config Contract address and public client.
  * @param inputs Function args for the tier lookup.
- * @returns `[isSet, depositFeeBps, withdrawalFeeBps]` for the tier.
+ * @returns `[isSet, depositFeeBps, redeemFeeBps]` for the tier.
  */
 export async function dynamicFeeFlatPriceCurveTierFeeOverride(
 	config: ReadConfig,

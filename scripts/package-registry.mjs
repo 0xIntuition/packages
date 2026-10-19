@@ -34,6 +34,8 @@ export const PACKAGES = [
 	{ dirName: 'primitives', kind: 'compiled' },
 	{ dirName: 'protocol', kind: 'compiled' },
 	{ dirName: 'periphery', kind: 'compiled' },
+	{ dirName: 'sdk', kind: 'compiled' },
+	{ dirName: 'cli', kind: 'compiled' },
 	{ dirName: 'react', kind: 'compiled' },
 ];
 

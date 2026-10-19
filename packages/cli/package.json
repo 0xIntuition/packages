@@ -1,0 +1,91 @@
+{
+	"name": "@0xintuition/cli",
+	"version": "0.1.0",
+	"description": "Agent-oriented encoders and action plan builders for Intuition protocol workflows.",
+	"private": false,
+	"license": "MIT",
+	"type": "module",
+	"sideEffects": false,
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"bin": {
+		"intuition": "./dist/bin/intuition.js"
+	},
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE",
+		"docs"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./package.json": "./package.json"
+	},
+	"keywords": [
+		"intuition",
+		"agents",
+		"encoders",
+		"calldata",
+		"viem",
+		"ethereum"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/0xIntuition/packages.git",
+		"directory": "packages/cli"
+	},
+	"bugs": {
+		"url": "https://github.com/0xIntuition/packages/issues"
+	},
+	"homepage": "https://github.com/0xIntuition/packages/tree/main/packages/cli#readme",
+	"publishConfig": {
+		"access": "public",
+		"tag": "alpha"
+	},
+	"scripts": {
+		"build": "node ../../scripts/clean-dist.mjs && bun run build:bundle && bun run build:cli && bun run build:types",
+		"build:bundle": "bun build ./src/index.ts --outfile ./dist/index.js --format esm --target node",
+		"build:cli": "node ./scripts/build-cli-bin.mjs",
+		"build:types": "tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"dev": "tsc --watch",
+		"vendor:abis": "bun run scripts/vendor-abis.ts && biome check --write src/abis",
+		"generate:core-encoders": "bun run scripts/generate-core-encoders.ts && biome check --write src/encoders/core",
+		"generate:periphery-encoders": "bun run scripts/generate-periphery-encoders.ts && biome check --write src/encoders/periphery",
+		"generate:encoders": "bun run vendor:abis && bun run generate:core-encoders && bun run generate:periphery-encoders",
+		"help:encoders": "bun run scripts/print-encoder-help.ts",
+		"help:encoders:core": "bun run scripts/print-core-encoder-help.ts",
+		"help:encoders:periphery": "bun run scripts/print-encoder-help.ts -- --surface=periphery",
+		"pack:dry-run": "bun run build && npm pack --ignore-scripts --dry-run --json",
+		"pack:release": "bun run build && node ../../scripts/pack-release.mjs",
+		"prepack": "bun run build",
+		"prepublishOnly": "bun run build && node ../../scripts/guard-direct-publish.mjs",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:smoke:dist": "bun run build && bun run ./scripts/dist-consumer-smoke.mjs",
+		"typecheck": "tsc --noEmit",
+		"ci": "biome check",
+		"lint": "biome lint",
+		"format": "biome format",
+		"check": "biome check",
+		"lint:write": "biome lint --write",
+		"format:write": "biome format --write",
+		"check:write": "biome check --write",
+		"check:unsafe:write": "biome check --write --unsafe"
+	},
+	"dependencies": {
+		"viem": "^2.31.4",
+		"@0xintuition/sdk": "4.0.0",
+		"@0xintuition/protocol": "4.0.0",
+		"@0xintuition/periphery": "0.1.0"
+	},
+	"devDependencies": {
+		"@0xintuition/curves": "0.1.0",
+		"@0xintuition/deployments": "0.1.0",
+		"typescript": "^5.9.3",
+		"vitest": "^4.0.16"
+	}
+}

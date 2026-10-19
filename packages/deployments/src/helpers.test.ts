@@ -40,10 +40,10 @@ describe('getContractAddressFromChainId', () => {
 		);
 
 		expect(getContractAddressFromChainId('AtomWalletFactory', intuitionTestnet.id)).toBe(
-			'0xdbaDd9a5f5B75A32ae403B7D44F5510Ac16939CA'
+			'0x900cff1007055c850FB48695a3CB121290d6f17b'
 		);
 		expect(getContractAddressFromChainId('AtomWalletBeacon', intuitionTestnet.id)).toBe(
-			'0x8497Eb80fB9742265AeFE711856b2ecACABF1Cb0'
+			'0x16deCCF5484bE9FFb5c8a2d800E0fdf27b876012'
 		);
 		expect(getContractAddressFromChainId('EntryPoint', intuitionTestnet.id)).toBe(
 			'0x4337084D9E255Ff0702461CF8895CE9E3b5Ff108'
