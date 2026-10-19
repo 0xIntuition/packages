@@ -51,6 +51,10 @@ export const PROVIDERS_BY_SCHEME: Readonly<Record<SchemeName, readonly ProviderS
 	imdb: ['tmdb', 'wikidata'],
 	tmdb: ['tmdb'],
 	podcastguid: ['podcast-index', 'apple-music'],
+	// Registration adds typed matching identities, not new lookup capabilities.
+	'podcast-index': NONE,
+	'apple-podcasts': NONE,
+	letterboxd: NONE,
 	url: NONE,
 	caip10: ['etherscan'],
 	caip19: ['coingecko', 'etherscan'],

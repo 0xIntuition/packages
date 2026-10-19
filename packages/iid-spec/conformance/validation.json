@@ -167,6 +167,132 @@
 			"valid": false,
 			"anchorEligible": false,
 			"note": "ISNI URL is accepted raw input but is not a canonical IID value"
+		},
+		{
+			"id": "valid-podcast-index",
+			"iid": "int:podcast-index:3421639",
+			"valid": true,
+			"anchorEligible": false,
+			"note": "typed provider-local identifier has whole-scheme P1 floor"
+		},
+		{
+			"id": "valid-podcast-index-reject-1",
+			"iid": "int:podcast-index:0",
+			"valid": false,
+			"anchorEligible": false,
+			"note": "invalid provider-local value"
+		},
+		{
+			"id": "valid-podcast-index-reject-2",
+			"iid": "int:podcast-index:0123",
+			"valid": false,
+			"anchorEligible": false,
+			"note": "invalid provider-local value"
+		},
+		{
+			"id": "valid-podcast-index-reject-3",
+			"iid": "int:podcast-index: 123",
+			"valid": false,
+			"anchorEligible": false,
+			"note": "invalid provider-local value"
+		},
+		{
+			"id": "valid-podcast-index-reject-4",
+			"iid": "int:podcast-index:123 ",
+			"valid": false,
+			"anchorEligible": false,
+			"note": "invalid provider-local value"
+		},
+		{
+			"id": "valid-podcast-index-reject-5",
+			"iid": "int:podcast-index:ABC",
+			"valid": false,
+			"anchorEligible": false,
+			"note": "invalid provider-local value"
+		},
+		{
+			"id": "valid-apple-podcasts",
+			"iid": "int:apple-podcasts:1222114325",
+			"valid": true,
+			"anchorEligible": false,
+			"note": "typed provider-local identifier has whole-scheme P1 floor"
+		},
+		{
+			"id": "valid-apple-podcasts-reject-1",
+			"iid": "int:apple-podcasts:0",
+			"valid": false,
+			"anchorEligible": false,
+			"note": "invalid provider-local value"
+		},
+		{
+			"id": "valid-apple-podcasts-reject-2",
+			"iid": "int:apple-podcasts:0123",
+			"valid": false,
+			"anchorEligible": false,
+			"note": "invalid provider-local value"
+		},
+		{
+			"id": "valid-apple-podcasts-reject-3",
+			"iid": "int:apple-podcasts: 123",
+			"valid": false,
+			"anchorEligible": false,
+			"note": "invalid provider-local value"
+		},
+		{
+			"id": "valid-apple-podcasts-reject-4",
+			"iid": "int:apple-podcasts:123 ",
+			"valid": false,
+			"anchorEligible": false,
+			"note": "invalid provider-local value"
+		},
+		{
+			"id": "valid-apple-podcasts-reject-5",
+			"iid": "int:apple-podcasts:ABC",
+			"valid": false,
+			"anchorEligible": false,
+			"note": "invalid provider-local value"
+		},
+		{
+			"id": "valid-letterboxd",
+			"iid": "int:letterboxd:film:moonlight",
+			"valid": true,
+			"anchorEligible": false,
+			"note": "typed provider-local identifier has whole-scheme P1 floor"
+		},
+		{
+			"id": "valid-letterboxd-reject-1",
+			"iid": "int:letterboxd:film:Moonlight",
+			"valid": false,
+			"anchorEligible": false,
+			"note": "invalid provider-local value"
+		},
+		{
+			"id": "valid-letterboxd-reject-2",
+			"iid": "int:letterboxd:film:-moonlight",
+			"valid": false,
+			"anchorEligible": false,
+			"note": "invalid provider-local value"
+		},
+		{
+			"id": "valid-letterboxd-reject-3",
+			"iid": "int:letterboxd:film:moon--light",
+			"valid": false,
+			"anchorEligible": false,
+			"note": "invalid provider-local value"
+		},
+		{
+			"id": "valid-letterboxd-reject-4",
+			"iid": "int:letterboxd:film:moonlight-",
+			"valid": false,
+			"anchorEligible": false,
+			"note": "invalid provider-local value"
+		},
+		{
+			"id": "valid-letterboxd-reject-5",
+			"iid": "int:letterboxd: film:moonlight",
+			"valid": false,
+			"anchorEligible": false,
+			"note": "invalid provider-local value"
 		}
 	]
 }

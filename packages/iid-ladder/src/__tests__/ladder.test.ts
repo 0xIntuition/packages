@@ -10,6 +10,8 @@ import {
 } from '../index.js';
 
 const PROVIDER_CASES = [
+	{ canonicalId: 'apple-podcasts:1222114325', expected: 'int:apple-podcasts:1222114325' },
+	{ canonicalId: 'podcast-index:3421639', expected: 'int:podcast-index:3421639' },
 	{ canonicalId: 'github:user:octocat', expected: 'int:acct:github:@octocat' },
 	{
 		canonicalId: 'github:repo:0xintuition/intuition',
@@ -25,6 +27,7 @@ const PROVIDER_CASES = [
 		canonicalId: 'npm:package:@tanstack/react-query',
 		expected: 'int:purl:npm/tanstack/react-query',
 	},
+	{ canonicalId: 'letterboxd:film:moonlight', expected: 'int:letterboxd:film:moonlight' },
 	{ canonicalId: 'x:user:jack', expected: 'int:acct:x:@jack' },
 	{ canonicalId: 'isbn:9780140328721', expected: 'int:isbn:9780140328721' },
 	{ canonicalId: 'wd:film:Q751921', expected: 'int:wd:film:Q751921' },
@@ -35,8 +38,6 @@ const PROVIDER_CASES = [
 ] as const;
 
 const PROVIDER_LOCAL_CASES = [
-	'apple-podcasts:1222114325',
-	'podcast-index:3421639',
 	'spotify:track:4uLU6hMCjMI75M1A2tKUQC',
 	'spotify:album:6DEjYFkNZh67HP7R9PSZvv',
 	'spotify:artist:0gxyHStUsqpMadRV0Di1Qt',
@@ -55,7 +56,6 @@ const PROVIDER_LOCAL_CASES = [
 	'etsy:listing:1234567890',
 	'shopify:product:acme-store.myshopify.com:handmade-blue-mug',
 	'goodreads:book:4671',
-	'letterboxd:film:moonlight',
 	'amazon:store:https-amazon-com-stores-fixture',
 	'asin:0062316095',
 	'instagram:user:instagram',
@@ -104,6 +104,8 @@ const CRISP_PROVIDER_ID_CASES = [
 ] as const;
 
 const REGISTERED_PROVIDER_EXPECTATIONS = [
+	{ providerPrefix: 'apple-podcasts:', providers: [] },
+	{ providerPrefix: 'podcast-index:', providers: [] },
 	{ providerPrefix: 'github:user:', providers: ['github'] },
 	{ providerPrefix: 'github:repo:', providers: ['github'] },
 	{ providerPrefix: 'imdb:title:', providers: ['tmdb', 'wikidata'] },
@@ -113,6 +115,7 @@ const REGISTERED_PROVIDER_EXPECTATIONS = [
 	{ providerPrefix: 'openlibrary:work:', providers: ['openlibrary'] },
 	{ providerPrefix: 'openlibrary:book:', providers: ['openlibrary'] },
 	{ providerPrefix: 'npm:package:', providers: ['npm'] },
+	{ providerPrefix: 'letterboxd:film:', providers: [] },
 	{ providerPrefix: 'x:user:', providers: ['x-profile'] },
 	{ providerPrefix: 'isbn:', providers: ['openlibrary'] },
 	{ providerPrefix: 'wd:', providers: ['wikidata'] },
@@ -496,6 +499,9 @@ const IDEMPOTENT_SCHEME_VALUES = {
 	imdb: ['tt0073629'],
 	tmdb: ['movie:603', 'tv:1399'],
 	podcastguid: ['f77016bc-fd74-5c94-893f-864deb06fc30'],
+	'podcast-index': ['123'],
+	'apple-podcasts': ['1222114325'],
+	letterboxd: ['film:moonlight'],
 	url: ['https://example.com/?utm_source=test'],
 	caip10: ['eip155:1:0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'],
 	caip19: ['eip155:1/erc20:0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'],

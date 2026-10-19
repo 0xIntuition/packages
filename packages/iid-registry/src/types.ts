@@ -22,8 +22,9 @@ export interface IidClassification {
 
 /**
  * A scheme ratified `unambiguous` (`SCHEME_TYPING`): the scheme (or a type
- * segment inside the value) implies the entity's classification, so bare
- * P0 anchors are legal. The classification table (`classification-map.ts`)
+ * segment inside the value) implies the entity's classification. Eligibility
+ * is a separate dimension: provider-local identifiers still floor at P1.
+ * The classification table (`classification-map.ts`)
  * must stay total over this union — a new unambiguous scheme in
  * `@0xintuition/iid` fails this package's totality test until mapped.
  */
@@ -37,6 +38,9 @@ export type UnambiguousScheme =
 	| 'mbid'
 	| 'olid'
 	| 'podcastguid'
+	| 'podcast-index'
+	| 'apple-podcasts'
+	| 'letterboxd'
 	| 'caip19'
 	| 'appid'
 	| 'purl'

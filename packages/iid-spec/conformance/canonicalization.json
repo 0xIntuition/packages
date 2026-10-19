@@ -807,6 +807,132 @@
 			"raw": "https://isni.org/ISNI/0000000121032683",
 			"canonical": "0000000121032683",
 			"note": "ISNI URL path segment is matched case-insensitively as well (whole-prefix fold, as the reference implementation does)"
+		},
+		{
+			"id": "canon-podcast-index",
+			"scheme": "podcast-index",
+			"raw": "3421639",
+			"canonical": "3421639",
+			"note": "provider-local identity canonicalization"
+		},
+		{
+			"id": "canon-podcast-index-reject-1",
+			"scheme": "podcast-index",
+			"raw": "0",
+			"canonical": null,
+			"note": "invalid provider-local value is never repaired"
+		},
+		{
+			"id": "canon-podcast-index-reject-2",
+			"scheme": "podcast-index",
+			"raw": "0123",
+			"canonical": null,
+			"note": "invalid provider-local value is never repaired"
+		},
+		{
+			"id": "canon-podcast-index-reject-3",
+			"scheme": "podcast-index",
+			"raw": " 123",
+			"canonical": null,
+			"note": "invalid provider-local value is never repaired"
+		},
+		{
+			"id": "canon-podcast-index-reject-4",
+			"scheme": "podcast-index",
+			"raw": "123 ",
+			"canonical": null,
+			"note": "invalid provider-local value is never repaired"
+		},
+		{
+			"id": "canon-podcast-index-reject-5",
+			"scheme": "podcast-index",
+			"raw": "ABC",
+			"canonical": null,
+			"note": "invalid provider-local value is never repaired"
+		},
+		{
+			"id": "canon-apple-podcasts",
+			"scheme": "apple-podcasts",
+			"raw": "1222114325",
+			"canonical": "1222114325",
+			"note": "provider-local identity canonicalization"
+		},
+		{
+			"id": "canon-apple-podcasts-reject-1",
+			"scheme": "apple-podcasts",
+			"raw": "0",
+			"canonical": null,
+			"note": "invalid provider-local value is never repaired"
+		},
+		{
+			"id": "canon-apple-podcasts-reject-2",
+			"scheme": "apple-podcasts",
+			"raw": "0123",
+			"canonical": null,
+			"note": "invalid provider-local value is never repaired"
+		},
+		{
+			"id": "canon-apple-podcasts-reject-3",
+			"scheme": "apple-podcasts",
+			"raw": " 123",
+			"canonical": null,
+			"note": "invalid provider-local value is never repaired"
+		},
+		{
+			"id": "canon-apple-podcasts-reject-4",
+			"scheme": "apple-podcasts",
+			"raw": "123 ",
+			"canonical": null,
+			"note": "invalid provider-local value is never repaired"
+		},
+		{
+			"id": "canon-apple-podcasts-reject-5",
+			"scheme": "apple-podcasts",
+			"raw": "ABC",
+			"canonical": null,
+			"note": "invalid provider-local value is never repaired"
+		},
+		{
+			"id": "canon-letterboxd",
+			"scheme": "letterboxd",
+			"raw": "film:moonlight",
+			"canonical": "film:moonlight",
+			"note": "provider-local identity canonicalization"
+		},
+		{
+			"id": "canon-letterboxd-reject-1",
+			"scheme": "letterboxd",
+			"raw": "film:Moonlight",
+			"canonical": null,
+			"note": "invalid provider-local value is never repaired"
+		},
+		{
+			"id": "canon-letterboxd-reject-2",
+			"scheme": "letterboxd",
+			"raw": "film:-moonlight",
+			"canonical": null,
+			"note": "invalid provider-local value is never repaired"
+		},
+		{
+			"id": "canon-letterboxd-reject-3",
+			"scheme": "letterboxd",
+			"raw": "film:moon--light",
+			"canonical": null,
+			"note": "invalid provider-local value is never repaired"
+		},
+		{
+			"id": "canon-letterboxd-reject-4",
+			"scheme": "letterboxd",
+			"raw": "film:moonlight-",
+			"canonical": null,
+			"note": "invalid provider-local value is never repaired"
+		},
+		{
+			"id": "canon-letterboxd-reject-5",
+			"scheme": "letterboxd",
+			"raw": " film:moonlight",
+			"canonical": null,
+			"note": "invalid provider-local value is never repaired"
 		}
 	]
 }

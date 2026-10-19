@@ -19,12 +19,13 @@ const packageRoot = resolve(new URL('..', import.meta.url).pathname);
 const read = (path) => readFileSync(resolve(packageRoot, path), 'utf8');
 const readJson = (path) => JSON.parse(read(path));
 
-const SCHEME_NAMES = readJson('conformance/schema.json').$defs.schemeName.enum;
-assert.equal(SCHEME_NAMES.length, 26, 'schema must register exactly 26 schemes');
+const SCHEMA = readJson('conformance/schema.json');
 
 const FIXTURE_FILES = ['canonicalization', 'norm1', 'gen1', 'parse', 'validation', 'schemes'];
 
-export function validateCorpus(fixtures) {
+export function validateCorpus(fixtures, schema = SCHEMA) {
+	const SCHEME_NAMES = schema.$defs.schemeName.enum;
+	assert.equal(SCHEME_NAMES.length, 29, 'schema must register exactly 29 schemes');
 	const allIds = new Set();
 
 	for (const name of FIXTURE_FILES) {
@@ -71,7 +72,12 @@ export function validateCorpus(fixtures) {
 		'schemes.json covers the registry'
 	);
 	for (const [scheme, entry] of Object.entries(schemes)) {
-		assert.ok(['A', 'B', 'C'].includes(entry.class), `${scheme}: class`);
+		assert.ok(
+			['podcast-index', 'apple-podcasts', 'letterboxd'].includes(scheme)
+				? entry.class === 'D'
+				: ['A', 'B', 'C'].includes(entry.class),
+			`${scheme}: class`
+		);
 		assert.ok(['unambiguous', 'polymorphic'].includes(entry.typing), `${scheme}: typing`);
 	}
 	assert.equal(schemes.gen1.class, 'C', 'gen1 is the Class C scheme');

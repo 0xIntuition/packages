@@ -111,6 +111,9 @@ describe('identifierHintsForIid', () => {
 
 	it('is total: every registered scheme yields non-empty hints for a canonical value', () => {
 		const samples: Record<(typeof SCHEME_NAMES)[number], string> = {
+			'podcast-index': 'int:podcast-index:3421639',
+			'apple-podcasts': 'int:apple-podcasts:1222114325',
+			letterboxd: 'int:letterboxd:film:moonlight',
 			isbn: 'int:isbn:9780684832722',
 			isrc: 'int:isrc:USUM71703861',
 			iswc: 'int:iswc:T0345246801',

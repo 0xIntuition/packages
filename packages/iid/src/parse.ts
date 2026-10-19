@@ -159,11 +159,13 @@ export function inspectIntuitionId(input: string): IidInspection {
 	const anchorIneligibilityReason =
 		scheme.class === 'C'
 			? ('class-c' as const)
-			: typing === 'polymorphic'
-				? ('polymorphic-scheme' as const)
-				: scheme.scheme === 'acct' && WEAK_ACCOUNT_VALUE.test(value)
-					? ('weak-account' as const)
-					: undefined;
+			: scheme.class === 'D'
+				? ('provider-local' as const)
+				: typing === 'polymorphic'
+					? ('polymorphic-scheme' as const)
+					: scheme.scheme === 'acct' && WEAK_ACCOUNT_VALUE.test(value)
+						? ('weak-account' as const)
+						: undefined;
 
 	return {
 		valid: true,

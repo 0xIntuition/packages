@@ -26,8 +26,10 @@ export type Iid<S extends SchemeName> = `int:${S}:${string}`;
  * - `A` — registered external authority (ISBN, ISNI, LEI, ...). Strongest.
  * - `B` — intrinsic natural key (URL, chain address, content hash, ...).
  * - `C` — derived composite hash (`gen1`). Weakest; ambiguous by construction.
+ * - `D` — provider-local: assigned by one provider, stable within it,
+ *   not governed by a registry outside it (spec §9.7). Always floors at P1.
  */
-export type IdentityClass = 'A' | 'B' | 'C';
+export type IdentityClass = 'A' | 'B' | 'C' | 'D';
 
 export const SCHEME_NAMES = [
 	'isbn',
@@ -45,6 +47,9 @@ export const SCHEME_NAMES = [
 	'imdb',
 	'tmdb',
 	'podcastguid',
+	'podcast-index',
+	'apple-podcasts',
+	'letterboxd',
 	'url',
 	'caip10',
 	'caip19',
@@ -186,7 +191,8 @@ export type AnchorIneligibilityReason =
 	| 'class-c'
 	| 'polymorphic-scheme'
 	| 'dormant-wd-binding'
-	| 'weak-account';
+	| 'weak-account'
+	| 'provider-local';
 
 export type IidInspection =
 	| {

@@ -9,6 +9,13 @@ import {
 
 describe('iidForIdentityRung', () => {
 	const cases = [
+		['podcast-index', '123', { providerCanonicalId: 'podcast-index:123' }, 'int:podcast-index:123'],
+		[
+			'apple-podcasts',
+			'1222114325',
+			{ providerCanonicalId: 'apple-podcasts:1222114325' },
+			'int:apple-podcasts:1222114325',
+		],
 		[
 			'isni',
 			'0000000121367029',
@@ -111,11 +118,9 @@ describe('iidForIdentityRung', () => {
 	] as const;
 
 	const providerLocalCases = [
-		['apple-podcasts', '1222114325'],
 		['spotify:album', '5xcunlfaZvD9BDQsLONI7A'],
 		['spotify:artist', '5xcunlfaZvD9BDQsLONI7A'],
 		['goodreads:book', '123'],
-		['podcast-index', '123'],
 		['spotify:episode', '5xcunlfaZvD9BDQsLONI7A'],
 		['spotify:show', '5xcunlfaZvD9BDQsLONI7A'],
 		['spotify:track', '5xcunlfaZvD9BDQsLONI7A'],

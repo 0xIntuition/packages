@@ -44,16 +44,16 @@ const DIGITS = /^[1-9]\d*$/;
  */
 export const PROVIDER_PREFIX_MAPPINGS = [
 	{
-		kind: 'provider-local',
+		kind: 'registered',
 		providerPrefix: 'apple-podcasts:',
-		iidPrefix: 'apple-podcasts:',
-		valuePattern: DIGITS,
+		scheme: 'apple-podcasts',
+		schemeValuePrefix: '',
 	},
 	{
-		kind: 'provider-local',
+		kind: 'registered',
 		providerPrefix: 'podcast-index:',
-		iidPrefix: 'podcast-index:',
-		valuePattern: DIGITS,
+		scheme: 'podcast-index',
+		schemeValuePrefix: '',
 	},
 	{
 		kind: 'provider-local',
@@ -219,10 +219,10 @@ export const PROVIDER_PREFIX_MAPPINGS = [
 		valuePattern: DIGITS,
 	},
 	{
-		kind: 'provider-local',
+		kind: 'registered',
 		providerPrefix: 'letterboxd:film:',
-		iidPrefix: 'letterboxd:film:',
-		valuePattern: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+		scheme: 'letterboxd',
+		schemeValuePrefix: 'film:',
 	},
 	{
 		kind: 'provider-local',

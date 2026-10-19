@@ -2,7 +2,7 @@
 
 **The Intuition ID (IID) reference implementation.**
 
-An IID is a deterministic, canonicalized identifier string for a real-world entity — `int:<scheme>:<value>` — computed from facts rather than requested from a registry. Two independent actors with the same facts derive byte-identical identifiers without coordinating. The normative rules live in [`@0xintuition/iid-spec`](https://www.npmjs.com/package/@0xintuition/iid-spec); this package implements them: parsing, validation, all 26 scheme canonicalizers, NORM-1, `gen1` derivation, and the declarative identity-ladder engine.
+An IID is a deterministic, canonicalized identifier string for a real-world entity — `int:<scheme>:<value>` — computed from facts rather than requested from a registry. Two independent actors with the same facts derive byte-identical identifiers without coordinating. The normative rules live in [`@0xintuition/iid-spec`](https://www.npmjs.com/package/@0xintuition/iid-spec); this package implements them: parsing, validation, all 29 scheme canonicalizers, NORM-1, `gen1` derivation, and the declarative identity-ladder engine.
 
 Pure and offline by contract: no network I/O, no clock, no locale, no configuration. Every function is a pure function of its input, and the full conformance corpus from the specification runs against this package on Node and Bun.
 
@@ -52,6 +52,12 @@ inspectIntuitionId('int:src:anything')
 ```
 
 `isAnchorEligible` answers the P0 question (spec §7.2): valid + Class A/B + unambiguously typed identifier with an active binding when present. Class C (`gen1`) and polymorphic values, including bare `wd`, floor at P1.
+
+## Provider-local identifiers
+
+Class D is "an identifier assigned by one provider, stable within that provider, not governed by a registry outside it" (spec §9.7). `podcast-index` and `apple-podcasts` identify podcast feeds; `letterboxd` identifies films. All three are registered and unambiguously typed, with a whole-scheme P1 floor: inspection returns `anchorEligible: false` and `anchorIneligibilityReason: 'provider-local'`.
+
+Canonicalization is the identity function: podcast IDs match `^[1-9]\d*$`; Letterboxd values match `^film:[a-z0-9]+(?:-[a-z0-9]+)*$`. Invalid values are never trimmed, case-folded, or repaired. Examples: `int:podcast-index:3421639`, `int:apple-podcasts:1222114325`, `int:letterboxd:film:moonlight`.
 
 ## Typed Wikidata identifiers
 

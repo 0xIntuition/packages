@@ -28,7 +28,7 @@ No proof covers a database-backed runner, devnet, publication, live registry, pr
 - `sameAs` omitted from identity envelopes → public-builder defect; the two movie cases retain the same gen1 IID but change anchor bytes and atom id.
 - Derived recipe values not materialised → public-builder defect; the social-media-posting case emits raw text under `textHash`, the same class as geo7 evidence defects.
 
-The required command reports **1029 pass, 23 todo, 0 fail** across 7 files (1052 tests). Of those, the five harness files report 741 agreements and 94 known divergences (anchor proof: 33 agreements, 25 divergences, 23 OPEN); 23 passing integrity self-tests cover malformed parser shapes, undefined/null distinctions, corpus loss, id drift, agreement metadata, orphan divergences, and documentation accounting; 169 passing tests come from the existing package conformance file.
+The required command reports **1068 pass, 23 todo, 0 fail** across 7 files (1091 tests). Of those, the five harness files report 741 agreements and 94 known divergences (anchor proof: 33 agreements, 25 divergences, 23 OPEN); 23 passing integrity self-tests cover malformed parser shapes, undefined/null distinctions, corpus loss, id drift, agreement metadata, orphan divergences, and documentation accounting; 210 passing tests come from the expanded package conformance file.
 
 ## Runtime enumeration
 
@@ -93,3 +93,10 @@ After combining #24–#34, eleven ISNI ladder cases now match the unchanged refe
 The person ISNI anchor case is only partially fixed. Its identifier now matches `int:isni:0000000121032683`, but the public P1 builder still omits `sameAs`. The reviewed public output is the 92-byte envelope containing only `@context`, `@type`, and `identifier`, with atom ID `0x1907130d1e3daafe1208dc1fc86354846b5a17392d7e69856504d30ff1e0874f`. The unchanged reference includes `sameAs`, has 144 bytes, and hashes to `0xb763b2a00d5dad1b6c3ccd18cdb5009d7e4954c8eec50974999151be6da250fa`. The remaining divergence records this specific builder defect and the inspected output fingerprint; it is not treated as agreement.
 
 The typed-wd stack does **not** reconcile the classifications package's inline declarative ladders: their slugless rungs remain unchanged. All 59 divergences assigned to the typed-wd follow-up still reproduce with their original fingerprints. The 70 historical typed-wd exclusions also remain outstanding, including 36 parser cases for which the checked-in oracle contains names only. Typed-wd package unit tests pass separately, but completing these cross-package proofs and reconciling classifications remains a release gate. A passing harness establishes its recorded agreements and known differences, not full parity with the internal application.
+
+
+## Provider-local reconciliation — 2026-10-19
+
+The specification corpus adds 39 provider-local vectors, increasing the package conformance tests to 210 and the root command to 1068 pass, 23 todo, 0 fail (1091 total). The frozen oracle proof inventory and runtime enumeration table above are unchanged: the new specification vectors run through the existing package conformance test, not the frozen oracle files. All retained divergence fingerprints still reproduce. Retired ids: none. Re-pinned ids: none. No expected hash or oracle vector changed.
+
+The new Class D exposes an independent compile-time integration failure: the primitives anchor result type still admits only A/B/C. Root conformance uses emitted public JavaScript and passes; that result does not override the failing root build and primitives typecheck.

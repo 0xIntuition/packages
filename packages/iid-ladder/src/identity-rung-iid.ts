@@ -27,6 +27,12 @@ export function iidForIdentityRung(
 	}
 	const scheme = getScheme(schemeName);
 	if (!scheme) return undefined;
+	if (scheme.class === 'D' && mapping?.kind === 'registered') {
+		const result = projectIdentifierLadder({
+			providerCanonicalId: `${mapping.providerPrefix}${value}`,
+		});
+		return result.iid && isCanonicalNodeIid(result.iid) ? result.iid : undefined;
+	}
 	const prepared = mapping?.kind === 'registered' ? `${mapping.schemeValuePrefix}${value}` : value;
 	const canonical = scheme.canonicalize(prepared);
 	if (!canonical) return undefined;
