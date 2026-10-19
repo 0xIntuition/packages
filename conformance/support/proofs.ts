@@ -223,6 +223,9 @@ export const encodeCases: ProofCase[] = anchorCases
 		const result = buildAnchor(c);
 		if (!result.ok) return null;
 		const anchor = result.anchor;
+		// A no-identifier fallback envelope has no URI to encode; the encode inventory
+		// covers identified anchors only (manifest.json pins its ids).
+		if (anchor.iid === null) return null;
 		return {
 			id: `encode:${c.label}`,
 			input: c.input,
