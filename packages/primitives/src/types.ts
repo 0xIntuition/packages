@@ -88,12 +88,12 @@ export interface AtomAnchor {
 	classification: string;
 	/** Representation profile the data was serialized at. */
 	profile: AnchorProfile;
-	/** The derived canonical Intuition ID. */
-	iid: string;
-	/** IID scheme that fired. */
-	scheme: string;
-	/** Identity class of that scheme (A/B/C). */
-	class: 'A' | 'B' | 'C';
+	/** The derived canonical Intuition ID, or null for a fallback envelope. */
+	iid: string | null;
+	/** IID scheme that fired, or null when no usable identifier was derived. */
+	scheme: string | null;
+	/** Identity class of that scheme (A/B/C), or null for a fallback envelope. */
+	class: 'A' | 'B' | 'C' | null;
 	/** Stable gen1 rung tag when a derived rung fired. */
 	tag?: number;
 	/** Exact atom data string (bare IID at p0; deterministic JSON at p1/p2). */

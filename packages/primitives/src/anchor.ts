@@ -1,7 +1,19 @@
-import { getClassification, identityLadderFor } from '@0xintuition/classifications';
+import {
+	buildAtomDataObject,
+	getClassification,
+	identityLadderFor,
+	validateClassificationValues,
+} from '@0xintuition/classifications';
 import { calculateAtomId } from '@0xintuition/ids';
-import type { IdentityLadder, IntuitionId } from '@0xintuition/iid';
-import { deriveIntuitionId, inspectIntuitionId } from '@0xintuition/iid';
+import type { IdentityLadder, IdentityRecipeField, IntuitionId } from '@0xintuition/iid';
+import {
+	deriveIntuitionId,
+	geohashEncode,
+	inspectIntuitionId,
+	keccak16,
+	norm1,
+	SCHEMES,
+} from '@0xintuition/iid';
 import { classificationForIid, providersForIid } from '@0xintuition/iid-registry';
 
 import type { AtomAnchor, BuildResult, IidAnchorOptions, UriLimits } from './types.js';
@@ -85,8 +97,10 @@ function normalizeContextUris(
  *   identifiers (Class A/B, unambiguously typed scheme). This is the only
  *   profile with protocol-level dedupe: `atomId = calculateAtomId(iid)`.
  * - `p1` — a deterministic JSON object carrying `@context`, `@type`,
- *   `identifier`, and the identity fields the fired rung consumed. The
- *   REQUIRED floor for Class C identifiers and polymorphic schemes.
+ *   `identifier`, materialized recipe evidence, and nonempty `sameAs`.
+ *   The REQUIRED floor for Class C, polymorphic schemes, and weak acct
+ *   handles. Without a usable IID, validated classification fields form a
+ *   P1 fallback envelope with no `identifier`.
  *
  * The default profile is the strongest legal one: `p0` when eligible,
  * otherwise `p1`. Requesting `p0` for an ineligible identifier is a
@@ -108,44 +122,39 @@ export function buildIidAnchor(
 
 	const ladder = identityLadderFor(classificationSlug);
 
-	if (!ladder) {
-		return {
-			success: false,
-			errors: [`Classification "${classificationSlug}" declares no identity ladder.`],
-		};
+	let derived = ladder ? deriveIntuitionId(ladder, values) : undefined;
+	const inspection = derived ? inspectIntuitionId(derived.iid) : undefined;
+
+	if (derived && inspection && !inspection.valid) {
+		// Only a canonical URL over the 220-character IID value cap may fall
+		// back. Other invalid derivations must retain their inspection error.
+		const url = derived.iid.startsWith('int:url:') ? derived.iid.slice(8) : undefined;
+		if (url !== undefined && url.length > 220 && SCHEMES.url.isCanonical(url)) {
+			derived = undefined;
+		} else {
+			return {
+				success: false,
+				errors: [`Derived identifier failed inspection: ${derived.iid} (${inspection.reason}).`],
+			};
+		}
 	}
 
-	const derived = deriveIntuitionId(ladder, values);
-
-	if (!derived) {
-		return {
-			success: false,
-			errors: [
-				`No identity rung fired for "${classificationSlug}": the provided values contain neither a usable registry identifier nor a complete derivation recipe.`,
-			],
-		};
-	}
-
-	const inspection = inspectIntuitionId(derived.iid);
-
-	if (!inspection.valid) {
-		return {
-			success: false,
-			errors: [`Derived identifier failed inspection: ${derived.iid} (${inspection.reason}).`],
-		};
-	}
-
+	const weakAccount = derived?.scheme === 'acct' && /^int:acct:[^:]+:@/.test(derived.iid);
+	const anchorEligible = derived && inspection?.valid && inspection.anchorEligible && !weakAccount;
 	const requestedProfile = options.profile;
-	const profile = requestedProfile ?? (inspection.anchorEligible ? 'p0' : 'p1');
+	const profile = requestedProfile ?? (anchorEligible ? 'p0' : 'p1');
 
-	if (profile === 'p0' && !inspection.anchorEligible) {
-		const reason =
-			inspection.anchorIneligibilityReason === 'class-c'
-				? 'Class C identifiers must carry their recipe fields in a P1 payload'
-				: 'polymorphic schemes must carry @type in a P1 payload';
+	if (profile === 'p0' && !anchorEligible) {
+		const reason = !derived
+			? 'no usable identifier was derived'
+			: weakAccount
+				? 'weak account handles must carry @type in a P1 payload'
+				: inspection?.valid && inspection.anchorIneligibilityReason === 'class-c'
+					? 'Class C identifiers must carry their recipe fields in a P1 payload'
+					: 'polymorphic schemes must carry @type in a P1 payload';
 		return {
 			success: false,
-			errors: [`${derived.iid} cannot mint as a bare P0 anchor: ${reason}.`],
+			errors: [`${derived?.iid ?? classificationSlug} cannot mint as a bare P0 anchor: ${reason}.`],
 		};
 	}
 
@@ -160,25 +169,49 @@ export function buildIidAnchor(
 		return { success: false, errors };
 	}
 
-	const data =
-		profile === 'p0' ? derived.iid : buildProfilePayload(spec.type, derived, ladder, values);
+	let data: string;
+	if (derived && ladder) {
+		data =
+			profile === 'p0'
+				? derived.iid
+				: buildProfilePayload(spec.schema?.context, spec.type, derived, ladder, values);
+	} else {
+		const issues = validateClassificationValues(classificationSlug, values);
+		if (issues.length > 0) {
+			return {
+				success: false,
+				errors: issues.map((issue) =>
+					ladder
+						? `No identity rung fired for "${classificationSlug}": ${issue.message}`
+						: issue.message
+				),
+			};
+		}
+		const envelope = buildAtomDataObject(classificationSlug, values);
+		for (const field of spec.fields) {
+			if (field.fieldType === 'string[]' && Array.isArray(envelope[field.key])) {
+				envelope[field.key] = stableStringSet(envelope[field.key]);
+			}
+		}
+		data = JSON.stringify(envelope);
+	}
 
-	const registryClassification = classificationForIid(derived.iid);
+	const registryClassification = derived ? classificationForIid(derived.iid) : undefined;
 
 	return {
 		success: true,
 		value: {
 			classification: registryClassification?.slug ?? classificationSlug,
-			profile,
-			iid: derived.iid,
-			scheme: derived.scheme,
-			class: derived.class,
-			...(derived.tag !== undefined ? { tag: derived.tag } : {}),
+			profile: derived ? profile : 'p1',
+			iid: derived?.iid ?? null,
+			scheme: derived?.scheme ?? null,
+			class: derived?.class ?? null,
+			...(derived?.tag !== undefined ? { tag: derived.tag } : {}),
 			data,
 			dataHex: toHex(data),
 			id: calculateAtomId(data),
 			contextUris,
-			providerPlan: providersForIid(derived.iid),
+			providerPlan: derived ? providersForIid(derived.iid) : [],
 			values: Object.freeze({ ...values }),
 		},
 	};
@@ -186,11 +219,12 @@ export function buildIidAnchor(
 
 /**
  * The deterministic P1/P2 payload. Key order is frozen: `@context`,
- * `@type`, `identifier`, then identity fields sorted by key. For a fired
- * gen1 rung the identity fields are the recipe's inputs as provided (the
- * preimage evidence — spec §6.6); scheme rungs carry no extra fields at P1.
+ * `@type`, `identifier`, recipe evidence, then nonempty `sameAs`. Direct-only
+ * recipes retain the train's sorted field order; transformed recipes use
+ * declaration order and materialize each source before NORM-1 of the IID.
  */
 function buildProfilePayload(
+	schemaContext: string | undefined,
 	schemaType: string,
 	derived: { iid: IntuitionId; tag?: number },
 	ladder: IdentityLadder,
@@ -204,26 +238,48 @@ function buildProfilePayload(
 		);
 
 		if (rung && rung.kind === 'gen1') {
-			for (const field of rung.recipe) {
-				const sourceKey = 'of' in field ? field.of : field.key;
-				const provided = values[sourceKey] ?? values[field.key];
-
-				if (provided !== undefined && provided !== null && provided !== '') {
-					identityFields[field.key] = provided;
-				}
+			const recipe = rung.recipe.some((field) => field.from !== 'field')
+				? rung.recipe
+				: [...rung.recipe].sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
+			for (const field of recipe) {
+				identityFields[field.key] = recipeValue(field, values);
 			}
 		}
 	}
 
 	const payload: Record<string, unknown> = {
-		'@context': 'https://schema.org/',
+		'@context': schemaContext,
 		'@type': schemaType,
 		identifier: derived.iid,
 	};
 
-	for (const key of Object.keys(identityFields).sort()) {
+	for (const key of Object.keys(identityFields)) {
 		payload[key] = identityFields[key];
+	}
+	const sameAs = stableStringSet(values.sameAs);
+	if (sameAs.length > 0) {
+		payload.sameAs = sameAs;
 	}
 
 	return JSON.stringify(payload);
+}
+
+function stableStringSet(value: unknown): string[] {
+	return Array.isArray(value)
+		? [...new Set(value.filter((entry): entry is string => typeof entry === 'string'))].sort()
+		: [];
+}
+
+/** The producing rung already checked that all of these sources resolve. */
+function recipeValue(field: IdentityRecipeField, values: Record<string, unknown>): string {
+	switch (field.from) {
+		case 'field':
+			return String(values[field.key]);
+		case 'year':
+			return String(values[field.of]).trim().slice(0, 4);
+		case 'text-hash':
+			return keccak16(norm1(String(values[field.of])));
+		case 'geohash':
+			return geohashEncode(Number(values.latitude), Number(values.longitude), field.precision);
+	}
 }
