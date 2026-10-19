@@ -15,8 +15,8 @@ The runner prints agreement, known-divergence, unexpected-failure, and OPEN coun
 | Proof | Establishes | Limits |
 | --- | --- | --- |
 | Parse/classify | The nine selected parser-contract cases and golden ISRC cover outcome class, canonical IID, and rejection reason; the golden IID also covers registry type/slug/category, identifier hints, providers, class, and typing. | Parser-contract cases contain no classification expectations. Remote-resolution policy is not modelled by the public packages. |
-| Anchor/build/hash | Supported non-typed inputs compare the complete serialized string, UTF-8 hex, length, key order, profile, IID, and salted atom ID; the builder's own data/string/hex/id invariant is checked. | Candidate overrides, direct reference validators, search text, and fallback field-validation semantics lack equivalent public APIs. Five single-field anchor findings are carried as exact, self-retiring divergence entries. |
-| Encode/decode | Every supported successful train anchor is encoded with its IID as the sole URI, decoded against the exported ABI, hashed, and linked across synthetic AtomCreated/AtomContextRegistered logs using the public event parsers. | Synthetic receipts prove local ABI/event handling; no transaction is submitted. The odd-length hex probe asserts that both validation and encoding reject malformed bytes. |
+| Anchor/build/hash | Supported non-typed inputs, including candidate overrides, compare the complete serialized string, UTF-8 hex, length, key order, profile, IID, and salted atom ID; the builder's own data/string/hex/id invariant is checked. Direct public validators compare return values and typed rejection details. | Search text and the complete fallback error surface are outside the builder comparison. Six existing recipe-order differences remain exact, self-retiring divergence entries. |
+| Encode/decode | Every registered successful train anchor is encoded with its IID as the sole URI, decoded against the exported ABI, hashed, and linked across synthetic AtomCreated/AtomContextRegistered logs using the public event parsers. | Synthetic receipts prove local ABI/event handling; no transaction is submitted. The odd-length hex probe asserts that both validation and encoding reject malformed bytes. |
 | Ladder differential | All retained value maps use `deriveIntuitionId` with the classification's inline declarative ladder; compare IID, winning rung, full derivation, canonical validation, and anchor eligibility. Compare all 37 ladder structures, including aggregate-rating's null ladder. | The strong-identifier projection is a different evaluator and is not substituted. The reference classification wrapper is unavailable publicly; its three invalid derivations are checked as derived strings followed by validation false. |
 | Canonicalization | All 131 vectors compare the train and the recorded reference separately with corpus expectations using SCHEMES canonicalize, parse, norm1, and buildGen1Iid. Every recorded agrees flag is recomputed and the false-id set must equal disagreements. gen1 preimages are reconstructed and hashed through public norm1/keccak16. | No preimage export is assumed; no typed-wd canonicalizer is tested at this base. |
 
@@ -24,11 +24,11 @@ No proof covers a database-backed runner, devnet, publication, live registry, pr
 
 ## Findings carried as entries
 
-- No-identifier fallback envelope → ruling: the reference builds it and the public builder refuses it; two cases.
-- `sameAs` omitted from identity envelopes → public-builder defect; the two movie cases retain the same gen1 IID but change anchor bytes and atom id.
-- Derived recipe values not materialised → public-builder defect; the social-media-posting case emits raw text under `textHash`, the same class as geo7 evidence defects.
+- Six existing direct-field recipe-order differences remain in the anchor proof.
+- The parser, ladder, and canonicalization entries retain their existing fingerprints.
+- Candidate anchors and direct validators add no divergences.
 
-The required command reports **1027 pass, 23 todo, 0 fail** across 7 files (1050 tests), including 23 integrity self-tests and 169 package conformance tests. The registered five-proof inventory accounts for 784 agreements and 51 known divergences (anchor proof: 52 agreements, 6 divergences, 23 OPEN). Encode proofs register identified anchors only: a no-identifier fallback envelope has no URI to encode, so those builds stay outside the encode inventory pinned in the manifest. The table below is regenerated with enumerationTable() and is checked by the integrity self-test.
+The required command reports **1050 pass, 0 todo, 0 fail** across 7 files (1050 tests), including 23 integrity self-tests and 169 package conformance tests. The registered five-proof inventory accounts for 807 agreements and 51 known divergences (anchor proof: 75 agreements, 6 divergences, 0 OPEN). The 23 formerly OPEN cases (14 candidate anchors and 9 validators) now run as ordinary comparisons. Encode registration remains unchanged: candidate anchors are outside its pinned inventory, and it registers identified anchors only: a no-identifier fallback envelope has no URI to encode, so those builds stay outside the encode inventory pinned in the manifest. The table below is regenerated with enumerationTable() and is checked by the integrity self-test.
 
 ## Runtime enumeration
 
@@ -37,7 +37,7 @@ The manifest pins sorted ids and counts for every vector file, every canonicaliz
 | Proof file | Registered | Executed | Agreements | Divergences | OPEN |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | parse-and-classify.test.ts | 10 | 10 | 9 | 1 | 0 |
-| anchor-build-hash.test.ts | 81 | 58 | 52 | 6 | 23 |
+| anchor-build-hash.test.ts | 81 | 81 | 75 | 6 | 0 |
 | encode-decode.test.ts | 51 | 51 | 51 | 0 | 0 |
 | ladder-differential.test.ts | 454 | 454 | 412 | 42 | 0 |
 | canonicalization-parity.test.ts | 262 | 262 | 260 | 2 | 0 |
@@ -58,7 +58,7 @@ Comparisons use strict structural equality. Shared normalization sorts object ke
 
 `support/mappings.ts` matches each reference slug to the unique train classification with the same schema type. All 37 slugs currently map identically. The public evaluator receives `{slug, identifies, rungs: spec.identity.ladder}`. Winning rungs compare kind, scheme, stable tag, input field keys, and ordered recipe fields. Numeric indices are local to each declaration: structural sequence comparison separately detects missing/reordered rungs. The Person OLID author rung and all 37 recorded ladder structures now agree with the reference.
 
-Reference `buildAtomAnchor(spec, values, {candidateIid})` maps to public `buildIidAnchor(slug, values, options)`. Values pass unchanged. None of the reference options has an equivalent public option at this base: the candidateIid cases are explicitly OPEN; no override is manufactured by injecting fields. Public structured failures are normalized by meaning to INVALID_IID (failed identifier inspection) or Error; this does not establish parity of exception types/messages or fallback validation. Such gaps remain OPEN.
+Reference `buildAtomAnchor(slug, values, {candidateIid})` maps to public `buildIidAnchor(slug, values, options)` and its identical `buildAtomAnchor` alias. The local adapter in `support/proofs.ts` passes values and `candidateIid` unchanged; no override is manufactured by injecting fields. Public structured failures are normalized by meaning to INVALID_IID (failed identifier inspection or candidate validation) or Error. This comparison does not assert builder exception-type parity: public builders return `BuildResult`, while the reference throws. Permanent primitives tests pin candidate failure messages. Direct validator proofs call the public exports and compare their boolean results or exact thrown name, code, and message. All 14 registered candidate cases and 9 validator cases agree, with no OPEN cases remaining. Historical typed-wd exclusions and the encode inventory remain unchanged.
 
 The golden reference's application category `song` corresponds to the public classification category `Media`; the harness asserts this explicit semantic mapping. It does not claim the public registry exports the reference's application category vocabulary. The golden classification's slug and schema type compare directly.
 
