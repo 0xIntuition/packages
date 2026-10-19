@@ -1,9 +1,4 @@
-import {
-	type DerivedIid,
-	deriveIntuitionId,
-	normalizePodcastFeedUrl,
-	validateIntuitionId,
-} from '@0xintuition/iid';
+import { type DerivedIid, deriveIntuitionId, validateIntuitionId } from '@0xintuition/iid';
 
 import { getClassification, identityLadderFor } from './classifications.js';
 import type {
@@ -90,16 +85,7 @@ export function deriveClassificationIdentifier(
 	const ladder = identityLadderFor(slug);
 	if (!ladder) return undefined;
 
-	// The train's declarative podcast-guid source hashes its input verbatim.
-	// Match the reference source's normalization at this adapter boundary.
-	const normalizedValues = { ...values };
-	for (const rung of ladder.rungs) {
-		if (rung.kind !== 'scheme' || rung.source.kind !== 'podcast-guid') continue;
-		const key = rung.source.key;
-		const value = values[key];
-		if (typeof value === 'string') normalizedValues[key] = normalizePodcastFeedUrl(value);
-	}
-	const derived = deriveIntuitionId(ladder, normalizedValues);
+	const derived = deriveIntuitionId(ladder, values);
 
 	if (derived && !validateIntuitionId(derived.iid)) {
 		throw new Error(`Derived identifier failed validation for "${slug}": ${derived.iid}`);

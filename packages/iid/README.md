@@ -116,7 +116,7 @@ Plus the derivation utilities the spec's schemes need: `norm1` (NORM-1), `keccak
 
 `MUSIC_IDENTITY_RUNG_POLICY` shares the music rung order: `artist` → `MusicGroup` uses `isni`, `mbid:artist`, `wd`, `spotify:artist`; `music-album` → `MusicAlbum` uses `mbid:release-group`, `wd`, `spotify:album`. `isPlainWdPrimaryAllowed(schemaType)` returns true for these two schema types, whose policy admits plain `wd`.
 
-`normalizePodcastFeedUrl(feedUrl)` trims input, folds the scheme and hostname case, strips the scheme and trailing slashes, and preserves userinfo, port, path and query bytes. Pass the result to `derivePodcastGuid` when normalizing feed evidence; `derivePodcastGuid` itself is unchanged.
+`normalizePodcastFeedUrl(feedUrl)` trims input, folds the scheme and hostname case, strips the scheme and trailing slashes, and preserves userinfo, port, path and query bytes. The ladder interpreter's `podcast-guid` value source applies it before hashing, so every entry point derives the same GUID for the same feed; pass the result to `derivePodcastGuid` yourself only when deriving outside a ladder. `derivePodcastGuid` itself is unchanged.
 
 ## What this package is not
 

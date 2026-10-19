@@ -111,15 +111,6 @@ export const knownDivergences: readonly KnownDivergence[] = [
 		expectedHash: '78c39b6d70fe794ccdb4282a79bb911cabea428622509877ef7c9180c911c5e9',
 	},
 	{
-		id: 'anchor:harvested: podcast guid derived from upper-case feed host',
-		side: 'public packages fix the defect (follow-up)',
-		reason: 'defect, follow-up',
-		removeWhen: 'package fix lands and the same vector agrees with the reference',
-		detail: 'podcast GUID derivation does not canonicalize the feed host',
-		actualHash: '4b7bd32f9d367fd075a479cc13e6947da7fcd4e03f19cade752a755790947efc',
-		expectedHash: 'b53186b0edc8b1ab8a5690c378420abd8dc64fe5ed8c9959a1e1468523dce67a',
-	},
-	{
 		id: 'anchor:synthetic: aggregate-rating (null ladder) fallback envelope',
 		side: 'public packages fix the defect (follow-up)',
 		reason: 'defect, follow-up',
@@ -720,15 +711,6 @@ export const knownDivergences: readonly KnownDivergence[] = [
 		detail: 'public person ladder omits the OLID author rung',
 		actualHash: '57e7fc08dc959678e6391f921b4d84f9bdcaabb3628bfb11c45ddf95e8ab5b11',
 		expectedHash: 'd7be6de3d6c7f9ed37b6c1850fa8863d7258d1659941db9fe309a71ff62ac3cd',
-	},
-	{
-		id: 'ladder:podcast-series:harvested: feed host folds to lowercase before guid derivation',
-		side: 'public packages fix the defect (follow-up)',
-		reason: 'defect, follow-up',
-		removeWhen: 'package fix lands and the same vector agrees with the reference',
-		detail: 'public podcast GUID derivation does not canonicalize the feed host',
-		actualHash: '394776d503dde8c7e6c9e635aa7baa78741db6fa794534d9addb273c37114db7',
-		expectedHash: '348c9f880e1f70cbfdf9f71ce2d2ebc1b382b80e22bf8d3bca8efd5a715023a4',
 	},
 	{
 		id: 'ladder:social-media-account:harvested: weak acct handle form',

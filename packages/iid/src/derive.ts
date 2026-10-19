@@ -12,7 +12,7 @@ import type {
 	IdentityValueSource,
 	IidValueMap,
 } from './types.js';
-import { derivePodcastGuid } from './uuid5.js';
+import { derivePodcastGuid, normalizePodcastFeedUrl } from './uuid5.js';
 import { isActiveWdEntitySchemaSlug } from './wd-entityschema-bindings.js';
 
 /**
@@ -183,7 +183,14 @@ function resolveValueSource(
 
 		case 'podcast-guid': {
 			const feedUrl = stringField(values, source.key);
-			return feedUrl === undefined ? undefined : derivePodcastGuid(feedUrl);
+
+			if (feedUrl === undefined) {
+				return undefined;
+			}
+
+			// Normalize scheme and host case before hashing so every entry point derives
+			// the same GUID for the same feed; path and query bytes are preserved.
+			return derivePodcastGuid(normalizePodcastFeedUrl(feedUrl));
 		}
 
 		case 'derivation':

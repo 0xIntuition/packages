@@ -81,11 +81,11 @@ const searchText = buildClassificationSearchText(book.fields, values, values.nam
 Identifier derivation projects the declarative `identity.ladder` through the IID
 engine. Unknown slugs throw; a missing identity or an unfired ladder returns
 `undefined`. Podcast feed GUIDs normalize scheme and host case while preserving
-path and query bytes. Atom data includes the derived `identifier` immediately
-after `@type` only when opted in, for both object and serialized builders.
-Callers that pass `identityLadderFor(...)` directly to the IID engine must
-normalize podcast feed URLs themselves; the normalization above belongs to
-`deriveClassificationIdentifier`.
+path and query bytes; the IID engine applies that normalization itself, so a
+ladder from `identityLadderFor(...)` passed straight to the engine derives the
+same identifier as `deriveClassificationIdentifier`. Atom data includes the
+derived `identifier` immediately after `@type` only when opted in, for both
+object and serialized builders.
 
 Search text includes the primary text, declared string fields, and corpus names
 from `description`, `author`, and `about`. It removes duplicates and URL/IID-like

@@ -300,6 +300,25 @@ describe('deriveIntuitionId (declarative engine)', () => {
 		expect(derived?.iid).toBe(`int:podcastguid:${derivePodcastGuid(feedUrl)}`);
 	});
 
+	it('podcast-guid normalizes feed scheme and host case before hashing', () => {
+		const ladder: IdentityLadder = {
+			slug: 'podcast-series',
+			identifies: 'a feed',
+			rungs: [
+				{ kind: 'scheme', scheme: 'podcastguid', source: { kind: 'podcast-guid', key: 'feedUrl' } },
+			],
+		};
+
+		const upper = deriveIntuitionId(ladder, { feedUrl: 'https://FEEDS.EXAMPLE.ORG/podcast.xml' });
+		const lower = deriveIntuitionId(ladder, { feedUrl: 'https://feeds.example.org/podcast.xml' });
+		const pathCase = deriveIntuitionId(ladder, {
+			feedUrl: 'https://feeds.example.org/Podcast.xml',
+		});
+		expect(upper?.iid).toBe('int:podcastguid:7d8bd745-04d4-5ab5-9754-49afad1729dc');
+		expect(lower?.iid).toBe(upper?.iid);
+		expect(pathCase?.iid).not.toBe(upper?.iid);
+	});
+
 	describe('named derivations', () => {
 		it('acct-strong uses the immutable platform user id', () => {
 			const ladder: IdentityLadder = {

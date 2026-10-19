@@ -1,3 +1,4 @@
+import { deriveIntuitionId } from '@0xintuition/iid';
 import { describe, expect, it } from 'vitest';
 import {
 	CLASSIFICATION_SPECS,
@@ -5,6 +6,7 @@ import {
 	getClassification,
 	getClassificationByType,
 	IDENTITY_FIELD_SCHEMA_ORG_ALIASES,
+	identityLadderFor,
 } from './index.js';
 
 describe('consumer helper exports', () => {
@@ -34,6 +36,17 @@ describe('consumer helper exports', () => {
 			'int:podcastguid:7d8bd745-04d4-5ab5-9754-49afad1729dc'
 		);
 		expect(values.feedUrl).toBe('https://FEEDS.EXAMPLE.ORG/podcast.xml');
+	});
+	it('derives the same podcast identifier through the exported ladder as through the helper', () => {
+		const values = { feedUrl: 'https://FEEDS.EXAMPLE.ORG/podcast.xml' };
+		const ladder = identityLadderFor('podcast-series');
+		if (!ladder) throw new Error('podcast-series ladder missing');
+		expect(deriveIntuitionId(ladder, values)?.iid).toBe(
+			'int:podcastguid:7d8bd745-04d4-5ab5-9754-49afad1729dc'
+		);
+		expect(deriveIntuitionId(ladder, values)?.iid).toBe(
+			deriveClassificationIdentifier('podcast-series', values)?.iid
+		);
 	});
 	it('normalizes only feed host and scheme while retaining path case and query bytes', () => {
 		const base = { feedUrl: 'HTTPS://FEEDS.EXAMPLE.ORG/Podcast.xml?Token=A%2FB' };
