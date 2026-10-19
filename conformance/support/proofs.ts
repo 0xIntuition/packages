@@ -276,22 +276,25 @@ export const encodeCases: ProofCase[] = anchorCases
 encodeCases.push({
 	id: 'protocol-odd-length-hex',
 	input: '0xabc',
-	expected: { validatorAccepts: false, decoded: '0xabc', hashAgrees: true },
+	expected: { validatorRejects: true, encoderRejects: true },
 	run: () => {
 		const inputs = encodeInputs('0xabc', golden.iid);
-		let validatorAccepts = true;
-		try {
-			protocol.multiVaultValidateCreateAtomsWithUris(inputs);
-		} catch {
-			validatorAccepts = false;
+		function rejectsOddHex(run: () => unknown) {
+			try {
+				run();
+				return false;
+			} catch (error) {
+				if (
+					!(error instanceof Error) ||
+					error.message !== 'atom data must be even-length hex bytes'
+				)
+					throw error;
+				return true;
+			}
 		}
-		const calldata = protocol.multiVaultCreateAtomsWithUrisEncode(inputs);
-		const decoded = viem.decodeFunctionData({ abi: protocol.MultiVaultAbi, data: calldata })
-			.args[1][0];
 		return {
-			validatorAccepts,
-			decoded,
-			hashAgrees: ids.calculateAtomId('0xabc') === ids.calculateAtomId(decoded),
+			validatorRejects: rejectsOddHex(() => protocol.multiVaultValidateCreateAtomsWithUris(inputs)),
+			encoderRejects: rejectsOddHex(() => protocol.multiVaultCreateAtomsWithUrisEncode(inputs)),
 		};
 	},
 });

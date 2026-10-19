@@ -8,7 +8,7 @@ bun run conformance:check
 bunx --no-install biome check conformance
 ```
 
-Build first: resolution must reach each package's exported `dist` entrypoint. The root script is exactly `bun test conformance`. Bun treats that argument as a path filter and additionally runs the existing package file named `conformance.test.ts` (146 tests); those incidental tests are reported separately from the five proofs below. For just the root harness and its integrity self-tests, `bun test ./conformance` is an optional focused command.
+Build first: resolution must reach each package's exported `dist` entrypoint. The root script is exactly `bun test conformance`. Bun treats that argument as a path filter and additionally runs the existing package file named `conformance.test.ts` (169 tests); those incidental tests are reported separately from the five proofs below. For just the root harness and its integrity self-tests, `bun test ./conformance` is an optional focused command.
 
 The runner prints agreement, known-divergence, unexpected-failure, and OPEN counts for each proof. It exits nonzero for any unexpected difference, agreement on a listed divergence, or fingerprint drift. An OPEN test uses `test.todo` with the concrete missing capability in its name. Typed-wd vectors are excluded explicitly and enumerated in the report; they enter with the typed-wd stack.
 
@@ -16,7 +16,7 @@ The runner prints agreement, known-divergence, unexpected-failure, and OPEN coun
 | --- | --- | --- |
 | Parse/classify | The nine selected parser-contract cases and golden ISRC cover outcome class, canonical IID, and rejection reason; the golden IID also covers registry type/slug/category, identifier hints, providers, class, and typing. | Parser-contract cases contain no classification expectations. Remote-resolution policy is not modelled by the public packages. |
 | Anchor/build/hash | Supported non-typed inputs compare the complete serialized string, UTF-8 hex, length, key order, profile, IID, and salted atom ID; the builder's own data/string/hex/id invariant is checked. | Candidate overrides, direct reference validators, search text, and fallback field-validation semantics lack equivalent public APIs. Five single-field anchor findings are carried as exact, self-retiring divergence entries. |
-| Encode/decode | Every supported successful train anchor is encoded with its IID as the sole URI, decoded against the exported ABI, hashed, and linked across synthetic AtomCreated/AtomContextRegistered logs using the public event parsers. | Synthetic receipts prove local ABI/event handling; no transaction is submitted. The odd-length hex probe explicitly records the current validation/padding/hash discrepancy. |
+| Encode/decode | Every supported successful train anchor is encoded with its IID as the sole URI, decoded against the exported ABI, hashed, and linked across synthetic AtomCreated/AtomContextRegistered logs using the public event parsers. | Synthetic receipts prove local ABI/event handling; no transaction is submitted. The odd-length hex probe asserts that both validation and encoding reject malformed bytes. |
 | Ladder differential | All retained value maps use `deriveIntuitionId` with the classification's inline declarative ladder; compare IID, winning rung, full derivation, canonical validation, and anchor eligibility. Compare all 37 ladder structures, including aggregate-rating's null ladder. | The strong-identifier projection is a different evaluator and is not substituted. The reference classification wrapper is unavailable publicly; its three invalid derivations are checked as derived strings followed by validation false. |
 | Canonicalization | All 131 vectors compare the train and the recorded reference separately with corpus expectations using SCHEMES canonicalize, parse, norm1, and buildGen1Iid. Every recorded agrees flag is recomputed and the false-id set must equal disagreements. gen1 preimages are reconstructed and hashed through public norm1/keccak16. | No preimage export is assumed; no typed-wd canonicalizer is tested at this base. |
 
@@ -28,7 +28,7 @@ No proof covers a database-backed runner, devnet, publication, live registry, pr
 - `sameAs` omitted from identity envelopes → public-builder defect; the two movie cases retain the same gen1 IID but change anchor bytes and atom id.
 - Derived recipe values not materialised → public-builder defect; the social-media-posting case emits raw text under `textHash`, the same class as geo7 evidence defects.
 
-The required command reports **1004 pass, 23 todo, 0 fail** across 7 files (1027 tests). Of those, the five harness files report 725 agreements and 110 known divergences (anchor proof: 32 agreements, 26 divergences, 23 OPEN); 23 passing integrity self-tests cover malformed parser shapes, undefined/null distinctions, corpus loss, id drift, agreement metadata, orphan divergences, and documentation accounting; 146 passing tests come from the existing package conformance file.
+The required command reports **1027 pass, 23 todo, 0 fail** across 7 files (1050 tests). Of those, the five harness files report 737 agreements and 98 known divergences (anchor proof: 32 agreements, 26 divergences, 23 OPEN); 23 passing integrity self-tests cover malformed parser shapes, undefined/null distinctions, corpus loss, id drift, agreement metadata, orphan divergences, and documentation accounting; 169 passing tests come from the existing package conformance file.
 
 ## Runtime enumeration
 
@@ -38,8 +38,8 @@ The manifest pins sorted ids and counts for every vector file, every canonicaliz
 | --- | ---: | ---: | ---: | ---: | ---: |
 | parse-and-classify.test.ts | 10 | 10 | 9 | 1 | 0 |
 | anchor-build-hash.test.ts | 81 | 58 | 32 | 26 | 23 |
-| encode-decode.test.ts | 51 | 51 | 50 | 1 | 0 |
-| ladder-differential.test.ts | 454 | 454 | 374 | 80 | 0 |
+| encode-decode.test.ts | 51 | 51 | 51 | 0 | 0 |
+| ladder-differential.test.ts | 454 | 454 | 385 | 69 | 0 |
 | canonicalization-parity.test.ts | 262 | 262 | 260 | 2 | 0 |
 
 ## Parser result shapes
@@ -85,3 +85,11 @@ A package defect cannot be fixed here. Record its concrete input and output in t
 Each entry in `known-divergences.ts` carries a case id, which side changes, a one-sentence reason, and a removal condition. SHA-256 fingerprints pin the complete normalized observed and expected comparison outputs. For parse-009/010 the observed side is the reference parser, and the expected side is the corpus; for the protocol hex probe the expected side is the local validation invariant. Other entries compare the train with the recorded reference. Normalization sorts object keys but preserves strings and array order; serialized JSON and hex therefore remain byte-sensitive.
 
 A listed test must still disagree and must still match both fingerprints. Agreement or any unexpected drift fails; orphaned, duplicate, and OPEN entries are rejected. After the specified fix/regeneration, remove the entry and let the ordinary equality test pass. For the odd-hex entry, replace the divergence with an explicit validator-rejection assertion when that follow-up lands. Never refresh fingerprints merely to silence a changed output.
+
+## Integration reconciliation — 2026-10-19
+
+After combining #24–#34, eleven ISNI ladder cases now match the unchanged reference outputs exactly because #28 accepts ISNI URLs. Their divergence entries are retired; their tests remain ordinary equality checks. #33 fixes odd-length atom bytes, so `protocol-odd-length-hex` now requires both the validator and encoder to reject `0xabc` with the even-length-hex diagnostic. The reference oracle files and proof inventories are unchanged.
+
+The person ISNI anchor case is only partially fixed. Its identifier now matches `int:isni:0000000121032683`, but the public P1 builder still omits `sameAs`. The reviewed public output is the 92-byte envelope containing only `@context`, `@type`, and `identifier`, with atom ID `0x1907130d1e3daafe1208dc1fc86354846b5a17392d7e69856504d30ff1e0874f`. The unchanged reference includes `sameAs`, has 144 bytes, and hashes to `0xb763b2a00d5dad1b6c3ccd18cdb5009d7e4954c8eec50974999151be6da250fa`. The remaining divergence records this specific builder defect and the inspected output fingerprint; it is not treated as agreement.
+
+The typed-wd stack does **not** reconcile the classifications package's inline declarative ladders: their slugless rungs remain unchanged. All 59 divergences assigned to the typed-wd follow-up still reproduce with their original fingerprints. The 70 historical typed-wd exclusions also remain outstanding, including 36 parser cases for which the checked-in oracle contains names only. Typed-wd package unit tests pass separately, but completing these cross-package proofs and reconciling classifications remains a release gate. A passing harness establishes its recorded agreements and known differences, not full parity with the internal application.

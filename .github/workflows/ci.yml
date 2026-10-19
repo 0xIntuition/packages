@@ -33,6 +33,18 @@ jobs:
       - name: Test
         run: bun run test
 
+      - name: Cross-package conformance
+        run: bun run conformance:check
+
+      - name: Check protocol artifacts
+        run: bun run protocol:check-artifacts
+
+      - name: Test protocol artifact provenance
+        run: bun run protocol:sync-artifacts:test
+
+      - name: Test supply-chain guard
+        run: bun run guard:supply-chain:test
+
       - name: Validate schema assets
         run: bun run schema:validate
 
