@@ -2,7 +2,7 @@
 
 Core Intuition protocol contract ABIs, event parsers, and interaction helpers for MultiVault, Trust, TrustBonding, WrappedTrust, and emissions controllers.
 
-Versioned as `3.0.0`. The major bump (vs the legacy `2.x` line) reflects deployment addresses and chain metadata being extracted into `@0xintuition/deployments`. See the root release runbook for the current `latest` / `alpha` dist-tag policy.
+Versioned as `3.1.0`. The `3.0.0` major bump (vs the legacy `2.x` line) reflects deployment addresses and chain metadata being extracted into `@0xintuition/deployments`. See the root release runbook for the current `latest` / `alpha` dist-tag policy.
 
 Runtime: ESM-only. This package does not publish CommonJS `require` entrypoints.
 
@@ -121,3 +121,45 @@ const hash = await multiVaultMulticall(writeConfig, {
 `@0xintuition/protocol` does not export deployment addresses, chain definitions, or address lookup helpers in this alpha. Use `@0xintuition/deployments` for core protocol deployments and `@0xintuition/periphery` for periphery bridge/router deployments.
 
 The package depends on `@0xintuition/curves` for deprecated compatibility re-exports of curve helpers. New consumers should import curve math from `@0xintuition/curves` directly.
+
+## URI-aware atom creation (3.1.0)
+
+`multiVaultGetAtomUriConfig` reads `getAtomUriConfig` from MultiVault and returns the live `maxUriCount` and `maxUriLength`. Pass these limits to `multiVaultValidateCreateAtomsWithUris`, `multiVaultCreateAtomsWithUrisEncode`, or `multiVaultCreateAtomsWithUris` through `uriLimits` when validating against the latest configuration.
+
+Each call uses `[creator, atomData, assets, uris]`, where `uris` contains one list per atom. Empty URI lists are supported. Atom data and every URI must be `0x`-prefixed, even-length hex bytes. Opaque bytes and empty atom data (`0x`) pass local validation; simulation determines whether the contract accepts them. URI context does not change atom bytes or term IDs.
+
+Local validation checks a nonzero creator, aligned arrays, exact payment equal to the sum of assets, valid bytes, and optional URI count and byte-length limits. It does not replace simulation for approval errors, duplicate atoms, creation costs, or changes to live configuration. The encoder validates before returning calldata; the write helper validates, simulates, then submits the simulated request.
+
+```ts
+import {
+  associateAtomCreationContext,
+  eventParseAtomContextRegistered,
+  eventParseAtomCreated,
+  eventParseAtomUriConfigUpdated,
+  multiVaultCreateAtomsWithUris,
+  multiVaultCreateAtomsWithUrisEncode,
+  multiVaultGetAtomUriConfig,
+  multiVaultValidateCreateAtomsWithUris,
+} from '@0xintuition/protocol'
+import { toHex } from 'viem'
+
+const uriLimits = await multiVaultGetAtomUriConfig(writeConfig)
+const inputs = {
+  args: [creatorAddress, [atomData], [assets], [[toHex('https://example.test/atom')]]],
+  value: assets,
+  uriLimits,
+} as const
+
+multiVaultValidateCreateAtomsWithUris(inputs)
+const calldata = multiVaultCreateAtomsWithUrisEncode(inputs)
+const hash = await multiVaultCreateAtomsWithUris(writeConfig, inputs)
+const atoms = await eventParseAtomCreated(publicClient, hash)
+const contexts = await eventParseAtomContextRegistered(publicClient, hash)
+const creations = associateAtomCreationContext(atoms, contexts)
+```
+
+`eventParseAtomContextRegistered` preserves the ordered URI bytes in creation receipts. `associateAtomCreationContext` joins these events to `AtomCreated` by `termId`, even when other events interleave, and returns an empty context list for atoms without context. `eventParseAtomUriConfigUpdated(publicClient, hash)` parses limit changes from configuration transaction receipts. Receipt parsers currently consider all emitters; callers that require address scoping must filter parsed logs by the expected MultiVault address before associating them.
+
+`contractsV2Provenance` records the registry package/version, lockfile integrity, and ABI/bytecode fingerprints shipped by the package. The legacy `multiVaultCreateAtoms` helpers remain available with their existing signatures.
+
+Artifact sync stays offline and records `verified: false` by default; `--verify-registry` fetches the locked registry tarball, checks SHA-512 and the installed ABI/bytecode modules, and records `verified: true` with an ISO `verifiedAt`, while integrity drift requires the printed `--accept-integrity-change` flag.

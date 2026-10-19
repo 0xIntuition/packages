@@ -1,0 +1,525 @@
+import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { dirname, posix, resolve } from 'node:path';
+import test from 'node:test';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { gzipSync } from 'node:zlib';
+
+const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
+const scriptPath = resolve(repoRoot, 'scripts/sync-protocol-artifacts.mjs');
+const source = readFileSync(scriptPath, 'utf8');
+const { syncProtocolArtifacts } = await import('./sync-protocol-artifacts.mjs');
+const contractsRoot = resolve(repoRoot, 'packages/protocol/src/contracts');
+const provenancePath = resolve(contractsRoot, 'contracts-v2-provenance.ts');
+const lockPath = resolve(repoRoot, 'bun.lock');
+const installedRoot = resolve(repoRoot, 'node_modules/@0xintuition/contracts-v2');
+const virtualRoot = resolve(repoRoot, '.virtual-p07b/contracts-v2');
+const manifest = JSON.parse(readFileSync(resolve(installedRoot, 'package.json'), 'utf8'));
+const artifactPaths = ['dist/abis/index.js', 'dist/bytecodes/index.js'];
+const chunkPaths = [
+	...new Set(
+		artifactPaths.map((path) => {
+			const reference = readFileSync(resolve(installedRoot, path), 'utf8').match(
+				/from "([^"]+)"/
+			)[1];
+			return posix.normalize(posix.join(posix.dirname(path), reference));
+		})
+	),
+];
+const registryPaths = [...artifactPaths, ...chunkPaths];
+const lockedIntegrity = readFileSync(lockPath, 'utf8').match(
+	/"@0xintuition\/contracts-v2": \[.*"(sha512-[^"]+)"\]/
+)[1];
+const installedAbi = await import(pathToFileURL(resolve(installedRoot, artifactPaths[0])).href);
+const installedBytecode = await import(
+	pathToFileURL(resolve(installedRoot, artifactPaths[1])).href
+);
+const fixedNow = new Date('2026-10-05T12:00:00.000Z');
+const fingerprint = (value) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
+const sri = (value) => `sha512-${createHash('sha512').update(value).digest('base64')}`;
+
+// Run the actual script entirely in memory. Every supplied source has its own
+// manifest AND artifact modules; the import seam must consume those virtual files.
+async function runScript({
+	args = [],
+	files = new Map(),
+	env = {},
+	writes = new Map(),
+	messages = [],
+	imports = [],
+	fetch = async () => {
+		throw new Error('Unexpected network access');
+	},
+	readTarball,
+	now = () => fixedNow,
+	scriptSource = source,
+} = {}) {
+	const read = (path, encoding) => {
+		if (!files.has(String(path))) return readFileSync(path, encoding);
+		const value = files.get(String(path));
+		if (value === null) throw new Error(`ENOENT: ${path}`);
+		return encoding ? Buffer.from(value).toString(encoding) : Buffer.from(value);
+	};
+	const virtualModuleUrl = (path) => {
+		const code = read(path, 'utf8').replace(
+			/(\bfrom\s*|\bimport\s*)['"](\.\.?\/[^'"]+)['"]/g,
+			(_match, prefix, relative) =>
+				`${prefix}${JSON.stringify(virtualModuleUrl(resolve(dirname(path), relative)))}`
+		);
+		return `data:text/javascript;base64,${Buffer.from(code).toString('base64')}`;
+	};
+	const loadArtifact = async (path) => {
+		imports.push(path);
+		if (files.has(path) || chunkPaths.some((chunk) => files.has(resolve(installedRoot, chunk)))) {
+			return import(virtualModuleUrl(path));
+		}
+		return import(pathToFileURL(path).href);
+	};
+	let sync = syncProtocolArtifacts;
+	if (scriptSource !== source) {
+		// Mutation proof uses a native in-memory module, preserving the real root
+		// and removing only the CLI invocation. No mutant file is created.
+		const virtualScript = scriptSource
+			.replace("resolve(fileURLToPath(new URL('..', import.meta.url)))", JSON.stringify(repoRoot))
+			.replace(
+				/if \(process\.argv\[1\] && resolve\(process\.argv\[1\]\) === fileURLToPath\(import\.meta\.url\)\) \{[\s\S]*$/,
+				''
+			);
+		sync = (
+			await import(`data:text/javascript;base64,${Buffer.from(virtualScript).toString('base64')}`)
+		).syncProtocolArtifacts;
+	}
+	await sync({
+		args,
+		env,
+		readFileSync: read,
+		writeFileSync: (path, content) => writes.set(String(path), content),
+		log: (message) => messages.push(message),
+		loadArtifact,
+		fetch,
+		readTarball,
+		now,
+	});
+	return { writes, messages, imports };
+}
+
+function record(writes) {
+	const content = writes.get(provenancePath);
+	assert.ok(content, 'sync must write provenance');
+	return content;
+}
+
+function format(content, destination) {
+	const result = spawnSync(
+		resolve(repoRoot, 'node_modules/.bin/biome'),
+		['format', '--stdin-file-path', destination],
+		{ input: content, encoding: 'utf8' }
+	);
+	assert.equal(result.status, 0, result.stderr);
+	return result.stdout;
+}
+
+function suppliedFiles(version = '9.9.9-supplied') {
+	const files = new Map([
+		[resolve(virtualRoot, 'package.json'), JSON.stringify({ ...manifest, version })],
+	]);
+	const mutatedAbi = structuredClone(installedAbi.MultiVaultAbi);
+	mutatedAbi.find((item) => item.name === 'AtomCreated').name = 'AtomCreatee';
+	files.set(
+		resolve(virtualRoot, artifactPaths[0]),
+		`export const MultiVaultAbi = ${JSON.stringify(mutatedAbi)};\nexport const MultiVaultMigrationModeAbi = ${JSON.stringify(installedAbi.MultiVaultMigrationModeAbi)};`
+	);
+	files.set(
+		resolve(virtualRoot, artifactPaths[1]),
+		`export const MultiVaultBytecode = ${JSON.stringify(installedBytecode.MultiVaultBytecode)};\nexport const MultiVaultMigrationModeBytecode = ${JSON.stringify(installedBytecode.MultiVaultMigrationModeBytecode)};`
+	);
+	// Supply a matching committed ABI virtually, so the artifact preflight does
+	// not obscure whether the source override was actually honoured.
+	files.set(
+		resolve(contractsRoot, 'MultiVault-abi.ts'),
+		format(
+			`/** Generated by scripts/sync-protocol-artifacts.mjs. */\nexport const MultiVaultAbi = ${JSON.stringify(mutatedAbi, null, '\t')} as const;\n`,
+			resolve(contractsRoot, 'MultiVault-abi.ts')
+		)
+	);
+	return { files, mutatedAbi };
+}
+
+function tarball({ mutateAbi = false } = {}) {
+	const chunks = [];
+	for (const path of registryPaths) {
+		let data = readFileSync(resolve(installedRoot, path));
+		if (mutateAbi && path === artifactPaths[0]) {
+			data = Buffer.from(data);
+			data[0] ^= 1;
+		}
+		const header = Buffer.alloc(512);
+		header.write(`package/${path}`);
+		header.write('0000644\0', 100);
+		header.write('0000000\0', 108);
+		header.write('0000000\0', 116);
+		header.write(`${data.length.toString(8).padStart(11, '0')}\0`, 124);
+		header.write('00000000000\0', 136);
+		header.fill(32, 148, 156);
+		header.write('0', 156);
+		header.write('ustar\0', 257);
+		header.write('00', 263);
+		const checksum = header.reduce((sum, byte) => sum + byte, 0);
+		header.write(`${checksum.toString(8).padStart(6, '0')}\0 `, 148);
+		chunks.push(header, data, Buffer.alloc((512 - (data.length % 512)) % 512));
+	}
+	return gzipSync(Buffer.concat([...chunks, Buffer.alloc(1024)]));
+}
+
+function registryFixture(archive, url) {
+	let lock = readFileSync(lockPath, 'utf8').replace(lockedIntegrity, sri(archive));
+	if (url)
+		lock = lock.replace(
+			'"@0xintuition/contracts-v2@1.1.0-alpha.0", ""',
+			`"@0xintuition/contracts-v2@1.1.0-alpha.0", "${url}"`
+		);
+	const committed = readFileSync(provenancePath, 'utf8').replace(lockedIntegrity, sri(archive));
+	return new Map([
+		[lockPath, lock],
+		[provenancePath, committed],
+	]);
+}
+
+const response = (archive) => ({ ok: true, arrayBuffer: async () => archive });
+
+async function rejectsWithoutWrites(options, pattern) {
+	const writes = new Map();
+	await assert.rejects(runScript({ ...options, writes }), pattern);
+	assert.equal(writes.size, 0);
+}
+
+test('registry provenance uses the locked integrity, is unverified offline, and leaves four artifacts unchanged', async () => {
+	const { writes, messages } = await runScript();
+	assert.equal(writes.size, 1);
+	assert.ok(record(writes).includes(lockedIntegrity));
+	assert.match(record(writes), /source: 'registry'/);
+	assert.match(record(writes), /verified: false/);
+	assert.doesNotMatch(record(writes), /verifiedAt/);
+	assert.equal(messages.filter((message) => /byte-identical/.test(message)).length, 4);
+});
+
+test('ordinary sync refuses lockfile integrity drift before writing', async () => {
+	const lock = readFileSync(lockPath, 'utf8').replace('sha512-vt9GFaF', 'sha512-changed');
+	await rejectsWithoutWrites(
+		{ files: new Map([[lockPath, lock]]) },
+		/Integrity changed.*--accept-integrity-change/
+	);
+});
+
+test('explicit integrity change acceptance records the new integrity and prints the flag', async () => {
+	const lock = readFileSync(lockPath, 'utf8').replace('sha512-vt9GFaF', 'sha512-changed');
+	const { writes, messages } = await runScript({
+		args: ['--accept-integrity-change'],
+		files: new Map([[lockPath, lock]]),
+	});
+	assert.ok(record(writes).includes('sha512-changed'));
+	assert.ok(messages.some((message) => message.includes('--accept-integrity-change')));
+});
+
+test('lockfile integrity drift fails the offline artifact check', async () => {
+	const lock = readFileSync(lockPath, 'utf8').replace('sha512-vt9GFaF', 'sha512-changed');
+	await rejectsWithoutWrites(
+		{ args: ['--check'], files: new Map([[lockPath, lock]]) },
+		/Integrity changed/
+	);
+});
+
+test('missing exact lock entry fails clearly', async () => {
+	const lock = readFileSync(lockPath, 'utf8').replaceAll(
+		'@0xintuition/contracts-v2@1.1.0-alpha.0',
+		'@0xintuition/contracts-v2@9.9.9'
+	);
+	await rejectsWithoutWrites(
+		{ files: new Map([[lockPath, lock]]) },
+		/Missing lockfile integrity for @0xintuition\/contracts-v2@1.1.0-alpha.0/
+	);
+});
+
+test('supplied directory consumes its own manifest and artifacts without implied registry integrity', async () => {
+	const { files, mutatedAbi } = suppliedFiles();
+	const { writes, imports } = await runScript({ args: [`--source=${virtualRoot}`], files });
+	assert.equal(writes.size, 1);
+	assert.match(record(writes), /source: 'supplied'/);
+	assert.match(record(writes), /version: '9.9.9-supplied'/);
+	assert.match(record(writes), /integrity: null/);
+	assert.ok(record(writes).includes(fingerprint(mutatedAbi)));
+	assert.ok(!record(writes).includes(fingerprint(installedAbi.MultiVaultAbi)));
+	assert.deepEqual(
+		imports,
+		artifactPaths.map((path) => resolve(virtualRoot, path))
+	);
+});
+
+test('environment override consumes supplied artifacts and records only explicit integrity', async () => {
+	const { files, mutatedAbi } = suppliedFiles();
+	const { writes, imports } = await runScript({
+		args: ['--integrity=sha512-YWJjZA=='],
+		files,
+		env: { INTUITION_CONTRACTS_V2_ROOT: virtualRoot },
+	});
+	assert.match(record(writes), /source: 'supplied'/);
+	assert.match(record(writes), /version: '9.9.9-supplied'/);
+	assert.match(record(writes), /integrity: 'sha512-YWJjZA=='/);
+	assert.ok(record(writes).includes(fingerprint(mutatedAbi)));
+	assert.deepEqual(
+		imports,
+		artifactPaths.map((path) => resolve(virtualRoot, path))
+	);
+});
+
+test('supplied integrity requires the sha512 prefix', async () => {
+	const { files } = suppliedFiles();
+	await rejectsWithoutWrites(
+		{ args: [`--source=${virtualRoot}`, '--integrity=sha256-YWJjZA=='], files },
+		/Supplied integrity must be a sha512-/
+	);
+});
+
+test('wrong supplied package name is rejected', async () => {
+	const { files } = suppliedFiles();
+	files.set(
+		resolve(virtualRoot, 'package.json'),
+		JSON.stringify({ name: '@wrong/contracts', version: manifest.version })
+	);
+	await rejectsWithoutWrites(
+		{ args: [`--source=${virtualRoot}`], files },
+		/Expected @0xintuition\/contracts-v2/
+	);
+});
+
+test('wrong version for a registry record is rejected', async () => {
+	await rejectsWithoutWrites(
+		{
+			files: new Map([
+				[
+					resolve(installedRoot, 'package.json'),
+					JSON.stringify({ ...manifest, version: '9.9.9-supplied' }),
+				],
+			]),
+		},
+		/Expected @0xintuition\/contracts-v2@1.1.0-alpha.0/
+	);
+});
+
+test('supplied directory missing an artifact file is rejected', async () => {
+	const { files } = suppliedFiles();
+	files.set(resolve(virtualRoot, artifactPaths[1]), null);
+	await rejectsWithoutWrites(
+		{ args: [`--source=${virtualRoot}`], files },
+		/ENOENT.*dist\/bytecodes\/index.js/
+	);
+});
+
+test('check rejects a supplied source override', async () => {
+	const { files } = suppliedFiles(manifest.version);
+	await rejectsWithoutWrites(
+		{ args: ['--check', `--source=${virtualRoot}`], files },
+		/Committed protocol provenance must describe the registry artifact/
+	);
+});
+
+test('check rejects committed supplied provenance', async () => {
+	const supplied = readFileSync(provenancePath, 'utf8').replace(
+		"source: 'registry'",
+		"source: 'supplied'"
+	);
+	await rejectsWithoutWrites(
+		{ args: ['--check'], files: new Map([[provenancePath, supplied]]) },
+		/Committed protocol provenance must describe the registry artifact/
+	);
+});
+
+test('artifact drift fails before any file write', async () => {
+	await rejectsWithoutWrites(
+		{ files: new Map([[resolve(contractsRoot, 'MultiVault-abi.ts'), '// different artifact\n']]) },
+		/Generated ABI\/bytecode would change: MultiVault-abi.ts/
+	);
+});
+
+test('matching registry tarball verifies SHA-512 and both installed modules', async () => {
+	const archive = tarball();
+	const requests = [];
+	const { writes } = await runScript({
+		args: ['--verify-registry'],
+		files: registryFixture(archive),
+		fetch: async (url) => {
+			requests.push(url);
+			return response(archive);
+		},
+	});
+	assert.match(record(writes), /verified: true/);
+	assert.match(record(writes), /verifiedAt: '2026-10-05T12:00:00.000Z'/);
+	assert.deepEqual(requests, [
+		'https://registry.npmjs.org/@0xintuition/contracts-v2/-/contracts-v2-1.1.0-alpha.0.tgz',
+	]);
+});
+
+test('registry verification resolves the explicit lockfile tarball URL', async () => {
+	const archive = tarball();
+	const url = 'https://registry.example.test/contracts-v2.tgz';
+	const requests = [];
+	await runScript({
+		args: ['--verify-registry'],
+		files: registryFixture(archive, url),
+		fetch: async (requested) => {
+			requests.push(requested);
+			return response(archive);
+		},
+	});
+	assert.deepEqual(requests, [url]);
+});
+
+test('registry tarball with a mutated ABI byte is rejected before writes, including check mode', async () => {
+	const archive = tarball({ mutateAbi: true });
+	for (const args of [['--verify-registry'], ['--check', '--verify-registry']]) {
+		await rejectsWithoutWrites(
+			{ args, files: registryFixture(archive), fetch: async () => response(archive) },
+			/Registry artifact mismatch: dist\/abis\/index.js/
+		);
+	}
+});
+
+test('mutated installed ABI with matching generated ABI cannot claim verified registry origin', async () => {
+	const archive = tarball();
+	const { files } = suppliedFiles(manifest.version);
+	const fixture = registryFixture(archive);
+	fixture.set(
+		resolve(installedRoot, artifactPaths[0]),
+		files.get(resolve(virtualRoot, artifactPaths[0]))
+	);
+	fixture.set(
+		resolve(contractsRoot, 'MultiVault-abi.ts'),
+		files.get(resolve(contractsRoot, 'MultiVault-abi.ts'))
+	);
+	for (const args of [['--verify-registry'], ['--check', '--verify-registry']]) {
+		await rejectsWithoutWrites(
+			{ args, files: fixture, fetch: async () => response(archive) },
+			/Registry artifact mismatch: dist\/abis\/index.js/
+		);
+	}
+});
+
+test('registry tarball with a mutated bytecode byte is rejected before writes', async () => {
+	const archive = tarball();
+	// Reader injection shares the file/fetch seam; real gzip/tar parsing is
+	// exercised by the matching and mutated-ABI tests above.
+	await rejectsWithoutWrites(
+		{
+			args: ['--verify-registry'],
+			files: registryFixture(archive),
+			fetch: async () => response(archive),
+			readTarball: (bytes) => {
+				assert.equal(sri(bytes), sri(archive));
+				const entries = new Map(
+					artifactPaths.map((path) => [
+						`package/${path}`,
+						readFileSync(resolve(installedRoot, path)),
+					])
+				);
+				const key = 'package/dist/bytecodes/index.js';
+				const data = Buffer.from(entries.get(key));
+				data[0] ^= 1;
+				entries.set(key, data);
+				return entries;
+			},
+		},
+		/Registry artifact mismatch: dist\/bytecodes\/index.js/
+	);
+});
+
+test('registry tarball SHA-512 mismatch fails before extraction or writes', async () => {
+	const archive = tarball();
+	await rejectsWithoutWrites(
+		{
+			args: ['--verify-registry'],
+			fetch: async () => response(archive),
+			readTarball: () => {
+				throw new Error('Reader must not run before integrity validation');
+			},
+		},
+		/Registry tarball SHA-512 mismatch/
+	);
+});
+
+test('registry fetch failure and HTTP failure are clear and never write', async () => {
+	await rejectsWithoutWrites(
+		{
+			args: ['--verify-registry'],
+			fetch: async () => {
+				throw new Error('fixture fetch unavailable');
+			},
+		},
+		/Registry verification fetch failed.*fixture fetch unavailable/
+	);
+	await rejectsWithoutWrites(
+		{ args: ['--verify-registry'], fetch: async () => ({ ok: false, status: 503 }) },
+		/Registry verification fetch failed.*503/
+	);
+});
+
+test('invalid registry tarball URL is rejected before fetching or writing', async () => {
+	const archive = tarball();
+	await rejectsWithoutWrites(
+		{ args: ['--verify-registry'], files: registryFixture(archive, 'not-a-url') },
+		/Invalid registry tarball URL/
+	);
+});
+
+test('verification refuses supplied sources without fetching', async () => {
+	const { files } = suppliedFiles();
+	await rejectsWithoutWrites(
+		{ args: [`--source=${virtualRoot}`, '--verify-registry'], files },
+		/--verify-registry requires the registry source/
+	);
+});
+
+test('verified provenance passes verified check without changing its verification date', async () => {
+	const archive = tarball();
+	const files = registryFixture(archive);
+	const verified = await runScript({
+		args: ['--verify-registry'],
+		files,
+		fetch: async () => response(archive),
+	});
+	files.set(provenancePath, record(verified.writes));
+	const result = await runScript({
+		args: ['--check', '--verify-registry'],
+		now: () => new Date('2026-10-06T12:00:00.000Z'),
+		files,
+		fetch: async () => response(archive),
+	});
+	assert.equal(result.writes.size, 0);
+	assert.ok(result.messages.some((message) => /Protocol artifacts match/.test(message)));
+	// Offline check validates consistency while retaining the existing verified
+	// record; offline sync deliberately records verified:false again.
+	assert.equal((await runScript({ args: ['--check'], files })).writes.size, 0);
+	assert.match(record((await runScript({ files })).writes), /verified: false/);
+});
+
+// The pinned package's indexes are wrappers: mutating the actual exported ABI
+// in its bundled chunk must not inherit registry verification from the wrappers.
+test('mutated installed ABI chunk with matching generated ABI fails registry verification', async () => {
+	const archive = tarball();
+	const files = registryFixture(archive);
+	const chunkPath = resolve(installedRoot, chunkPaths[0]);
+	const original = readFileSync(chunkPath, 'utf8');
+	assert.ok(original.includes('AtomCreated'));
+	files.set(chunkPath, original.replace('"name": "AtomCreated"', '"name": "AtomCreatee"'));
+	files.set(
+		resolve(contractsRoot, 'MultiVault-abi.ts'),
+		suppliedFiles().files.get(resolve(contractsRoot, 'MultiVault-abi.ts'))
+	);
+	for (const args of [['--verify-registry'], ['--check', '--verify-registry']]) {
+		await rejectsWithoutWrites(
+			{ args, files, fetch: async () => response(archive) },
+			/Registry artifact mismatch: dist\/chunk-/
+		);
+	}
+});

@@ -28,6 +28,7 @@
 		"classifications:check-creation-profiles": "node scripts/check-classification-creation-profiles.mjs",
 		"protocol:sync-artifacts": "node scripts/sync-protocol-artifacts.mjs",
 		"protocol:check-artifacts": "node scripts/sync-protocol-artifacts.mjs --check",
+		"protocol:sync-artifacts:test": "node --experimental-vm-modules --test scripts/sync-protocol-artifacts.test.mjs",
 		"predicates:check-generated": "node scripts/check-predicate-generation.mjs",
 		"registry:check": "node scripts/package-registry.mjs",
 		"pack:dry-run": "node scripts/pack-dry-run.mjs",
