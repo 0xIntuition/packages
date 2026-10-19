@@ -28,7 +28,7 @@ No proof covers a database-backed runner, devnet, publication, live registry, pr
 - `sameAs` omitted from identity envelopes → public-builder defect; the two movie cases retain the same gen1 IID but change anchor bytes and atom id.
 - Derived recipe values not materialised → public-builder defect; the social-media-posting case emits raw text under `textHash`, the same class as geo7 evidence defects.
 
-The required command reports **1027 pass, 23 todo, 0 fail** across 7 files (1050 tests). Of those, the five harness files report 737 agreements and 98 known divergences (anchor proof: 32 agreements, 26 divergences, 23 OPEN); 23 passing integrity self-tests cover malformed parser shapes, undefined/null distinctions, corpus loss, id drift, agreement metadata, orphan divergences, and documentation accounting; 169 passing tests come from the existing package conformance file.
+The required command reports **1029 pass, 23 todo, 0 fail** across 7 files (1052 tests). Of those, the five harness files report 741 agreements and 94 known divergences (anchor proof: 33 agreements, 25 divergences, 23 OPEN); 23 passing integrity self-tests cover malformed parser shapes, undefined/null distinctions, corpus loss, id drift, agreement metadata, orphan divergences, and documentation accounting; 169 passing tests come from the existing package conformance file.
 
 ## Runtime enumeration
 
@@ -37,9 +37,9 @@ The manifest pins sorted ids and counts for every vector file, every canonicaliz
 | Proof file | Registered | Executed | Agreements | Divergences | OPEN |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | parse-and-classify.test.ts | 10 | 10 | 9 | 1 | 0 |
-| anchor-build-hash.test.ts | 81 | 58 | 32 | 26 | 23 |
+| anchor-build-hash.test.ts | 81 | 58 | 33 | 25 | 23 |
 | encode-decode.test.ts | 51 | 51 | 51 | 0 | 0 |
-| ladder-differential.test.ts | 454 | 454 | 385 | 69 | 0 |
+| ladder-differential.test.ts | 454 | 454 | 388 | 66 | 0 |
 | canonicalization-parity.test.ts | 262 | 262 | 260 | 2 | 0 |
 
 ## Parser result shapes
