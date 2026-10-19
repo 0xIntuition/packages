@@ -56,40 +56,38 @@ type HandleProjection =
 	| { status: 'unregistered' };
 
 export function projectIdentifierLadder(input: LadderInput): LadderResult {
+	const normalizedIdentifiers = normalizeStrongIdentifiers(input.strongIdentifiers);
+	const aliasOnlySchemes = aliasOnlySchemesForIdentityOrder(input.strongIdentifierOrder);
+	const directIdentifiers =
+		normalizedIdentifiers &&
+		Object.fromEntries(
+			Object.entries(normalizedIdentifiers).filter(
+				([key, value]) => !aliasOnlySchemes.includes(strongSchemeForEntry(key, value) ?? '')
+			)
+		);
+	const providerCandidate = input.providerCanonicalId
+		? strongProviderCandidate(input.providerCanonicalId, input.allowPlainWd)
+		: undefined;
+	// E1/E2 remove candidates before the reference's provider-last merge and selection.
+	// A selection failure (for example, disagreeing QID aliases) is not a provider veto.
+	const rejectedProvider =
+		providerCandidate &&
+		(aliasOnlySchemes.includes(providerCandidate.scheme) ||
+			hasProviderWdSubtypeConflict(normalizedIdentifiers, providerCandidate));
 	const providerStrong =
-		input.strongIdentifierOrder && input.providerCanonicalId
-			? strongProviderCandidate(input.providerCanonicalId, input.allowPlainWd)
-			: undefined;
+		input.strongIdentifierOrder && !rejectedProvider ? providerCandidate : undefined;
 	const directStrongIid = selectStrongIdentifier(
-		input.strongIdentifiers,
+		directIdentifiers,
 		input.strongIdentifierOrder,
 		input.allowPlainWd
 	);
-	const directWdIid =
-		providerStrong?.scheme === 'wd'
-			? selectStrongIdentifier(input.strongIdentifiers, ['wd'], input.allowPlainWd)
-			: undefined;
-	const directWdValue = directWdIid && parseIntuitionId(directWdIid)?.value;
-	const conflictingWdSubtype =
-		directWdValue?.includes(':') &&
-		directWdValue.split(':')[0] !== providerStrong?.value.split(':')[0];
-	// Only valid typed WD evidence can veto a conflicting subtype; otherwise preserve provider-last precedence.
-	const promotedIdentifiers = providerStrong
-		? conflictingWdSubtype
-			? { [providerStrong.scheme]: providerStrong.value, ...input.strongIdentifiers }
-			: { ...input.strongIdentifiers, [providerStrong.scheme]: providerStrong.value }
-		: input.strongIdentifiers;
-	const rejectedProvider =
-		providerStrong &&
-		(aliasOnlySchemesForIdentityOrder(input.strongIdentifierOrder).includes(
-			providerStrong.scheme
-		) ||
-			selectStrongIdentifier(promotedIdentifiers, [providerStrong.scheme], input.allowPlainWd) !==
-				providerStrong.iid);
-	const strongIid =
-		providerStrong && !rejectedProvider
-			? selectStrongIdentifier(promotedIdentifiers, input.strongIdentifierOrder, input.allowPlainWd)
-			: directStrongIid;
+	const strongIid = providerStrong
+		? selectStrongIdentifier(
+				{ ...directIdentifiers, [providerStrong.scheme]: providerStrong.value },
+				input.strongIdentifierOrder,
+				input.allowPlainWd
+			)
+		: directStrongIid;
 	if (strongIid) {
 		return {
 			iid: strongIid,
@@ -136,6 +134,41 @@ export function projectIdentifierLadder(input: LadderInput): LadderResult {
 	return validateIntuitionId(iid)
 		? { iid, rung: 'url' }
 		: { fallback: 'envelope', iid: null, reason: 'no-identifier' };
+}
+
+function normalizeStrongIdentifiers(
+	identifiers: LadderInput['strongIdentifiers']
+): LadderInput['strongIdentifiers'] {
+	if (!identifiers) return undefined;
+	const normalized: Record<string, string> = {};
+	for (const [key, value] of Object.entries(identifiers)) {
+		if (key === 'wdSlug') {
+			if (isActiveWdEntitySchemaSlug(value)) normalized[key] = value;
+			continue;
+		}
+		// Typed WD aliases also carry conflict evidence, even when they are not selectable keys.
+		const scheme = WIKIDATA_IDENTIFIER_KEYS.has(key) ? 'wd' : strongSchemeForEntry(key, value);
+		if (!scheme) continue;
+		const canonical = SCHEMES[scheme].canonicalize(value);
+		if (canonical && validateIntuitionId(formatIntuitionId(scheme, canonical))) {
+			normalized[key] = canonical;
+		}
+	}
+	return normalized;
+}
+
+function hasProviderWdSubtypeConflict(
+	direct: LadderInput['strongIdentifiers'],
+	provider: { scheme: SchemeName; value: string }
+): boolean {
+	if (provider.scheme !== 'wd' || !direct) return false;
+	const directSubtypes = Object.entries(direct).flatMap(([key, value]) => {
+		const subtype = WIKIDATA_IDENTIFIER_KEYS.has(key) && value.split(':')[0];
+		return subtype && isActiveWdEntitySchemaSlug(subtype) ? [subtype] : [];
+	});
+	// An active split binding also constrains promotion when no typed value supplies one.
+	const bindings = directSubtypes.length ? directSubtypes : direct.wdSlug ? [direct.wdSlug] : [];
+	return bindings.some((subtype) => subtype !== provider.value.split(':')[0]);
 }
 
 function strongProviderCandidate(

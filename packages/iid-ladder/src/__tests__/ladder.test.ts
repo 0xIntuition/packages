@@ -121,6 +121,62 @@ const REGISTERED_PROVIDER_EXPECTATIONS = [
 
 describe('projectIdentifierLadder', () => {
 	it.each([
+		'wd:human:Q2',
+		'int:wd:human:Q2',
+	])('filters a conflicting provider %s even without a category order', (providerCanonicalId) => {
+		expect(
+			projectIdentifierLadder({
+				strongIdentifiers: { wd: 'film:Q1', wdSlug: 'television-series' },
+				providerCanonicalId,
+				canonicalUrl: 'https://example.com/item',
+			})
+		).toEqual({ iid: 'int:url:https://example.com/item', rung: 'url' });
+	});
+	it('preserves reference precedence with a redundant direct alias (round-2 reproduction)', () => {
+		expect(
+			projectIdentifierLadder({
+				strongIdentifierOrder: ['wd'],
+				strongIdentifiers: { wd: 'film:Q1', wikidata: 'Q1' },
+				providerCanonicalId: 'wd:film:Q2',
+			})
+		).toEqual({ iid: 'int:wd:film:Q2', rung: 'handle' });
+	});
+
+	it('drops malformed WD and invalid split slug (round-2 reproduction)', () => {
+		expect(
+			projectIdentifierLadder({
+				strongIdentifierOrder: ['wd'],
+				strongIdentifiers: { wd: 'garbage', wdSlug: 'garbage' },
+				providerCanonicalId: 'wd:film:Q2',
+				canonicalUrl: 'https://example.com/item',
+			})
+		).toEqual({ iid: 'int:wd:film:Q2', rung: 'handle' });
+	});
+
+	it.each([
+		'wikidata',
+		'wikidataId',
+	])('recovers provider precedence with alias %s in every fallback form', (alias) => {
+		for (const prefix of ['', 'int:']) {
+			for (const canonicalUrl of [undefined, 'https://example.com/item']) {
+				for (const strongIdentifiers of [
+					{ wd: 'film:Q1', [alias]: 'Q1' },
+					{ wd: 'garbage', wdSlug: 'garbage' },
+				]) {
+					expect(
+						projectIdentifierLadder({
+							strongIdentifierOrder: ['wd'],
+							strongIdentifiers,
+							providerCanonicalId: `${prefix}wd:film:Q2`,
+							canonicalUrl,
+						})
+					).toEqual({ iid: 'int:wd:film:Q2', rung: prefix ? 'strong' : 'handle' });
+				}
+			}
+		}
+	});
+
+	it.each([
 		['music-album', 'int:gtin:00012345600012', { gtin: '00012345600012' }],
 		['podcast-series', 'wd:human:Q2', { wd: 'human:Q2' }],
 		['podcast-series', 'int:wd:human:Q2', { wd: 'human:Q2' }],
@@ -450,7 +506,7 @@ describe('projectIdentifierLadder', () => {
 		).toEqual({ fallback: 'envelope', iid: null, reason: 'no-identifier' });
 	});
 
-	it('rejects a WD candidate when a supplied split slug is dormant', () => {
+	it('drops a dormant split slug before selecting valid direct WD', () => {
 		expect(
 			projectIdentifierLadder({
 				strongIdentifiers: {
@@ -459,7 +515,7 @@ describe('projectIdentifierLadder', () => {
 					wdSlug: 'written-work',
 				},
 			})
-		).toEqual({ iid: 'int:tmdb:movie:603', rung: 'strong' });
+		).toEqual({ iid: 'int:wd:film:Q42', rung: 'strong' });
 	});
 
 	it('rejects all WD aliases when typed hints conflict and falls through', () => {
