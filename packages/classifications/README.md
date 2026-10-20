@@ -163,3 +163,12 @@ Ethereum classifications declare `https://schemas.intuition.systems/v1`.
 SocialMediaAccount declares `https://schema.org/` for reference byte parity,
 although that type is absent from the pinned schema.org vocabulary. No spec
 currently references the separately hosted `schema.intuition.systems` contexts.
+
+## Declarative identity ladders
+
+The declarative IID engine skips any Wikidata (`wd`) rung without an active
+`wdSlug` EntitySchema binding and tries the next rung. The slugless rungs in
+brand, event, local-business, location, music-group, and thing therefore fall
+through to another available scheme or recipe, or yield no identifier. Active
+bindings still prefix bare QIDs and retain matching typed values; conflicting
+or invalid typed values are skipped.

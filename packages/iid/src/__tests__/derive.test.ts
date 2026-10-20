@@ -6,6 +6,7 @@ import { norm1 } from '../norm.js';
 import { isAnchorEligible, parseIntuitionId, validateIntuitionId } from '../parse.js';
 import type { IdentityLadder } from '../types.js';
 import { derivePodcastGuid } from '../uuid5.js';
+import { sluglessWdCases, sluglessWdLadders } from './slugless-wd-cases.js';
 
 const bookLadder: IdentityLadder = {
 	slug: 'book',
@@ -110,35 +111,43 @@ describe('deriveIntuitionId (declarative engine)', () => {
 		expect(deriveIntuitionId(dormantWdLadder, { wikidataId: 'Q47461344' })).toBeUndefined();
 	});
 
-	it('legacy: a slugless wd rung still mints bare (D-P16-1, flips with the classifications lane)', () => {
-		expect(deriveIntuitionId(bareWdLadder, { wikidataId: 'Q188035' })).toEqual({
-			iid: 'int:wd:Q188035',
-			scheme: 'wd',
-			class: 'A',
-		});
+	it('skips a slugless wd field rung (D-P16-1 withdrawn)', () => {
+		expect(deriveIntuitionId(bareWdLadder, { wikidataId: 'Q188035' })).toBeUndefined();
 	});
 
-	it('legacy: BOM- and NBSP-wrapped bare QIDs keep minting through slugless rungs (D-P16-4)', () => {
+	it('skips BOM- and NBSP-wrapped bare QIDs through slugless rungs', () => {
 		for (const wikidataId of ['\uFEFFQ188035\uFEFF', '\u00A0Q188035\u00A0']) {
-			expect(deriveIntuitionId(bareWdLadder, { wikidataId })?.iid, JSON.stringify(wikidataId)).toBe(
-				'int:wd:Q188035'
-			);
+			expect(deriveIntuitionId(bareWdLadder, { wikidataId })).toBeUndefined();
 		}
-		expect(deriveIntuitionId(bareWdSameAsLadder, { sameAs: ['\uFEFFQ42\uFEFF', 'Q9'] })?.iid).toBe(
-			'int:wd:Q42'
-		);
+		expect(
+			deriveIntuitionId(bareWdSameAsLadder, { sameAs: ['\uFEFFQ42\uFEFF', 'Q9'] })
+		).toBeUndefined();
 	});
 
-	it('legacy: a slugless wd rung mints bare values only; typed values need a declared active slug (D-P16-5)', () => {
+	it('skips all typed and bare values through slugless rungs (D-P16-5 withdrawn)', () => {
 		for (const wikidataId of ['written-work:Q47461344', 'human:Q42', 'film:Q188035']) {
 			expect(deriveIntuitionId(bareWdLadder, { wikidataId }), wikidataId).toBeUndefined();
 		}
-		expect(
-			deriveIntuitionId(bareWdSameAsLadder, { sameAs: ['written-work:Q47461344'] })
-		).toBeUndefined();
-		expect(deriveIntuitionId(bareWdSameAsLadder, { sameAs: ['human:Q42'] })).toBeUndefined();
-		expect(deriveIntuitionId(bareWdSameAsLadder, { sameAs: ['human:Q42', 'Q7'] })?.iid).toBe(
-			'int:wd:Q7'
+		for (const sameAs of [['written-work:Q47461344'], ['human:Q42'], ['human:Q42', 'Q7']]) {
+			expect(deriveIntuitionId(bareWdSameAsLadder, { sameAs })).toBeUndefined();
+		}
+	});
+
+	for (const { name, slug, values, expected } of sluglessWdCases) {
+		it(name, () => {
+			const ladder = sluglessWdLadders.find((candidate) => candidate.slug === slug);
+			expect(ladder).toBeDefined();
+			expect(deriveIntuitionId(ladder!, values) ?? null).toEqual(expected);
+		});
+	}
+
+	it('continues past a dormant wd rung to the next available rung', () => {
+		const ladder: IdentityLadder = {
+			...dormantWdLadder,
+			rungs: [...dormantWdLadder.rungs, ...bookLadder.rungs],
+		};
+		expect(deriveIntuitionId(ladder, { wikidataId: 'Q42', isbn: '9780684832722' })?.iid).toBe(
+			'int:isbn:9780684832722'
 		);
 	});
 
@@ -229,7 +238,7 @@ describe('deriveIntuitionId (declarative engine)', () => {
 		const ladder: IdentityLadder = {
 			slug: 'movie',
 			identifies: 'a film',
-			rungs: [{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' } }],
+			rungs: [{ kind: 'scheme', scheme: 'wd', wdSlug: 'film', source: { kind: 'same-as' } }],
 		};
 
 		const forward = deriveIntuitionId(ladder, {
@@ -240,21 +249,21 @@ describe('deriveIntuitionId (declarative engine)', () => {
 		});
 
 		expect(forward?.iid).toBe(reversed?.iid);
-		expect(forward?.iid).toBe('int:wd:Q25188'); // lexicographically smallest canonical
+		expect(forward?.iid).toBe('int:wd:film:Q25188'); // lexicographically smallest canonical
 	});
 
 	it('same-as entries that do not canonicalize are ignored', () => {
 		const ladder: IdentityLadder = {
 			slug: 'movie',
 			identifies: 'a film',
-			rungs: [{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' } }],
+			rungs: [{ kind: 'scheme', scheme: 'wd', wdSlug: 'film', source: { kind: 'same-as' } }],
 		};
 
 		const derived = deriveIntuitionId(ladder, {
 			sameAs: ['https://www.imdb.com/title/tt1375666/', 'https://www.wikidata.org/wiki/Q25188'],
 		});
 
-		expect(derived?.iid).toBe('int:wd:Q25188');
+		expect(derived?.iid).toBe('int:wd:film:Q25188');
 	});
 
 	it('url-origin reduces a page URL to its origin', () => {

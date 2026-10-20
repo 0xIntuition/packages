@@ -57,7 +57,7 @@ inspectIntuitionId('int:src:anything')
 
 `wd` is value-typed: `int:wd:film:Q188035`, `int:wd:television-series:Q137400033`, and `int:wd:human:Q42` carry active EntitySchema bindings and are P0-eligible. Bare `int:wd:Q42` remains valid, polymorphic, and ineligible for P0. Dormant typed bindings such as `written-work` remain valid for parsing and validation but do not mint.
 
-Declare `wdSlug: 'film'` on a `wd` scheme rung with a `field` or `same-as` source to mint typed values. Bare QIDs are prefixed; a conflicting typed slug or an overlong IID skips the rung. `same-as` selects the lexicographically smallest canonical value before checking the slug. A rung without `wdSlug` retains legacy bare minting during the transition.
+Declare `wdSlug: 'film'` on a `wd` scheme rung with a `field` or `same-as` source to mint typed values. Bare QIDs are prefixed; a conflicting typed slug or an overlong IID skips the rung. `same-as` selects the lexicographically smallest canonical value before checking the slug. A `wd` rung with no `wdSlug` or no active EntitySchema binding is skipped, and the next rung is tried. The former bare-minting decisions D-P16-1 and D-P16-5 are withdrawn in favor of reference parity.
 
 `WD_ENTITYSCHEMA_BINDINGS` exposes the 11 pinned rows; `WD_ENTITYSCHEMA_SLUGS` is the frozen grammar list. `isWdEntitySchemaSlug` checks membership, and `isActiveWdEntitySchemaSlug` checks minting eligibility. The corresponding public types are `WdEntitySchemaBinding` and `WdEntitySchemaSlug`. `SCHEME_TYPING.wd` stays `polymorphic`; use `inspectIntuitionId` for per-value typing and the `dormant-wd-binding` ineligibility reason.
 
