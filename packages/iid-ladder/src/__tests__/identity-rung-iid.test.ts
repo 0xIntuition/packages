@@ -7,6 +7,15 @@ import {
 	projectIdentifierLadder,
 } from '../index.js';
 
+it.each([
+	['gtin', '00012345600012', 'MusicAlbum', 'int:gtin:00012345600012'],
+	['wd', 'human:Q2', 'PodcastSeries', 'int:wd:human:Q2'],
+] as const)('refuses category alias-only projection %s %s for %s', (rung, value, schemaType, rejected) => {
+	expect(iidForIdentityRung(rung, value, schemaType)).not.toBe(rejected);
+	expect(iidForIdentityRung(rung, value, schemaType)).toBeUndefined();
+	expect(iidForIdentityRung(rung, value)).toBe(rejected);
+});
+
 describe('iidForIdentityRung', () => {
 	const cases = [
 		[

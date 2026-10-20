@@ -28,6 +28,27 @@ export const IDENTITY_CATEGORY_ALIAS_ONLY_POLICY = {
 	'podcast-series': ['wd', 'apple-podcasts'],
 } as const;
 
+/** Resolve alias-only schemes from the category order already carried by the ladder. */
+export function aliasOnlySchemesForIdentityOrder(
+	order: readonly string[] | undefined
+): readonly string[] {
+	if (!order) return [];
+	for (const category of Object.keys(
+		IDENTITY_CATEGORY_ALIAS_ONLY_POLICY
+	) as (keyof typeof IDENTITY_CATEGORY_ALIAS_ONLY_POLICY)[]) {
+		const primaryOrder = schemeOrderForIdentityCategory(category);
+		if (
+			primaryOrder?.length === order.length &&
+			primaryOrder.every((scheme, index) => scheme === order[index])
+		) {
+			return IDENTITY_CATEGORY_ALIAS_ONLY_POLICY[category].map(
+				(rung) => rung.split(':', 1)[0] ?? rung
+			);
+		}
+	}
+	return [];
+}
+
 export function identityRungsForCategory(category: IdentityCategory): readonly IdentityRungToken[] {
 	return [
 		...IDENTITY_CATEGORY_RUNG_POLICY[category],

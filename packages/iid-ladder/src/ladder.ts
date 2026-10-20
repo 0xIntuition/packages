@@ -7,6 +7,7 @@ import {
 	type SchemeName,
 	validateIntuitionId,
 } from '@0xintuition/iid';
+import { aliasOnlySchemesForIdentityOrder } from './category-rungs.js';
 import { PROVIDER_PREFIX_MAPPINGS } from './provider-prefixes.js';
 
 export type LadderInput = {
@@ -55,21 +56,36 @@ type HandleProjection =
 	| { status: 'unregistered' };
 
 export function projectIdentifierLadder(input: LadderInput): LadderResult {
+	const normalizedIdentifiers = normalizeStrongIdentifiers(input.strongIdentifiers);
+	const aliasOnlySchemes = aliasOnlySchemesForIdentityOrder(input.strongIdentifierOrder);
+	const directIdentifiers =
+		normalizedIdentifiers &&
+		Object.fromEntries(
+			Object.entries(normalizedIdentifiers).filter(
+				([key, value]) => !aliasOnlySchemes.includes(strongSchemeForEntry(key, value) ?? '')
+			)
+		);
+	const providerCandidate = input.providerCanonicalId
+		? strongProviderCandidate(input.providerCanonicalId, input.allowPlainWd)
+		: undefined;
+	// E1/E2 remove candidates before the reference's provider-last merge and selection.
+	// A selection failure (for example, disagreeing QID aliases) is not a provider veto.
+	const rejectedProvider =
+		providerCandidate &&
+		(aliasOnlySchemes.includes(providerCandidate.scheme) ||
+			hasProviderWdSubtypeConflict(normalizedIdentifiers, providerCandidate));
 	const providerStrong =
-		input.strongIdentifierOrder && input.providerCanonicalId
-			? strongProviderCandidate(input.providerCanonicalId, input.allowPlainWd)
-			: undefined;
+		input.strongIdentifierOrder && !rejectedProvider ? providerCandidate : undefined;
 	const directStrongIid = selectStrongIdentifier(
-		input.strongIdentifiers,
+		directIdentifiers,
 		input.strongIdentifierOrder,
 		input.allowPlainWd
 	);
 	const strongIid = providerStrong
 		? selectStrongIdentifier(
-				input.strongIdentifiers,
+				{ ...directIdentifiers, [providerStrong.scheme]: providerStrong.value },
 				input.strongIdentifierOrder,
-				input.allowPlainWd,
-				providerStrong
+				input.allowPlainWd
 			)
 		: directStrongIid;
 	if (strongIid) {
@@ -83,17 +99,7 @@ export function projectIdentifierLadder(input: LadderInput): LadderResult {
 	}
 
 	let canonicalUrl = input.canonicalUrl;
-	const providerCanonicalId = input.providerCanonicalId;
-	// A rejected WD candidate must not re-enter through provider fallback.
-	const fallbackCandidate = input.providerCanonicalId
-		? (providerStrong ?? strongProviderCandidate(input.providerCanonicalId, input.allowPlainWd))
-		: undefined;
-	if (
-		fallbackCandidate?.scheme === 'wd' &&
-		!selectStrongIdentifier(input.strongIdentifiers, ['wd'], input.allowPlainWd, fallbackCandidate)
-	) {
-		return { fallback: 'envelope', iid: null, reason: 'invalid-handle' };
-	}
+	const providerCanonicalId = rejectedProvider ? undefined : input.providerCanonicalId;
 	if (providerCanonicalId?.startsWith('int:')) {
 		return validateIntuitionId(providerCanonicalId) &&
 			isMintableWdIid(providerCanonicalId, input.allowPlainWd)
@@ -130,6 +136,41 @@ export function projectIdentifierLadder(input: LadderInput): LadderResult {
 		: { fallback: 'envelope', iid: null, reason: 'no-identifier' };
 }
 
+function normalizeStrongIdentifiers(
+	identifiers: LadderInput['strongIdentifiers']
+): LadderInput['strongIdentifiers'] {
+	if (!identifiers) return undefined;
+	const normalized: Record<string, string> = {};
+	for (const [key, value] of Object.entries(identifiers)) {
+		if (key === 'wdSlug') {
+			if (isActiveWdEntitySchemaSlug(value)) normalized[key] = value;
+			continue;
+		}
+		// Typed WD aliases also carry conflict evidence, even when they are not selectable keys.
+		const scheme = WIKIDATA_IDENTIFIER_KEYS.has(key) ? 'wd' : strongSchemeForEntry(key, value);
+		if (!scheme) continue;
+		const canonical = SCHEMES[scheme].canonicalize(value);
+		if (canonical && validateIntuitionId(formatIntuitionId(scheme, canonical))) {
+			normalized[key] = canonical;
+		}
+	}
+	return normalized;
+}
+
+function hasProviderWdSubtypeConflict(
+	direct: LadderInput['strongIdentifiers'],
+	provider: { scheme: SchemeName; value: string }
+): boolean {
+	if (provider.scheme !== 'wd' || !direct) return false;
+	const directSubtypes = Object.entries(direct).flatMap(([key, value]) => {
+		const subtype = WIKIDATA_IDENTIFIER_KEYS.has(key) && value.split(':')[0];
+		return subtype && isActiveWdEntitySchemaSlug(subtype) ? [subtype] : [];
+	});
+	// An active split binding also constrains promotion when no typed value supplies one.
+	const bindings = directSubtypes.length ? directSubtypes : direct.wdSlug ? [direct.wdSlug] : [];
+	return bindings.some((subtype) => subtype !== provider.value.split(':')[0]);
+}
+
 function strongProviderCandidate(
 	providerCanonicalId: string,
 	allowPlainWd?: boolean
@@ -156,18 +197,19 @@ function strongProviderCandidate(
 function selectStrongIdentifier(
 	strongIdentifiers: LadderInput['strongIdentifiers'],
 	strongIdentifierOrder: LadderInput['strongIdentifierOrder'],
-	allowPlainWd?: boolean,
-	additionalIdentifier?: { scheme: SchemeName; value: string }
+	allowPlainWd?: boolean
 ): string | undefined {
-	const entries = Object.entries(strongIdentifiers ?? {});
-	if (additionalIdentifier) entries.push([additionalIdentifier.scheme, additionalIdentifier.value]);
-	const rawWdSlug = strongIdentifiers?.wdSlug;
+	if (!strongIdentifiers) {
+		return undefined;
+	}
+
+	const rawWdSlug = strongIdentifiers.wdSlug;
 	const wdSlug = rawWdSlug && isActiveWdEntitySchemaSlug(rawWdSlug) ? rawWdSlug : undefined;
 	const wdSlugConflict =
-		(Object.hasOwn(strongIdentifiers ?? {}, 'wdSlug') && !wdSlug) ||
-		hasWdSlugConflict(entries, wdSlug);
+		(Object.hasOwn(strongIdentifiers, 'wdSlug') && !wdSlug) ||
+		hasWdSlugConflict(strongIdentifiers, wdSlug);
 	const candidates = new Map<SchemeName, string[]>();
-	for (const [key, value] of entries) {
+	for (const [key, value] of Object.entries(strongIdentifiers)) {
 		const scheme = strongSchemeForEntry(key, value);
 		if (!scheme || (scheme === 'wd' && wdSlugConflict)) {
 			continue;
@@ -200,12 +242,12 @@ function selectStrongIdentifier(
 }
 
 function hasWdSlugConflict(
-	entries: readonly (readonly [string, string])[],
+	strongIdentifiers: Readonly<Record<string, string>>,
 	wdSlug: string | undefined
 ) {
 	const qids = new Set<string>();
 	const typedValues = new Set<string>();
-	for (const [key, value] of entries) {
+	for (const [key, value] of Object.entries(strongIdentifiers)) {
 		if (!WIKIDATA_IDENTIFIER_KEYS.has(key)) {
 			continue;
 		}
