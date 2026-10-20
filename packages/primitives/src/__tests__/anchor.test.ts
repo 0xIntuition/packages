@@ -57,7 +57,9 @@ describe('buildIidAnchor', () => {
 
 		expect(result.success).toBe(false);
 		if (!result.success) {
-			expect(result.errors[0]).toMatch(/No identity rung fired for "brand"/);
+			expect(result.errors[0]).toBe(
+				'brand cannot mint as a bare P0 anchor: no usable identifier was derived.'
+			);
 		}
 	});
 

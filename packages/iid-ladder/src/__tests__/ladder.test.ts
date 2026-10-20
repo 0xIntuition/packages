@@ -301,9 +301,9 @@ describe('projectIdentifierLadder', () => {
 		).toEqual({ iid: 'int:tmdb:movie:550', rung });
 	});
 
-	it('ranks same-scheme provider and direct candidates without overwriting either', () => {
+	it('uses provider-last precedence for same-scheme candidates', () => {
 		for (const [direct, provider, rung] of [
-			['movie:100', 'movie:550', 'strong'],
+			['movie:100', 'movie:550', 'handle'],
 			['movie:550', 'movie:100', 'handle'],
 		] as const) {
 			expect(
@@ -312,21 +312,21 @@ describe('projectIdentifierLadder', () => {
 					strongIdentifiers: { tmdb: direct },
 					providerCanonicalId: `tmdb:${provider}`,
 				})
-			).toEqual({ iid: 'int:tmdb:movie:100', rung });
+			).toEqual({ iid: `int:tmdb:${provider}`, rung });
 		}
 	});
 
-	it('retains WD conflicts when a provider contributes another WD candidate', () => {
+	it('uses the provider QID when direct WD has the same subtype', () => {
 		expect(
 			projectIdentifierLadder({
 				strongIdentifierOrder: ['wd', 'tmdb'],
 				strongIdentifiers: { wd: 'film:Q42', tmdb: 'movie:550' },
 				providerCanonicalId: 'int:wd:film:Q43',
 			})
-		).toEqual({ iid: 'int:tmdb:movie:550', rung: 'strong' });
+		).toEqual({ iid: 'int:wd:film:Q43', rung: 'strong' });
 	});
 
-	it('does not reintroduce conflicting WD through provider fallback', () => {
+	it('does not treat disagreeing QID aliases as a provider subtype veto', () => {
 		for (const strongIdentifierOrder of [undefined, ['wd']]) {
 			expect(
 				projectIdentifierLadder({
@@ -334,7 +334,7 @@ describe('projectIdentifierLadder', () => {
 					strongIdentifiers: { wd: 'film:Q42', wikidata: 'Q44' },
 					providerCanonicalId: 'int:wd:film:Q43',
 				})
-			).toEqual({ iid: null, fallback: 'envelope', reason: 'invalid-handle' });
+			).toEqual({ iid: 'int:wd:film:Q43', rung: 'strong' });
 		}
 	});
 
