@@ -317,8 +317,10 @@ try {
 		if (result.success) {
 			const atomData: Hex = result.value.dataHex;
 			multiVaultCreateAtomsWithUrisEncode({ args: ['0x1111111111111111111111111111111111111111', [atomData], [1n], [[]]], value: 1n });
-			inspectIntuitionId(result.value.iid);
-			classificationForIid(result.value.iid);
+			if (result.value.iid !== null) {
+				inspectIntuitionId(result.value.iid);
+				classificationForIid(result.value.iid);
+			}
 		}
 		projectIdentifierLadder({ strongIdentifiers: { isrc: 'USRC17607839' } });
 		type Events = Awaited<ReturnType<typeof eventParseAtomCreated>>;
