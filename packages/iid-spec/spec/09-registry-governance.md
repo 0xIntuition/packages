@@ -100,6 +100,10 @@ Deprecation means:
 
 A scheme is never *removed*. Removal would invalidate historical data, which is precisely what [§9.3](#93-the-freeze-rule) forbids.
 
+## 9.7 Pre-publication amendments
+
+- **2026-10-19 — Weak account eligibility correction.** Before the first publication of `@0xintuition/iid-spec`, the [`acct`](../schemes/acct.md) weak form (`<platform>:@<handle>`) is corrected to be valid and unambiguously typed but not P0 anchor-eligible, with a P1 floor one rung below the strong form because handles can be renamed or recycled. Strong-form eligibility and all canonicalization rules and canonical bytes remain unchanged. This is a pre-publication amendment, not a §9.3.1 additive extension: it changes eligibility of an existing valid form, which §9.3.1 does not permit. The parity ruling is in effect by default, subject to ratification in review.
+
 ---
 
 **Previous:** [8. Equivalence](./08-equivalence.md) · **Back to:** [Overview](./00-overview.md)

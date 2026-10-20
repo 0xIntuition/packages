@@ -182,7 +182,11 @@ export interface ParsedIid {
 export type IidInvalidReason = 'malformed' | 'unknown-scheme' | 'noncanonical';
 
 /** Why a valid IID may still not mint as a bare P0 anchor (spec §7.2). */
-export type AnchorIneligibilityReason = 'class-c' | 'polymorphic-scheme' | 'dormant-wd-binding';
+export type AnchorIneligibilityReason =
+	| 'class-c'
+	| 'polymorphic-scheme'
+	| 'dormant-wd-binding'
+	| 'weak-account';
 
 export type IidInspection =
 	| {

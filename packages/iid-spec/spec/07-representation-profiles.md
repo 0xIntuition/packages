@@ -35,6 +35,8 @@ Identity becomes a pure function of the identifier. Two parties who derive the s
 1. Its scheme is Class **A or B**. Class C never qualifies ([§6.6](./06-gen1.md)).
 2. Its identifier is **unambiguously typed** ([§7.3](#73-scheme-typing)) — the identifier implies the entity's type on its own, and any EntitySchema binding it carries is active.
 
+The [`acct` weak form](../schemes/acct.md) (`<platform>:@<handle>`) is an exception: it remains valid and unambiguously typed, but MUST NOT anchor at P0 and has a P1 floor because handles can be renamed or recycled.
+
 ### P1 — identity context
 
 Atom data is an object containing the type, the identifier, the identity-recipe fields, and any corroborating evidence.
@@ -86,7 +88,7 @@ A scheme is **unambiguously typed** if knowing an identifier's scheme and value 
 
 Some schemes are unambiguous because their domain is narrow: an ISBN is always a book edition, an ISRC always a sound recording. Others carry the type inside the value: `mbid` values begin with an entity-type segment (`artist:`, `recording:`), `olid` values end with `W`/`M`/`A`, and `gen1` values begin with the entity type's slug.
 
-A **value-typed scheme** has polymorphic bare values but MAY carry the entity type inside a value. `wd` is value-typed: bare `Q…` is polymorphic, while `<slug>:Q…` with an active [EntitySchema binding](../schemes/wd.md) is unambiguous; a dormant binding is valid and unambiguous but not mintable. The conformance corpus marks value-typed schemes with `valueTyped` and MAY state per-value `typing` on validation vectors, defaulting to the scheme's typing when omitted.
+A **value-typed scheme** has polymorphic bare values but MAY carry the entity type inside a value. `wd` is value-typed: bare `Q…` is polymorphic, while `<slug>:Q…` with an active [EntitySchema binding](../schemes/wd.md) is unambiguous; a dormant binding is valid and unambiguous but not mintable. The conformance corpus marks value-typed schemes with `valueTyped` and MAY state per-value `typing` on validation vectors, defaulting to the scheme's typing when omitted. A scheme's optional `anchorIneligibleValuePattern` is a regular expression applied to the value after the scheme; matching values may be valid but are never anchor-eligible, regardless of effective typing.
 
 The polymorphic cases are polymorphic for concrete reasons:
 

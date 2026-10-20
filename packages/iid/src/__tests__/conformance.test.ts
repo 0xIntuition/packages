@@ -14,7 +14,12 @@ import { describe, expect, it } from 'vitest';
 
 import { buildGen1Iid } from '../gen1.js';
 import { norm1 } from '../norm.js';
-import { isAnchorEligible, parseIntuitionId, validateIntuitionId } from '../parse.js';
+import {
+	inspectIntuitionId,
+	isAnchorEligible,
+	parseIntuitionId,
+	validateIntuitionId,
+} from '../parse.js';
 import { SCHEME_TYPING, SCHEMES } from '../schemes.js';
 import type { SchemeName } from '../types.js';
 
@@ -72,6 +77,15 @@ describe('conformance: validation and anchor eligibility', () => {
 		it(`${vector.id} — ${vector.note}`, () => {
 			expect(validateIntuitionId(vector.iid)).toBe(vector.valid);
 			expect(isAnchorEligible(vector.iid)).toBe(vector.anchorEligible);
+			if (vector.valid) {
+				expect(inspectIntuitionId(vector.iid)).toMatchObject({
+					valid: true,
+					typing:
+						'typing' in vector
+							? vector.typing
+							: SCHEME_TYPING[vector.iid.split(':')[1] as SchemeName],
+				});
+			}
 		});
 	}
 });

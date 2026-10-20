@@ -4,6 +4,20 @@
 	"kind": "validation",
 	"vectors": [
 		{
+			"id": "valid-acct-strong",
+			"iid": "int:acct:github:MonaLisa",
+			"valid": true,
+			"anchorEligible": true,
+			"note": "strong immutable account ID: unambiguous typing inherited from schemes.json; case preserved"
+		},
+		{
+			"id": "valid-acct-weak",
+			"iid": "int:acct:twitter:@jack",
+			"valid": true,
+			"anchorEligible": false,
+			"note": "weak recycled handle: unambiguous typing inherited from schemes.json; valid but floors at P1"
+		},
+		{
 			"id": "valid-001",
 			"iid": "int:isrc:USRC17607839",
 			"valid": true,

@@ -5,7 +5,8 @@
 	"schemes": {
 		"acct": {
 			"class": "B",
-			"typing": "unambiguous"
+			"typing": "unambiguous",
+			"anchorIneligibleValuePattern": "^[^:]+:@"
 		},
 		"appid": {
 			"class": "B",
@@ -106,7 +107,8 @@
 		"wd": {
 			"class": "A",
 			"typing": "polymorphic",
-			"valueTyped": true
+			"valueTyped": true,
+			"anchorIneligibleValuePattern": "^(television-series-season|television-series-episode|written-work|podcast|podcast-episode|video-game|album|organization):"
 		}
 	}
 }
