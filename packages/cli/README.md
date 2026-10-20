@@ -38,7 +38,7 @@ Canonical bridge targets remain mainnet-focused:
 
 - Base mainnet for `meta-erc20-hub`; `trust-swap-and-bridge-router` lookup throws pending a compatible redeployment
 - Intuition mainnet for `meta-erc20-spoke` and `meta-native-spoke`
-- FeeProxy and dynamic-fee curve targets carry explicit addresses; both accept `1155` and `13579`, but only testnet has canonical candidate deployments
+- FeeProxy and dynamic-fee curve targets carry explicit addresses; both accept `1155` and `13579`; FeeProxy is deployed on both networks, and the dynamic-fee curve has a canonical deployment on testnet only
 
 See [docs/network-support-matrix.md](./docs/network-support-matrix.md) for the exact contract-by-chain matrix and explicit unsupported combinations.
 

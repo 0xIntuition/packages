@@ -264,8 +264,8 @@ export type AgentActionTarget =
 			deploymentName: 'DynamicFeeFlatPriceCurve';
 			address: Address;
 	  }
-	// FeeProxy is deployed on testnet only until the mainnet v1.1.0 upgrade — the caller
-	// supplies the already-resolved address on the intent rather than it being looked up.
+	// The caller supplies the already-resolved FeeProxy address on the intent rather than it
+	// being looked up.
 	| {
 			chainId: 1155;
 			chainName: 'Intuition';

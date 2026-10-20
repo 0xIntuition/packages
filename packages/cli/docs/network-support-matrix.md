@@ -25,7 +25,7 @@ Testnet support is a core-only expansion for canonically-deployed contracts. Per
 
 ## Address-carrying targets
 
-`dynamic-fee-flat-price-curve` (core) and `fee-proxy` (periphery) don't fit the tables above: the CLI resolves neither from the deployment map. `DynamicFeeFlatPriceCurve` is resolved per-vault via the `BondingCurveRegistry`, and the deployment map records only the testnet curve. `FeeProxy` is deployed on Intuition Testnet (`13579`) only until the mainnet v1.1.0 upgrade. Both intent variants carry the already-resolved `address` directly instead of looking one up. Both accept `1155` and `13579`; "supported" here means the chain ID is accepted and labeled correctly, not that a canonical address exists to resolve.
+`dynamic-fee-flat-price-curve` (core) and `fee-proxy` (periphery) don't fit the tables above: the CLI resolves neither from the deployment map. `DynamicFeeFlatPriceCurve` is resolved per-vault via the `BondingCurveRegistry`, and the deployment map records only the testnet curve. `FeeProxy` is deployed on both Intuition mainnet (`1155`) and Intuition Testnet (`13579`). Both intent variants carry the already-resolved `address` directly instead of looking one up. Both accept `1155` and `13579`; "supported" here means the chain ID is accepted and labeled correctly, not that a canonical address exists to resolve.
 
 ## Rules
 

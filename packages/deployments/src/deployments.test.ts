@@ -63,8 +63,9 @@ describe('@0xintuition/deployments', () => {
 		});
 	});
 
-	it('carries the testnet FeeProxy only; mainnet deploys after the upgrade', () => {
+	it('carries the mainnet and testnet FeeProxy', () => {
 		expect(intuitionPeripheryDeployments.FeeProxy).toEqual({
+			[INTUITION_MAINNET_CHAIN_ID]: '0x45B65BB9FFC4BC51C9e3a56902d9183dcff51B55',
 			[INTUITION_TESTNET_CHAIN_ID]: '0x847801465DcB17811089107c0051c49E0135F6B8',
 		});
 	});

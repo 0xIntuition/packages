@@ -18,9 +18,9 @@ export const intuitionPeripheryDeployments: {
 	MetaNativeSpoke: {
 		[INTUITION_MAINNET_CHAIN_ID]: '0x375135fe908dD62f3C7939FA4e65bf41Da721AB9',
 	},
-	// Testnet routes to the canonical 13579 MultiVault. Mainnet deploys after the v1.1.0 upgrade;
-	// add its address then.
+	// Each FeeProxy routes to its network's canonical MultiVault.
 	FeeProxy: {
+		[INTUITION_MAINNET_CHAIN_ID]: '0x45B65BB9FFC4BC51C9e3a56902d9183dcff51B55',
 		[INTUITION_TESTNET_CHAIN_ID]: '0x847801465DcB17811089107c0051c49E0135F6B8',
 	},
 };
