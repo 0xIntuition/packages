@@ -20,7 +20,7 @@ npm install viem @0xintuition/periphery@alpha
 - calldata encoders and client-based wrappers for `TrustSwapAndBridgeRouter`
 - direct bridge helpers for `MetaERC20Hub`, `MetaERC20Spoke`, and `MetaNativeSpoke`
 - Base bridge asset address helpers for `USDC` and `WETH` approval flows
-- calldata encoders and client wrappers for `FeeProxy`; `getFeeProxyAddressFromChainId` resolves the Intuition Testnet (`13579`) FeeProxy and throws for Intuition mainnet until FeeProxy is deployed there
+- calldata encoders and client wrappers for `FeeProxy`; `getFeeProxyAddressFromChainId` resolves the FeeProxy on Intuition mainnet (`1155`) and Intuition Testnet (`13579`)
 
 Current deployments are mainnet-oriented:
 
@@ -37,9 +37,9 @@ That means the package now covers:
 
 `WrappedTrust` is a core contract and resolves from `@0xintuition/protocol`, not from `@0xintuition/periphery`.
 
-Bridge helpers cover router-based TRUST transfers from Base to Intuition, direct TRUST transfers from Intuition to Base, and direct USDC and WETH transfers in both directions. FeeProxy is available on Intuition Testnet; the bridge contracts remain mainnet-only.
+Bridge helpers cover router-based TRUST transfers from Base to Intuition, direct TRUST transfers from Intuition to Base, and direct USDC and WETH transfers in both directions. FeeProxy is available on Intuition mainnet and Intuition Testnet; the bridge contracts remain mainnet-only.
 
-`getFeeProxyAddressFromChainId(13579)` resolves the candidate testnet FeeProxy. Mainnet lookup throws until deployment; wrappers also accept an explicit address.
+`getFeeProxyAddressFromChainId(1155)` and `getFeeProxyAddressFromChainId(13579)` resolve the deployed FeeProxy on each network; wrappers also accept an explicit address.
 
 ## Usage
 
