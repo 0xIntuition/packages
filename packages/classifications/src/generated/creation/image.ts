@@ -204,10 +204,10 @@ export const imageCreationProfile = {
 			subjectClassification: 'image',
 			predicate: {
 				key: 'hasTag',
-				id: '0x0d72b37c75f5f640679c8e4743831d587b5db984edd1c6408bd3d7aa2b5b55b3',
+				id: '0x137f29ea8a0422c9d1003ece2e1883e916d4a106da0a897279842ffbb793229a',
 				label: 'has tag',
 				description:
-					'Assigns a free-form keyword or tag atom to the subject. Use for lightweight clustering, filtering, and discovery — tags are informal, many-per-subject, and carry no taxonomy guarantees (prefer `has type` or `has category` for structured classification)',
+					'Assigns a reusable tag or keyword atom to the subject for filtering, clustering, and discovery',
 				status: 'enshrined',
 				category: 'Identity/Classification',
 				marketPattern: 'attributive',
@@ -223,10 +223,10 @@ export const imageCreationProfile = {
 			subjectClassification: 'image',
 			predicate: {
 				key: 'hasCategory',
-				id: '0x7540882b556f76cd67ce24a0ecdb16a175dc438ed63a003180cb62794568748a',
+				id: '0xbf037cebba059cbb9547b784b0f667db03f08c177fc0f94c0f734cf16cdc0fa8',
 				label: 'has category',
 				description:
-					'Places the subject in a product-level browsable category for user-facing discovery and filtering. Less formal than `has type` (which asserts a taxonomy classification) and more curated than `has tag` (which is free-form)',
+					'Places the subject within a broader categorical grouping. More formal than tags — use for structured taxonomies rather than free-form labeling',
 				status: 'enshrined',
 				category: 'Identity/Classification',
 				marketPattern: 'attributive',
@@ -242,10 +242,10 @@ export const imageCreationProfile = {
 			subjectClassification: 'image',
 			predicate: {
 				key: 'sameAs',
-				id: '0x13fa59de1639343483dd3c864cf585b571fe43b67e0ce9c2335a803c4e8f7348',
+				id: '0x1908b7994ca437c84c67a4799ae710355591790a726bf5890277f3aa70828c0a',
 				label: 'same as',
 				description:
-					'Declares that the subject and object refer to the same real-world entity across representations, naming systems, or aliases. Symmetric and transitive — use for identity resolution, duplicate collapsing, and alternate-name mapping',
+					'Declares that the subject and object refer to the same real-world entity across different representations or naming systems',
 				status: 'enshrined',
 				category: 'Identity/Classification',
 				marketPattern: 'attributive',

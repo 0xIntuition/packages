@@ -217,10 +217,10 @@ export const locationCreationProfile = {
 			subjectClassification: 'location',
 			predicate: {
 				key: 'sameAs',
-				id: '0x13fa59de1639343483dd3c864cf585b571fe43b67e0ce9c2335a803c4e8f7348',
+				id: '0x1908b7994ca437c84c67a4799ae710355591790a726bf5890277f3aa70828c0a',
 				label: 'same as',
 				description:
-					'Declares that the subject and object refer to the same real-world entity across representations, naming systems, or aliases. Symmetric and transitive — use for identity resolution, duplicate collapsing, and alternate-name mapping',
+					'Declares that the subject and object refer to the same real-world entity across different representations or naming systems',
 				status: 'enshrined',
 				category: 'Identity/Classification',
 				marketPattern: 'attributive',

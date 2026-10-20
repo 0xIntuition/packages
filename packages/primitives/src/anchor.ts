@@ -378,10 +378,11 @@ function buildProfilePayload(
 		);
 
 		if (rung && rung.kind === 'gen1') {
-			const recipe = rung.recipe.some((field) => field.from !== 'field')
-				? rung.recipe
-				: [...rung.recipe].sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
-			for (const field of recipe) {
+			// Recipe evidence is materialized in recipe (declaration) order: that is the
+			// byte order of every gen1 P1 atom already minted by the reference
+			// builder, and spec §6 keeps a tag's field set stable for the entity's
+			// lifetime. Sorting by key would re-key existing atoms.
+			for (const field of rung.recipe) {
 				identityFields[field.key] = recipeValue(field, values);
 			}
 		}
