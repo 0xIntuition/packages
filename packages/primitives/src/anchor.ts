@@ -1,5 +1,6 @@
 import {
 	buildAtomDataObject,
+	type ClassificationSpec,
 	getClassification,
 	identityLadderFor,
 	validateClassificationValues,
@@ -10,9 +11,14 @@ import {
 	deriveIntuitionId,
 	geohashEncode,
 	inspectIntuitionId,
+	isAnchorEligible,
+	isPlainWdPrimaryAllowed,
 	keccak16,
 	norm1,
+	SCHEME_NAMES,
 	SCHEMES,
+	validateIntuitionId,
+	WD_ENTITYSCHEMA_BINDINGS,
 } from '@0xintuition/iid';
 import { classificationForIid, providersForIid } from '@0xintuition/iid-registry';
 
@@ -30,6 +36,66 @@ export const DEFAULT_URI_LIMITS: UriLimits = Object.freeze({
 });
 
 const encoder = new TextEncoder();
+const MAX_IID_VALUE_LENGTH = 220;
+const URL_IID_PREFIX = 'int:url:';
+const GENERIC_IID_SHAPE = /^int:([a-z0-9-]{1,32}):(.{1,220})$/;
+const REGISTERED_IID_SCHEMES = new Set<string>(SCHEME_NAMES);
+
+/** Reference validator errors retain their name, code, and exact message. */
+class AtomAnchorError extends Error {
+	readonly code = 'INVALID_IID';
+
+	constructor(message: string) {
+		super(message);
+		this.name = 'AtomAnchorError';
+	}
+}
+
+/** False is reserved for a canonical URL whose length alone exceeds the IID cap. */
+export function validateDerivedAnchorIid(slug: string, iid: string): boolean {
+	if (validateIntuitionId(iid)) return true;
+	if (isOverCapUrlIid(iid)) return false;
+	throw new AtomAnchorError(`Derived identifier is not canonical for "${slug}": ${iid}`);
+}
+
+export function isOverCapUrlIid(iid: string): boolean {
+	if (!iid.startsWith(URL_IID_PREFIX)) return false;
+	const value = iid.slice(URL_IID_PREFIX.length);
+	return value.length > MAX_IID_VALUE_LENGTH && SCHEMES.url.isCanonical(value);
+}
+
+function validateCandidateAnchorIid(spec: ClassificationSpec, candidateIid: string): void {
+	const match = GENERIC_IID_SHAPE.exec(candidateIid);
+	const scheme = match?.[1];
+	const isRegisteredScheme = scheme !== undefined && REGISTERED_IID_SCHEMES.has(scheme);
+	const isCanonical = isRegisteredScheme
+		? validateIntuitionId(candidateIid)
+		: match !== null && candidateIid.trim() === candidateIid && !/\s/.test(candidateIid);
+
+	if (!isCanonical) {
+		throw new AtomAnchorError(
+			`Candidate identifier is not canonical for "${spec.slug}": ${candidateIid}`
+		);
+	}
+
+	if (scheme !== 'wd') return;
+	const canonicalValue = match?.[2] ?? '';
+	if (/^Q[1-9]\d*$/.test(canonicalValue) && isPlainWdPrimaryAllowed(spec.type)) return;
+	const separator = canonicalValue.indexOf(':');
+	const slug = separator > 0 ? canonicalValue.slice(0, separator) : undefined;
+	const binding = WD_ENTITYSCHEMA_BINDINGS.find((candidate) => candidate.slug === slug);
+
+	if (binding?.status !== 'active') {
+		throw new AtomAnchorError(
+			`Candidate wd identifier is parse-only and cannot be minted for "${spec.slug}": ${candidateIid}`
+		);
+	}
+	if (binding.classification !== spec.type) {
+		throw new AtomAnchorError(
+			`Candidate wd identifier classifies as "${binding.classification}", not "${spec.type}": ${candidateIid}`
+		);
+	}
+}
 
 function toHex(data: string): `0x${string}` {
 	let hex = '0x';
@@ -118,6 +184,9 @@ export function buildIidAnchor(
 
 	if (!spec) {
 		return { success: false, errors: [`Unknown classification "${classificationSlug}".`] };
+	}
+	if (options.candidateIid !== undefined) {
+		return buildCandidateAnchor(spec, values, options.candidateIid, options);
 	}
 
 	const ladder = identityLadderFor(classificationSlug);
@@ -212,6 +281,77 @@ export function buildIidAnchor(
 			id: calculateAtomId(data),
 			contextUris,
 			providerPlan: derived ? providersForIid(derived.iid) : [],
+			values: Object.freeze({ ...values }),
+		},
+	};
+}
+
+/** The reference's helper name; both public names share one function object. */
+export const buildAtomAnchor = buildIidAnchor;
+
+function buildCandidateAnchor(
+	spec: ClassificationSpec,
+	values: Record<string, unknown>,
+	candidateIid: string,
+	options: IidAnchorOptions
+): BuildResult<AtomAnchor> {
+	try {
+		validateCandidateAnchorIid(spec, candidateIid);
+	} catch (error) {
+		if (!(error instanceof AtomAnchorError)) throw error;
+		return { success: false, errors: [error.message] };
+	}
+
+	// The reference selects the profile from the candidate's eligibility alone:
+	// an eligible candidate mints as bare P0 bytes, any other admitted candidate
+	// as a P1 envelope. `options.profile` is not consulted on this path, so a
+	// candidate always yields the atom the reference would mint for it.
+	const eligible = isAnchorEligible(candidateIid) && !/^int:acct:[^:]+:@/.test(candidateIid);
+	const profile = eligible ? 'p0' : 'p1';
+	const errors: string[] = [];
+	const contextUris = normalizeContextUris(
+		options.contextUris ?? [],
+		options.uriLimits ?? DEFAULT_URI_LIMITS,
+		errors
+	);
+	if (errors.length > 0) return { success: false, errors };
+
+	let data = candidateIid;
+	if (profile !== 'p0') {
+		let envelope: Record<string, unknown>;
+		try {
+			envelope = buildAtomDataObject(spec.slug, values);
+		} catch (error) {
+			if (!(error instanceof Error)) throw error;
+			return { success: false, errors: [error.message] };
+		}
+		for (const field of spec.fields) {
+			if (field.fieldType === 'string[]' && Array.isArray(envelope[field.key])) {
+				envelope[field.key] = stableStringSet(envelope[field.key]);
+			}
+		}
+		const entries: Array<[string, unknown]> = [];
+		for (const [key, value] of Object.entries(envelope)) {
+			entries.push([key, value]);
+			if (key === '@type') entries.push(['identifier', candidateIid]);
+		}
+		data = JSON.stringify(Object.fromEntries(entries));
+	}
+
+	const inspection = inspectIntuitionId(candidateIid);
+	return {
+		success: true,
+		value: {
+			classification: classificationForIid(candidateIid)?.slug ?? spec.slug,
+			profile,
+			iid: candidateIid,
+			scheme: candidateIid.split(':')[1] ?? null,
+			class: inspection.valid ? inspection.class : null,
+			data,
+			dataHex: toHex(data),
+			id: calculateAtomId(data),
+			contextUris,
+			providerPlan: providersForIid(candidateIid),
 			values: Object.freeze({ ...values }),
 		},
 	};

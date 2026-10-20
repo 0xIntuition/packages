@@ -1,11 +1,5 @@
-import {
-	buildAnchor,
-	referenceStructure,
-	slugMapping,
-	trainLadder,
-	trainStructure,
-} from './mappings';
-import { ids, iid, protocol, registry, viem } from './public';
+import { referenceStructure, slugMapping, trainLadder, trainStructure } from './mappings';
+import { ids, iid, primitives, protocol, registry, viem } from './public';
 import {
 	anchorCases,
 	anchors,
@@ -27,6 +21,17 @@ export interface ProofCase {
 	run: () => unknown | Promise<unknown>;
 	open?: string;
 	policy?: 'single-field-anchor';
+}
+
+/** Candidate options pass unchanged through the public builder, never through values. */
+function buildAnchor(c: any) {
+	const result = primitives.buildIidAnchor(
+		slugMapping[c.input.slug] ?? c.input.slug,
+		c.input.values,
+		{ candidateIid: c.input.options?.candidateIid }
+	);
+	if (!result.success) return { ok: false, errors: result.errors };
+	return { ok: true, anchor: result.value };
 }
 
 function checkedPublicParse(input: string) {
@@ -159,17 +164,15 @@ export const anchorProofCases: ProofCase[] = anchorCases.map((c: any) => {
 		id: `anchor:${c.label}`,
 		input: c.input,
 		expected: referenceAnchor(c),
-		open: c.input.options?.candidateIid
-			? 'candidateIid is not modelled by the public builder options; values cannot represent an override or candidate-validation proof'
-			: undefined,
 		policy: identityKeys.length === 1 ? 'single-field-anchor' : undefined,
 		run: () => {
 			const result = buildAnchor(c);
 			if (!result.ok)
 				return {
 					ok: false,
-					error: result.errors.some((e: string) =>
-						e.startsWith('Derived identifier failed inspection:')
+					error: result.errors.some(
+						(e: string) =>
+							e.startsWith('Derived identifier failed inspection:') || e.startsWith('Candidate ')
 					)
 						? 'INVALID_IID'
 						: 'Error',
@@ -188,9 +191,23 @@ for (const c of anchors.validators)
 		id: `validator:${c.label}`,
 		input: c.input,
 		expected: c.expected,
-		open: 'validateDerivedAnchorIid and isOverCapUrlIid are not exported by the public packages; direct validator proof blocked',
 		run: () => {
-			throw new Error('Unavailable public validator surface');
+			const isOverCapUrlIid = primitives.isOverCapUrlIid(c.input.iid);
+			try {
+				return {
+					isOverCapUrlIid,
+					validateDerivedAnchorIid: primitives.validateDerivedAnchorIid(c.input.slug, c.input.iid),
+					error: null,
+					raw: { thrown: null },
+				};
+			} catch (error: any) {
+				return {
+					isOverCapUrlIid,
+					validateDerivedAnchorIid: null,
+					error: error.code ?? error.name,
+					raw: { thrown: { name: error.name, code: error.code, message: error.message } },
+				};
+			}
 		},
 	});
 

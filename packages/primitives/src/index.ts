@@ -42,7 +42,13 @@ export {
 	TRIPLE_SALT,
 } from '@0xintuition/ids';
 // Predicate helpers
-export { buildIidAnchor, DEFAULT_URI_LIMITS } from './anchor.js';
+export {
+	buildAtomAnchor,
+	buildIidAnchor,
+	DEFAULT_URI_LIMITS,
+	isOverCapUrlIid,
+	validateDerivedAnchorIid,
+} from './anchor.js';
 // Atom builders
 export {
 	buildAggregateRating,
