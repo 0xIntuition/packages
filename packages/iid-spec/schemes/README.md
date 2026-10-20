@@ -2,7 +2,7 @@
 
 This directory is the normative scheme registry referenced by [§9.1](../spec/09-registry-governance.md): the governed, **closed** list of schemes that may appear in `int:<scheme>:<value>`. A well-formed IID bearing a scheme not listed here is not a valid IID ([§1.3.1](../spec/01-conformance.md)) — implementations MUST reject unknown schemes rather than passing them through. Each scheme has exactly one normative document, containing its grammar, its ordered canonicalization algorithm, validation rules, and test vectors. Once ratified, a scheme's canonicalization rules are frozen ([§9.3](../spec/09-registry-governance.md)): improvements ship as new schemes, never as edits.
 
-## The 26 schemes
+## The 29 schemes
 
 | Scheme | Class | Tier | Typing | Identifies |
 | :-- | :-: | :-: | :-- | :-- |
@@ -31,9 +31,12 @@ This directory is the normative scheme registry referenced by [§9.1](../spec/09
 | [`acct`](./acct.md) | B | — | unambiguous | A platform account |
 | [`rssitem`](./rssitem.md) | B | — | unambiguous | A podcast feed item |
 | [`termset`](./termset.md) | B | — | unambiguous | A term within a term set |
+| [`podcast-index`](./podcast-index.md) | D | — | unambiguous | A podcast feed |
+| [`apple-podcasts`](./apple-podcasts.md) | D | — | unambiguous | A podcast feed (matching-only) |
+| [`letterboxd`](./letterboxd.md) | D | — | unambiguous | A film |
 | [`gen1`](./gen1.md) | C | — | unambiguous | The facts a recipe hashed — not the entity itself |
 
-Class and typing definitions are in [§3](../spec/03-identity-classes.md) and [§7.2](../spec/07-representation-profiles.md); openness tiers (an axis that applies within Class A only) in [§3.3](../spec/03-identity-classes.md). The class/typing assignments above are snapshotted in machine-readable form in [`conformance/schemes.json`](../conformance/schemes.json), and every scheme document's test vectors appear in [`conformance/canonicalization.json`](../conformance/canonicalization.json); both are normative fixtures.
+Class D is defined in the [pre-publication amendment](../spec/09-registry-governance.md#2026-10-19--provider-local-identifiers-class-d). Existing class and typing definitions are in [§3](../spec/03-identity-classes.md) and [§7.2](../spec/07-representation-profiles.md); openness tiers (an axis that applies within Class A only) in [§3.3](../spec/03-identity-classes.md). The class/typing assignments above are snapshotted in machine-readable form in [`conformance/schemes.json`](../conformance/schemes.json), and every scheme document's test vectors appear in [`conformance/canonicalization.json`](../conformance/canonicalization.json); both are normative fixtures.
 
 ## Adding a scheme
 

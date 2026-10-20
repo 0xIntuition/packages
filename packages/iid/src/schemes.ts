@@ -479,6 +479,11 @@ function define(
 	};
 }
 
+/** Identity canonicalization: a grammar mismatch is never repaired, even at EOF. */
+function providerLocalValue(raw: string, pattern: RegExp): string | undefined {
+	return pattern.exec(raw)?.[0] === raw ? raw : undefined;
+}
+
 export const SCHEMES: Readonly<Record<SchemeName, SchemeDefinition>> = {
 	isbn: define('isbn', 'A', canonicalizeIsbn),
 	isrc: define('isrc', 'A', canonicalizeIsrc),
@@ -497,6 +502,11 @@ export const SCHEMES: Readonly<Record<SchemeName, SchemeDefinition>> = {
 	imdb: define('imdb', 'A', canonicalizeImdb),
 	tmdb: define('tmdb', 'A', canonicalizeTmdb),
 	podcastguid: define('podcastguid', 'A', canonicalizePodcastGuid),
+	'podcast-index': define('podcast-index', 'D', (raw) => providerLocalValue(raw, /^[1-9]\d*$/)),
+	'apple-podcasts': define('apple-podcasts', 'D', (raw) => providerLocalValue(raw, /^[1-9]\d*$/)),
+	letterboxd: define('letterboxd', 'D', (raw) =>
+		providerLocalValue(raw, /^film:[a-z0-9]+(?:-[a-z0-9]+)*$/)
+	),
 	url: define('url', 'B', canonicalizeUrl),
 	caip10: define('caip10', 'B', canonicalizeCaip10),
 	caip19: define('caip19', 'B', canonicalizeCaip19),
@@ -533,6 +543,9 @@ export const SCHEME_TYPING: Readonly<Record<SchemeName, 'unambiguous' | 'polymor
 	imdb: 'polymorphic',
 	tmdb: 'polymorphic', // ratified polymorphic (person segment spans classifications)
 	podcastguid: 'unambiguous',
+	'podcast-index': 'unambiguous',
+	'apple-podcasts': 'unambiguous',
+	letterboxd: 'unambiguous',
 	url: 'polymorphic',
 	caip10: 'polymorphic', // account OR contract
 	caip19: 'unambiguous',

@@ -19,7 +19,7 @@ int:gen1:music-group:r4:8f3c…   a band we could only identify by name
 
 **If you are implementing against this spec**, read the [specification](./spec/00-overview.md) in order. It is normative: it uses MUST/SHOULD/MAY in the RFC 2119 sense and is versioned.
 
-**If you need the exact rules for one identifier type** — how to canonicalize an ISBN, what a valid CAIP-10 value looks like — go straight to the [scheme registry](./schemes/README.md). Each of the 26 schemes has its own file with a grammar, an ordered canonicalization algorithm, validation rules, test vectors, and known limitations.
+**If you need the exact rules for one identifier type** — how to canonicalize an ISBN, what a valid CAIP-10 value looks like — go straight to the [scheme registry](./schemes/README.md). Each of the 29 schemes has its own file with a grammar, an ordered canonicalization algorithm, validation rules, test vectors, and known limitations.
 
 **If you are testing an implementation**, the [`conformance/`](./conformance/) directory contains the versioned machine-readable test vectors. They are normative and executable:
 
@@ -61,7 +61,7 @@ import vectors from '@0xintuition/iid-spec/conformance/canonicalization.json'
 | [08 — Equivalence](./spec/08-equivalence.md) | The layer above IIDs: clustering, canonical election, trust |
 | [09 — Registry governance](./spec/09-registry-governance.md) | Admission criteria, the freeze rule, and the change process |
 
-## The 26 schemes
+## The 29 schemes
 
 **Class A — registered authorities** (an external registry guarantees uniqueness)
 [`isbn`](./schemes/isbn.md) · [`isrc`](./schemes/isrc.md) · [`iswc`](./schemes/iswc.md) · [`isni`](./schemes/isni.md) · [`orcid`](./schemes/orcid.md) · [`lei`](./schemes/lei.md) · [`gtin`](./schemes/gtin.md) · [`doi`](./schemes/doi.md) · [`eidr`](./schemes/eidr.md) · [`wd`](./schemes/wd.md) · [`mbid`](./schemes/mbid.md) · [`olid`](./schemes/olid.md) · [`imdb`](./schemes/imdb.md) · [`tmdb`](./schemes/tmdb.md) · [`podcastguid`](./schemes/podcastguid.md)
@@ -71,6 +71,9 @@ import vectors from '@0xintuition/iid-spec/conformance/canonicalization.json'
 
 **Class C — derived** (a hash of the few facts we actually have)
 [`gen1`](./schemes/gen1.md)
+
+**Class D — provider-local** ([pre-publication amendment](./spec/09-registry-governance.md#2026-10-19--provider-local-identifiers-class-d))
+[`podcast-index`](./schemes/podcast-index.md), [`apple-podcasts`](./schemes/apple-podcasts.md), [`letterboxd`](./schemes/letterboxd.md) — typed, with a whole-scheme P1 floor.
 
 ## Typed Wikidata identifiers
 

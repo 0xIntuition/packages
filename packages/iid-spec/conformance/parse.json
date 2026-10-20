@@ -93,6 +93,27 @@
 			"scheme": "wd",
 			"value": "Q42",
 			"note": "legacy bare Wikidata parse remains unchanged"
+		},
+		{
+			"id": "parse-podcast-index",
+			"input": "int:podcast-index:3421639",
+			"scheme": "podcast-index",
+			"value": "3421639",
+			"note": "registered provider-local namespace"
+		},
+		{
+			"id": "parse-apple-podcasts",
+			"input": "int:apple-podcasts:1222114325",
+			"scheme": "apple-podcasts",
+			"value": "1222114325",
+			"note": "registered provider-local namespace"
+		},
+		{
+			"id": "parse-letterboxd",
+			"input": "int:letterboxd:film:moonlight",
+			"scheme": "letterboxd",
+			"value": "film:moonlight",
+			"note": "registered provider-local namespace"
 		}
 	]
 }

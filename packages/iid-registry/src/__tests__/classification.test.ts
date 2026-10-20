@@ -29,6 +29,9 @@ const DIRECT_EXPECTATIONS: Readonly<Record<string, string>> = {
 	gtin: 'product',
 	eidr: 'movie',
 	podcastguid: 'podcast-series',
+	'podcast-index': 'podcast-series',
+	'apple-podcasts': 'podcast-series',
+	letterboxd: 'movie',
 	appid: 'mobile-application',
 	purl: 'software',
 	acct: 'social-media-account',
@@ -233,3 +236,13 @@ describe('listUnambiguousSchemeClassifications', () => {
 		expect(entries.length).toBe(Object.keys(DIRECT_EXPECTATIONS).length);
 	});
 });
+
+for (const [iid, slug] of [
+	['int:podcast-index:3421639', 'podcast-series'],
+	['int:apple-podcasts:1222114325', 'podcast-series'],
+	['int:letterboxd:film:moonlight', 'movie'],
+]) {
+	it(`${iid}: classifies a registered provider-local identifier`, () => {
+		expect(classificationForIid(iid)?.slug).toBe(slug);
+	});
+}

@@ -109,6 +109,21 @@
 			"typing": "polymorphic",
 			"valueTyped": true,
 			"anchorIneligibleValuePattern": "^(television-series-season|television-series-episode|written-work|podcast|podcast-episode|video-game|album|organization):"
+		},
+		"podcast-index": {
+			"class": "D",
+			"typing": "unambiguous",
+			"anchorIneligibleValuePattern": "^[\\s\\S]*$"
+		},
+		"apple-podcasts": {
+			"class": "D",
+			"typing": "unambiguous",
+			"anchorIneligibleValuePattern": "^[\\s\\S]*$"
+		},
+		"letterboxd": {
+			"class": "D",
+			"typing": "unambiguous",
+			"anchorIneligibleValuePattern": "^[\\s\\S]*$"
 		}
 	}
 }

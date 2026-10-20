@@ -104,6 +104,23 @@ A scheme is never *removed*. Removal would invalidate historical data, which is 
 
 - **2026-10-19 — Weak account eligibility correction.** Before the first publication of `@0xintuition/iid-spec`, the [`acct`](../schemes/acct.md) weak form (`<platform>:@<handle>`) is corrected to be valid and unambiguously typed but not P0 anchor-eligible, with a P1 floor one rung below the strong form because handles can be renamed or recycled. Strong-form eligibility and all canonicalization rules and canonical bytes remain unchanged. This is a pre-publication amendment, not a §9.3.1 additive extension: it changes eligibility of an existing valid form, which §9.3.1 does not permit. The parity ruling is in effect by default, subject to ratification in review.
 
+
+### 2026-10-19 — Provider-local identifiers (Class D)
+
+A **provider-local identifier** is "an identifier assigned by one provider, stable within that provider, not governed by a registry outside it."
+
+This adds **Class D**. Class A requires an external registry's uniqueness guarantee; Class B is intrinsic and unassigned; Class C is a derived composite hash. None fits this definition verbatim. The three classes in §3 remain unchanged; this dated pre-publication amendment adds a fourth class before the first publication.
+
+Admission requires a named assigning provider, identifiers stable within that provider, permission to store and republish the values, a deterministic offline grammar, explicit entity typing, and normative positive and negative vectors. Names use `int:<provider>:<value>`; a type segment belongs to the value where needed. Provider-local admission does not establish an external registry's uniqueness guarantee or permit unknown schemes. The closed-registry rule in §9.1 stays unchanged.
+
+The admitted schemes are [`podcast-index`](../schemes/podcast-index.md), [`apple-podcasts`](../schemes/apple-podcasts.md), and [`letterboxd`](../schemes/letterboxd.md). Their grammars are respectively `^[1-9]\d*$`, `^[1-9]\d*$`, and `^film:[a-z0-9]+(?:-[a-z0-9]+)*$`. Canonicalization is the identity function on the complete valid value: no trimming, case folding, or leading-zero repair. Invalid values MUST be rejected, never repaired.
+
+The podcast namespaces unambiguously identify podcast feeds (`podcast-series`); Letterboxd identifies films (`movie`). All three are valid and typed but **not anchor-eligible**: they have a P1 floor, reported as `anchorIneligibilityReason: 'provider-local'`. In `schemes.json`, `anchorIneligibleValuePattern: "^[\\s\\S]*$"` means **whole scheme ineligible**, using the existing value-pattern mechanism. No Class D identifier may mint as a bare P0 anchor.
+
+Projection emits these identities on the `handle` rung, never the registry-backed strong path. `podcast-index` is second after `podcastguid` for podcast-series and second after `rssitem` for podcast-episode; its namespace still identifies a feed, not an episode. `apple-podcasts` is matching-only for podcast-series, listed after `wd` in the alias-only policy and excluded from primary category scheme orders. Letterboxd adds no category rung: movie remains `wd:film`, `tmdb:movie`, `imdb:title`. Matching aliases do not authorize primary category selection; the existing alias-only policy governs that distinction.
+
+This amendment changes only these previously unregistered namespaces. Existing scheme canonical bytes, typing, eligibility and category policies remain unchanged. The parity ruling is in effect by default, subject to ratification in review.
+
 ---
 
 **Previous:** [8. Equivalence](./08-equivalence.md) · **Back to:** [Overview](./00-overview.md)

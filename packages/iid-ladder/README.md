@@ -28,13 +28,20 @@ projectIdentifierLadder({
 Strong inputs are canonicalized using their registered scheme rules; invalid
 inputs are refused. Registered provider translations use the same frozen
 canonicalizers. An already canonical `int:` provider ID passes through as the
-strong rung, subject to the typed Wikidata policy below. Provider capability
+strong rung, except Class D retains `handle`, subject to the typed Wikidata policy below. Provider capability
 resolution is verified in tests and is not a runtime precondition for identity
 selection.
 
-Under the R16 hold, provider-local namespaces such as `spotify:*`,
-`apple-podcasts:`, `podcast-index:`, `goodreads:book:` and `letterboxd:film:`
-remain explicit `unregistered-provider` envelope fallbacks until their schemes are ratified.
+The registered provider-local class (Class D, spec §9.7) admits `podcast-index:`,
+`apple-podcasts:` and `letterboxd:film:`. These emit canonical IIDs on the `handle`
+rung, retain byte-exact grammar, and never enter registry-backed strong selection.
+Their valid typed IIDs have a whole-scheme P1 floor (`provider-local` eligibility
+reason). Podcast IDs are positive digits without leading zeros; Letterboxd is
+`film:<lowercase-hyphenated-slug>`. `apple-podcasts` remains a matching-only
+podcast-series alias; Letterboxd adds no movie rung.
+
+Other unregistered namespaces, including `spotify:*` and `goodreads:book:`,
+remain explicit `unregistered-provider` envelope fallbacks.
 
 ## Category rungs
 
@@ -110,7 +117,7 @@ import { iidForIdentityRung } from '@0xintuition/iid-ladder';
 iidForIdentityRung('isbn', '0140328726'); // 'int:isbn:9780140328721'
 iidForIdentityRung('wd:film', 'q485271'); // 'int:wd:film:Q485271'
 iidForIdentityRung('tmdb:movie', 'tv:550'); // undefined
-iidForIdentityRung('podcast-index', '123'); // undefined
+iidForIdentityRung('podcast-index', '123'); // 'int:podcast-index:123'
 ```
 
 ## Typed Wikidata identities

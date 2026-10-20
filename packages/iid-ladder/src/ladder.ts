@@ -36,7 +36,8 @@ export type LadderResult =
 export const IID_VALUE_MAX_LENGTH = 220;
 
 const STRONG_SCHEMES = SCHEME_NAMES.filter(
-	(scheme): scheme is Exclude<SchemeName, 'gen1' | 'url'> => scheme !== 'gen1' && scheme !== 'url'
+	(scheme): scheme is Exclude<SchemeName, 'gen1' | 'url'> =>
+		scheme !== 'gen1' && scheme !== 'url' && SCHEMES[scheme].class !== 'D'
 );
 const STRONG_SCHEME_SET = new Set<string>(STRONG_SCHEMES);
 const WIKIDATA_IDENTIFIER_KEYS = new Set([
@@ -103,7 +104,13 @@ export function projectIdentifierLadder(input: LadderInput): LadderResult {
 	if (providerCanonicalId?.startsWith('int:')) {
 		return validateIntuitionId(providerCanonicalId) &&
 			isMintableWdIid(providerCanonicalId, input.allowPlainWd)
-			? { iid: providerCanonicalId, rung: 'strong' }
+			? {
+					iid: providerCanonicalId,
+					rung:
+						SCHEMES[parseIntuitionId(providerCanonicalId)!.scheme].class === 'D'
+							? 'handle'
+							: 'strong',
+				}
 			: { fallback: 'envelope', iid: null, reason: 'invalid-handle' };
 	}
 	if (providerCanonicalId && isHttpUrl(providerCanonicalId)) {
@@ -184,7 +191,7 @@ function strongProviderCandidate(
 		return undefined;
 	}
 	const parsed = parseIntuitionId(projection.iid);
-	return parsed && parsed.scheme !== 'gen1' && parsed.scheme !== 'url'
+	return parsed && STRONG_SCHEME_SET.has(parsed.scheme)
 		? {
 				iid: projection.iid,
 				rung: providerCanonicalId.startsWith('int:') ? 'strong' : 'handle',

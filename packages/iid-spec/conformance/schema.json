@@ -160,13 +160,13 @@
 				"kind": { "const": "schemes" },
 				"schemes": {
 					"type": "object",
-					"minProperties": 26,
+					"minProperties": 29,
 					"additionalProperties": {
 						"type": "object",
 						"required": ["class", "typing"],
 						"additionalProperties": false,
 						"properties": {
-							"class": { "enum": ["A", "B", "C"] },
+							"class": { "enum": ["A", "B", "C", "D"] },
 							"typing": { "enum": ["unambiguous", "polymorphic"] },
 							"anchorIneligibleValuePattern": {
 								"type": "string",
@@ -207,6 +207,9 @@
 				"imdb",
 				"tmdb",
 				"podcastguid",
+				"podcast-index",
+				"apple-podcasts",
+				"letterboxd",
 				"url",
 				"caip10",
 				"caip19",
