@@ -6,6 +6,7 @@ export const book: ClassificationSpec = {
 	displayName: 'Book',
 	description: 'A book identity with only the title and optional disambiguators.',
 	category: 'Creative Work',
+	atomCategory: 'thing',
 	schema: { context: 'https://schema.org/', type: 'Book' },
 	metadataPredicates: [
 		'authoredBy',
@@ -60,7 +61,7 @@ export const book: ClassificationSpec = {
 			{ kind: 'scheme', scheme: 'isbn', source: { kind: 'field', key: 'isbn' } },
 			// D27: T2 community open data
 			{ kind: 'scheme', scheme: 'olid', source: { kind: 'same-as' } },
-			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' } },
+			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' }, wdSlug: 'written-work' },
 			// D21: author omitted — authorship is an authoredBy triple
 			{ kind: 'gen1', tag: 3, recipe: [{ key: 'name', from: 'field' }] },
 		],

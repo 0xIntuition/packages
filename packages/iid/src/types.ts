@@ -107,7 +107,7 @@ export type IdentityValueSource =
 	| { readonly kind: 'same-as' } // scan sameAs URLs through the scheme's canonicalizer
 	| { readonly kind: 'url-origin'; readonly key: string } // origin of a URL field
 	| { readonly kind: 'geohash'; readonly precision: number } // from latitude + longitude
-	| { readonly kind: 'podcast-guid'; readonly key: string } // RFC 4122 v5 over a feed URL
+	| { readonly kind: 'podcast-guid'; readonly key: string } // RFC 4122 v5 over the normalized feed URL
 	| { readonly kind: 'derivation'; readonly name: IdentityDerivationName };
 
 /** One hashed input of a gen1 recipe. `key` is the preimage key (spec §6.3). */

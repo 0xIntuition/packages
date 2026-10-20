@@ -45,17 +45,19 @@ describe('buildIidAnchor', () => {
 		}
 	});
 
-	it('polymorphic schemes cannot emit bare P0', () => {
-		// movie ladder tops out at wd via sameAs — polymorphic.
+	it('polymorphic schemes cannot emit bare P0: a slugless wd rung never fires', () => {
+		// brand's only wd rung is slugless; the engine skips it as the reference
+		// does, so a bare polymorphic IID can no longer reach the builder from a
+		// ladder and the request fails before the profile check.
 		const result = buildIidAnchor(
-			'movie',
+			'brand',
 			{ sameAs: ['https://www.wikidata.org/wiki/Q25188'] },
 			{ profile: 'p0' }
 		);
 
 		expect(result.success).toBe(false);
 		if (!result.success) {
-			expect(result.errors[0]).toMatch(/polymorphic/);
+			expect(result.errors[0]).toMatch(/No identity rung fired for "brand"/);
 		}
 	});
 

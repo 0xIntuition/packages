@@ -29,6 +29,18 @@ export type ClassificationCategory =
 	| 'Blockchain'
 	| 'Other';
 
+/** Engine category tokens; distinct from the catalogue's broad grouping. */
+export type AtomCategory =
+	| 'person'
+	| 'place'
+	| 'thing'
+	| 'company'
+	| 'product'
+	| 'podcast'
+	| 'song'
+	| 'software'
+	| 'unknown';
+
 // --- Identity (Intuition ID spec) -----------------------------------------
 //
 // Each classification declares an ordered identity ladder (IID spec §5):
@@ -74,8 +86,12 @@ export interface ClassificationSpec {
 	slug: string;
 	type: string;
 	displayName: string;
+	/** Optional render label; canonical names and schema types remain stable. */
+	commonName?: string;
 	description: string;
 	category: ClassificationCategory;
+	/** Optional classification-engine token, independent of catalogue grouping. */
+	atomCategory?: AtomCategory;
 	schema: {
 		context: string;
 		type: string;

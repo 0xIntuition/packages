@@ -6,6 +6,7 @@ export const brand: ClassificationSpec = {
 	displayName: 'Brand',
 	description: 'A brand identity with a name and optional canonical references.',
 	category: 'Entity',
+	atomCategory: 'company',
 	schema: { context: 'https://schema.org/', type: 'Brand' },
 	metadataPredicates: ['url', 'sameAs', 'imgUrl'] as const,
 	fields: [

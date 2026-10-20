@@ -6,6 +6,7 @@ export const aggregateRating: ClassificationSpec = {
 	displayName: 'Aggregate Rating',
 	description: 'A stable aggregate rating summary for a reviewed thing.',
 	category: 'Product',
+	atomCategory: 'thing',
 	schema: { context: 'https://schema.org/', type: 'AggregateRating' },
 	metadataPredicates: ['itemReviewed', 'authoredBy'] as const,
 	fields: [

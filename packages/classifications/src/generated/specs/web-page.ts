@@ -6,6 +6,7 @@ export const webPage: ClassificationSpec = {
 	displayName: 'Web Page',
 	description: 'A web page identity with a canonical URL.',
 	category: 'Web',
+	atomCategory: 'thing',
 	schema: { context: 'https://schema.org/', type: 'WebPage' },
 	metadataPredicates: ['listedIn', 'authoredBy', 'imgUrl', 'url', 'sameAs'] as const,
 	fields: [

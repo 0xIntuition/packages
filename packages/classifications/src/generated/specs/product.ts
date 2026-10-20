@@ -6,6 +6,7 @@ export const product: ClassificationSpec = {
 	displayName: 'Product',
 	description: 'A product identity with optional brand and SKU disambiguators.',
 	category: 'Product',
+	atomCategory: 'product',
 	schema: { context: 'https://schema.org/', type: 'Product' },
 	metadataPredicates: ['brand', 'manufacturer', 'hasCategory', 'sameAs'] as const,
 	fields: [

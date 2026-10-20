@@ -8,7 +8,7 @@ export const ethereumErc20CreationProfile = {
 		description: 'A fungible token contract identity on an EVM chain.',
 		category: 'Blockchain',
 		schema: {
-			context: 'https://schema.intuition.systems/v1/ethereum.jsonld',
+			context: 'https://schemas.intuition.systems/v1',
 			type: 'EthereumERC20',
 		},
 	},

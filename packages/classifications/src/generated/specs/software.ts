@@ -6,6 +6,7 @@ export const software: ClassificationSpec = {
 	displayName: 'Software',
 	description: 'A code project or software identity with a canonical repository URL.',
 	category: 'Product',
+	atomCategory: 'software',
 	schema: { context: 'https://schema.org/', type: 'SoftwareSourceCode' },
 	metadataPredicates: ['createdBy', 'url', 'implement', 'compatibleWith', 'sameAs'] as const,
 	fields: [

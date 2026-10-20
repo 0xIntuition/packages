@@ -44,6 +44,74 @@ sources can be supported later. For schema.org-backed classifications,
 copy inheritance or provenance into the classification; consumers can derive that
 from `@0xintuition/schema-org`.
 
+## Consumer Helpers
+
+`getClassificationByType('MusicRecording')` looks up the canonical schema type
+exactly and returns the same frozen spec as `getClassification('music-recording')`.
+Unknown types return `undefined`.
+
+`getClassificationByReference('song')` resolves trimmed, case-insensitive
+references in this order: canonical slug, schema type, unique common name,
+unique display name, then unique engine category. Ambiguous tiers fall through;
+unresolved references return `undefined`. `buildClassificationReferenceResolver`
+applies the same rules to a supplied spec list, independently of its order.
+
+`getClassificationLabel(spec)` returns the optional `commonName` or falls back
+to `displayName`: MusicRecording renders as “Song” and MusicGroup as
+“Artist/Band”. Canonical names stay stable. Optional `atomCategory` carries the
+engine token (for example, `song`); `category` keeps the catalogue grouping.
+
+```ts
+import {
+  buildAtomDataObject,
+  buildClassificationSearchText,
+  deriveClassificationIdentifier,
+  getClassificationByType,
+} from '@0xintuition/classifications'
+
+const book = getClassificationByType('Book')!
+const values = { name: 'The Sovereign Individual', isbn: '9780684832722' }
+const identifier = deriveClassificationIdentifier(book.slug, values)
+// { iid: 'int:isbn:9780684832722', scheme: 'isbn', class: 'A' }
+
+const data = buildAtomDataObject(book.slug, values, { identifier: true })
+const searchText = buildClassificationSearchText(book.fields, values, values.name)
+```
+
+Identifier derivation projects the declarative `identity.ladder` through the IID
+engine. Unknown slugs throw; a missing identity or an unfired ladder returns
+`undefined`. Podcast feed GUIDs normalize scheme and host case while preserving
+path and query bytes; the IID engine applies that normalization itself, so a
+ladder from `identityLadderFor(...)` passed straight to the engine derives the
+same identifier as `deriveClassificationIdentifier`. Atom data includes the
+derived `identifier` immediately after `@type` only when opted in, for both
+object and serialized builders.
+
+Search text includes the primary text, declared string fields, and corpus names
+from `description`, `author`, and `about`. It removes duplicates and URL/IID-like
+strings. The base remains unbounded; `CLASSIFICATION_SEARCH_TEXT_MAX_LENGTH`
+exports the 20,000-character cap for downstream composition.
+
+## Discovery and Visibility Data
+
+`DISCOVER_ACTIVITY_GROUPS` defines the shared `read`, `watch`, and `listen`
+classification memberships. `PRIMARY_ITEM_CATALOGUE_PRESET` lists machinery
+types hidden from item browsing, plus the self-created `EthereumAccount` rule.
+`filterClassificationSpecsForPrimaryCatalogue(...)` narrows spec option lists;
+`isClassificationTypeInPrimaryCatalogue(...)` tests a type. Neither removes
+specs from the canonical catalogue.
+
+`PRIMARY_ITEM_CATALOGUE_VISIBILITY`, `ALL_ATOMS_VISIBILITY`, and
+`ATOM_VISIBILITY_MODES` identify the supported modes. Use
+`resolveAtomVisibilityFilters({ visibility, excludeClassifications })` to expand
+a mode into exclusion lists; `all` keeps only caller exclusions.
+
+`NATIVE_ATOM_CLASSIFICATION_TYPES` and `isNativeAtomClassificationType(...)`
+describe authoritative native writer types independently of visibility.
+`nativeAtomClassificationTypeForData(...)` recognizes UUID-backed native content
+URNs and returns `null` for other data. `IDENTITY_FIELD_SCHEMA_ORG_ALIASES`
+provides the identity field mapping from `isrc` to `isrcCode`.
+
 ## Browser Creation UIs
 
 Use Creation Profiles for known frontend create flows. They are generated plain
@@ -91,4 +159,16 @@ Known classifications are also available as direct subpath imports:
 import { ethereumAccount } from '@0xintuition/classifications/ethereum-account'
 ```
 
-Ethereum and other Intuition-local classifications use immutable `https://schema.intuition.systems/v1/...` JSON-LD contexts and are gated on `schema.intuition.systems` resolving before publication.
+Ethereum classifications declare `https://schemas.intuition.systems/v1`.
+SocialMediaAccount declares `https://schema.org/` for reference byte parity,
+although that type is absent from the pinned schema.org vocabulary. No spec
+currently references the separately hosted `schema.intuition.systems` contexts.
+
+## Declarative identity ladders
+
+The declarative IID engine skips any Wikidata (`wd`) rung without an active
+`wdSlug` EntitySchema binding and tries the next rung. The slugless rungs in
+brand, event, local-business, location, music-group, and thing therefore fall
+through to another available scheme or recipe, or yield no identifier. Active
+bindings still prefix bare QIDs and retain matching typed values; conflicting
+or invalid typed values are skipped.

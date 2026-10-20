@@ -6,6 +6,7 @@ export const movie: ClassificationSpec = {
 	displayName: 'Movie',
 	description: 'A movie identity with release-date disambiguation when needed.',
 	category: 'Media',
+	atomCategory: 'thing',
 	schema: { context: 'https://schema.org/', type: 'Movie' },
 	metadataPredicates: [
 		'actor',
@@ -50,7 +51,7 @@ export const movie: ClassificationSpec = {
 		identifies: 'a film (work level)',
 		ladder: [
 			// D27: open registries first — wd (CC0), tmdb (daily ID exports), then imdb (closed)
-			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' } },
+			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' }, wdSlug: 'film' },
 			{ kind: 'scheme', scheme: 'tmdb', source: { kind: 'same-as' } },
 			{ kind: 'scheme', scheme: 'imdb', source: { kind: 'same-as' } },
 			{

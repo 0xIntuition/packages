@@ -110,7 +110,7 @@ describe('buildAtom', () => {
 
 		const parsed = JSON.parse(result.value.data);
 
-		expect(parsed['@context']).toBe('https://schema.intuition.systems/v1/ethereum.jsonld');
+		expect(parsed['@context']).toBe('https://schemas.intuition.systems/v1');
 		expect(parsed['@type']).toBe('EthereumERC20');
 		expect(parsed.chainId).toBe('1');
 		expect(parsed.address).toBe('0x0000000000000000000000000000000000000001');
@@ -129,7 +129,7 @@ describe('buildAtom', () => {
 	});
 
 	it('returns errors for missing required fields', () => {
-		const result = buildAtom('person', { givenName: 'Vitalik' });
+		const result = buildAtom('person', { familyName: 'Buterin' });
 
 		expect(result.success).toBe(false);
 
@@ -137,7 +137,7 @@ describe('buildAtom', () => {
 			return;
 		}
 
-		expect(result.errors).toContain('Missing required field "familyName".');
+		expect(result.errors).toContain('Missing required field "givenName".');
 	});
 
 	it('returns errors for invalid field values', () => {
@@ -516,7 +516,7 @@ describe('convenience builders', () => {
 
 		const parsed = JSON.parse(result.value.data);
 
-		expect(parsed['@context']).toBe('https://schema.intuition.systems/v1/ethereum.jsonld');
+		expect(parsed['@context']).toBe('https://schemas.intuition.systems/v1');
 		expect(parsed['@type']).toBe('EthereumERC20');
 		expect(parsed.symbol).toBe('USDC');
 	});

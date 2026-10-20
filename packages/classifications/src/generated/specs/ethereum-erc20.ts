@@ -6,8 +6,9 @@ export const ethereumErc20: ClassificationSpec = {
 	displayName: 'ERC-20 Token',
 	description: 'A fungible token contract identity on an EVM chain.',
 	category: 'Blockchain',
+	atomCategory: 'thing',
 	schema: {
-		context: 'https://schema.intuition.systems/v1/ethereum.jsonld',
+		context: 'https://schemas.intuition.systems/v1',
 		type: 'EthereumERC20',
 	},
 	metadataPredicates: ['listedOn', 'pricedIn', 'backedBy'] as const,
