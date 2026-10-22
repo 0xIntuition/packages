@@ -22,6 +22,7 @@ export {
 	listBuiltinClassificationSlugs,
 	registerBuiltinClassifications,
 } from './classifications';
+export { redactProviderDiagnostic } from './diagnostics';
 
 export type { EnrichmentEngine, EnrichmentEngineConfig } from './engine';
 export { createEnrichmentEngine } from './engine';
