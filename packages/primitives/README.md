@@ -121,3 +121,21 @@ the reference's message. `isOverCapUrlIid(iid)` returns `true` only for that can
 `int:url:` exception; malformed or noncanonical URLs and other schemes return
 `false`. A URL exactly at the cap is valid. This exception is exclusive to derived
 identifiers: an over-cap candidate is rejected, even when its URL is canonical.
+
+## Subpaths
+
+| Import suffix | API |
+| --- | --- |
+| `.` | Complete primitives API |
+| `./atom` | Atom construction |
+| `./anchor` | Canonical IID anchor construction |
+| `./predicate` | Predicate construction |
+| `./triple` | Triple construction |
+| `./discover` | Classification and predicate discovery |
+| `./validate` | Primitive input validation |
+| `./types` | TypeScript primitive input and result types |
+| `./package.json` | Package metadata |
+
+Append the suffix to `@0xintuition/primitives` (for example,
+`@0xintuition/primitives/validate`). Use named ESM imports; `./types` is intended
+for `import type`.
