@@ -3,8 +3,10 @@ import type { PredicateSpec } from '../../types.js';
 export const hasTag = {
 	key: 'hasTag',
 	name: 'has tag',
+	// Identity-sensitive: this text is part of the minted predicate atom data. Keep the
+	// bytes frozen; reword guidance in docs, not here (see docs/reconciliation.md).
 	description:
-		'Assigns a free-form keyword or tag atom to the subject. Use for lightweight clustering, filtering, and discovery — tags are informal, many-per-subject, and carry no taxonomy guarantees (prefer `has type` or `has category` for structured classification)',
+		'Assigns a reusable tag or keyword atom to the subject for filtering, clustering, and discovery',
 	marketPattern: 'attributive',
 	conjugates: false,
 	category: 'Identity/Classification',

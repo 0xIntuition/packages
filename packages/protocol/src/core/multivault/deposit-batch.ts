@@ -1,6 +1,6 @@
 import type { ContractFunctionArgs } from 'viem';
 
-import { MultiVaultAbi } from '../../contracts';
+import { type MultiVaultAbi, MultiVaultWithRevertsAbi } from '../../contracts';
 import type { WriteConfig } from '../../types';
 
 export type DepositBatchInputs = {
@@ -21,7 +21,7 @@ export async function multiVaultDepositBatch(config: WriteConfig, inputs: Deposi
 	const { request } = await publicClient.simulateContract({
 		account: walletClient.account,
 		address,
-		abi: MultiVaultAbi,
+		abi: MultiVaultWithRevertsAbi,
 		functionName: 'depositBatch',
 		args,
 		value,

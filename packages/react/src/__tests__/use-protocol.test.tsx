@@ -350,9 +350,11 @@ describe('usePreviewAtomCreate', () => {
 });
 
 describe('usePreviewTripleCreate', () => {
-	const termId = '0x0000000000000000000000000000000000000000000000000000000000000001' as Hex;
+	const subjectId = '0x0000000000000000000000000000000000000000000000000000000000000001' as Hex;
+	const predicateId = '0x0000000000000000000000000000000000000000000000000000000000000002' as Hex;
+	const objectId = '0x0000000000000000000000000000000000000000000000000000000000000003' as Hex;
 
-	it('reads previewTripleCreate from the contract', () => {
+	it('reads previewTripleCreate from the contract with the three atom ids', () => {
 		mockUseReadContract.mockReturnValue({
 			data: [30n, 25n],
 			isLoading: false,
@@ -361,13 +363,35 @@ describe('usePreviewTripleCreate', () => {
 			error: null,
 		});
 
-		const { result } = renderHook(() => usePreviewTripleCreate(termId, 2000n));
+		const { result } = renderHook(() =>
+			usePreviewTripleCreate(subjectId, predicateId, objectId, 2000n)
+		);
 
 		expect(result.current.data).toBeDefined();
 		expect(mockUseReadContract).toHaveBeenCalledWith(
 			expect.objectContaining({
 				functionName: 'previewTripleCreate',
-				args: [termId, 2000n],
+				args: [subjectId, predicateId, objectId, 2000n],
+			})
+		);
+	});
+
+	it('stays disabled until all three atom ids are known', () => {
+		mockUseReadContract.mockReturnValue({
+			data: undefined,
+			isLoading: false,
+			isPending: false,
+			isError: false,
+			error: null,
+		});
+
+		renderHook(() => usePreviewTripleCreate(subjectId, undefined, objectId, 2000n));
+
+		expect(mockUseReadContract).toHaveBeenCalledWith(
+			expect.objectContaining({
+				functionName: 'previewTripleCreate',
+				args: undefined,
+				query: { enabled: false },
 			})
 		);
 	});

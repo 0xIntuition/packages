@@ -14,10 +14,10 @@ describe('validateAtom', () => {
 	});
 
 	it('returns issues for missing required fields', () => {
-		const result = validateAtom('person', { givenName: 'Vitalik' });
+		const result = validateAtom('person', { familyName: 'Buterin' });
 
 		expect(result.valid).toBe(false);
-		expect(result.issues).toContain('Missing required field "familyName".');
+		expect(result.issues).toContain('Missing required field "givenName".');
 	});
 
 	it('returns issues for unknown fields', () => {

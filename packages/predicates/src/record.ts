@@ -1,8 +1,7 @@
 import type { PredicateRecord, PredicateSpec } from './types.js';
 
 /**
- * Per-spec consistency gate. Checks the rules that need only a single spec (see
- * `.planning/predicate-spec-decisions.md` §5.1). Cross-referential rules that need the whole set
+ * Per-spec consistency gate. Checks the rules that need only a single spec. Cross-referential rules that need the whole set
  * (inverse mirroring, contradicts symmetry, specializes acyclicity, key existence) live in
  * `validate.ts` and run over `PREDICATE_SPECS`.
  */

@@ -77,7 +77,7 @@ describe('classification atom data', () => {
 				decimals: '18',
 			})
 		).toBe(
-			'{"@context":"https://schema.intuition.systems/v1/ethereum.jsonld","@type":"EthereumERC20","chainId":"1","address":"0x0000000000000000000000000000000000000001","name":"Ether","symbol":"ETH","decimals":"18"}'
+			'{"@context":"https://schemas.intuition.systems/v1","@type":"EthereumERC20","chainId":"1","address":"0x0000000000000000000000000000000000000001","name":"Ether","symbol":"ETH","decimals":"18"}'
 		);
 	});
 
@@ -107,9 +107,9 @@ describe('classification atom data', () => {
 	it('throws on invalid required values', () => {
 		expect(() =>
 			buildAtomData('person', {
-				givenName: 'Vitalik',
+				familyName: 'Buterin',
 			})
-		).toThrow('Missing required field "familyName".');
+		).toThrow('Missing required field "givenName".');
 	});
 
 	it('throws on invalid ethereum addresses', () => {

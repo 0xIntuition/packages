@@ -6,6 +6,7 @@ export const socialMediaPosting: ClassificationSpec = {
 	displayName: 'Social Media Posting',
 	description: 'A social media post with name, text, and canonical URL.',
 	category: 'Web',
+	atomCategory: 'thing',
 	schema: { context: 'https://schema.org/', type: 'SocialMediaPosting' },
 	metadataPredicates: ['authoredBy', 'reference', 'url', 'hasTag'] as const,
 	fields: [

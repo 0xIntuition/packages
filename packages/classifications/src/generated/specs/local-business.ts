@@ -6,6 +6,7 @@ export const localBusiness: ClassificationSpec = {
 	displayName: 'Local Business',
 	description: 'A local business identity with optional address and contact disambiguators.',
 	category: 'Entity',
+	atomCategory: 'place',
 	schema: { context: 'https://schema.org/', type: 'LocalBusiness' },
 	metadataPredicates: [
 		'branchOf',

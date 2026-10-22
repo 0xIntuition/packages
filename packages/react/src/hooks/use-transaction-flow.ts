@@ -34,7 +34,7 @@ type UseTransactionFlowReturn<TArgs> = {
 	receipt: TransactionReceipt | undefined;
 	/** Error if any step failed. */
 	error: Error | undefined;
-	/** Reset the flow to idle state. */
+	/** Reset to idle and reject a pending execute; does not cancel an on-chain transaction. */
 	reset: () => void;
 };
 
@@ -83,13 +83,14 @@ export function useTransactionFlow<TArgs>(
 	const [receipt, setReceipt] = useState<TransactionReceipt | undefined>(undefined);
 	const [error, setError] = useState<Error | undefined>(undefined);
 
-	// Ref to hold the promise resolver for the imperative execute() API
-	const resolverRef = useRef<{
+	// Allocate one attempt before asking the wallet. Reset/unmount invalidates
+	// this object so a late wallet response cannot revive an abandoned flow.
+	type PendingTransaction = {
 		resolve: (receipt: TransactionReceipt) => void;
 		reject: (error: Error) => void;
-	} | null>(null);
+	};
+	const pendingRef = useRef<PendingTransaction | null>(null);
 
-	// Keep callbacks in refs to avoid stale closures
 	const onConfirmedRef = useRef(options.onConfirmed);
 	onConfirmedRef.current = options.onConfirmed;
 	const onErrorRef = useRef(options.onError);
@@ -98,71 +99,92 @@ export function useTransactionFlow<TArgs>(
 	const receiptQuery = useWaitForTransactionReceipt({
 		hash,
 		confirmations: options.confirmations ?? 1,
-		query: {
-			enabled: hash !== undefined && status === 'confirming',
-		},
+		query: { enabled: hash !== undefined && status === 'confirming' },
 	});
 
-	// Sync receipt query results into our state via useEffect
 	useEffect(() => {
-		if (receiptQuery.data && status === 'confirming') {
-			setReceipt(receiptQuery.data);
-			setStatus('confirmed');
-			onConfirmedRef.current?.(receiptQuery.data);
-			resolverRef.current?.resolve(receiptQuery.data);
-			resolverRef.current = null;
-		}
-	}, [receiptQuery.data, status]);
-
-	useEffect(() => {
-		if (receiptQuery.error && status === 'confirming') {
-			const receiptError =
-				receiptQuery.error instanceof Error
-					? receiptQuery.error
+		const pending = pendingRef.current;
+		if (!pending || status !== 'confirming') return;
+		const confirmedReceipt = receiptQuery.data;
+		const receiptError =
+			confirmedReceipt?.status === 'reverted'
+				? new Error('Transaction reverted.')
+				: receiptQuery.error;
+		if (receiptError) {
+			const failure =
+				receiptError instanceof Error
+					? receiptError
 					: new Error('Transaction confirmation failed.');
-			setError(receiptError);
+			pendingRef.current = null;
+			setError(failure);
 			setStatus('error');
-			onErrorRef.current?.(receiptError);
-			resolverRef.current?.reject(receiptError);
-			resolverRef.current = null;
+			pending.reject(failure);
+			onErrorRef.current?.(failure);
+		} else if (confirmedReceipt) {
+			pendingRef.current = null;
+			setReceipt(confirmedReceipt);
+			setStatus('confirmed');
+			// Settle before application callbacks, which may throw or start another flow.
+			pending.resolve(confirmedReceipt);
+			onConfirmedRef.current?.(confirmedReceipt);
 		}
-	}, [receiptQuery.error, status]);
+	}, [receiptQuery.data, receiptQuery.error, status]);
+
+	useEffect(
+		() => () => {
+			const pending = pendingRef.current;
+			pendingRef.current = null;
+			pending?.reject(new Error('Transaction flow unmounted.'));
+		},
+		[]
+	);
 
 	const execute = useCallback(
-		async (args: TArgs): Promise<TransactionReceipt> => {
+		(args: TArgs): Promise<TransactionReceipt> => {
+			if (pendingRef.current)
+				return Promise.reject(new Error('A transaction is already in progress.'));
+			let pending!: PendingTransaction;
+			const completion = new Promise<TransactionReceipt>((resolve, reject) => {
+				pending = { resolve, reject };
+			});
+			pendingRef.current = pending;
 			setStatus('submitting');
 			setHash(undefined);
 			setReceipt(undefined);
 			setError(undefined);
 
-			try {
-				const txHash = await options.mutationFn(args);
-				setHash(txHash);
-				setStatus('confirming');
-
-				// Return a promise that resolves when the receipt arrives
-				// via the useEffect sync above.
-				return new Promise<TransactionReceipt>((resolve, reject) => {
-					resolverRef.current = { resolve, reject };
-				});
-			} catch (submitError) {
-				const err =
-					submitError instanceof Error ? submitError : new Error('Transaction submission failed.');
-				setError(err);
-				setStatus('error');
-				onErrorRef.current?.(err);
-				throw err;
-			}
+			void (async () => {
+				try {
+					const txHash = await options.mutationFn(args);
+					if (pendingRef.current !== pending) return;
+					setHash(txHash);
+					setStatus('confirming');
+				} catch (submitError) {
+					if (pendingRef.current !== pending) return;
+					const failure =
+						submitError instanceof Error
+							? submitError
+							: new Error('Transaction submission failed.');
+					pendingRef.current = null;
+					setError(failure);
+					setStatus('error');
+					pending.reject(failure);
+					onErrorRef.current?.(failure);
+				}
+			})().catch(pending.reject);
+			return completion;
 		},
 		[options.mutationFn]
 	);
 
 	const reset = useCallback(() => {
+		const pending = pendingRef.current;
+		pendingRef.current = null;
+		pending?.reject(new Error('Transaction flow reset.'));
 		setStatus('idle');
 		setHash(undefined);
 		setReceipt(undefined);
 		setError(undefined);
-		resolverRef.current = null;
 	}, []);
 
 	return {

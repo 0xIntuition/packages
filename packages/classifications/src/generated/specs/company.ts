@@ -6,6 +6,7 @@ export const company: ClassificationSpec = {
 	displayName: 'Company',
 	description: 'An organization identity with optional canonical references.',
 	category: 'Entity',
+	atomCategory: 'company',
 	schema: { context: 'https://schema.org/', type: 'Organization' },
 	metadataPredicates: [
 		'founder',
@@ -52,7 +53,7 @@ export const company: ClassificationSpec = {
 	identity: {
 		identifies: 'a legal entity',
 		ladder: [
-			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' } },
+			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' }, wdSlug: 'organization' },
 			{ kind: 'scheme', scheme: 'url', source: { kind: 'field', key: 'url' } },
 			{ kind: 'gen1', tag: 4, recipe: [{ key: 'name', from: 'field' }] },
 		],

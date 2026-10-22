@@ -76,7 +76,7 @@ describe('classification atom data', () => {
 				address: '0x0000000000000000000000000000000000000001',
 			})
 		).toBe(
-			'{"@context":"https://schema.intuition.systems/v1/ethereum.jsonld","@type":"EthereumAccount","address":"0x0000000000000000000000000000000000000001"}'
+			'{"@context":"https://schemas.intuition.systems/v1","@type":"EthereumAccount","address":"0x0000000000000000000000000000000000000001"}'
 		);
 		expect(
 			buildAtomData('ethereum-erc20', {
@@ -87,7 +87,7 @@ describe('classification atom data', () => {
 				decimals: '18',
 			})
 		).toBe(
-			'{"@context":"https://schema.intuition.systems/v1/ethereum.jsonld","@type":"EthereumERC20","chainId":"1","address":"0x0000000000000000000000000000000000000001","name":"Ether","symbol":"ETH","decimals":"18"}'
+			'{"@context":"https://schemas.intuition.systems/v1","@type":"EthereumERC20","chainId":"1","address":"0x0000000000000000000000000000000000000001","name":"Ether","symbol":"ETH","decimals":"18"}'
 		);
 		expect(
 			buildAtomData('ethereum-smart-contract', {
@@ -95,7 +95,7 @@ describe('classification atom data', () => {
 				address: '0x0000000000000000000000000000000000000002',
 			})
 		).toBe(
-			'{"@context":"https://schema.intuition.systems/v1/ethereum.jsonld","@type":"EthereumSmartContract","chainId":"1","address":"0x0000000000000000000000000000000000000002"}'
+			'{"@context":"https://schemas.intuition.systems/v1","@type":"EthereumSmartContract","chainId":"1","address":"0x0000000000000000000000000000000000000002"}'
 		);
 	});
 
@@ -106,7 +106,7 @@ describe('classification atom data', () => {
 				platform: 'x',
 			})
 		).toBe(
-			'{"@context":"https://schema.intuition.systems/v1/social-media-account.jsonld","@type":"SocialMediaAccount","username":"karpathy","platform":"x"}'
+			'{"@context":"https://schema.org/","@type":"SocialMediaAccount","username":"karpathy","platform":"x"}'
 		);
 	});
 
@@ -136,9 +136,13 @@ describe('classification atom data', () => {
 	it('throws on invalid required values', () => {
 		expect(() =>
 			buildAtomData('person', {
-				givenName: 'Vitalik',
+				familyName: 'Buterin',
 			})
-		).toThrow('Missing required field "familyName".');
+		).toThrow('Missing required field "givenName".');
+	});
+
+	it('allows mononym persons without a family name (IID decision D25)', () => {
+		expect(() => buildAtomData('person', { givenName: 'Rihanna' })).not.toThrow();
 	});
 
 	it('throws on invalid ethereum addresses', () => {

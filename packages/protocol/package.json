@@ -1,6 +1,6 @@
 {
 	"name": "@0xintuition/protocol",
-	"version": "3.0.0",
+	"version": "4.0.0",
 	"description": "Intuition protocol contract ABIs and interaction helpers",
 	"private": false,
 	"license": "MIT",
@@ -17,6 +17,10 @@
 		".": {
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.js"
+		},
+		"./contracts": {
+			"types": "./dist/contracts/index.d.ts",
+			"import": "./dist/contracts/index.js"
 		},
 		"./package.json": "./package.json"
 	},
@@ -38,7 +42,8 @@
 	},
 	"homepage": "https://github.com/0xIntuition/packages/tree/main/packages/protocol#readme",
 	"publishConfig": {
-		"access": "public"
+		"access": "public",
+		"tag": "alpha"
 	},
 	"scripts": {
 		"build": "node ../../scripts/clean-dist.mjs && tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
@@ -62,7 +67,8 @@
 		"test:unit": "vitest run -c vitest.unit.config.ts"
 	},
 	"dependencies": {
-		"@0xintuition/curves": "0.1.0-alpha.0"
+		"@0xintuition/curves": "0.1.0",
+		"@0xintuition/deployments": "0.1.0"
 	},
 	"peerDependencies": {
 		"viem": "^2.0.0"

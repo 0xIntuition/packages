@@ -8,7 +8,7 @@ export const ethereumAccountCreationProfile = {
 		description: 'A wallet or externally owned account identity on an EVM chain.',
 		category: 'Blockchain',
 		schema: {
-			context: 'https://schema.intuition.systems/v1/ethereum.jsonld',
+			context: 'https://schemas.intuition.systems/v1',
 			type: 'EthereumAccount',
 		},
 	},

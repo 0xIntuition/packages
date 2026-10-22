@@ -6,6 +6,7 @@ export const thing: ClassificationSpec = {
 	displayName: 'Thing',
 	description: 'A broad tangible or conceptual thing with a name and description.',
 	category: 'Entity',
+	atomCategory: 'thing',
 	schema: { context: 'https://schema.org/', type: 'Thing' },
 	metadataPredicates: ['sameAs', 'url', 'imgUrl', 'hasDescription'] as const,
 	fields: [

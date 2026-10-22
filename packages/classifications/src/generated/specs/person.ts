@@ -6,6 +6,7 @@ export const person: ClassificationSpec = {
 	displayName: 'Person',
 	description: 'An individual human identity using structured first and last names.',
 	category: 'Entity',
+	atomCategory: 'person',
 	schema: { context: 'https://schema.org/', type: 'Person' },
 	metadataPredicates: [
 		'memberOf',
@@ -31,7 +32,7 @@ export const person: ClassificationSpec = {
 			label: 'Last Name',
 			description: 'The person’s family or last name.',
 			fieldType: 'string',
-			required: true,
+			required: false,
 			placeholder: 'Buterin',
 		},
 		{
@@ -49,7 +50,9 @@ export const person: ClassificationSpec = {
 		identifies: 'an individual human',
 		ladder: [
 			{ kind: 'scheme', scheme: 'isni', source: { kind: 'same-as' } },
-			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' } },
+			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' }, wdSlug: 'human' },
+			// D27 T2: OpenLibrary author IDs carry their type in the A suffix.
+			{ kind: 'scheme', scheme: 'olid', source: { kind: 'same-as' } },
 			{
 				kind: 'gen1',
 				tag: 4,

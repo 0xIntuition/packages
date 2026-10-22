@@ -6,6 +6,7 @@ export const dataset: ClassificationSpec = {
 	displayName: 'Dataset',
 	description: 'A dataset identity with a canonical dataset URL.',
 	category: 'Creative Work',
+	atomCategory: 'thing',
 	schema: { context: 'https://schema.org/', type: 'Dataset' },
 	metadataPredicates: ['createdBy', 'publisher', 'reference', 'url', 'sameAs'] as const,
 	fields: [

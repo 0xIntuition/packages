@@ -1,10 +1,12 @@
 import type { ContractFunctionArgs } from 'viem';
 
-import { MultiVaultAbi } from '../../contracts';
+import { type MultiVaultAbi, MultiVaultWithRevertsAbi } from '../../contracts';
 import type { WriteConfig } from '../../types';
 
 export type RedeemBatchInputs = {
-	args: ContractFunctionArgs<typeof MultiVaultAbi, 'nonpayable', 'redeemBatch'>;
+	// `redeemBatch` is declared payable only so it can share a value-bearing multicall
+	// with payable legs; its own value allocation must be zero.
+	args: ContractFunctionArgs<typeof MultiVaultAbi, 'payable', 'redeemBatch'>;
 };
 
 /**
@@ -20,7 +22,7 @@ export async function multiVaultRedeemBatch(config: WriteConfig, inputs: RedeemB
 	const { request } = await publicClient.simulateContract({
 		account: walletClient.account,
 		address,
-		abi: MultiVaultAbi,
+		abi: MultiVaultWithRevertsAbi,
 		functionName: 'redeemBatch',
 		args,
 	});

@@ -6,6 +6,7 @@ export const event: ClassificationSpec = {
 	displayName: 'Event',
 	description: 'An event identity with optional time and location disambiguators.',
 	category: 'Other',
+	atomCategory: 'thing',
 	schema: { context: 'https://schema.org/', type: 'Event' },
 	metadataPredicates: [
 		'organizer',

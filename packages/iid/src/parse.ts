@@ -1,0 +1,185 @@
+import { getScheme, SCHEME_TYPING } from './schemes.js';
+import type { IidInspection, IntuitionId, ParsedIid, SchemeName } from './types.js';
+import { isActiveWdEntitySchemaSlug, type WdEntitySchemaSlug } from './wd-entityschema-bindings.js';
+
+/**
+ * The full grammar (spec §2.2): `int:` namespace, 1-32 char lowercase
+ * scheme, and a 1-220 char value of visible ASCII only (%x21-7E — no
+ * space, no control characters, no non-ASCII).
+ */
+const IID_SHAPE = /^int:([a-z0-9-]{1,32}):([\x21-\x7E]{1,220})$/;
+
+/** Matches the shape without requiring a registered scheme. */
+const IID_SHAPE_ANY_SCHEME = IID_SHAPE;
+
+/** Handles can be renamed or recycled; only strong account IDs may anchor. */
+const WEAK_ACCOUNT_VALUE = /^[^:]+:@/;
+
+/**
+ * Parse an IID into scheme + value. Splits on the FIRST TWO colons only —
+ * everything after the second colon is an opaque, scheme-owned value
+ * (CAIP and DOI values contain `:` and `/`).
+ */
+export function parseIntuitionId(input: string): ParsedIid | undefined {
+	const match = IID_SHAPE.exec(input);
+
+	if (!match) {
+		return undefined;
+	}
+
+	const scheme = getScheme(match[1] ?? '');
+
+	if (!scheme) {
+		return undefined;
+	}
+
+	return { scheme: scheme.scheme, value: match[2] ?? '' };
+}
+
+/**
+ * Full validation: well-formed, registered scheme, and the value is in the
+ * scheme's canonical form (byte-exact — there is no case-insensitive
+ * matching at the ID layer).
+ */
+export function validateIntuitionId(input: string): input is IntuitionId {
+	const parsed = parseIntuitionId(input);
+
+	if (!parsed) {
+		return false;
+	}
+
+	const scheme = getScheme(parsed.scheme);
+
+	if (!scheme) {
+		return false;
+	}
+
+	return scheme.isCanonical(parsed.value);
+}
+
+/**
+ * Storage/read-boundary IID contract for KG nodes.
+ *
+ * Registered schemes must use their canonical byte form. Unregistered
+ * provider-local schemes retain the bounded generic shape used by the app IID
+ * ladder, without trimming or embedded whitespace normalization.
+ */
+export function isCanonicalNodeIid(input: string): boolean {
+	const match = IID_SHAPE.exec(input);
+	const schemeName = match?.[1];
+	if (!schemeName) {
+		return false;
+	}
+
+	const scheme = getScheme(schemeName);
+	if (scheme) {
+		return scheme.isCanonical(match[2] ?? '');
+	}
+
+	return input.trim() === input && !/\s/.test(input);
+}
+
+/** Type guard for the broad IID string shape (does not check canonical form). */
+export function isIntuitionId(input: string): input is IntuitionId {
+	return parseIntuitionId(input) !== undefined;
+}
+
+/**
+ * May this IID mint as a P0 anchor (atom data = the bare IID string)?
+ * Requires: valid + canonical, Class A or B (Class C recipe fields are
+ * preimage evidence and must travel in a P1 payload), and an IID that
+ * implies its classification (spec §7.2 / §7.3). Typed `wd` values qualify
+ * only with an active EntitySchema binding; bare `wd` remains polymorphic.
+ * Weak `acct` handles remain valid and typed but cannot anchor.
+ */
+export function isAnchorEligible(input: string): boolean {
+	const inspection = inspectIntuitionId(input);
+	return inspection.valid && inspection.anchorEligible;
+}
+
+/**
+ * Typed inspection: one call that distinguishes every failure mode a
+ * caller can act on (spec §2.5 validity, §7.2 anchor eligibility, §7.3 typing).
+ * Typed `wd` values report their binding slug and per-value typing;
+ * dormant bindings are valid but cannot mint a P0 anchor.
+ *
+ * - `malformed` — not `int:<scheme>:<value>` per the grammar
+ * - `unknown-scheme` — the registry is closed; unknown schemes are invalid
+ * - `noncanonical` — a real scheme, but the value is not canonical form.
+ *   When the value canonicalizes, the repaired IID is reported so read
+ *   paths can resolve historical/foreign spellings WITHOUT treating them
+ *   as valid new anchors.
+ */
+export function inspectIntuitionId(input: string): IidInspection {
+	const match = IID_SHAPE_ANY_SCHEME.exec(input);
+
+	if (!match) {
+		return { valid: false, reason: 'malformed' };
+	}
+
+	const schemeName = match[1] ?? '';
+	const value = match[2] ?? '';
+	const scheme = getScheme(schemeName);
+
+	if (!scheme) {
+		return { valid: false, reason: 'unknown-scheme', scheme: schemeName, value };
+	}
+
+	if (!scheme.isCanonical(value)) {
+		const canonical = scheme.canonicalize(value);
+		return {
+			valid: false,
+			reason: 'noncanonical',
+			scheme: scheme.scheme,
+			value,
+			...(canonical !== undefined
+				? { canonical: formatIntuitionId(scheme.scheme, canonical) }
+				: {}),
+		};
+	}
+
+	if (scheme.scheme === 'wd' && value.includes(':')) {
+		// Canonicalization already proved membership in the closed binding set.
+		const wdSlug = value.slice(0, value.indexOf(':')) as WdEntitySchemaSlug;
+		const anchorEligible = isActiveWdEntitySchemaSlug(wdSlug);
+		return {
+			valid: true,
+			iid: formatIntuitionId(scheme.scheme, value),
+			scheme: scheme.scheme,
+			value,
+			class: scheme.class,
+			typing: 'unambiguous',
+			wdSlug,
+			anchorEligible,
+			...(!anchorEligible ? { anchorIneligibilityReason: 'dormant-wd-binding' as const } : {}),
+		};
+	}
+
+	const typing = SCHEME_TYPING[scheme.scheme];
+	const anchorIneligibilityReason =
+		scheme.class === 'C'
+			? ('class-c' as const)
+			: scheme.class === 'D'
+				? ('provider-local' as const)
+				: typing === 'polymorphic'
+					? ('polymorphic-scheme' as const)
+					: scheme.scheme === 'acct' && WEAK_ACCOUNT_VALUE.test(value)
+						? ('weak-account' as const)
+						: undefined;
+
+	return {
+		valid: true,
+		iid: formatIntuitionId(scheme.scheme, value),
+		scheme: scheme.scheme,
+		value,
+		class: scheme.class,
+		typing,
+		anchorEligible: anchorIneligibilityReason === undefined,
+		...(anchorIneligibilityReason ? { anchorIneligibilityReason } : {}),
+	};
+}
+
+/** Assemble an IID from a scheme and an ALREADY-CANONICAL value. */
+export function formatIntuitionId(scheme: SchemeName, canonicalValue: string): IntuitionId {
+	return `int:${scheme}:${canonicalValue}`;
+}

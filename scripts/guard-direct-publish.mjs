@@ -1,11 +1,16 @@
 #!/usr/bin/env node
 
+import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { basename, resolve } from 'node:path';
+import { assertPublicTarballFiles, PACKAGES } from './package-registry.mjs';
 
 const packageRoot = process.cwd();
 const packageJsonPath = resolve(packageRoot, 'package.json');
 const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+const packageKind =
+	PACKAGES.find((entry) => entry.dirName === basename(packageRoot))?.kind ?? 'compiled';
+const isDocsOnly = packageKind === 'docs-only';
 const failures = [];
 
 function addFailure(message) {
@@ -77,12 +82,7 @@ function entrypointExists(path) {
 		return existsSync(resolve(packageRoot, relativePath));
 	}
 
-	const pattern = new RegExp(
-		`^${relativePath
-			.split('*')
-			.map(escapeRegExp)
-			.join('.*')}$`
-	);
+	const pattern = new RegExp(`^${relativePath.split('*').map(escapeRegExp).join('.*')}$`);
 
 	return walkPackageFiles().some((candidatePath) => pattern.test(candidatePath));
 }
@@ -93,7 +93,12 @@ function assertEntrypoint(path, label) {
 		return;
 	}
 
-	if (!path.startsWith('./dist/') && path !== './package.json') {
+	if (isDocsOnly) {
+		if (path.startsWith('./dist/') || path.startsWith('./src/')) {
+			addFailure(`${label} must not point at dist or src in a docs-only package, got ${path}`);
+			return;
+		}
+	} else if (!path.startsWith('./dist/') && path !== './package.json') {
 		addFailure(`${label} must point at dist or package.json, got ${path}`);
 		return;
 	}
@@ -115,19 +120,29 @@ if (packageJson.license !== 'MIT') {
 	addFailure('license must be MIT');
 }
 
-assertEntrypoint(packageJson.main, 'main');
-assertEntrypoint(packageJson.types, 'types');
+if (isDocsOnly) {
+	if (packageJson.main !== undefined || packageJson.types !== undefined) {
+		addFailure('docs-only packages must not declare main or types entrypoints');
+	}
+} else {
+	assertEntrypoint(packageJson.main, 'main');
+	assertEntrypoint(packageJson.types, 'types');
+}
 
 if (!Array.isArray(packageJson.files)) {
 	addFailure('files must be an array');
 } else {
-	for (const requiredFile of ['dist', 'README.md', 'LICENSE']) {
+	const requiredFiles = isDocsOnly ? ['README.md', 'LICENSE'] : ['dist', 'README.md', 'LICENSE'];
+	for (const requiredFile of requiredFiles) {
 		if (!packageJson.files.includes(requiredFile)) {
 			addFailure(`files must include ${requiredFile}`);
 		}
 	}
 	if (packageJson.files.includes('src')) {
 		addFailure('files must not include src');
+	}
+	if (isDocsOnly && packageJson.files.includes('dist')) {
+		addFailure('docs-only packages must not ship dist');
 	}
 }
 
@@ -151,12 +166,33 @@ for (const requiredFile of ['README.md', 'LICENSE']) {
 	}
 }
 
-if (!existsSync(resolve(packageRoot, 'dist/index.js'))) {
-	addFailure('missing dist/index.js; run the package build first');
+if (!isDocsOnly) {
+	if (!existsSync(resolve(packageRoot, 'dist/index.js'))) {
+		addFailure('missing dist/index.js; run the package build first');
+	}
+
+	if (!existsSync(resolve(packageRoot, 'dist/index.d.ts'))) {
+		addFailure('missing dist/index.d.ts; run the package build first');
+	}
 }
 
-if (!existsSync(resolve(packageRoot, 'dist/index.d.ts'))) {
-	addFailure('missing dist/index.d.ts; run the package build first');
+if (!failures.length) {
+	// Inspect npm's actual file selection, including nested files under allowed directories.
+	const [packed] = JSON.parse(
+		execFileSync('npm', ['pack', '--ignore-scripts', '--dry-run', '--json'], {
+			cwd: packageRoot,
+			encoding: 'utf8',
+			maxBuffer: 10 * 1024 * 1024,
+		})
+	);
+	try {
+		assertPublicTarballFiles(
+			packed.files.map((file) => file.path),
+			packageJson.name
+		);
+	} catch (error) {
+		addFailure(error.message);
+	}
 }
 
 if (failures.length > 0) {

@@ -4,7 +4,7 @@ export type PredicateForm = 'base' | 'thirdPerson' | 'pastParticiple' | 'display
 export type TextDirection = 'ltr' | 'rtl';
 
 /**
- * Machine-readable relationship semantics added per `.planning/predicate-spec-decisions.md`.
+ * Machine-readable relationship semantics for predicate specifications.
  * All optional and additive — a predicate omitting them behaves exactly as before.
  */
 

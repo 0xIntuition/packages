@@ -41,6 +41,11 @@ describe('classification references', () => {
 			const schemaType = getType(spec.schema.type);
 
 			if (!schemaType) {
+				// Amendment 1 preserves this exact reference context/type pair.
+				// reference-schema.test.ts pins its known vocabulary drift.
+				if (spec.slug === 'social-media-account' && spec.schema.type === 'SocialMediaAccount') {
+					continue;
+				}
 				issues.push(`${spec.slug}: unknown schema.org type "${spec.schema.type}"`);
 				continue;
 			}
@@ -112,11 +117,11 @@ describe('classification references', () => {
 		}
 	});
 
-	it('keeps social media account on an Intuition-owned schema context', () => {
+	it('keeps social media account on the reference-declared schema context', () => {
 		const socialMediaAccount = getClassification('social-media-account');
 
 		expect(socialMediaAccount?.schema).toEqual({
-			context: 'https://schema.intuition.systems/v1/social-media-account.jsonld',
+			context: 'https://schema.org/',
 			type: 'SocialMediaAccount',
 		});
 		expect(socialMediaAccount?.fields.every((field) => !field.schemaProperty)).toBe(true);

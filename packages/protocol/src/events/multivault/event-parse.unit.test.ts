@@ -4,7 +4,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
 	eventParse,
 	eventParseAtomConfigUpdate,
+	eventParseAtomContextRegistered,
 	eventParseAtomCreated,
+	eventParseAtomUriConfigUpdated,
 	eventParseAtomWalletDepositFeeCollected,
 	eventParseAtomWalletDepositFeesClaimed,
 	eventParseBondingCurveConfigUpdated,
@@ -42,6 +44,7 @@ function createClient(status: 'success' | 'reverted') {
 
 const parserCases: Array<{ name: string; fn: ParserFn }> = [
 	{ name: 'eventParseAtomConfigUpdate', fn: eventParseAtomConfigUpdate },
+	{ name: 'eventParseAtomContextRegistered', fn: eventParseAtomContextRegistered },
 	{ name: 'eventParseAtomCreated', fn: eventParseAtomCreated },
 	{
 		name: 'eventParseAtomWalletDepositFeeCollected',
@@ -51,6 +54,7 @@ const parserCases: Array<{ name: string; fn: ParserFn }> = [
 		name: 'eventParseAtomWalletDepositFeesClaimed',
 		fn: eventParseAtomWalletDepositFeesClaimed,
 	},
+	{ name: 'eventParseAtomUriConfigUpdated', fn: eventParseAtomUriConfigUpdated },
 	{
 		name: 'eventParseBondingCurveConfigUpdated',
 		fn: eventParseBondingCurveConfigUpdated,
