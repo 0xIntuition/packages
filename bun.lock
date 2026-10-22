@@ -205,6 +205,14 @@
         "viem": "^2.0.0",
       },
     },
+    "packages/pipeline-runtime": {
+      "name": "@0xintuition/pipeline-runtime",
+      "version": "0.1.0-alpha.0",
+      "devDependencies": {
+        "typescript": "^5.9.3",
+        "vitest": "^4.0.16",
+      },
+    },
     "packages/predicates": {
       "name": "@0xintuition/predicates",
       "version": "0.1.0-alpha.1",
@@ -362,6 +370,8 @@
     "@0xintuition/iid-spec": ["@0xintuition/iid-spec@workspace:packages/iid-spec"],
 
     "@0xintuition/periphery": ["@0xintuition/periphery@workspace:packages/periphery"],
+
+    "@0xintuition/pipeline-runtime": ["@0xintuition/pipeline-runtime@workspace:packages/pipeline-runtime"],
 
     "@0xintuition/predicates": ["@0xintuition/predicates@workspace:packages/predicates"],
 

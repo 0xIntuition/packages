@@ -91,6 +91,7 @@ Use `fields` to render atom inputs and `relationships` to suggest triples such a
 | Semantic / data modeling | `schema-org`, `classifications`, `predicates` | Canonical vocabulary, schema references, recommended atom fields, metadata predicates, and relationship guardrails |
 | Identity | `iid-spec`, `iid`, `iid-registry`, `iid-ladder`, `ids` | Canonical real-world identifiers, semantic/provider resolution, deterministic input projection, and content-addressable protocol IDs |
 | Builder helpers | `primitives` | Higher-level atom, predicate, triple, discovery, and validation helpers |
+| Pipeline runtime | `pipeline-runtime` | Effect-free concurrency, circuit breaking, cancellation, observation, and provider host policies |
 | Atom processing | `atom-parser`, `atom-classification`, `atom-enrichment` | Input parsing, plugin-based classification, provider execution, and field extraction |
 | Application integration | `sdk`, `cli` | Typed action plans, API reads, and deterministic command-line calldata generation |
 | Protocol plumbing | `protocol`, `deployments`, `periphery`, `curves`, `react` | ABIs, bytecode, chain/deployment metadata, bridge/router and fee-proxy helpers, curve math, and React hooks |
@@ -113,6 +114,7 @@ Use `fields` to render atom inputs and `relationships` to suggest triples such a
 - [`@0xintuition/curves`](https://www.npmjs.com/package/@0xintuition/curves) - bonding curve math helpers, including dynamic-fee curve quotes and exact-net gross-up quotes.
 - [`@0xintuition/sdk`](https://www.npmjs.com/package/@0xintuition/sdk) - integration SDK with API reads, onchain action planning helpers, and deterministic utilities.
 - [`@0xintuition/cli`](https://www.npmjs.com/package/@0xintuition/cli) - agent-oriented calldata encoders, action plan builders, and the `intuition` executable.
+- `@0xintuition/pipeline-runtime` - Effect-free Promise runtime utilities and provider host policies.
 - `@0xintuition/atom-parser` - input detection, normalization, and bounded remote inspection.
 - `@0xintuition/atom-classification` - configurable classification engines and reusable plugins.
 - `@0xintuition/atom-enrichment` - provider adapters, enrichment execution, and field extraction using public classification specifications.
