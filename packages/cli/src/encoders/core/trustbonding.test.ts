@@ -1,5 +1,5 @@
 import { describe, it } from 'vitest';
-import { assertEncoderRoundTrip } from './test-helpers';
+import { assertEncoderRoundTrip } from './encoders.test-helpers';
 import * as trustbonding from './trustbonding';
 import { trustbondingEncoderManifest } from './trustbonding/manifest';
 

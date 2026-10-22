@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, Hex } from 'viem';
 
-import { AtomWardenAbi } from '../../contracts';
+import { AtomWardenAbi } from '../../contracts/abis';
 import type { WriteConfig } from '../../types';
 
 export type AtomWardenClaimOwnershipOverAddressAtomInputs = {
@@ -16,7 +16,7 @@ export type AtomWardenClaimOwnershipOverAddressAtomInputs = {
 export async function atomWardenClaimOwnershipOverAddressAtom(
 	config: WriteConfig,
 	inputs: AtomWardenClaimOwnershipOverAddressAtomInputs
-) {
+): Promise<AtomWardenClaimOwnershipOverAddressAtomResult> {
 	const { address, walletClient, publicClient } = config;
 	const { args } = inputs;
 
@@ -30,3 +30,5 @@ export async function atomWardenClaimOwnershipOverAddressAtom(
 
 	return await walletClient.writeContract(request);
 }
+
+export type AtomWardenClaimOwnershipOverAddressAtomResult = Hex;

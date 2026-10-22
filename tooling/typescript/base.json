@@ -17,7 +17,8 @@
 		"checkJs": true,
 		"module": "Preserve",
 		"moduleResolution": "Bundler",
-		"noEmit": true
+		"noEmit": true,
+		"declarationMap": false
 	},
 	"exclude": ["node_modules", "build", "dist", ".next", ".expo"]
 }

@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, Hex } from 'viem';
 
-import { TrustBondingAbi } from '../../contracts';
+import { TrustBondingAbi } from '../../contracts/abis';
 import type { WriteConfig } from '../../types';
 
 export type TrustBondingWithdrawAndCreateLockInputs = {
@@ -16,7 +16,7 @@ export type TrustBondingWithdrawAndCreateLockInputs = {
 export async function trustBondingWithdrawAndCreateLock(
 	config: WriteConfig,
 	inputs: TrustBondingWithdrawAndCreateLockInputs
-) {
+): Promise<TrustBondingWithdrawAndCreateLockResult> {
 	const { address, walletClient, publicClient } = config;
 	const { args } = inputs;
 
@@ -30,3 +30,5 @@ export async function trustBondingWithdrawAndCreateLock(
 
 	return await walletClient.writeContract(request);
 }
+
+export type TrustBondingWithdrawAndCreateLockResult = Hex;

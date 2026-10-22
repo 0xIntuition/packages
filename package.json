@@ -42,7 +42,8 @@
 		"release:contracts": "bun scripts/check-release-contracts.ts",
 		"release:check": "bun run release:registry && bun run protocol:check-artifacts -- --verify-registry && bun run release:contracts",
 		"artifacts:check": "bun scripts/check-candidate-artifacts.ts",
-		"artifacts:test": "vitest run scripts/check-candidate-artifacts.test.ts"
+		"artifacts:test": "vitest run scripts/check-candidate-artifacts.test.ts",
+		"docs:check-imports": "node scripts/check-doc-imports.mjs"
 	},
 	"catalog": {
 		"@biomejs/biome": "2.3.10",

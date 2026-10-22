@@ -1,0 +1,170 @@
+{
+	"name": "@0xintuition/atom-classification",
+	"private": false,
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./ai": {
+			"types": "./dist/ai.d.ts",
+			"import": "./dist/ai.js"
+		},
+		"./cache": {
+			"types": "./dist/cache.d.ts",
+			"import": "./dist/cache.js"
+		},
+		"./client": {
+			"types": "./dist/client.d.ts",
+			"import": "./dist/client.js"
+		},
+		"./engine": {
+			"types": "./dist/engine.d.ts",
+			"import": "./dist/engine.js"
+		},
+		"./plugin-factories": {
+			"types": "./dist/plugins/index.d.ts",
+			"import": "./dist/plugins/index.js"
+		},
+		"./plugins": {
+			"types": "./dist/plugins.d.ts",
+			"import": "./dist/plugins.js"
+		},
+		"./plugins/amazon": {
+			"types": "./dist/plugins/amazon/index.d.ts",
+			"import": "./dist/plugins/amazon/index.js"
+		},
+		"./plugins/default-url": {
+			"types": "./dist/plugins/default-url/index.d.ts",
+			"import": "./dist/plugins/default-url/index.js"
+		},
+		"./plugins/etherscan": {
+			"types": "./dist/plugins/etherscan/index.d.ts",
+			"import": "./dist/plugins/etherscan/index.js"
+		},
+		"./plugins/ethereum": {
+			"types": "./dist/plugins/ethereum/index.d.ts",
+			"import": "./dist/plugins/ethereum/index.js"
+		},
+		"./plugins/github": {
+			"types": "./dist/plugins/github/index.d.ts",
+			"import": "./dist/plugins/github/index.js"
+		},
+		"./plugins/imdb": {
+			"types": "./dist/plugins/imdb/index.d.ts",
+			"import": "./dist/plugins/imdb/index.js"
+		},
+		"./plugins/instagram": {
+			"types": "./dist/plugins/instagram/index.d.ts",
+			"import": "./dist/plugins/instagram/index.js"
+		},
+		"./plugins/isbn": {
+			"types": "./dist/plugins/isbn/index.d.ts",
+			"import": "./dist/plugins/isbn/index.js"
+		},
+		"./plugins/lexical": {
+			"types": "./dist/plugins/lexical/index.d.ts",
+			"import": "./dist/plugins/lexical/index.js"
+		},
+		"./plugins/plain-text": {
+			"types": "./dist/plugins/plain-text/index.d.ts",
+			"import": "./dist/plugins/plain-text/index.js"
+		},
+		"./plugins/spotify": {
+			"types": "./dist/plugins/spotify/index.d.ts",
+			"import": "./dist/plugins/spotify/index.js"
+		},
+		"./plugins/tiktok": {
+			"types": "./dist/plugins/tiktok/index.d.ts",
+			"import": "./dist/plugins/tiktok/index.js"
+		},
+		"./plugins/tmdb": {
+			"types": "./dist/plugins/tmdb/index.d.ts",
+			"import": "./dist/plugins/tmdb/index.js"
+		},
+		"./plugins/type-profiles": {
+			"types": "./dist/plugins/type-profiles/index.d.ts",
+			"import": "./dist/plugins/type-profiles/index.js"
+		},
+		"./plugins/wikipedia": {
+			"types": "./dist/plugins/wikipedia/index.d.ts",
+			"import": "./dist/plugins/wikipedia/index.js"
+		},
+		"./plugins/x": {
+			"types": "./dist/plugins/x/index.d.ts",
+			"import": "./dist/plugins/x/index.js"
+		},
+		"./plugins/youtube": {
+			"types": "./dist/plugins/youtube/index.d.ts",
+			"import": "./dist/plugins/youtube/index.js"
+		},
+		"./presets": {
+			"types": "./dist/presets/index.d.ts",
+			"import": "./dist/presets/index.js"
+		},
+		"./server": {
+			"types": "./dist/server.d.ts",
+			"import": "./dist/server.js"
+		},
+		"./type-registry": {
+			"types": "./dist/type-registry.d.ts",
+			"import": "./dist/type-registry.js"
+		},
+		"./types": {
+			"types": "./dist/types.d.ts",
+			"import": "./dist/types.js"
+		},
+		"./package.json": "./package.json"
+	},
+	"license": "MIT",
+	"scripts": {
+		"build": "node ../../scripts/clean-dist.mjs && tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"dev": "tsc --watch",
+		"typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
+		"test": "bun test __tests__ src",
+		"ci": "biome check",
+		"lint": "biome lint",
+		"format": "biome format",
+		"check": "biome check",
+		"check:write": "biome check --write",
+		"pack:dry-run": "bun run build && npm pack --ignore-scripts --dry-run --json",
+		"pack:release": "bun run build && node ../../scripts/pack-release.mjs",
+		"prepack": "bun run build",
+		"prepublishOnly": "bun run build && node ../../scripts/guard-direct-publish.mjs"
+	},
+	"dependencies": {
+		"zod": "4.1.12"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3",
+		"@types/bun": "^1.3.3"
+	},
+	"version": "0.1.0-alpha.0",
+	"description": "Composable atom classification engine, plugins, and configurable runtime presets",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE",
+		"docs"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/0xIntuition/packages.git",
+		"directory": "packages/atom-classification"
+	},
+	"bugs": {
+		"url": "https://github.com/0xIntuition/packages/issues"
+	},
+	"homepage": "https://github.com/0xIntuition/packages/tree/main/packages/atom-classification#readme",
+	"publishConfig": {
+		"access": "public",
+		"tag": "alpha"
+	},
+	"engines": {
+		"node": ">=20"
+	}
+}

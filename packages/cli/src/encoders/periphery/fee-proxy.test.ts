@@ -1,7 +1,7 @@
 import { describe, it } from 'vitest';
+import { assertEncoderRoundTrip } from './encoders.test-helpers';
 import * as feeProxy from './fee-proxy';
 import { feeProxyEncoderManifest } from './fee-proxy/manifest';
-import { assertEncoderRoundTrip } from './test-helpers';
 
 describe('periphery fee-proxy encoders', () => {
 	it('encodes and decodes all manifest entries', () => {

@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, Hex } from 'viem';
 
-import { AtomWardenAbi } from '../../contracts';
+import { AtomWardenAbi } from '../../contracts/abis';
 import type { WriteConfig } from '../../types';
 
 export type AtomWardenGrantAtomWalletOwnershipInputs = {
@@ -17,7 +17,7 @@ export type AtomWardenGrantAtomWalletOwnershipInputs = {
 export async function atomWardenGrantAtomWalletOwnership(
 	config: WriteConfig,
 	inputs: AtomWardenGrantAtomWalletOwnershipInputs
-) {
+): Promise<AtomWardenGrantAtomWalletOwnershipResult> {
 	const { address, walletClient, publicClient } = config;
 	const { args } = inputs;
 
@@ -31,3 +31,5 @@ export async function atomWardenGrantAtomWalletOwnership(
 
 	return await walletClient.writeContract(request);
 }
+
+export type AtomWardenGrantAtomWalletOwnershipResult = Hex;

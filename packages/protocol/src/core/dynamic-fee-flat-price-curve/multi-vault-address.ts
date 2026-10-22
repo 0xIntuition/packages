@@ -1,4 +1,5 @@
-import { DynamicFeeFlatPriceCurveAbi } from '../../contracts';
+import type { ContractFunctionReturnType } from 'viem';
+import { DynamicFeeFlatPriceCurveAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -6,7 +7,9 @@ import type { ReadConfig } from '../../types';
  * @param config Contract address and public client.
  * @returns The authorized MultiVault address.
  */
-export async function dynamicFeeFlatPriceCurveMultiVaultAddress(config: ReadConfig) {
+export async function dynamicFeeFlatPriceCurveMultiVaultAddress(
+	config: ReadConfig
+): Promise<DynamicFeeFlatPriceCurveMultiVaultAddressResult> {
 	const { address, publicClient } = config;
 
 	return await publicClient.readContract({
@@ -15,3 +18,9 @@ export async function dynamicFeeFlatPriceCurveMultiVaultAddress(config: ReadConf
 		functionName: 'multiVault',
 	});
 }
+
+export type DynamicFeeFlatPriceCurveMultiVaultAddressResult = ContractFunctionReturnType<
+	typeof DynamicFeeFlatPriceCurveAbi,
+	'view' | 'pure',
+	'multiVault'
+>;

@@ -1,5 +1,6 @@
+import type { ParseEventLogsReturnType } from 'viem';
 import { type Address, type Hex, type Log, type PublicClient, parseEventLogs } from 'viem';
-import { DynamicFeeFlatPriceCurveAbi } from '../../contracts';
+import { DynamicFeeFlatPriceCurveAbi } from '../../contracts/abis';
 import { receiptLogs } from '../receipt-logs.js';
 
 /**
@@ -16,7 +17,7 @@ export async function eventParseRedeemFeeRerouted(
 	client: PublicClient,
 	hash: Hex,
 	address: Address | undefined = undefined
-) {
+): Promise<EventParseRedeemFeeReroutedResult> {
 	const logs = await receiptLogs(client, hash, address);
 
 	const events = parseEventLogs({
@@ -37,10 +38,21 @@ export async function eventParseRedeemFeeRerouted(
  * @param logs Logs to decode; anything that is not this event is ignored.
  * @returns Decoded RedeemFeeRerouted event logs.
  */
-export function eventDecodeRedeemFeeRerouted(logs: Log[]) {
+export function eventDecodeRedeemFeeRerouted(logs: Log[]): EventDecodeRedeemFeeReroutedResult {
 	return parseEventLogs({
 		abi: DynamicFeeFlatPriceCurveAbi,
 		logs,
 		eventName: 'RedeemFeeRerouted',
 	});
 }
+
+export type EventParseRedeemFeeReroutedResult = ParseEventLogsReturnType<
+	typeof DynamicFeeFlatPriceCurveAbi,
+	'RedeemFeeRerouted',
+	true
+>;
+export type EventDecodeRedeemFeeReroutedResult = ParseEventLogsReturnType<
+	typeof DynamicFeeFlatPriceCurveAbi,
+	'RedeemFeeRerouted',
+	true
+>;

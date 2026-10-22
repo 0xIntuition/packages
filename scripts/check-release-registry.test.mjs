@@ -10,7 +10,7 @@ const manifests = new Map([
 			name: '@0xintuition/app',
 			version: '1.0.1',
 			publishConfig: { tag: 'alpha' },
-			dependencies: { '@0xintuition/base': '1.0.0' },
+			dependencies: { '@0xintuition/base': '^1.0.0' },
 		},
 	],
 ]);
@@ -18,7 +18,7 @@ const app = { directory: 'app', version: '1.0.1', tag: 'alpha' };
 const plan = { packages: [app] };
 const response = (status, body) => ({ ok: status === 200, status, json: async () => body });
 
-test('accepts a new version with an already-published internal dependency', async () => {
+test('accepts a new version with an already-published stable caret baseline', async () => {
 	const fetch = async (url) =>
 		response(200, { versions: url.endsWith('base') ? { '1.0.0': {} } : {} });
 	assert.deepEqual(await checkReleaseRegistry({ manifests, plan, fetch }), [

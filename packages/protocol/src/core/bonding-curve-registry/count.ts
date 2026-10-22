@@ -1,4 +1,5 @@
-import { BondingCurveRegistryAbi } from '../../contracts';
+import type { ContractFunctionReturnType } from 'viem';
+import { BondingCurveRegistryAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -7,7 +8,9 @@ import type { ReadConfig } from '../../types';
  * @param config Contract address and public client.
  * @returns The number of registered curves.
  */
-export async function bondingCurveRegistryCount(config: ReadConfig) {
+export async function bondingCurveRegistryCount(
+	config: ReadConfig
+): Promise<BondingCurveRegistryCountResult> {
 	const { address, publicClient } = config;
 
 	return await publicClient.readContract({
@@ -16,3 +19,9 @@ export async function bondingCurveRegistryCount(config: ReadConfig) {
 		functionName: 'count',
 	});
 }
+
+export type BondingCurveRegistryCountResult = ContractFunctionReturnType<
+	typeof BondingCurveRegistryAbi,
+	'view' | 'pure',
+	'count'
+>;

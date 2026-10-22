@@ -24,10 +24,24 @@ int:gen1:music-group:r4:8f3c…   a band we could only identify by name
 **If you are testing an implementation**, the [`conformance/`](./conformance/) directory contains the versioned machine-readable test vectors. They are normative and executable:
 
 ```ts
-import vectors from '@0xintuition/iid-spec/conformance/canonicalization.json'
+import vectors from '@0xintuition/iid-spec/conformance/canonicalization.json' with { type: 'json' }
 ```
 
 ---
+
+For Node environments where JSON import attributes are unavailable, read the
+fixture through the exported package path:
+
+```ts
+import { readFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
+
+const require = createRequire(import.meta.url)
+const vectors = JSON.parse(readFileSync(
+  require.resolve('@0xintuition/iid-spec/conformance/canonicalization.json'),
+  'utf8',
+))
+```
 
 ## Reading paths
 

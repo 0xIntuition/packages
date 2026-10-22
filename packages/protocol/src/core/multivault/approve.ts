@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, Hex } from 'viem';
 
-import { MultiVaultAbi } from '../../contracts';
+import { MultiVaultAbi } from '../../contracts/abis';
 import type { WriteConfig } from '../../types';
 
 export type MultiVaultApproveInputs = {
@@ -15,7 +15,10 @@ export type MultiVaultApproveInputs = {
  * @param inputs Function args for approval updates.
  * @returns Transaction hash from the wallet client.
  */
-export async function multiVaultApprove(config: WriteConfig, inputs: MultiVaultApproveInputs) {
+export async function multiVaultApprove(
+	config: WriteConfig,
+	inputs: MultiVaultApproveInputs
+): Promise<MultiVaultApproveResult> {
 	const { address, walletClient, publicClient } = config;
 	const { args } = inputs;
 
@@ -29,3 +32,5 @@ export async function multiVaultApprove(config: WriteConfig, inputs: MultiVaultA
 
 	return await walletClient.writeContract(request);
 }
+
+export type MultiVaultApproveResult = Hex;

@@ -14,7 +14,10 @@ type AtomContextLike = {
 export function associateAtomCreationContext<
 	TAtom extends AtomCreatedLike,
 	TContext extends AtomContextLike,
->(atomEvents: readonly TAtom[], contextEvents: readonly TContext[]) {
+>(
+	atomEvents: readonly TAtom[],
+	contextEvents: readonly TContext[]
+): AtomCreationContext<TAtom, TContext>[] {
 	const contextsByTermId = new Map<Hex, TContext[]>();
 	for (const context of contextEvents) {
 		const existing = contextsByTermId.get(context.args.termId) ?? [];
@@ -29,3 +32,5 @@ export function associateAtomCreationContext<
 		),
 	}));
 }
+
+export type AtomCreationContext<TAtom, TContext> = { atom: TAtom; contexts: TContext[] };

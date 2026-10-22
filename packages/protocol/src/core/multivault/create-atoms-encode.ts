@@ -1,6 +1,6 @@
 import { encodeFunctionData, type Hex } from 'viem';
 
-import { MultiVaultAbi } from '../../contracts';
+import { MultiVaultAbi } from '../../contracts/abis';
 
 /**
  * Encodes calldata for the MultiVault `createAtoms` function.

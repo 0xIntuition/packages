@@ -1,0 +1,120 @@
+{
+	"name": "@0xintuition/pipeline-runtime",
+	"version": "0.1.0-alpha.0",
+	"description": "Effect-free Promise utilities, cancellation, provider observation, and provider host policies",
+	"private": false,
+	"license": "MIT",
+	"type": "module",
+	"sideEffects": false,
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./bounded-text": {
+			"types": "./dist/bounded-text.d.ts",
+			"import": "./dist/bounded-text.js"
+		},
+		"./cache": {
+			"types": "./dist/cache.d.ts",
+			"import": "./dist/cache.js"
+		},
+		"./errors": {
+			"types": "./dist/errors.d.ts",
+			"import": "./dist/errors.js"
+		},
+		"./provider-observer": {
+			"types": "./dist/provider-observer.d.ts",
+			"import": "./dist/provider-observer.js"
+		},
+		"./provider-metrics-contract": {
+			"types": "./dist/provider-metrics-contract.d.ts",
+			"import": "./dist/provider-metrics-contract.js"
+		},
+		"./retry-after": {
+			"types": "./dist/retry-after.d.ts",
+			"import": "./dist/retry-after.js"
+		},
+		"./letterboxd": {
+			"types": "./dist/letterboxd.d.ts",
+			"import": "./dist/letterboxd.js"
+		},
+		"./letterboxd-page": {
+			"types": "./dist/letterboxd-page.d.ts",
+			"import": "./dist/letterboxd-page.js"
+		},
+		"./tmdb": {
+			"types": "./dist/tmdb.d.ts",
+			"import": "./dist/tmdb.js"
+		},
+		"./testing/prometheus-exposition": {
+			"types": "./dist/testing/prometheus-exposition.d.ts",
+			"import": "./dist/testing/prometheus-exposition.js"
+		},
+		"./outcome": {
+			"types": "./dist/outcome.d.ts",
+			"import": "./dist/outcome.js"
+		},
+		"./circuit-breaker": {
+			"types": "./dist/circuit-breaker.d.ts",
+			"import": "./dist/circuit-breaker.js"
+		},
+		"./concurrency": {
+			"types": "./dist/concurrency.d.ts",
+			"import": "./dist/concurrency.js"
+		},
+		"./package.json": "./package.json"
+	},
+	"keywords": [
+		"intuition",
+		"pipeline",
+		"providers"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/0xIntuition/packages.git",
+		"directory": "packages/pipeline-runtime"
+	},
+	"bugs": {
+		"url": "https://github.com/0xIntuition/packages/issues"
+	},
+	"homepage": "https://github.com/0xIntuition/packages/tree/main/packages/pipeline-runtime#readme",
+	"publishConfig": {
+		"access": "public",
+		"tag": "alpha"
+	},
+	"scripts": {
+		"build": "node ../../scripts/clean-dist.mjs && tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"dev": "tsc --watch",
+		"pack:dry-run": "bun run build && npm pack --ignore-scripts --dry-run --json",
+		"pack:release": "bun run build && node ../../scripts/pack-release.mjs",
+		"prepack": "bun run build",
+		"prepublishOnly": "bun run build && node ../../scripts/guard-direct-publish.mjs",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"typecheck": "tsc --noEmit",
+		"ci": "biome check",
+		"lint": "biome lint",
+		"format": "biome format",
+		"check": "biome check",
+		"lint:write": "biome lint --write",
+		"format:write": "biome format --write",
+		"check:write": "biome check --write",
+		"check:unsafe:write": "biome check --write --unsafe"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3",
+		"vitest": "^4.0.16"
+	},
+	"engines": {
+		"node": ">=20"
+	}
+}

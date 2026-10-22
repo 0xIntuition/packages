@@ -1,4 +1,5 @@
-import { IBaseCurveAbi } from '../../contracts';
+import type { ContractFunctionReturnType } from 'viem';
+import { IBaseCurveAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -7,7 +8,7 @@ import type { ReadConfig } from '../../types';
  * @param config Curve address and public client.
  * @returns The curve's name.
  */
-export async function baseCurveName(config: ReadConfig) {
+export async function baseCurveName(config: ReadConfig): Promise<BaseCurveNameResult> {
 	const { address, publicClient } = config;
 
 	return await publicClient.readContract({
@@ -16,3 +17,9 @@ export async function baseCurveName(config: ReadConfig) {
 		functionName: 'name',
 	});
 }
+
+export type BaseCurveNameResult = ContractFunctionReturnType<
+	typeof IBaseCurveAbi,
+	'view' | 'pure',
+	'name'
+>;

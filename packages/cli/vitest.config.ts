@@ -5,6 +5,9 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
 	resolve: {
 		alias: {
+			'@0xintuition/sdk/actions': fileURLToPath(
+				new URL('../sdk/src/actions/index.ts', import.meta.url)
+			),
 			'@0xintuition/periphery': fileURLToPath(
 				new URL('../periphery/src/index.ts', import.meta.url)
 			),

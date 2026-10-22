@@ -1,6 +1,6 @@
 import { type Address, formatUnits, type PublicClient } from 'viem';
 
-import { MultiVaultAbi } from '../../contracts';
+import { MultiVaultAbi } from '../../contracts/abis';
 import type { MultivaultConfig } from '../../types';
 
 export type MultiCallIntuitionConfigs = {
@@ -15,7 +15,9 @@ const DEFAULT_MULTICALL3_ADDRESS = '0xcA11bde05977b3631167028862bE2a173976CA11' 
  * @param config Contract address and public client.
  * @returns Aggregated configuration values with raw and formatted fields.
  */
-export async function multiVaultMultiCallIntuitionConfigs(config: MultiCallIntuitionConfigs) {
+export async function multiVaultMultiCallIntuitionConfigs(
+	config: MultiCallIntuitionConfigs
+): Promise<MultiVaultMultiCallIntuitionConfigsResult> {
 	const { address, publicClient } = config;
 	const multicallAddress = publicClient.chain?.contracts?.multicall3?.address
 		? publicClient.chain.contracts.multicall3.address
@@ -146,3 +148,5 @@ export async function multiVaultMultiCallIntuitionConfigs(config: MultiCallIntui
 		formatted_min_deposit: formattedMinDeposit,
 	} as MultivaultConfig;
 }
+
+export type MultiVaultMultiCallIntuitionConfigsResult = MultivaultConfig;
