@@ -28,7 +28,7 @@ The public package set has three release tracks:
 | `@0xintuition/protocol` | `4.x` | Publish this candidate to `alpha`; leave the existing `latest` line unchanged until a release owner explicitly promotes it |
 
 For this candidate, every entry in `release-plan.json` uses `alpha`, including
-protocol/SDK `4.0.0` and deployments/curves/periphery/CLI `0.1.0`. The absence of
+protocol/SDK `4.0.0` and deployments/curves/periphery/CLI `0.1.0-alpha.0`. The absence of
 a prerelease suffix does not authorize promotion to `latest`.
 
 For packages with an existing stable line, keep `latest` pointed at the current
@@ -302,3 +302,14 @@ Prefer deprecation and superseding releases over unpublish.
   `npm dist-tag add`.
 - If a schema URL or deterministic ID surface is wrong, stop adoption, publish a
   corrected version, and document the identity impact.
+
+## Candidate version decision
+
+This train uses `0.1.0-alpha.0` for deployments, curves, periphery, and CLI.
+An alpha-track candidate in the 0.1.0 family must include its prerelease suffix;
+all dependent pins and `release-plan.json` move together. Registry validation
+reads manifest versions directly, so no second hard-coded version list exists.
+Protocol and SDK retain their planned 4.0.0 major versions. All candidates use
+the `alpha` tag, and promoting `latest` requires a separate release decision.
+Check registry availability before publishing and never overwrite an existing
+immutable version.

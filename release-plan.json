@@ -13,12 +13,12 @@
 		},
 		{
 			"directory": "deployments",
-			"version": "0.1.0",
+			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
 		},
 		{
 			"directory": "curves",
-			"version": "0.1.0",
+			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
 		},
 		{
@@ -73,7 +73,7 @@
 		},
 		{
 			"directory": "periphery",
-			"version": "0.1.0",
+			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
 		},
 		{
@@ -83,7 +83,7 @@
 		},
 		{
 			"directory": "cli",
-			"version": "0.1.0",
+			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
 		},
 		{
