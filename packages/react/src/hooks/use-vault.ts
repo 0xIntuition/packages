@@ -1,7 +1,8 @@
 'use client';
 
 import { MultiVaultAbi, multiVaultResolveVaultTotals } from '@0xintuition/protocol';
-import type { Hex } from 'viem';
+import type { ContractFunctionArgs, ContractFunctionReturnType, Hex } from 'viem';
+import type { UseReadContractReturnType } from 'wagmi';
 import { useAccount, useReadContract, useReadContracts, useWriteContract } from 'wagmi';
 
 import { useChainConfig } from '../provider';
@@ -537,7 +538,7 @@ export function useConvertToAssets(
 	curveId: bigint,
 	shares: bigint,
 	options?: { chainId?: number; enabled?: boolean }
-) {
+): UseConvertToAssetsResult {
 	const { multivaultAddress, chainId } = useChainConfig(options?.chainId);
 	const enabled = options?.enabled !== false;
 
@@ -570,7 +571,7 @@ export function useConvertToShares(
 	curveId: bigint,
 	assets: bigint,
 	options?: { chainId?: number; enabled?: boolean }
-) {
+): UseConvertToSharesResult {
 	const { multivaultAddress, chainId } = useChainConfig(options?.chainId);
 	const enabled = options?.enabled !== false;
 
@@ -583,3 +584,16 @@ export function useConvertToShares(
 		query: { enabled },
 	});
 }
+
+export type UseConvertToAssetsResult = UseReadContractReturnType<
+	typeof MultiVaultAbi,
+	'convertToAssets',
+	ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'convertToAssets'>,
+	ContractFunctionReturnType<typeof MultiVaultAbi, 'view' | 'pure', 'convertToAssets'> | undefined
+>;
+export type UseConvertToSharesResult = UseReadContractReturnType<
+	typeof MultiVaultAbi,
+	'convertToShares',
+	ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'convertToShares'>,
+	ContractFunctionReturnType<typeof MultiVaultAbi, 'view' | 'pure', 'convertToShares'> | undefined
+>;

@@ -60,15 +60,15 @@
 		"check:unsafe:write": "biome check --write --unsafe"
 	},
 	"dependencies": {
-		"@0xintuition/deployments": "0.1.0",
-		"@0xintuition/ids": "0.1.0-alpha.1",
-		"@0xintuition/protocol": "4.0.0"
+		"@0xintuition/ids": "0.1.0-alpha.1"
 	},
 	"peerDependencies": {
 		"@tanstack/react-query": ">=5",
 		"react": ">=18",
 		"viem": "^2.0.0",
-		"wagmi": ">=2"
+		"wagmi": ">=2",
+		"@0xintuition/protocol": "4.0.0",
+		"@0xintuition/deployments": "0.1.0"
 	},
 	"devDependencies": {
 		"typescript": "^5.9.3",
@@ -80,7 +80,9 @@
 		"react": "19.1.0",
 		"react-dom": "19.1.0",
 		"viem": "^2.31.4",
-		"wagmi": "^2.15.4"
+		"wagmi": "^2.15.4",
+		"@0xintuition/protocol": "4.0.0",
+		"@0xintuition/deployments": "0.1.0"
 	},
 	"engines": {
 		"node": ">=20"

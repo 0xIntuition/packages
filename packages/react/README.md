@@ -6,13 +6,12 @@ ESM-only; use `import`.
 ## Install
 
 ```bash
-npm install @0xintuition/react@alpha @0xintuition/deployments@alpha react@^19 react-dom@^19 @tanstack/react-query@^5 wagmi@^2 viem@^2
+npm install @0xintuition/react@alpha @0xintuition/deployments@alpha @0xintuition/protocol@alpha react@">=18" @tanstack/react-query@^5 wagmi@^2 viem@^2
 ```
 
 The package declares React 18+ support. Release checks currently exercise React
-19, wagmi 2, TanStack Query 5, and viem 2. Add `@0xintuition/protocol@alpha` when
-you import its helpers directly; the untagged protocol package may be on an older
-major line.
+19, wagmi 2, TanStack Query 5, and viem 2. Install the protocol and deployments peers from this release train; the untagged
+protocol package may be on an older major line.
 
 TypeScript consumer checks use `strict: true` and `skipLibCheck: true`, as in
 this repository. The tested wagmi declaration graph has upstream errors with
@@ -79,3 +78,31 @@ logs. Existing `useCreateAtom` and `useCreateAtomFlow` use `createAtoms`; for UR
 context creation, compose `multiVaultCreateAtomsWithUris` from
 `@0xintuition/protocol` with `useTransactionFlow`. A dedicated URI-aware React
 hook is not included in this candidate.
+
+## Peers
+
+React 18+, wagmi 2+, TanStack Query 5+, and viem 2 are required. The release
+suite tests React 19 with wagmi 2 and TanStack Query 5. `react-dom` is the host
+application's renderer and is not imported or declared as a peer by this library.
+Use the renderer version appropriate for your React application.
+
+Protocol and deployments are peers so the application selects one shared copy
+of contract metadata and wrappers. Install the versions from this release train
+shown in `package.json`; dev dependencies provide those peers for workspace tests.
+
+## Hook API
+
+All hooks below are named root exports. Read hooks accept chain overrides where
+applicable; write hooks expose transaction state, and flow hooks coordinate the
+transaction lifecycle.
+
+| Group | Hooks | Purpose |
+| --- | --- | --- |
+| Atom | `useAtom`, `useCreateAtom`, `useAtomState` | Read atom state and create atoms. |
+| Triple | `useTriple`, `useCreateTriple`, `useTripleState` | Read triple state and create triples. |
+| Vault | `useVaultState`, `useDepositPreview`, `useRedeemPreview`, `useDeposit`, `useRedeem`, `useDepositBatch`, `useRedeemBatch`, `useConvertToAssets`, `useConvertToShares` | Read vault totals, preview deposits/redemptions, convert amounts, and submit individual or batch writes. |
+| Position | `usePosition`, `usePositions` | Read one or multiple account positions. |
+| Protocol | `useProtocolConfig`, `useProtocolFees`, `useAtomCost`, `useTripleCost`, `useGeneralConfig`, `useBondingCurveConfig`, `useAtomConfig`, `useTripleConfig`, `useWalletConfig`, `useIsTermCreated`, `useCounterTripleId`, `usePreviewAtomCreate`, `usePreviewTripleCreate` | Read protocol configuration, fees, costs, term existence, counter IDs, and creation previews. |
+| Identity | `useAtomId`, `useTripleId`, `useAtomIdOnchain`, `useTripleIdOnchain` | Derive atom/triple IDs locally or read them onchain. |
+| Flow | `useTransactionFlow`, `useCreateAtomFlow`, `useDepositFlow`, `useRedeemFlow` | Coordinate transaction submission and receipt state for common workflows. |
+| Provider | `IntuitionProvider`, `useIntuitionConfig`, `useChainConfig` | Configure networks and resolve chain-specific contract addresses. |

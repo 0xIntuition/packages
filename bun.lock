@@ -258,11 +258,11 @@
       "name": "@0xintuition/react",
       "version": "0.1.0-alpha.1",
       "dependencies": {
-        "@0xintuition/deployments": "0.1.0",
         "@0xintuition/ids": "0.1.0-alpha.1",
-        "@0xintuition/protocol": "4.0.0",
       },
       "devDependencies": {
+        "@0xintuition/deployments": "0.1.0",
+        "@0xintuition/protocol": "4.0.0",
         "@tanstack/react-query": "^5.90.2",
         "@testing-library/react": "^16.3.0",
         "@types/react": "19.1.10",
@@ -275,6 +275,8 @@
         "wagmi": "^2.15.4",
       },
       "peerDependencies": {
+        "@0xintuition/deployments": "0.1.0",
+        "@0xintuition/protocol": "4.0.0",
         "@tanstack/react-query": ">=5",
         "react": ">=18",
         "viem": "^2.0.0",

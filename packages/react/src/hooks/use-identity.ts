@@ -3,7 +3,8 @@
 import { calculateAtomId, calculateTripleId } from '@0xintuition/ids';
 import { MultiVaultAbi } from '@0xintuition/protocol';
 import { useMemo } from 'react';
-import type { Hex } from 'viem';
+import type { ContractFunctionArgs, ContractFunctionReturnType, Hex } from 'viem';
+import type { UseReadContractReturnType } from 'wagmi';
 import { useReadContract } from 'wagmi';
 
 import { useChainConfig } from '../provider';
@@ -86,7 +87,7 @@ export function useTripleId(
 export function useAtomIdOnchain(
 	atomData: Hex | undefined,
 	options?: { chainId?: number; enabled?: boolean }
-) {
+): UseAtomIdOnchainResult {
 	const { multivaultAddress, chainId } = useChainConfig(options?.chainId);
 	const enabled = options?.enabled !== false && atomData !== undefined;
 
@@ -122,7 +123,7 @@ export function useTripleIdOnchain(
 	predicateId: Hex | undefined,
 	objectId: Hex | undefined,
 	options?: { chainId?: number; enabled?: boolean }
-) {
+): UseTripleIdOnchainResult {
 	const { multivaultAddress, chainId } = useChainConfig(options?.chainId);
 	const enabled =
 		options?.enabled !== false &&
@@ -139,3 +140,16 @@ export function useTripleIdOnchain(
 		query: { enabled },
 	});
 }
+
+export type UseAtomIdOnchainResult = UseReadContractReturnType<
+	typeof MultiVaultAbi,
+	'calculateAtomId',
+	ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'calculateAtomId'>,
+	ContractFunctionReturnType<typeof MultiVaultAbi, 'view' | 'pure', 'calculateAtomId'> | undefined
+>;
+export type UseTripleIdOnchainResult = UseReadContractReturnType<
+	typeof MultiVaultAbi,
+	'calculateTripleId',
+	ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'calculateTripleId'>,
+	ContractFunctionReturnType<typeof MultiVaultAbi, 'view' | 'pure', 'calculateTripleId'> | undefined
+>;
