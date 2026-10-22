@@ -49,8 +49,11 @@ Prefer extending the package that owns the concept:
 | `@0xintuition/protocol` | Core contract wrappers, event parsing, and protocol interaction helpers; re-exports core ABIs and addresses from `deployments` |
 | `@0xintuition/periphery` | Periphery contract helpers (bridge, router, FeeProxy); re-exports periphery ABIs and addresses from `deployments` |
 | `@0xintuition/sdk` | Integration-level API reads, onchain action planning, and deterministic utilities composed from the protocol packages |
-| `@0xintuition/cli` | Side-effect-free calldata encoders, agent action plan builders, and the `intuition` executable |
+| `@0xintuition/cli` | Side-effect-free calldata encoders, deprecated SDK action plan aliases, and the `intuition` executable |
 | `@0xintuition/react` | React providers and hooks |
+| `@0xintuition/atom-parser` | Input detection, normalization, optional remote inspection, parser types; apps own configured fetch policy and worker integration |
+| `@0xintuition/atom-classification` | Classification engine, plugin contracts, reusable classifiers/resolvers, configurable presets; apps own enabled plugins, fallback policy, injected identity capabilities and service wiring |
+| `@0xintuition/atom-enrichment` | Enrichment engine, provider adapters, extraction, artifact validation, cache interfaces and reusable adapters; apps own credentials, cache provisioning/configuration, queue scheduling, retries, persistence and service wiring |
 
 Keep package dependencies one-way. Focused foundation packages should stay
 usable on their own; for example, `ids` should not import `primitives`, and
