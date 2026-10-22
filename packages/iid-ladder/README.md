@@ -3,8 +3,10 @@
 Shared identifier-projection ladder for application, seed, and import pipelines.
 ESM-only.
 
+## Install
+
 ```bash
-npm install @0xintuition/iid-ladder@alpha viem@^2
+npm install @0xintuition/iid-ladder@alpha
 ```
 
 The ladder selects the first canonical identity available in this order:
@@ -159,3 +161,7 @@ The labels root must be an object; arrays and other non-object roots are refused
 The package is pure and offline. It performs no network I/O, provider
 enrichment, contract calls, or atom serialization; P31 resolution uses only
 the supplied classes and pinned local data.
+
+## License
+
+MIT.

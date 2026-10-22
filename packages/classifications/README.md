@@ -172,3 +172,8 @@ brand, event, local-business, location, music-group, and thing therefore fall
 through to another available scheme or recipe, or yield no identifier. Active
 bindings still prefix bare QIDs and retain matching typed values; conflicting
 or invalid typed values are skipped.
+
+## viem peer
+
+The viem 2 peer is required via `@0xintuition/iid`, which performs identity
+derivation. Classifications does not import viem directly.
