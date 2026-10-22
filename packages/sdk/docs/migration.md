@@ -15,7 +15,7 @@ Prefer these entrypoints for new work:
 - `@0xintuition/sdk/actions`
   - explicit onchain planning helpers
 - `@0xintuition/sdk/utils`
-  - deterministic ID and formatting helpers
+  - formatting helpers (import deterministic IDs from `@0xintuition/ids`)
 - `@0xintuition/predicates`
   - canonical predicate registry, inline/IPFS atom-data helpers, and launch constants
 - `@0xintuition/sdk/protocol`
@@ -62,14 +62,15 @@ import { multivaultPrepareDepositTx } from '@0xintuition/sdk/actions'
 Before:
 
 ```ts
-import { calculateAtomId, PREDICATES } from '@0xintuition/sdk'
+import { calculateAtomId } from '@0xintuition/sdk'
 ```
 
 After:
 
 ```ts
-import { FOLLOW, PREDICATE_IDS } from '@0xintuition/predicates'
-import { calculateAtomId } from '@0xintuition/sdk/utils'
+import { PREDICATE_IDS } from '@0xintuition/predicates'
+import { follow } from '@0xintuition/predicates/follow'
+import { calculateAtomId } from '@0xintuition/ids'
 ```
 
 ### Low-level protocol escape hatch
