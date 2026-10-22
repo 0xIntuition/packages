@@ -10,6 +10,11 @@ import {
 import { aliasOnlySchemesForIdentityOrder } from './category-rungs.js';
 import { PROVIDER_PREFIX_MAPPINGS } from './provider-prefixes.js';
 
+export type LadderOptions = {
+	/** Application-local handles do not admit schemes to the normative IID registry. */
+	providerLocalHandles?: 'reject' | 'mint';
+};
+
 export type LadderInput = {
 	/** Music and podcast policy uses plain QIDs; active typed bindings remain opt-in. */
 	allowPlainWd?: boolean;
@@ -56,7 +61,22 @@ type HandleProjection =
 	| { status: 'unmapped' }
 	| { status: 'unregistered' };
 
-export function projectIdentifierLadder(input: LadderInput): LadderResult {
+export function projectIdentifierLadder(
+	input: LadderInput,
+	options: LadderOptions = {}
+): LadderResult {
+	const result = projectRegisteredIdentifierLadder(input);
+	if (
+		options.providerLocalHandles !== 'mint' ||
+		!('fallback' in result) ||
+		result.reason !== 'unregistered-provider' ||
+		!input.providerCanonicalId
+	)
+		return result;
+	return projectProviderLocalHandle(input.providerCanonicalId) ?? result;
+}
+
+function projectRegisteredIdentifierLadder(input: LadderInput): LadderResult {
 	const normalizedIdentifiers = normalizeStrongIdentifiers(input.strongIdentifiers);
 	const aliasOnlySchemes = aliasOnlySchemesForIdentityOrder(input.strongIdentifierOrder);
 	const directIdentifiers =
@@ -335,4 +355,44 @@ function compareCodepoints(left: string, right: string): number {
 
 function isHttpUrl(value: string): boolean {
 	return value.startsWith('https://') || value.startsWith('http://');
+}
+
+/** The broad `int:<scheme>:<value>` shape a provider-local handle must still satisfy. */
+const GENERIC_IID_SHAPE = /^int:([a-z0-9-]{1,32}):(.{1,220})$/;
+
+type ProviderLocalMapping = Extract<
+	(typeof PROVIDER_PREFIX_MAPPINGS)[number],
+	{ kind: 'provider-local' }
+>;
+
+function providerLocalMappingFor(providerCanonicalId: string): ProviderLocalMapping | undefined {
+	for (const mapping of PROVIDER_PREFIX_MAPPINGS) {
+		if (providerCanonicalId.startsWith(mapping.providerPrefix)) {
+			return mapping.kind === 'provider-local' ? mapping : undefined;
+		}
+	}
+	return undefined;
+}
+
+/**
+ * Mint a provider-local handle the way the reference ladder did: the value must
+ * be trimmed, whitespace-free and match the mapping's grammar; a value the IID
+ * parser recognizes must also validate; otherwise the broad IID shape decides.
+ */
+function projectProviderLocalHandle(providerCanonicalId: string): LadderResult | undefined {
+	const mapping = providerLocalMappingFor(providerCanonicalId);
+	if (!mapping) return undefined;
+
+	const value = providerCanonicalId.slice(mapping.providerPrefix.length);
+	const invalid: LadderResult = { fallback: 'envelope', iid: null, reason: 'invalid-handle' };
+	if (!value) return invalid;
+	if (!(value.trim() === value && !/\s/.test(value) && mapping.valuePattern.test(value))) {
+		return invalid;
+	}
+
+	const iid = `int:${mapping.iidPrefix}${value}`;
+	if (parseIntuitionId(iid)) {
+		return validateIntuitionId(iid) ? { iid, rung: 'handle' } : invalid;
+	}
+	return GENERIC_IID_SHAPE.test(iid) ? { iid, rung: 'handle' } : invalid;
 }

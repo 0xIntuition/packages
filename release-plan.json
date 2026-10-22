@@ -32,6 +32,11 @@
 			"tag": "alpha"
 		},
 		{
+			"directory": "pipeline-runtime",
+			"version": "0.1.0-alpha.0",
+			"tag": "alpha"
+		},
+		{
 			"directory": "atom-parser",
 			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
@@ -53,7 +58,7 @@
 		},
 		{
 			"directory": "iid-ladder",
-			"version": "0.1.0-alpha.0",
+			"version": "0.1.0-alpha.1",
 			"tag": "alpha"
 		},
 		{
