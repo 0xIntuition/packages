@@ -8,6 +8,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
 	assertRegistryIntegrity,
+	internalDependencyRange,
 	PACKAGES,
 	packageRootFor,
 	requiredTarballFiles,
@@ -74,7 +75,7 @@ function assertInternalDependencyVersions(packageJson, packageName) {
 				workspacePackageVersions.get(dependencyName);
 			assert.equal(
 				versionRange,
-				expectedVersion,
+				internalDependencyRange(expectedVersion),
 				`${packageName} ${fieldName}.${dependencyName} must match the packed workspace version.`
 			);
 		}
@@ -117,6 +118,8 @@ try {
 		assertNoWorkspaceProtocol(tarballPackageJson, `@0xintuition/${packageName}`);
 		assertInternalDependencyVersions(tarballPackageJson, `@0xintuition/${packageName}`);
 	}
+
+	run('node', [resolve(repoRoot, 'scripts/check-doc-imports.mjs')], repoRoot);
 
 	writeFileSync(
 		resolve(tempRoot, 'package.json'),

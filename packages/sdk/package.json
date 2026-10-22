@@ -86,7 +86,7 @@
 		"@0xintuition/deployments": "0.1.0-alpha.0",
 		"@0xintuition/ids": "0.1.0-alpha.1",
 		"@0xintuition/periphery": "0.1.0-alpha.0",
-		"@0xintuition/protocol": "4.0.0"
+		"@0xintuition/protocol": "^4.0.0"
 	},
 	"peerDependencies": {
 		"viem": "^2.0.0"

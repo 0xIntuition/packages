@@ -10,7 +10,7 @@
  * Order is the topological publish/pack order: every runtime internal
  * dependency of a package must appear earlier in the list. devDependencies do
  * not constrain order (they are not installed by consumers) but must still be
- * exact workspace versions.
+ * follow the same stable-range/prerelease-pin policy.
  *
  * kind:
  * - 'compiled'  — ships dist/ output; tarball must contain compiled entrypoints
@@ -48,6 +48,11 @@ export const PACKAGE_ORDER = PACKAGES.map((entry) => entry.dirName);
 const RUNTIME_DEPENDENCY_FIELDS = ['dependencies', 'peerDependencies', 'optionalDependencies'];
 
 const ALL_DEPENDENCY_FIELDS = [...RUNTIME_DEPENDENCY_FIELDS, 'devDependencies'];
+
+/** Prereleases stay coordinated; stable dependencies accept compatible updates. */
+export function internalDependencyRange(version) {
+	return version.includes('-') ? version : `^${version}`;
+}
 
 export function packageRootFor(repoRoot, dirName) {
 	return resolve(repoRoot, 'packages', dirName);
@@ -105,7 +110,7 @@ export function readAllWorkspaceManifests(repoRoot) {
  * Asserts that PACKAGES covers exactly the set of registered names, that
  * registry order is a valid topological order over runtime internal
  * dependencies, and that every internal dependency (including dev) is
- * exact-pinned to the current workspace version.
+ * a caret range for a stable workspace version or an exact prerelease pin.
  *
  * Throws with an aggregate message listing every violation.
  */
@@ -155,9 +160,9 @@ export function assertRegistryIntegrity(repoRoot) {
 				);
 				continue;
 			}
-			if (versionRange !== expectedVersion) {
+			if (versionRange !== internalDependencyRange(expectedVersion)) {
 				failures.push(
-					`${dirName}: ${fieldName}.${dependencyName} must be exact-pinned to workspace version ${expectedVersion}, found "${versionRange}"`
+					`${dirName}: ${fieldName}.${dependencyName} must use workspace dependency range ${internalDependencyRange(expectedVersion)}, found "${versionRange}"`
 				);
 			}
 		}
