@@ -43,7 +43,7 @@ reason). Podcast IDs are positive digits without leading zeros; Letterboxd is
 podcast-series alias; Letterboxd adds no movie rung.
 
 Other unregistered namespaces, including `spotify:*` and `goodreads:book:`,
-remain explicit `unregistered-provider` envelope fallbacks.
+remain explicit `unregistered-provider` envelope fallbacks by default.
 
 ## Category rungs
 
@@ -161,6 +161,49 @@ The labels root must be an object; arrays and other non-object roots are refused
 The package is pure and offline. It performs no network I/O, provider
 enrichment, contract calls, or atom serialization; P31 resolution uses only
 the supplied classes and pinned local data.
+
+## Provider-local handles
+
+The normative IID specification §9 has a closed registry. Known provider-local
+prefixes such as Spotify, Goodreads, YouTube, and Steam are not admitted schemes.
+The default `providerLocalHandles: 'reject'` retains every existing conformance
+result, including `unregistered-provider` for valid but unregistered handles.
+
+Applications preserving historical identities can opt into `'mint'`, an
+**application-local identifier policy**, without changing the normative registry:
+
+```ts
+import { createLadder } from '@0xintuition/iid-ladder';
+
+export const { projectIdentifierLadder, iidForIdentityRung } = createLadder({
+  providerLocalHandles: 'mint',
+});
+```
+
+This binds the same option accepted by the direct entry points:
+
+```ts
+projectIdentifierLadder(input, options?: LadderOptions): LadderResult;
+iidForIdentityRung(rung, value, primarySchemaType?, options?: LadderOptions): string | undefined;
+// LadderOptions = { providerLocalHandles?: 'reject' | 'mint' }
+```
+
+Minting applies only to the existing `unregistered-provider` fallback. It preserves
+the app's byte-exact `int:<iidPrefix><value>` strings, grammar and length checks,
+strong-identifier precedence, and alias-only decisions. Every other result passes
+through unchanged. Unknown prefixes remain unmapped, invalid handles stay invalid,
+and an already-prefixed unregistered `int:` input is not newly admitted.
+A minted result is reported as `rung: 'handle'` for app compatibility; it is not a
+registered Class D handle, the result does not flag its origin, and the
+canonical-node check in `iidForIdentityRung` performs no scheme validation for
+unregistered prefixes. These application-local strings do not become spec-valid or
+anchor-eligible merely because this option emits them. `createLadder` captures the
+policy when constructed and returns a `Ladder` (both bound entry points).
+
+Known-answer fixtures in `__tests__/fixtures/provider-local-handles.json` are
+produced by the unmodified app at `7fc0c82b4`; their provenance records the generating
+command. Tests cover both modes, classification fixtures, all provider-local prefix
+rows, alias contexts, and boundary values.
 
 ## License
 

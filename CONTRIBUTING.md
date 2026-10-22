@@ -41,6 +41,7 @@ Prefer extending the package that owns the concept:
 | `@0xintuition/iid-spec` | Normative identity specification and fixtures |
 | `@0xintuition/iid` | Canonical parsing, validation, and derivation |
 | `@0xintuition/iid-registry` | Classification and provider capability resolution |
+| `@0xintuition/pipeline-runtime` | Effect-free runtime utilities and provider host policies; consumer-owned Effect integrations |
 | `@0xintuition/iid-ladder` | Identifier selection from application/import input |
 | `@0xintuition/ids` | Deterministic atom, predicate, triple, and counter-triple IDs |
 | `@0xintuition/classifications` | Intuition atom classifications, recommended fields, metadata predicates, matrix rows, and creation profiles |

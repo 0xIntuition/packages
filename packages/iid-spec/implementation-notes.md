@@ -23,3 +23,16 @@ If a conformance vector fails against a released implementation:
 1. Do not change the vector or the canonicalizer to make the failure disappear — either could silently re-derive historical identifiers.
 2. Open an issue stating the vector ID, the specified behaviour, and the observed behaviour.
 3. The resolution follows [§1.4](./spec/01-conformance.md): a disagreement between vector and prose is a specification defect; a disagreement between a ratified rule and the code is either a code fix (when no identifiers depend on the behaviour) or a frozen defect documented here (when they do).
+
+## Application-local provider handles (ENG-17075)
+
+`@0xintuition/iid-ladder` 0.1.0-alpha.1 adds an opt-in
+`providerLocalHandles: 'mint'` application policy to preserve historical provider
+identities from the app at `7fc0c82b4`. Its default remains `'reject'`, consistent
+with §9's closed registry; this is not a deviation in `@0xintuition/iid` and does
+not modify the normative specification, conformance vectors, or anchor eligibility.
+
+Follow-up: propose admission of the ladder's `kind: 'provider-local'` mappings
+(including Spotify, Goodreads, YouTube, and Steam) as Class D schemes through the
+registry governance process. Preserve existing byte-exact spellings when admitted.
+Until then, applications choosing `'mint'` own those unregistered identifiers.

@@ -1,0 +1,6553 @@
+{
+	"provenance": {
+		"appCommit": "7fc0c82b4efe446bcdd582bc9b7d87aabd638869",
+		"generatingCommand": "cd <app-checkout> && bun <packages-checkout>/scripts/generate-provider-local-handles.mjs \"$PWD\" <packages-checkout>/packages/iid-ladder/__tests__/fixtures/provider-local-handles.json",
+		"corpusCount": 43,
+		"providerLocalPrefixes": 28,
+		"oracle": "packages/provider-handles/src/index.ts (unmodified)",
+		"scope": "provider-handles tests, atom-classification tests/fixtures/plugins, supplemental grammar boundaries"
+	},
+	"handles": [
+		{
+			"input": {
+				"providerCanonicalId": "amazon:store:"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "amazon:store:123"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:amazon:store:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "amazon:store:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "amazon:store:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "amazon:store:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "asin:"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "asin:B000123456"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:asin:B000123456",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "asin:B0916J478T"
+			},
+			"sources": [
+				"packages/atom-classification/__tests__/amazon.domain-html.test.ts",
+				"packages/atom-classification/__tests__/default-preset.audit.test.ts"
+			],
+			"mint": {
+				"iid": "int:asin:B0916J478T",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "asin:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "asin:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "asin:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coingecko:"
+			},
+			"sources": [
+				"packages/atom-classification/__tests__/coingecko.plugin.test.ts",
+				"supplemental grammar/length coverage"
+			],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coingecko:123"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:coingecko:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coingecko:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:coingecko:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coingecko:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coingecko:bitcoin"
+			},
+			"sources": [
+				"packages/atom-classification/__tests__/coingecko.plugin.test.ts",
+				"packages/atom-classification/__tests__/default-preset.audit.test.ts"
+			],
+			"mint": {
+				"iid": "int:coingecko:bitcoin",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coingecko:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coinmarketcap:"
+			},
+			"sources": [
+				"packages/atom-classification/__tests__/coinmarketcap.plugin.test.ts",
+				"supplemental grammar/length coverage"
+			],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coinmarketcap:123"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:coinmarketcap:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coinmarketcap:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:coinmarketcap:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coinmarketcap:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coinmarketcap:bitcoin"
+			},
+			"sources": [
+				"packages/atom-classification/__tests__/coinmarketcap.plugin.test.ts",
+				"packages/atom-classification/__tests__/default-preset.audit.test.ts"
+			],
+			"mint": {
+				"iid": "int:coinmarketcap:bitcoin",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coinmarketcap:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "ens:"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "ens:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "ens:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "ens:example.eth"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:ens:example.eth",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "ens:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "etsy:listing:"
+			},
+			"sources": [
+				"packages/atom-classification/__tests__/etsy.plugin.test.ts",
+				"supplemental grammar/length coverage"
+			],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "etsy:listing:123"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:etsy:listing:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "etsy:listing:1234567890"
+			},
+			"sources": [
+				"packages/atom-classification/__tests__/default-preset.audit.test.ts",
+				"packages/atom-classification/__tests__/etsy.plugin.test.ts"
+			],
+			"mint": {
+				"iid": "int:etsy:listing:1234567890",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "etsy:listing:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "etsy:listing:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "etsy:listing:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:commit:"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:commit:123"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:github:commit:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:commit:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:commit:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:commit:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:issue:"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:issue:123"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:github:issue:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:issue:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:issue:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:issue:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:issue:openai/openai-node#123"
+			},
+			"sources": ["packages/atom-classification/__tests__/github.domain-api.test.ts"],
+			"mint": {
+				"iid": "int:github:issue:openai/openai-node#123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:org:"
+			},
+			"sources": [
+				"packages/atom-classification/src/plugins/github/domain-api-adapter.ts",
+				"supplemental grammar/length coverage"
+			],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:org:123"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:github:org:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:org:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:org:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:org:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:pull:"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:pull:123"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:github:pull:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:pull:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:pull:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:pull:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:"
+			},
+			"sources": [
+				"packages/atom-classification/src/plugins/goodreads/index.test.ts",
+				"packages/atom-classification/src/plugins/goodreads/openlibrary-title.test.ts",
+				"supplemental grammar/length coverage"
+			],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:123"
+			},
+			"sources": [
+				"packages/provider-handles/tests/provider-handles.test.ts",
+				"supplemental grammar/length coverage"
+			],
+			"mint": {
+				"iid": "int:goodreads:book:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:12345"
+			},
+			"sources": ["packages/atom-classification/src/plugins/goodreads/openlibrary-title.test.ts"],
+			"mint": {
+				"iid": "int:goodreads:book:12345",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:133518"
+			},
+			"sources": ["packages/atom-classification/__tests__/openlibrary-work-resolution.test.ts"],
+			"mint": {
+				"iid": "int:goodreads:book:133518",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:170448"
+			},
+			"sources": ["packages/atom-classification/__tests__/goodreads-ol-bridge-budget.test.ts"],
+			"mint": {
+				"iid": "int:goodreads:book:170448",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:4671"
+			},
+			"sources": [
+				"packages/atom-classification/__tests__/fixtures/classify-output/goodreads-hit.json",
+				"packages/atom-classification/__tests__/fixtures/classify-output/goodreads-thin.json",
+				"packages/atom-classification/__tests__/fixtures/classify-output/openlibrary-work-multi-isbn.json",
+				"packages/atom-classification/__tests__/fixtures/classify-output/openlibrary-work.json",
+				"packages/atom-classification/__tests__/provider-lane-parity.test.ts",
+				"packages/atom-classification/src/plugins/goodreads/index.test.ts"
+			],
+			"mint": {
+				"iid": "int:goodreads:book:4671",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:52036"
+			},
+			"sources": ["packages/atom-classification/src/plugins/goodreads/index.test.ts"],
+			"mint": {
+				"iid": "int:goodreads:book:52036",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:59552636"
+			},
+			"sources": [
+				"packages/atom-classification/src/plugins/goodreads/index.test.ts",
+				"packages/atom-classification/src/plugins/goodreads/openlibrary-title.test.ts"
+			],
+			"mint": {
+				"iid": "int:goodreads:book:59552636",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:post:"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:post:4Oju8V0OpOaz886J75roH5"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:instagram:post:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:post:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:post:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:post:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:user:"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:user:123"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:instagram:user:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:user:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:user:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:user:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:video:"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:video:4Oju8V0OpOaz886J75roH5"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:instagram:video:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:video:C4f6h1M0abc"
+			},
+			"sources": ["packages/atom-classification/__tests__/default-preset.audit.test.ts"],
+			"mint": {
+				"iid": "int:instagram:video:C4f6h1M0abc",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:video:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:video:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:video:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "places:"
+			},
+			"sources": [
+				"packages/atom-classification/__tests__/iid-ladder-emission-conformance.test.ts",
+				"supplemental grammar/length coverage"
+			],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "places:123"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:places:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "places:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:places:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "places:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "places:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "shopify:product:"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "shopify:product:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "shopify:product:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "shopify:product:acme-store.myshopify.com:handmade-blue-mug"
+			},
+			"sources": [
+				"packages/atom-classification/__tests__/default-preset.audit.test.ts",
+				"packages/atom-classification/__tests__/shopify.plugin.test.ts"
+			],
+			"mint": {
+				"iid": "int:shopify:product:acme-store.myshopify.com:handmade-blue-mug",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "shopify:product:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "shopify:product:shop.example:product"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:shopify:product:shop.example:product",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:album:"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:album:4Oju8V0OpOaz886J75roH5"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:spotify:album:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:album:4uLU6hMCjMI75M1A2tKUQC"
+			},
+			"sources": [
+				"packages/atom-classification/__tests__/fixtures/classify-output/spotify-album-bridge-hit.json",
+				"packages/atom-classification/__tests__/fixtures/classify-output/spotify-album-bridge-miss.json",
+				"packages/atom-classification/__tests__/fixtures/classify-output/spotify-album.json"
+			],
+			"mint": {
+				"iid": "int:spotify:album:4uLU6hMCjMI75M1A2tKUQC",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:album:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:album:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:album:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:artist:"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:artist:4Oju8V0OpOaz886J75roH5"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:spotify:artist:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:artist:4uLU6hMCjMI75M1A2tKUQC"
+			},
+			"sources": [
+				"packages/atom-classification/__tests__/fixtures/classify-output/spotify-artist-bridge-hit.json",
+				"packages/atom-classification/__tests__/fixtures/classify-output/spotify-artist-bridge-miss.json",
+				"packages/atom-classification/__tests__/fixtures/classify-output/spotify-artist.json"
+			],
+			"mint": {
+				"iid": "int:spotify:artist:4uLU6hMCjMI75M1A2tKUQC",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:artist:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:artist:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:artist:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:episode:"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:episode:4Oju8V0OpOaz886J75roH5"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:spotify:episode:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:episode:4uLU6hMCjMI75M1A2tKUQC"
+			},
+			"sources": [
+				"packages/atom-classification/__tests__/fixtures/classify-output/spotify-episode.json"
+			],
+			"mint": {
+				"iid": "int:spotify:episode:4uLU6hMCjMI75M1A2tKUQC",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:episode:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:episode:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:episode:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:playlist:"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:playlist:4Oju8V0OpOaz886J75roH5"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:spotify:playlist:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:playlist:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:playlist:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:playlist:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:show:"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:show:38bS44xjbVVZ3No3ByF1dJ"
+			},
+			"sources": ["packages/atom-classification/__tests__/provider-lane-parity.test.ts"],
+			"mint": {
+				"iid": "int:spotify:show:38bS44xjbVVZ3No3ByF1dJ",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:show:4Oju8V0OpOaz886J75roH5"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:spotify:show:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:show:4uLU6hMCjMI75M1A2tKUQC"
+			},
+			"sources": [
+				"packages/atom-classification/__tests__/fixtures/classify-output/spotify-show.json"
+			],
+			"mint": {
+				"iid": "int:spotify:show:4uLU6hMCjMI75M1A2tKUQC",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:show:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:show:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:show:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:"
+			},
+			"sources": [
+				"packages/provider-handles/tests/provider-handles.test.ts",
+				"supplemental grammar/length coverage"
+			],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:0ojU4I7FDbtkvh4lnkPI1C"
+			},
+			"sources": ["packages/atom-classification/__tests__/engine.smoke.test.ts"],
+			"mint": {
+				"iid": "int:spotify:track:0ojU4I7FDbtkvh4lnkPI1C",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:3n3Ppam7vgaVa1iaRUc9Lp"
+			},
+			"sources": ["packages/atom-classification/__tests__/provider-lane-parity.test.ts"],
+			"mint": {
+				"iid": "int:spotify:track:3n3Ppam7vgaVa1iaRUc9Lp",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:4Oju8V0OpOaz886J75roH5"
+			},
+			"sources": [
+				"packages/provider-handles/tests/provider-handles.test.ts",
+				"supplemental grammar/length coverage"
+			],
+			"mint": {
+				"iid": "int:spotify:track:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:4iV5W9uYEdYUVa79Axb7Rh"
+			},
+			"sources": [
+				"packages/atom-classification/__tests__/default-preset.audit.test.ts",
+				"packages/atom-classification/__tests__/v0.platforms.test.ts"
+			],
+			"mint": {
+				"iid": "int:spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:4uLU6hMCjMI75M1A2tKUQC"
+			},
+			"sources": [
+				"packages/atom-classification/__tests__/fixtures/classify-output/spotify-track.json"
+			],
+			"mint": {
+				"iid": "int:spotify:track:4uLU6hMCjMI75M1A2tKUQC",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:domain-api"
+			},
+			"sources": ["packages/atom-classification/__tests__/v0.platforms.test.ts"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:isolated-domain-api"
+			},
+			"sources": ["packages/atom-classification/__tests__/v0.platforms.test.ts"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:not valid"
+			},
+			"sources": [
+				"packages/provider-handles/tests/provider-handles.test.ts",
+				"supplemental grammar/length coverage"
+			],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:oembed"
+			},
+			"sources": ["packages/atom-classification/__tests__/v0.platforms.test.ts"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:public-metadata"
+			},
+			"sources": ["packages/atom-classification/__tests__/v0.platforms.test.ts"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "steam:app:"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "steam:app:123"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:steam:app:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "steam:app:570"
+			},
+			"sources": ["packages/atom-classification/__tests__/default-preset.audit.test.ts"],
+			"mint": {
+				"iid": "int:steam:app:570",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "steam:app:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "steam:app:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "steam:app:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "tiktok:user:"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "tiktok:user:123"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:tiktok:user:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "tiktok:user:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "tiktok:user:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "tiktok:user:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "tiktok:video:"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "tiktok:video:123"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:tiktok:video:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "tiktok:video:7345678901234567890"
+			},
+			"sources": ["packages/atom-classification/__tests__/default-preset.audit.test.ts"],
+			"mint": {
+				"iid": "int:tiktok:video:7345678901234567890",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "tiktok:video:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "tiktok:video:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "tiktok:video:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "wikipedia:"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "wikipedia:123"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:wikipedia:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "wikipedia:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:wikipedia:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "wikipedia:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "wikipedia:manon-rheaume"
+			},
+			"sources": ["packages/atom-classification/__tests__/wikipedia.plugin.test.ts"],
+			"mint": {
+				"iid": "int:wikipedia:manon-rheaume",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "wikipedia:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "wikipedia:notion-software"
+			},
+			"sources": ["packages/atom-classification/__tests__/default-preset.audit.test.ts"],
+			"mint": {
+				"iid": "int:wikipedia:notion-software",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "x:post:"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "x:post:123"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"iid": "int:x:post:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "x:post:123456789"
+			},
+			"sources": ["packages/atom-classification/__tests__/default-preset.audit.test.ts"],
+			"mint": {
+				"iid": "int:x:post:123456789",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "x:post:1920505170888216700"
+			},
+			"sources": ["packages/atom-classification/__tests__/x.plugin.test.ts"],
+			"mint": {
+				"iid": "int:x:post:1920505170888216700",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "x:post:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "x:post:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "x:post:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "youtube:video:"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "youtube:video:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "youtube:video:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "youtube:video:dQw4w9WgXcQ"
+			},
+			"sources": [
+				"packages/atom-classification/__tests__/default-preset.audit.test.ts",
+				"packages/atom-classification/src/plugins/youtube/index.test.ts",
+				"supplemental grammar/length coverage"
+			],
+			"mint": {
+				"iid": "int:youtube:video:dQw4w9WgXcQ",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "youtube:video:not valid"
+			},
+			"sources": ["supplemental grammar/length coverage"],
+			"mint": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "invalid-handle"
+			}
+		}
+	],
+	"projections": [
+		{
+			"input": {
+				"providerCanonicalId": "amazon:store:123",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "amazon:store:123",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:amazon:store:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "amazon:store:123",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:amazon:store:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "asin:B000123456",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "asin:B000123456",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:asin:B000123456",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "asin:B000123456",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:asin:B000123456",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "asin:B0916J478T",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "asin:B0916J478T",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:asin:B0916J478T",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "asin:B0916J478T",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:asin:B0916J478T",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coingecko:123",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coingecko:123",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:coingecko:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coingecko:123",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:coingecko:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coingecko:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coingecko:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:coingecko:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coingecko:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:coingecko:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coingecko:bitcoin",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coingecko:bitcoin",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:coingecko:bitcoin",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coingecko:bitcoin",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:coingecko:bitcoin",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coinmarketcap:123",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coinmarketcap:123",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:coinmarketcap:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coinmarketcap:123",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:coinmarketcap:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coinmarketcap:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coinmarketcap:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:coinmarketcap:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coinmarketcap:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:coinmarketcap:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coinmarketcap:bitcoin",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coinmarketcap:bitcoin",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:coinmarketcap:bitcoin",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "coinmarketcap:bitcoin",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:coinmarketcap:bitcoin",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "ens:example.eth",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "ens:example.eth",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:ens:example.eth",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "ens:example.eth",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:ens:example.eth",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "etsy:listing:123",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "etsy:listing:123",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:etsy:listing:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "etsy:listing:123",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:etsy:listing:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "etsy:listing:1234567890",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "etsy:listing:1234567890",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:etsy:listing:1234567890",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "etsy:listing:1234567890",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:etsy:listing:1234567890",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:commit:123",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:commit:123",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:github:commit:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:commit:123",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:github:commit:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:issue:123",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:issue:123",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:github:issue:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:issue:123",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:github:issue:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:issue:openai/openai-node#123",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:issue:openai/openai-node#123",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:github:issue:openai/openai-node#123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:issue:openai/openai-node#123",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:github:issue:openai/openai-node#123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:org:123",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:org:123",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:github:org:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:org:123",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:github:org:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:pull:123",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:pull:123",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:github:pull:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "github:pull:123",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:github:pull:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:123",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:123",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:goodreads:book:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:123",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:goodreads:book:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:12345",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:12345",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:goodreads:book:12345",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:12345",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:goodreads:book:12345",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:133518",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:133518",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:goodreads:book:133518",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:133518",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:goodreads:book:133518",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:170448",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:170448",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:goodreads:book:170448",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:170448",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:goodreads:book:170448",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:4671",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:4671",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:goodreads:book:4671",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:4671",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:goodreads:book:4671",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:52036",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:52036",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:goodreads:book:52036",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:52036",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:goodreads:book:52036",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:59552636",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:59552636",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:goodreads:book:59552636",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "goodreads:book:59552636",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:goodreads:book:59552636",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:post:4Oju8V0OpOaz886J75roH5",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:post:4Oju8V0OpOaz886J75roH5",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:instagram:post:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:post:4Oju8V0OpOaz886J75roH5",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:instagram:post:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:user:123",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:user:123",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:instagram:user:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:user:123",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:instagram:user:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:video:4Oju8V0OpOaz886J75roH5",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:video:4Oju8V0OpOaz886J75roH5",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:instagram:video:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:video:4Oju8V0OpOaz886J75roH5",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:instagram:video:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:video:C4f6h1M0abc",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:video:C4f6h1M0abc",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:instagram:video:C4f6h1M0abc",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "instagram:video:C4f6h1M0abc",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:instagram:video:C4f6h1M0abc",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "places:123",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "places:123",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:places:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "places:123",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:places:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "places:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "places:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:places:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "places:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:places:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "shopify:product:acme-store.myshopify.com:handmade-blue-mug",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "shopify:product:acme-store.myshopify.com:handmade-blue-mug",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:shopify:product:acme-store.myshopify.com:handmade-blue-mug",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "shopify:product:acme-store.myshopify.com:handmade-blue-mug",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:shopify:product:acme-store.myshopify.com:handmade-blue-mug",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "shopify:product:shop.example:product",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "shopify:product:shop.example:product",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:shopify:product:shop.example:product",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "shopify:product:shop.example:product",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:shopify:product:shop.example:product",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:album:4Oju8V0OpOaz886J75roH5",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:album:4Oju8V0OpOaz886J75roH5",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:spotify:album:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:album:4Oju8V0OpOaz886J75roH5",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:spotify:album:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:album:4uLU6hMCjMI75M1A2tKUQC",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:album:4uLU6hMCjMI75M1A2tKUQC",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:spotify:album:4uLU6hMCjMI75M1A2tKUQC",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:album:4uLU6hMCjMI75M1A2tKUQC",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:spotify:album:4uLU6hMCjMI75M1A2tKUQC",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:artist:4Oju8V0OpOaz886J75roH5",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:artist:4Oju8V0OpOaz886J75roH5",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:spotify:artist:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:artist:4Oju8V0OpOaz886J75roH5",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:spotify:artist:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:artist:4uLU6hMCjMI75M1A2tKUQC",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:artist:4uLU6hMCjMI75M1A2tKUQC",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:spotify:artist:4uLU6hMCjMI75M1A2tKUQC",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:artist:4uLU6hMCjMI75M1A2tKUQC",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:spotify:artist:4uLU6hMCjMI75M1A2tKUQC",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:episode:4Oju8V0OpOaz886J75roH5",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:episode:4Oju8V0OpOaz886J75roH5",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:spotify:episode:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:episode:4Oju8V0OpOaz886J75roH5",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:spotify:episode:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:episode:4uLU6hMCjMI75M1A2tKUQC",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:episode:4uLU6hMCjMI75M1A2tKUQC",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:spotify:episode:4uLU6hMCjMI75M1A2tKUQC",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:episode:4uLU6hMCjMI75M1A2tKUQC",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:spotify:episode:4uLU6hMCjMI75M1A2tKUQC",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:playlist:4Oju8V0OpOaz886J75roH5",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:playlist:4Oju8V0OpOaz886J75roH5",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:spotify:playlist:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:playlist:4Oju8V0OpOaz886J75roH5",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:spotify:playlist:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:show:38bS44xjbVVZ3No3ByF1dJ",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:show:38bS44xjbVVZ3No3ByF1dJ",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:spotify:show:38bS44xjbVVZ3No3ByF1dJ",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:show:38bS44xjbVVZ3No3ByF1dJ",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:spotify:show:38bS44xjbVVZ3No3ByF1dJ",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:show:4Oju8V0OpOaz886J75roH5",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:show:4Oju8V0OpOaz886J75roH5",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:spotify:show:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:show:4Oju8V0OpOaz886J75roH5",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:spotify:show:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:show:4uLU6hMCjMI75M1A2tKUQC",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:show:4uLU6hMCjMI75M1A2tKUQC",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:spotify:show:4uLU6hMCjMI75M1A2tKUQC",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:show:4uLU6hMCjMI75M1A2tKUQC",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:spotify:show:4uLU6hMCjMI75M1A2tKUQC",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:0ojU4I7FDbtkvh4lnkPI1C",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:0ojU4I7FDbtkvh4lnkPI1C",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:spotify:track:0ojU4I7FDbtkvh4lnkPI1C",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:0ojU4I7FDbtkvh4lnkPI1C",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:spotify:track:0ojU4I7FDbtkvh4lnkPI1C",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:3n3Ppam7vgaVa1iaRUc9Lp",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:3n3Ppam7vgaVa1iaRUc9Lp",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:spotify:track:3n3Ppam7vgaVa1iaRUc9Lp",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:3n3Ppam7vgaVa1iaRUc9Lp",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:spotify:track:3n3Ppam7vgaVa1iaRUc9Lp",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:4Oju8V0OpOaz886J75roH5",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:4Oju8V0OpOaz886J75roH5",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:spotify:track:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:4Oju8V0OpOaz886J75roH5",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:spotify:track:4Oju8V0OpOaz886J75roH5",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:4uLU6hMCjMI75M1A2tKUQC",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:4uLU6hMCjMI75M1A2tKUQC",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:spotify:track:4uLU6hMCjMI75M1A2tKUQC",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "spotify:track:4uLU6hMCjMI75M1A2tKUQC",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:spotify:track:4uLU6hMCjMI75M1A2tKUQC",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "steam:app:123",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "steam:app:123",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:steam:app:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "steam:app:123",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:steam:app:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "steam:app:570",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "steam:app:570",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:steam:app:570",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "steam:app:570",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:steam:app:570",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "tiktok:user:123",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "tiktok:user:123",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:tiktok:user:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "tiktok:user:123",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:tiktok:user:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "tiktok:video:123",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "tiktok:video:123",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:tiktok:video:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "tiktok:video:123",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:tiktok:video:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "tiktok:video:7345678901234567890",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "tiktok:video:7345678901234567890",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:tiktok:video:7345678901234567890",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "tiktok:video:7345678901234567890",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:tiktok:video:7345678901234567890",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "wikipedia:123",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "wikipedia:123",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:wikipedia:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "wikipedia:123",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:wikipedia:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "wikipedia:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "wikipedia:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:wikipedia:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "wikipedia:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:wikipedia:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "wikipedia:manon-rheaume",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "wikipedia:manon-rheaume",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:wikipedia:manon-rheaume",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "wikipedia:manon-rheaume",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:wikipedia:manon-rheaume",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "wikipedia:notion-software",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "wikipedia:notion-software",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:wikipedia:notion-software",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "wikipedia:notion-software",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:wikipedia:notion-software",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "x:post:123",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "x:post:123",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:x:post:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "x:post:123",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:x:post:123",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "x:post:123456789",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "x:post:123456789",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:x:post:123456789",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "x:post:123456789",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:x:post:123456789",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "x:post:1920505170888216700",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "x:post:1920505170888216700",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:x:post:1920505170888216700",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "x:post:1920505170888216700",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:x:post:1920505170888216700",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "youtube:video:dQw4w9WgXcQ",
+				"strongIdentifiers": {
+					"isrc": "US-RC1-76-07839"
+				},
+				"strongIdentifierOrder": ["isrc"]
+			},
+			"mint": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			},
+			"reject": {
+				"iid": "int:isrc:USRC17607839",
+				"rung": "strong"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "youtube:video:dQw4w9WgXcQ",
+				"canonicalUrl": "https://example.com/item"
+			},
+			"mint": {
+				"iid": "int:youtube:video:dQw4w9WgXcQ",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		},
+		{
+			"input": {
+				"providerCanonicalId": "youtube:video:dQw4w9WgXcQ",
+				"strongIdentifierOrder": ["podcastguid", "podcast-index", "spotify"]
+			},
+			"mint": {
+				"iid": "int:youtube:video:dQw4w9WgXcQ",
+				"rung": "handle"
+			},
+			"reject": {
+				"fallback": "envelope",
+				"iid": null,
+				"reason": "unregistered-provider"
+			}
+		}
+	],
+	"rungs": [
+		{
+			"args": ["amazon:store", "123", null],
+			"mint": "int:amazon:store:123",
+			"reject": null
+		},
+		{
+			"args": ["amazon:store", "123", "MusicAlbum"],
+			"mint": "int:amazon:store:123",
+			"reject": null
+		},
+		{
+			"args": ["amazon:store", "123", "PodcastSeries"],
+			"mint": "int:amazon:store:123",
+			"reject": null
+		},
+		{
+			"args": ["asin", "B000123456", null],
+			"mint": "int:asin:B000123456",
+			"reject": null
+		},
+		{
+			"args": ["asin", "B000123456", "MusicAlbum"],
+			"mint": "int:asin:B000123456",
+			"reject": null
+		},
+		{
+			"args": ["asin", "B000123456", "PodcastSeries"],
+			"mint": "int:asin:B000123456",
+			"reject": null
+		},
+		{
+			"args": ["asin", "B0916J478T", null],
+			"mint": "int:asin:B0916J478T",
+			"reject": null
+		},
+		{
+			"args": ["asin", "B0916J478T", "MusicAlbum"],
+			"mint": "int:asin:B0916J478T",
+			"reject": null
+		},
+		{
+			"args": ["asin", "B0916J478T", "PodcastSeries"],
+			"mint": "int:asin:B0916J478T",
+			"reject": null
+		},
+		{
+			"args": ["coingecko", "123", null],
+			"mint": "int:coingecko:123",
+			"reject": null
+		},
+		{
+			"args": ["coingecko", "123", "MusicAlbum"],
+			"mint": "int:coingecko:123",
+			"reject": null
+		},
+		{
+			"args": ["coingecko", "123", "PodcastSeries"],
+			"mint": "int:coingecko:123",
+			"reject": null
+		},
+		{
+			"args": [
+				"coingecko",
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				null
+			],
+			"mint": "int:coingecko:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			"reject": null
+		},
+		{
+			"args": [
+				"coingecko",
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"MusicAlbum"
+			],
+			"mint": "int:coingecko:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			"reject": null
+		},
+		{
+			"args": [
+				"coingecko",
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"PodcastSeries"
+			],
+			"mint": "int:coingecko:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			"reject": null
+		},
+		{
+			"args": ["coingecko", "bitcoin", null],
+			"mint": "int:coingecko:bitcoin",
+			"reject": null
+		},
+		{
+			"args": ["coingecko", "bitcoin", "MusicAlbum"],
+			"mint": "int:coingecko:bitcoin",
+			"reject": null
+		},
+		{
+			"args": ["coingecko", "bitcoin", "PodcastSeries"],
+			"mint": "int:coingecko:bitcoin",
+			"reject": null
+		},
+		{
+			"args": ["coinmarketcap", "123", null],
+			"mint": "int:coinmarketcap:123",
+			"reject": null
+		},
+		{
+			"args": ["coinmarketcap", "123", "MusicAlbum"],
+			"mint": "int:coinmarketcap:123",
+			"reject": null
+		},
+		{
+			"args": ["coinmarketcap", "123", "PodcastSeries"],
+			"mint": "int:coinmarketcap:123",
+			"reject": null
+		},
+		{
+			"args": [
+				"coinmarketcap",
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				null
+			],
+			"mint": "int:coinmarketcap:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			"reject": null
+		},
+		{
+			"args": [
+				"coinmarketcap",
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"MusicAlbum"
+			],
+			"mint": "int:coinmarketcap:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			"reject": null
+		},
+		{
+			"args": [
+				"coinmarketcap",
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"PodcastSeries"
+			],
+			"mint": "int:coinmarketcap:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			"reject": null
+		},
+		{
+			"args": ["coinmarketcap", "bitcoin", null],
+			"mint": "int:coinmarketcap:bitcoin",
+			"reject": null
+		},
+		{
+			"args": ["coinmarketcap", "bitcoin", "MusicAlbum"],
+			"mint": "int:coinmarketcap:bitcoin",
+			"reject": null
+		},
+		{
+			"args": ["coinmarketcap", "bitcoin", "PodcastSeries"],
+			"mint": "int:coinmarketcap:bitcoin",
+			"reject": null
+		},
+		{
+			"args": ["ens", "example.eth", null],
+			"mint": "int:ens:example.eth",
+			"reject": null
+		},
+		{
+			"args": ["ens", "example.eth", "MusicAlbum"],
+			"mint": "int:ens:example.eth",
+			"reject": null
+		},
+		{
+			"args": ["ens", "example.eth", "PodcastSeries"],
+			"mint": "int:ens:example.eth",
+			"reject": null
+		},
+		{
+			"args": ["etsy:listing", "123", null],
+			"mint": "int:etsy:listing:123",
+			"reject": null
+		},
+		{
+			"args": ["etsy:listing", "123", "MusicAlbum"],
+			"mint": "int:etsy:listing:123",
+			"reject": null
+		},
+		{
+			"args": ["etsy:listing", "123", "PodcastSeries"],
+			"mint": "int:etsy:listing:123",
+			"reject": null
+		},
+		{
+			"args": ["etsy:listing", "1234567890", null],
+			"mint": "int:etsy:listing:1234567890",
+			"reject": null
+		},
+		{
+			"args": ["etsy:listing", "1234567890", "MusicAlbum"],
+			"mint": "int:etsy:listing:1234567890",
+			"reject": null
+		},
+		{
+			"args": ["etsy:listing", "1234567890", "PodcastSeries"],
+			"mint": "int:etsy:listing:1234567890",
+			"reject": null
+		},
+		{
+			"args": ["github:commit", "123", null],
+			"mint": "int:github:commit:123",
+			"reject": null
+		},
+		{
+			"args": ["github:commit", "123", "MusicAlbum"],
+			"mint": "int:github:commit:123",
+			"reject": null
+		},
+		{
+			"args": ["github:commit", "123", "PodcastSeries"],
+			"mint": "int:github:commit:123",
+			"reject": null
+		},
+		{
+			"args": ["github:issue", "123", null],
+			"mint": "int:github:issue:123",
+			"reject": null
+		},
+		{
+			"args": ["github:issue", "123", "MusicAlbum"],
+			"mint": "int:github:issue:123",
+			"reject": null
+		},
+		{
+			"args": ["github:issue", "123", "PodcastSeries"],
+			"mint": "int:github:issue:123",
+			"reject": null
+		},
+		{
+			"args": ["github:issue", "openai/openai-node#123", null],
+			"mint": "int:github:issue:openai/openai-node#123",
+			"reject": null
+		},
+		{
+			"args": ["github:issue", "openai/openai-node#123", "MusicAlbum"],
+			"mint": "int:github:issue:openai/openai-node#123",
+			"reject": null
+		},
+		{
+			"args": ["github:issue", "openai/openai-node#123", "PodcastSeries"],
+			"mint": "int:github:issue:openai/openai-node#123",
+			"reject": null
+		},
+		{
+			"args": ["github:org", "123", null],
+			"mint": "int:github:org:123",
+			"reject": null
+		},
+		{
+			"args": ["github:org", "123", "MusicAlbum"],
+			"mint": "int:github:org:123",
+			"reject": null
+		},
+		{
+			"args": ["github:org", "123", "PodcastSeries"],
+			"mint": "int:github:org:123",
+			"reject": null
+		},
+		{
+			"args": ["github:pull", "123", null],
+			"mint": "int:github:pull:123",
+			"reject": null
+		},
+		{
+			"args": ["github:pull", "123", "MusicAlbum"],
+			"mint": "int:github:pull:123",
+			"reject": null
+		},
+		{
+			"args": ["github:pull", "123", "PodcastSeries"],
+			"mint": "int:github:pull:123",
+			"reject": null
+		},
+		{
+			"args": ["goodreads:book", "123", null],
+			"mint": "int:goodreads:book:123",
+			"reject": null
+		},
+		{
+			"args": ["goodreads:book", "123", "MusicAlbum"],
+			"mint": "int:goodreads:book:123",
+			"reject": null
+		},
+		{
+			"args": ["goodreads:book", "123", "PodcastSeries"],
+			"mint": "int:goodreads:book:123",
+			"reject": null
+		},
+		{
+			"args": ["goodreads:book", "12345", null],
+			"mint": "int:goodreads:book:12345",
+			"reject": null
+		},
+		{
+			"args": ["goodreads:book", "12345", "MusicAlbum"],
+			"mint": "int:goodreads:book:12345",
+			"reject": null
+		},
+		{
+			"args": ["goodreads:book", "12345", "PodcastSeries"],
+			"mint": "int:goodreads:book:12345",
+			"reject": null
+		},
+		{
+			"args": ["goodreads:book", "133518", null],
+			"mint": "int:goodreads:book:133518",
+			"reject": null
+		},
+		{
+			"args": ["goodreads:book", "133518", "MusicAlbum"],
+			"mint": "int:goodreads:book:133518",
+			"reject": null
+		},
+		{
+			"args": ["goodreads:book", "133518", "PodcastSeries"],
+			"mint": "int:goodreads:book:133518",
+			"reject": null
+		},
+		{
+			"args": ["goodreads:book", "170448", null],
+			"mint": "int:goodreads:book:170448",
+			"reject": null
+		},
+		{
+			"args": ["goodreads:book", "170448", "MusicAlbum"],
+			"mint": "int:goodreads:book:170448",
+			"reject": null
+		},
+		{
+			"args": ["goodreads:book", "170448", "PodcastSeries"],
+			"mint": "int:goodreads:book:170448",
+			"reject": null
+		},
+		{
+			"args": ["goodreads:book", "4671", null],
+			"mint": "int:goodreads:book:4671",
+			"reject": null
+		},
+		{
+			"args": ["goodreads:book", "4671", "MusicAlbum"],
+			"mint": "int:goodreads:book:4671",
+			"reject": null
+		},
+		{
+			"args": ["goodreads:book", "4671", "PodcastSeries"],
+			"mint": "int:goodreads:book:4671",
+			"reject": null
+		},
+		{
+			"args": ["goodreads:book", "52036", null],
+			"mint": "int:goodreads:book:52036",
+			"reject": null
+		},
+		{
+			"args": ["goodreads:book", "52036", "MusicAlbum"],
+			"mint": "int:goodreads:book:52036",
+			"reject": null
+		},
+		{
+			"args": ["goodreads:book", "52036", "PodcastSeries"],
+			"mint": "int:goodreads:book:52036",
+			"reject": null
+		},
+		{
+			"args": ["goodreads:book", "59552636", null],
+			"mint": "int:goodreads:book:59552636",
+			"reject": null
+		},
+		{
+			"args": ["goodreads:book", "59552636", "MusicAlbum"],
+			"mint": "int:goodreads:book:59552636",
+			"reject": null
+		},
+		{
+			"args": ["goodreads:book", "59552636", "PodcastSeries"],
+			"mint": "int:goodreads:book:59552636",
+			"reject": null
+		},
+		{
+			"args": ["instagram:post", "4Oju8V0OpOaz886J75roH5", null],
+			"mint": "int:instagram:post:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["instagram:post", "4Oju8V0OpOaz886J75roH5", "MusicAlbum"],
+			"mint": "int:instagram:post:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["instagram:post", "4Oju8V0OpOaz886J75roH5", "PodcastSeries"],
+			"mint": "int:instagram:post:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["instagram:user", "123", null],
+			"mint": "int:instagram:user:123",
+			"reject": null
+		},
+		{
+			"args": ["instagram:user", "123", "MusicAlbum"],
+			"mint": "int:instagram:user:123",
+			"reject": null
+		},
+		{
+			"args": ["instagram:user", "123", "PodcastSeries"],
+			"mint": "int:instagram:user:123",
+			"reject": null
+		},
+		{
+			"args": ["instagram:video", "4Oju8V0OpOaz886J75roH5", null],
+			"mint": "int:instagram:video:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["instagram:video", "4Oju8V0OpOaz886J75roH5", "MusicAlbum"],
+			"mint": "int:instagram:video:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["instagram:video", "4Oju8V0OpOaz886J75roH5", "PodcastSeries"],
+			"mint": "int:instagram:video:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["instagram:video", "C4f6h1M0abc", null],
+			"mint": "int:instagram:video:C4f6h1M0abc",
+			"reject": null
+		},
+		{
+			"args": ["instagram:video", "C4f6h1M0abc", "MusicAlbum"],
+			"mint": "int:instagram:video:C4f6h1M0abc",
+			"reject": null
+		},
+		{
+			"args": ["instagram:video", "C4f6h1M0abc", "PodcastSeries"],
+			"mint": "int:instagram:video:C4f6h1M0abc",
+			"reject": null
+		},
+		{
+			"args": ["places", "123", null],
+			"mint": "int:places:123",
+			"reject": null
+		},
+		{
+			"args": ["places", "123", "MusicAlbum"],
+			"mint": "int:places:123",
+			"reject": null
+		},
+		{
+			"args": ["places", "123", "PodcastSeries"],
+			"mint": "int:places:123",
+			"reject": null
+		},
+		{
+			"args": [
+				"places",
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				null
+			],
+			"mint": "int:places:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			"reject": null
+		},
+		{
+			"args": [
+				"places",
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"MusicAlbum"
+			],
+			"mint": "int:places:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			"reject": null
+		},
+		{
+			"args": [
+				"places",
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"PodcastSeries"
+			],
+			"mint": "int:places:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			"reject": null
+		},
+		{
+			"args": ["shopify:product", "acme-store.myshopify.com:handmade-blue-mug", null],
+			"mint": "int:shopify:product:acme-store.myshopify.com:handmade-blue-mug",
+			"reject": null
+		},
+		{
+			"args": ["shopify:product", "acme-store.myshopify.com:handmade-blue-mug", "MusicAlbum"],
+			"mint": "int:shopify:product:acme-store.myshopify.com:handmade-blue-mug",
+			"reject": null
+		},
+		{
+			"args": ["shopify:product", "acme-store.myshopify.com:handmade-blue-mug", "PodcastSeries"],
+			"mint": "int:shopify:product:acme-store.myshopify.com:handmade-blue-mug",
+			"reject": null
+		},
+		{
+			"args": ["shopify:product", "shop.example:product", null],
+			"mint": "int:shopify:product:shop.example:product",
+			"reject": null
+		},
+		{
+			"args": ["shopify:product", "shop.example:product", "MusicAlbum"],
+			"mint": "int:shopify:product:shop.example:product",
+			"reject": null
+		},
+		{
+			"args": ["shopify:product", "shop.example:product", "PodcastSeries"],
+			"mint": "int:shopify:product:shop.example:product",
+			"reject": null
+		},
+		{
+			"args": ["spotify:album", "4Oju8V0OpOaz886J75roH5", null],
+			"mint": "int:spotify:album:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["spotify:album", "4Oju8V0OpOaz886J75roH5", "MusicAlbum"],
+			"mint": "int:spotify:album:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["spotify:album", "4Oju8V0OpOaz886J75roH5", "PodcastSeries"],
+			"mint": "int:spotify:album:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["spotify:album", "4uLU6hMCjMI75M1A2tKUQC", null],
+			"mint": "int:spotify:album:4uLU6hMCjMI75M1A2tKUQC",
+			"reject": null
+		},
+		{
+			"args": ["spotify:album", "4uLU6hMCjMI75M1A2tKUQC", "MusicAlbum"],
+			"mint": "int:spotify:album:4uLU6hMCjMI75M1A2tKUQC",
+			"reject": null
+		},
+		{
+			"args": ["spotify:album", "4uLU6hMCjMI75M1A2tKUQC", "PodcastSeries"],
+			"mint": "int:spotify:album:4uLU6hMCjMI75M1A2tKUQC",
+			"reject": null
+		},
+		{
+			"args": ["spotify:artist", "4Oju8V0OpOaz886J75roH5", null],
+			"mint": "int:spotify:artist:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["spotify:artist", "4Oju8V0OpOaz886J75roH5", "MusicAlbum"],
+			"mint": "int:spotify:artist:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["spotify:artist", "4Oju8V0OpOaz886J75roH5", "PodcastSeries"],
+			"mint": "int:spotify:artist:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["spotify:artist", "4uLU6hMCjMI75M1A2tKUQC", null],
+			"mint": "int:spotify:artist:4uLU6hMCjMI75M1A2tKUQC",
+			"reject": null
+		},
+		{
+			"args": ["spotify:artist", "4uLU6hMCjMI75M1A2tKUQC", "MusicAlbum"],
+			"mint": "int:spotify:artist:4uLU6hMCjMI75M1A2tKUQC",
+			"reject": null
+		},
+		{
+			"args": ["spotify:artist", "4uLU6hMCjMI75M1A2tKUQC", "PodcastSeries"],
+			"mint": "int:spotify:artist:4uLU6hMCjMI75M1A2tKUQC",
+			"reject": null
+		},
+		{
+			"args": ["spotify:episode", "4Oju8V0OpOaz886J75roH5", null],
+			"mint": "int:spotify:episode:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["spotify:episode", "4Oju8V0OpOaz886J75roH5", "MusicAlbum"],
+			"mint": "int:spotify:episode:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["spotify:episode", "4Oju8V0OpOaz886J75roH5", "PodcastSeries"],
+			"mint": "int:spotify:episode:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["spotify:episode", "4uLU6hMCjMI75M1A2tKUQC", null],
+			"mint": "int:spotify:episode:4uLU6hMCjMI75M1A2tKUQC",
+			"reject": null
+		},
+		{
+			"args": ["spotify:episode", "4uLU6hMCjMI75M1A2tKUQC", "MusicAlbum"],
+			"mint": "int:spotify:episode:4uLU6hMCjMI75M1A2tKUQC",
+			"reject": null
+		},
+		{
+			"args": ["spotify:episode", "4uLU6hMCjMI75M1A2tKUQC", "PodcastSeries"],
+			"mint": "int:spotify:episode:4uLU6hMCjMI75M1A2tKUQC",
+			"reject": null
+		},
+		{
+			"args": ["spotify:playlist", "4Oju8V0OpOaz886J75roH5", null],
+			"mint": "int:spotify:playlist:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["spotify:playlist", "4Oju8V0OpOaz886J75roH5", "MusicAlbum"],
+			"mint": "int:spotify:playlist:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["spotify:playlist", "4Oju8V0OpOaz886J75roH5", "PodcastSeries"],
+			"mint": "int:spotify:playlist:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["spotify:show", "38bS44xjbVVZ3No3ByF1dJ", null],
+			"mint": "int:spotify:show:38bS44xjbVVZ3No3ByF1dJ",
+			"reject": null
+		},
+		{
+			"args": ["spotify:show", "38bS44xjbVVZ3No3ByF1dJ", "MusicAlbum"],
+			"mint": "int:spotify:show:38bS44xjbVVZ3No3ByF1dJ",
+			"reject": null
+		},
+		{
+			"args": ["spotify:show", "38bS44xjbVVZ3No3ByF1dJ", "PodcastSeries"],
+			"mint": "int:spotify:show:38bS44xjbVVZ3No3ByF1dJ",
+			"reject": null
+		},
+		{
+			"args": ["spotify:show", "4Oju8V0OpOaz886J75roH5", null],
+			"mint": "int:spotify:show:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["spotify:show", "4Oju8V0OpOaz886J75roH5", "MusicAlbum"],
+			"mint": "int:spotify:show:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["spotify:show", "4Oju8V0OpOaz886J75roH5", "PodcastSeries"],
+			"mint": "int:spotify:show:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["spotify:show", "4uLU6hMCjMI75M1A2tKUQC", null],
+			"mint": "int:spotify:show:4uLU6hMCjMI75M1A2tKUQC",
+			"reject": null
+		},
+		{
+			"args": ["spotify:show", "4uLU6hMCjMI75M1A2tKUQC", "MusicAlbum"],
+			"mint": "int:spotify:show:4uLU6hMCjMI75M1A2tKUQC",
+			"reject": null
+		},
+		{
+			"args": ["spotify:show", "4uLU6hMCjMI75M1A2tKUQC", "PodcastSeries"],
+			"mint": "int:spotify:show:4uLU6hMCjMI75M1A2tKUQC",
+			"reject": null
+		},
+		{
+			"args": ["spotify:track", "0ojU4I7FDbtkvh4lnkPI1C", null],
+			"mint": "int:spotify:track:0ojU4I7FDbtkvh4lnkPI1C",
+			"reject": null
+		},
+		{
+			"args": ["spotify:track", "0ojU4I7FDbtkvh4lnkPI1C", "MusicAlbum"],
+			"mint": "int:spotify:track:0ojU4I7FDbtkvh4lnkPI1C",
+			"reject": null
+		},
+		{
+			"args": ["spotify:track", "0ojU4I7FDbtkvh4lnkPI1C", "PodcastSeries"],
+			"mint": "int:spotify:track:0ojU4I7FDbtkvh4lnkPI1C",
+			"reject": null
+		},
+		{
+			"args": ["spotify:track", "3n3Ppam7vgaVa1iaRUc9Lp", null],
+			"mint": "int:spotify:track:3n3Ppam7vgaVa1iaRUc9Lp",
+			"reject": null
+		},
+		{
+			"args": ["spotify:track", "3n3Ppam7vgaVa1iaRUc9Lp", "MusicAlbum"],
+			"mint": "int:spotify:track:3n3Ppam7vgaVa1iaRUc9Lp",
+			"reject": null
+		},
+		{
+			"args": ["spotify:track", "3n3Ppam7vgaVa1iaRUc9Lp", "PodcastSeries"],
+			"mint": "int:spotify:track:3n3Ppam7vgaVa1iaRUc9Lp",
+			"reject": null
+		},
+		{
+			"args": ["spotify:track", "4Oju8V0OpOaz886J75roH5", null],
+			"mint": "int:spotify:track:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["spotify:track", "4Oju8V0OpOaz886J75roH5", "MusicAlbum"],
+			"mint": "int:spotify:track:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["spotify:track", "4Oju8V0OpOaz886J75roH5", "PodcastSeries"],
+			"mint": "int:spotify:track:4Oju8V0OpOaz886J75roH5",
+			"reject": null
+		},
+		{
+			"args": ["spotify:track", "4iV5W9uYEdYUVa79Axb7Rh", null],
+			"mint": "int:spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
+			"reject": null
+		},
+		{
+			"args": ["spotify:track", "4iV5W9uYEdYUVa79Axb7Rh", "MusicAlbum"],
+			"mint": "int:spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
+			"reject": null
+		},
+		{
+			"args": ["spotify:track", "4iV5W9uYEdYUVa79Axb7Rh", "PodcastSeries"],
+			"mint": "int:spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
+			"reject": null
+		},
+		{
+			"args": ["spotify:track", "4uLU6hMCjMI75M1A2tKUQC", null],
+			"mint": "int:spotify:track:4uLU6hMCjMI75M1A2tKUQC",
+			"reject": null
+		},
+		{
+			"args": ["spotify:track", "4uLU6hMCjMI75M1A2tKUQC", "MusicAlbum"],
+			"mint": "int:spotify:track:4uLU6hMCjMI75M1A2tKUQC",
+			"reject": null
+		},
+		{
+			"args": ["spotify:track", "4uLU6hMCjMI75M1A2tKUQC", "PodcastSeries"],
+			"mint": "int:spotify:track:4uLU6hMCjMI75M1A2tKUQC",
+			"reject": null
+		},
+		{
+			"args": ["steam:app", "123", null],
+			"mint": "int:steam:app:123",
+			"reject": null
+		},
+		{
+			"args": ["steam:app", "123", "MusicAlbum"],
+			"mint": "int:steam:app:123",
+			"reject": null
+		},
+		{
+			"args": ["steam:app", "123", "PodcastSeries"],
+			"mint": "int:steam:app:123",
+			"reject": null
+		},
+		{
+			"args": ["steam:app", "570", null],
+			"mint": "int:steam:app:570",
+			"reject": null
+		},
+		{
+			"args": ["steam:app", "570", "MusicAlbum"],
+			"mint": "int:steam:app:570",
+			"reject": null
+		},
+		{
+			"args": ["steam:app", "570", "PodcastSeries"],
+			"mint": "int:steam:app:570",
+			"reject": null
+		},
+		{
+			"args": ["tiktok:user", "123", null],
+			"mint": "int:tiktok:user:123",
+			"reject": null
+		},
+		{
+			"args": ["tiktok:user", "123", "MusicAlbum"],
+			"mint": "int:tiktok:user:123",
+			"reject": null
+		},
+		{
+			"args": ["tiktok:user", "123", "PodcastSeries"],
+			"mint": "int:tiktok:user:123",
+			"reject": null
+		},
+		{
+			"args": ["tiktok:video", "123", null],
+			"mint": "int:tiktok:video:123",
+			"reject": null
+		},
+		{
+			"args": ["tiktok:video", "123", "MusicAlbum"],
+			"mint": "int:tiktok:video:123",
+			"reject": null
+		},
+		{
+			"args": ["tiktok:video", "123", "PodcastSeries"],
+			"mint": "int:tiktok:video:123",
+			"reject": null
+		},
+		{
+			"args": ["tiktok:video", "7345678901234567890", null],
+			"mint": "int:tiktok:video:7345678901234567890",
+			"reject": null
+		},
+		{
+			"args": ["tiktok:video", "7345678901234567890", "MusicAlbum"],
+			"mint": "int:tiktok:video:7345678901234567890",
+			"reject": null
+		},
+		{
+			"args": ["tiktok:video", "7345678901234567890", "PodcastSeries"],
+			"mint": "int:tiktok:video:7345678901234567890",
+			"reject": null
+		},
+		{
+			"args": ["wikipedia", "123", null],
+			"mint": "int:wikipedia:123",
+			"reject": null
+		},
+		{
+			"args": ["wikipedia", "123", "MusicAlbum"],
+			"mint": "int:wikipedia:123",
+			"reject": null
+		},
+		{
+			"args": ["wikipedia", "123", "PodcastSeries"],
+			"mint": "int:wikipedia:123",
+			"reject": null
+		},
+		{
+			"args": [
+				"wikipedia",
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				null
+			],
+			"mint": "int:wikipedia:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			"reject": null
+		},
+		{
+			"args": [
+				"wikipedia",
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"MusicAlbum"
+			],
+			"mint": "int:wikipedia:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			"reject": null
+		},
+		{
+			"args": [
+				"wikipedia",
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"PodcastSeries"
+			],
+			"mint": "int:wikipedia:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			"reject": null
+		},
+		{
+			"args": ["wikipedia", "manon-rheaume", null],
+			"mint": "int:wikipedia:manon-rheaume",
+			"reject": null
+		},
+		{
+			"args": ["wikipedia", "manon-rheaume", "MusicAlbum"],
+			"mint": "int:wikipedia:manon-rheaume",
+			"reject": null
+		},
+		{
+			"args": ["wikipedia", "manon-rheaume", "PodcastSeries"],
+			"mint": "int:wikipedia:manon-rheaume",
+			"reject": null
+		},
+		{
+			"args": ["wikipedia", "notion-software", null],
+			"mint": "int:wikipedia:notion-software",
+			"reject": null
+		},
+		{
+			"args": ["wikipedia", "notion-software", "MusicAlbum"],
+			"mint": "int:wikipedia:notion-software",
+			"reject": null
+		},
+		{
+			"args": ["wikipedia", "notion-software", "PodcastSeries"],
+			"mint": "int:wikipedia:notion-software",
+			"reject": null
+		},
+		{
+			"args": ["x:post", "123", null],
+			"mint": "int:x:post:123",
+			"reject": null
+		},
+		{
+			"args": ["x:post", "123", "MusicAlbum"],
+			"mint": "int:x:post:123",
+			"reject": null
+		},
+		{
+			"args": ["x:post", "123", "PodcastSeries"],
+			"mint": "int:x:post:123",
+			"reject": null
+		},
+		{
+			"args": ["x:post", "123456789", null],
+			"mint": "int:x:post:123456789",
+			"reject": null
+		},
+		{
+			"args": ["x:post", "123456789", "MusicAlbum"],
+			"mint": "int:x:post:123456789",
+			"reject": null
+		},
+		{
+			"args": ["x:post", "123456789", "PodcastSeries"],
+			"mint": "int:x:post:123456789",
+			"reject": null
+		},
+		{
+			"args": ["x:post", "1920505170888216700", null],
+			"mint": "int:x:post:1920505170888216700",
+			"reject": null
+		},
+		{
+			"args": ["x:post", "1920505170888216700", "MusicAlbum"],
+			"mint": "int:x:post:1920505170888216700",
+			"reject": null
+		},
+		{
+			"args": ["x:post", "1920505170888216700", "PodcastSeries"],
+			"mint": "int:x:post:1920505170888216700",
+			"reject": null
+		},
+		{
+			"args": ["youtube:video", "dQw4w9WgXcQ", null],
+			"mint": "int:youtube:video:dQw4w9WgXcQ",
+			"reject": null
+		},
+		{
+			"args": ["youtube:video", "dQw4w9WgXcQ", "MusicAlbum"],
+			"mint": "int:youtube:video:dQw4w9WgXcQ",
+			"reject": null
+		},
+		{
+			"args": ["youtube:video", "dQw4w9WgXcQ", "PodcastSeries"],
+			"mint": "int:youtube:video:dQw4w9WgXcQ",
+			"reject": null
+		}
+	]
+}

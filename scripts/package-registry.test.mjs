@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -12,7 +12,7 @@ import {
 } from './package-registry.mjs';
 
 function fixture(t) {
-	const root = mkdtempSync(join(tmpdir(), 'intuition-registry-'));
+	const root = mkdtempSync(join(tmpdir(), 'intuition registry-'));
 	t.after(() => rmSync(root, { recursive: true, force: true }));
 	const write = (dir, overrides = {}) => {
 		const path = join(root, 'packages', dir);
@@ -145,4 +145,18 @@ test('rejects stable exact pins, open ranges, stale carets and prerelease ranges
 	write('ids', { version: '0.1.0-alpha.1' });
 	write('sdk', { dependencies: { '@0xintuition/ids': '^0.1.0-alpha.1' } });
 	assert.throws(() => assertRegistryIntegrity(root), /workspace dependency range/);
+});
+
+test('direct CLI validates and reports failures in paths containing spaces', (t) => {
+	const { root, write } = fixture(t);
+	mkdirSync(join(root, 'scripts'));
+	const script = join(root, 'scripts/package-registry.mjs');
+	copyFileSync(fileURLToPath(new URL('./package-registry.mjs', import.meta.url)), script);
+	const valid = spawnSync(process.execPath, [script], { encoding: 'utf8' });
+	assert.equal(valid.status, 0, valid.stderr);
+	assert.match(valid.stdout, /Package registry integrity check passed/);
+	write('forgotten');
+	const invalid = spawnSync(process.execPath, [script], { encoding: 'utf8' });
+	assert.equal(invalid.status, 1);
+	assert.match(invalid.stderr, /forgotten: publishable package is missing/);
 });

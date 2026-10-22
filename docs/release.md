@@ -134,18 +134,19 @@ Publish in dependency order:
 5. `@0xintuition/ids`
 6. `@0xintuition/schema-org`
 7. `@0xintuition/classifications`
-8. `@0xintuition/atom-parser` (held, see below)
-9. `@0xintuition/atom-classification` (held)
-10. `@0xintuition/atom-enrichment` (held)
-11. `@0xintuition/iid-registry`
-12. `@0xintuition/iid-ladder`
-13. `@0xintuition/predicates`
-14. `@0xintuition/primitives`
-15. `@0xintuition/protocol`
-16. `@0xintuition/periphery`
-17. `@0xintuition/sdk`
-18. `@0xintuition/cli`
-19. `@0xintuition/react`
+8. `@0xintuition/pipeline-runtime`
+9. `@0xintuition/atom-parser` (held, see below)
+10. `@0xintuition/atom-classification` (held)
+11. `@0xintuition/atom-enrichment` (held)
+12. `@0xintuition/iid-registry`
+13. `@0xintuition/iid-ladder`
+14. `@0xintuition/predicates`
+15. `@0xintuition/primitives`
+16. `@0xintuition/protocol`
+17. `@0xintuition/periphery`
+18. `@0xintuition/sdk`
+19. `@0xintuition/cli`
+20. `@0xintuition/react`
 
 This order matches the release packing/smoke scripts and keeps internal
 dependency pins resolvable as each package is published.

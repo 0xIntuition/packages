@@ -175,6 +175,16 @@ try {
 		const iidLadder = await import('@0xintuition/iid-ladder');
 		results.iidLadder = iidLadder.projectIdentifierLadder({ strongIdentifiers: { isrc: 'USUM71703861' } });
 		results.iidLadderRejectsUnregistered = iidLadder.projectIdentifierLadder({ providerCanonicalId: 'spotify:track:1kcfGBb6kSrGqNIMW7rAlB' });
+		results.iidLadderMint = iidLadder.createLadder({ providerLocalHandles: 'mint' }).projectIdentifierLadder({ providerCanonicalId: 'goodreads:book:123' });
+		const pipeline = await import('@0xintuition/pipeline-runtime');
+		results.pipelineError = pipeline.isPipelineErrorKind('circuit_open');
+		for (const subpath of ['bounded-text', 'cache', 'circuit-breaker', 'concurrency', 'errors', 'outcome', 'provider-observer', 'provider-metrics-contract', 'retry-after', 'letterboxd', 'letterboxd-page', 'tmdb', 'testing/prometheus-exposition']) {
+			results['pipeline:' + subpath] = Object.keys(await import('@0xintuition/pipeline-runtime/' + subpath)).sort();
+		}
+		const { forEachBounded } = await import('@0xintuition/pipeline-runtime/concurrency');
+		results.pipelineBounded = await forEachBounded([1, 2], async (value) => value * 2, { concurrency: 2 });
+		const { CircuitBreaker } = await import('@0xintuition/pipeline-runtime/circuit-breaker');
+		results.pipelineCircuit = await new CircuitBreaker({ name: 'smoke', failureThreshold: 1, resetAfterMs: 10 }).execute(async () => 'ok');
 		const ethereumAccountClassification = await import('@0xintuition/classifications/ethereum-account');
 		results.classificationSubpath = ethereumAccountClassification.ethereumAccount.type;
 		const musicRecordingCreation = await import('@0xintuition/classifications/creation/music-recording');
@@ -349,6 +359,13 @@ try {
 	assert.equal(bunResult.cli, 'function');
 	assert.equal(bunResult.react, 'function');
 
+	assert.deepEqual(bunResult.iidLadderMint, { iid: 'int:goodreads:book:123', rung: 'handle' });
+	assert.equal(bunResult.pipelineError, true);
+	assert.equal(bunResult.pipelineCircuit, 'ok');
+	assert.deepEqual(bunResult.pipelineBounded, [
+		{ kind: 'success', value: 2 },
+		{ kind: 'success', value: 4 },
+	]);
 	assert.deepEqual(bunResult, nodeResult, 'Node and Bun must agree on every consumer result');
 
 	// Resolve declarations from packed artifacts, without repository aliases or
@@ -359,7 +376,16 @@ try {
 		import { buildIidAnchor } from '@0xintuition/primitives/anchor';
 		import { inspectIntuitionId } from '@0xintuition/iid';
 		import { classificationForIid } from '@0xintuition/iid-registry';
-		import { projectIdentifierLadder } from '@0xintuition/iid-ladder';
+		import { createLadder, projectIdentifierLadder } from '@0xintuition/iid-ladder';
+		import { forEachBounded } from '@0xintuition/pipeline-runtime/concurrency';
+		import { CircuitBreaker, type CircuitSnapshot } from '@0xintuition/pipeline-runtime/circuit-breaker';
+		import { type Outcome, runWithSignal, withTimeout } from '@0xintuition/pipeline-runtime/outcome';
+		const outcomes: ReadonlyArray<Outcome<number>> = await forEachBounded([1], async (value) => value, { concurrency: 1 });
+		const breaker = new CircuitBreaker({ name: 'typed', failureThreshold: 1, resetAfterMs: 10 });
+		const snapshot: CircuitSnapshot = breaker.snapshot();
+		await breaker.execute(async (signal) => signal.aborted, { signal: new AbortController().signal });
+		await runWithSignal(withTimeout(async () => 1, 100));
+		createLadder({ providerLocalHandles: 'mint' }).iidForIdentityRung('goodreads:book', '123');
 		import { multiVaultCreateAtomsWithUrisEncode, eventParseAtomCreated } from '@0xintuition/protocol';
 		import { buildMultiVaultDepositPlan } from '@0xintuition/cli';
 		import { multivaultPrepareDepositTx } from '@0xintuition/sdk/actions';

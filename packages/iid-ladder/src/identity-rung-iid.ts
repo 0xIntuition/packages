@@ -6,13 +6,13 @@ import {
 	isPlainWdPrimaryAllowed,
 	SCHEMA_TYPE_IDENTITY_CATEGORIES,
 } from './category-rungs.js';
-import { projectIdentifierLadder } from './ladder.js';
+import { type LadderOptions, projectIdentifierLadder } from './ladder.js';
 import { PROVIDER_PREFIX_MAPPINGS } from './provider-prefixes.js';
 
 const TOKENS = new Set<string>(IDENTITY_RUNG_TOKENS);
 
 /** Converts descriptive aliases for matching only; does not select a primary IID. */
-export function iidForIdentityRung(
+function iidForRegisteredIdentityRung(
 	rung: IdentityRungToken,
 	value: string,
 	primarySchemaType?: string
@@ -59,5 +59,47 @@ export function iidForIdentityRung(
 		},
 		strongIdentifierOrder: [schemeName],
 	});
+	return result.iid && isCanonicalNodeIid(result.iid) ? result.iid : undefined;
+}
+
+function isAliasOnlyRung(rung: IdentityRungToken, primarySchemaType: string | undefined): boolean {
+	const category = primarySchemaType
+		? SCHEMA_TYPE_IDENTITY_CATEGORIES[primarySchemaType]
+		: undefined;
+	if (!category) return false;
+	const aliasOnlyRungs: readonly string[] =
+		IDENTITY_CATEGORY_ALIAS_ONLY_POLICY[
+			category as keyof typeof IDENTITY_CATEGORY_ALIAS_ONLY_POLICY
+		] ?? [];
+	const [schemeName] = rung.split(':');
+	return aliasOnlyRungs.includes(rung) || (!!schemeName && aliasOnlyRungs.includes(schemeName));
+}
+
+/**
+ * `iidForIdentityRung` from `@0xintuition/iid-ladder`, extended so provider-local
+ * rung tokens (`spotify:track`, `goodreads:book`, …) convert through the same
+ * handle policy. Alias-only rungs for the primary classification stay excluded,
+ * as upstream excludes them.
+ */
+export function iidForIdentityRung(
+	rung: IdentityRungToken,
+	value: string,
+	primarySchemaType?: string,
+	options: LadderOptions = {}
+): string | undefined {
+	const registered = iidForRegisteredIdentityRung(rung, value, primarySchemaType);
+	if (options.providerLocalHandles !== 'mint' || registered !== undefined) return registered;
+	if (typeof value !== 'string') return undefined;
+
+	const mapping = PROVIDER_PREFIX_MAPPINGS.find((row) => row.providerPrefix === `${rung}:`);
+	if (mapping?.kind !== 'provider-local') return undefined;
+	if (isAliasOnlyRung(rung, primarySchemaType)) return undefined;
+
+	const result = projectIdentifierLadder(
+		{
+			providerCanonicalId: `${mapping.providerPrefix}${value}`,
+		},
+		options
+	);
 	return result.iid && isCanonicalNodeIid(result.iid) ? result.iid : undefined;
 }

@@ -17,7 +17,7 @@
  * - 'docs-only' — normative documents/fixtures only; no build step, no dist/
  */
 
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, realpathSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -29,6 +29,7 @@ export const PACKAGES = [
 	{ dirName: 'ids', kind: 'compiled' },
 	{ dirName: 'schema-org', kind: 'compiled' },
 	{ dirName: 'classifications', kind: 'compiled' },
+	{ dirName: 'pipeline-runtime', kind: 'compiled' },
 	{ dirName: 'atom-parser', kind: 'compiled' },
 	{ dirName: 'atom-classification', kind: 'compiled' },
 	{ dirName: 'atom-enrichment', kind: 'compiled' },
@@ -194,7 +195,7 @@ export function assertRegistryIntegrity(repoRoot) {
 }
 
 const isDirectInvocation =
-	process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+	process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url);
 
 if (isDirectInvocation) {
 	const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
