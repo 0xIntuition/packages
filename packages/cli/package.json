@@ -47,7 +47,7 @@
 	},
 	"scripts": {
 		"build": "node ../../scripts/clean-dist.mjs && bun run build:bundle && bun run build:cli && bun run build:types",
-		"build:bundle": "bun build ./src/index.ts --outfile ./dist/index.js --format esm --target node",
+		"build:bundle": "bun build ./src/index.ts --outfile ./dist/index.js --format esm --target node --external viem --external '@0xintuition/*'",
 		"build:cli": "node ./scripts/build-cli-bin.mjs",
 		"build:types": "tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
 		"clean": "git clean -xdf .cache .turbo dist node_modules",
@@ -87,5 +87,8 @@
 		"@0xintuition/deployments": "0.1.0",
 		"typescript": "^5.9.3",
 		"vitest": "^4.0.16"
+	},
+	"engines": {
+		"node": ">=20"
 	}
 }

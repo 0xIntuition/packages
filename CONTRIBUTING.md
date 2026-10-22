@@ -121,7 +121,7 @@ and PR before implementation.
 
 ## Local Setup
 
-Use Node 22.12+ and the Bun version pinned in `package.json`. The repo enforces
+Use Node 20 minimum (Node 24 tested) and the Bun version pinned in `package.json`. The repo enforces
 Bun installs. Package consumers can use npm or another package manager.
 
 ```bash

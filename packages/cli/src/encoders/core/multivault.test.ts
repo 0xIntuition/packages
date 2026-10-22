@@ -1,7 +1,7 @@
 import { describe, it } from 'vitest';
+import { assertEncoderRoundTrip } from './encoders.test-helpers';
 import * as multivault from './multivault';
 import { multivaultEncoderManifest } from './multivault/manifest';
-import { assertEncoderRoundTrip } from './test-helpers';
 
 describe('core multivault encoders', () => {
 	it('encodes and decodes all manifest entries', () => {

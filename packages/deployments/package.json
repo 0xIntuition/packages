@@ -72,5 +72,8 @@
 		"typescript": "^5.9.3",
 		"vitest": "^4.0.16",
 		"viem": "^2.31.4"
+	},
+	"engines": {
+		"node": ">=20"
 	}
 }

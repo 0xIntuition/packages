@@ -1,5 +1,5 @@
 import { describe, it } from 'vitest';
-import { assertEncoderRoundTrip } from './test-helpers';
+import { assertEncoderRoundTrip } from './encoders.test-helpers';
 import * as wrappedTrust from './wrapped-trust';
 import { wrappedTrustEncoderManifest } from './wrapped-trust/manifest';
 

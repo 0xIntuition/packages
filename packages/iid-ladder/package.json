@@ -67,5 +67,8 @@
 		"@0xintuition/iid-registry": "0.1.0-alpha.0",
 		"typescript": "^5.9.3",
 		"vitest": "^4.0.16"
+	},
+	"engines": {
+		"node": ">=20"
 	}
 }

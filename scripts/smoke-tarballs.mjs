@@ -2,9 +2,10 @@
 
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
 	assertRegistryIntegrity,
 	PACKAGES,
@@ -12,7 +13,7 @@ import {
 	requiredTarballFiles,
 } from './package-registry.mjs';
 
-const repoRoot = resolve(new URL('..', import.meta.url).pathname);
+const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const tempRoot = mkdtempSync(join(tmpdir(), 'intuition-packages-smoke-'));
 const workspaceManifests = assertRegistryIntegrity(repoRoot);
 const tarballPaths = [];
@@ -85,6 +86,14 @@ try {
 		const cwd = packageRoot(packageName);
 		if (kind === 'compiled') {
 			run('bun', ['run', 'build'], cwd);
+		}
+		if (packageName === 'cli') {
+			const library = readFileSync(resolve(cwd, 'dist/index.js'), 'utf8');
+			assert.match(library, /import[\s\S]*?from ['"]viem['"]/);
+			assert.doesNotMatch(
+				library,
+				/node_modules\/viem|function (?:encodeFunctionData|parseAbi|createPublicClient)\(/
+			);
 		}
 		const dryRun = JSON.parse(run('npm', ['pack', '--ignore-scripts', '--dry-run', '--json'], cwd));
 		const packedFiles = new Set(dryRun[0]?.files?.map((entry) => entry.path));

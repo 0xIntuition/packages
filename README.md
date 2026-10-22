@@ -28,7 +28,7 @@ The IID packages and anchor API are new in this release candidate; the existing
 npm `alpha` tags do not yet contain them. See the [release guide](./docs/release.md)
 for package versions and validation requirements.
 
-To run the dry-run UI example from a checkout, use Node 22.12+ and the Bun version
+To run the dry-run UI example from a checkout, use Node 20 minimum (Node 24 tested) and the Bun version
 pinned in `package.json`:
 
 ```bash
@@ -94,7 +94,6 @@ Use `fields` to render atom inputs and `relationships` to suggest triples such a
 | Atom processing | `atom-parser`, `atom-classification`, `atom-enrichment` | Input parsing, plugin-based classification, provider execution, and field extraction |
 | Application integration | `sdk`, `cli` | Typed action plans, API reads, and deterministic command-line calldata generation |
 | Protocol plumbing | `protocol`, `deployments`, `periphery`, `curves`, `react` | ABIs, bytecode, chain/deployment metadata, bridge/router and fee-proxy helpers, curve math, and React hooks |
-| Integration and agents | `sdk`, `cli` | Action planning and read helpers over the protocol packages, plus side-effect-free calldata encoders, plan builders, and the `intuition` executable |
 
 ## Packages
 
