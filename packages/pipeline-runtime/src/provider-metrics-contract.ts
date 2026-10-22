@@ -22,10 +22,10 @@ import {
 } from './provider-observer';
 
 /**
- * The single source of truth for provider metrics contract "1"
- * (gcp-deployment#438 plus the PR #2264 amendments). Every exporter (api,
- * workers) builds its families, pre-registered series and event handling from
- * this module, so a rename or a new label value is made once. Exporters
+ * The single source of truth for provider metrics contract "1". Every exporter
+ * (an API process or a worker process) builds its families, pre-registered
+ * series and event handling from this module, so a rename or a new label value
+ * is made once. Exporters
  * pre-register exactly the tuples enumerated here at 0 and route every event
  * through the normalizers, so an event can never mint a label value outside
  * the allowlists.
@@ -42,8 +42,8 @@ export type ProviderDroppedFamily = (typeof PROVIDER_DROPPED_FAMILIES)[number];
 /**
  * Which producer exports what.
  * - `api`: every operation (including the goodreads `page` fetch), the resolutions, the circuit gauge.
- * - `classification` (kg-classification-worker): the search operations and the circuit gauge.
- * - `enrichment` (kg-enrichment-worker): the enrichment operations and the goodreads `page` fetch.
+ * - `classification` (a classification worker): the search operations and the circuit gauge.
+ * - `enrichment` (an enrichment worker): the enrichment operations and the goodreads `page` fetch.
  */
 export type ProviderMetricsScope = 'api' | 'classification' | 'enrichment';
 export const PROVIDER_METRICS_SCOPES = ['api', 'classification', 'enrichment'] as const;

@@ -191,9 +191,12 @@ the app's byte-exact `int:<iidPrefix><value>` strings, grammar and length checks
 strong-identifier precedence, and alias-only decisions. Every other result passes
 through unchanged. Unknown prefixes remain unmapped, invalid handles stay invalid,
 and an already-prefixed unregistered `int:` input is not newly admitted.
-These application-local strings do not become spec-valid or anchor-eligible merely
-because this option emits them. `iidForIdentityRung` retains its canonical-node
-check. `createLadder` captures the policy when constructed.
+A minted result is reported as `rung: 'handle'` for app compatibility; it is not a
+registered Class D handle, the result does not flag its origin, and the
+canonical-node check in `iidForIdentityRung` performs no scheme validation for
+unregistered prefixes. These application-local strings do not become spec-valid or
+anchor-eligible merely because this option emits them. `createLadder` captures the
+policy when constructed and returns a `Ladder` (both bound entry points).
 
 Known-answer fixtures in `__tests__/fixtures/provider-local-handles.json` are
 produced by the unmodified app at `7fc0c82b4`; their provenance records the generating

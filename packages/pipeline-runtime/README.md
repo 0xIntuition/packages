@@ -78,6 +78,15 @@ package. Promise helpers here do not accept Effect values or `Exit`/`Cause` obje
 Consumer adapters must retain `executeEffect`, `forEachBoundedEffect`, Effect
 `toOutcome`/`withTimeout`/`runWithSignal`, and service Layers where needed.
 
+Because `./outcome` and `./concurrency` keep the app's export names with Promise
+signatures, and `./services` and `./retry` are not shipped, these app modules do
+not compile against this package as copied and need a local Effect adapter or a
+rewrite to the Promise helpers: `atom-classification/src/engine.ts`
+(`runWithSignal(effect)`), `engine-effect.ts`, `engine-layer.ts`;
+`atom-enrichment/src/engine.ts`, `engine-effect.ts`, `engine-layer.ts`. Every other
+atom-package import site (`fetch.ts`, `letterboxd.ts`, the providers, and
+`forEachBounded` / `Outcome` consumers) compiles unchanged.
+
 ## Verification
 
 Vitest ports the app's pure-module and Promise circuit expectations, including

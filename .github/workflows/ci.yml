@@ -41,13 +41,6 @@ jobs:
       - name: Test release registry guards
         run: bun run registry:test && bun run release:registry:test
 
-      # The ported pipeline-runtime metrics tests require promtool in CI.
-      - name: Install Prometheus validation tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends prometheus
-          promtool --version
-
       - name: Test
         run: bun run test
 

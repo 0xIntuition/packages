@@ -13,7 +13,7 @@ export {
 	WIKIDATA_P31_IDENTITY_POLICY,
 	type WikidataP31Identity,
 } from './category-rungs.js';
-export { createLadder } from './create-ladder.js';
+export { createLadder, type Ladder } from './create-ladder.js';
 export { iidForIdentityRung } from './identity-rung-iid.js';
 export {
 	IID_VALUE_MAX_LENGTH,
