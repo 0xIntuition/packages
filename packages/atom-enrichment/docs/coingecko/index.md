@@ -63,7 +63,7 @@ CoinGecko enrichment resolves token metadata from a CoinGecko coin id or EVM con
 }
 ```
 
-### Example 
+### Example
 
 ```json
 {

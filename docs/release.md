@@ -123,15 +123,18 @@ Publish in dependency order:
 5. `@0xintuition/ids`
 6. `@0xintuition/schema-org`
 7. `@0xintuition/classifications`
-8. `@0xintuition/iid-registry`
-9. `@0xintuition/iid-ladder`
-10. `@0xintuition/predicates`
-11. `@0xintuition/primitives`
-12. `@0xintuition/protocol`
-13. `@0xintuition/periphery`
-14. `@0xintuition/sdk`
-15. `@0xintuition/cli`
-16. `@0xintuition/react`
+8. `@0xintuition/atom-parser`
+9. `@0xintuition/atom-classification`
+10. `@0xintuition/atom-enrichment`
+11. `@0xintuition/iid-registry`
+12. `@0xintuition/iid-ladder`
+13. `@0xintuition/predicates`
+14. `@0xintuition/primitives`
+15. `@0xintuition/protocol`
+16. `@0xintuition/periphery`
+17. `@0xintuition/sdk`
+18. `@0xintuition/cli`
+19. `@0xintuition/react`
 
 This order matches the release packing/smoke scripts and keeps internal
 dependency pins resolvable as each package is published.
@@ -160,6 +163,10 @@ Common cascades:
   behavior or exact pins should move with the ID package.
 - `classifications`: also release `primitives` when primitive builders or pins
   should consume the new classification data.
+- `atom-parser` and `atom-classification`: release independently when their runtime
+  APIs change; update Core consumers only after publication.
+- `classifications`: also release `atom-enrichment` when it should consume the
+  new exact specification version.
 - `iid`: also release `classifications`, `iid-registry`, `iid-ladder`, and
   `primitives` when their exact pins or behavior consume the change.
 - `iid-registry`: also release `iid-ladder` when its registered provider

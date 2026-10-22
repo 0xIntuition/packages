@@ -54,8 +54,12 @@ relationships, sameAs links, and deterministic IDs without submitting transactio
 
 See the [IID explainer](./packages/iid-spec/explainer.md) for identity schemes and
 representation profiles. The packages supply deterministic identity and graph
-building tools; application-specific enrichment, ranking, and reasoning policies
-remain in your application.
+building tools and reusable parsing, classification, and enrichment runtimes.
+Applications configure providers, credentials, cache adapters, scheduling,
+ranking, and persistence; importing a runtime does not start a worker or fetch data.
+
+For the coordinated Core extraction and publication gates, see the
+[atom runtime migration runbook](./docs/atom-runtime-migration.md).
 
 ## What You Can Build
 
@@ -87,6 +91,7 @@ Use `fields` to render atom inputs and `relationships` to suggest triples such a
 | Semantic / data modeling | `schema-org`, `classifications`, `predicates` | Canonical vocabulary, schema references, recommended atom fields, metadata predicates, and relationship guardrails |
 | Identity | `iid-spec`, `iid`, `iid-registry`, `iid-ladder`, `ids` | Canonical real-world identifiers, semantic/provider resolution, deterministic input projection, and content-addressable protocol IDs |
 | Builder helpers | `primitives` | Higher-level atom, predicate, triple, discovery, and validation helpers |
+| Atom processing | `atom-parser`, `atom-classification`, `atom-enrichment` | Input parsing, plugin-based classification, provider execution, and field extraction |
 | Application integration | `sdk`, `cli` | Typed action plans, API reads, and deterministic command-line calldata generation |
 | Protocol plumbing | `protocol`, `deployments`, `periphery`, `curves`, `react` | ABIs, bytecode, chain/deployment metadata, bridge/router and fee-proxy helpers, curve math, and React hooks |
 | Integration and agents | `sdk`, `cli` | Action planning and read helpers over the protocol packages, plus side-effect-free calldata encoders, plan builders, and the `intuition` executable |
@@ -108,6 +113,9 @@ Use `fields` to render atom inputs and `relationships` to suggest triples such a
 - [`@0xintuition/curves`](https://www.npmjs.com/package/@0xintuition/curves) - bonding curve math helpers, including dynamic-fee curve quotes and exact-net gross-up quotes.
 - [`@0xintuition/sdk`](https://www.npmjs.com/package/@0xintuition/sdk) - integration SDK with API reads, onchain action planning helpers, and deterministic utilities.
 - [`@0xintuition/cli`](https://www.npmjs.com/package/@0xintuition/cli) - agent-oriented calldata encoders, action plan builders, and the `intuition` executable.
+- `@0xintuition/atom-parser` - input detection, normalization, and bounded remote inspection.
+- `@0xintuition/atom-classification` - configurable classification engines and reusable plugins.
+- `@0xintuition/atom-enrichment` - provider adapters, enrichment execution, and field extraction using public classification specifications.
 - [`@0xintuition/react`](https://www.npmjs.com/package/@0xintuition/react) - React provider and hooks for protocol reads/writes.
 
 ## Install
