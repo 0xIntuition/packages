@@ -101,6 +101,12 @@ try {
 			assert(packedFiles.has(filePath), `${packageName} tarball is missing ${filePath}`);
 		}
 		for (const filePath of packedFiles) {
+			if (!packageName.startsWith('atom-')) {
+				assert(
+					!filePath.endsWith('.d.ts.map'),
+					`${packageName} ships an unusable declaration map: ${filePath}`
+				);
+			}
 			assert(!filePath.startsWith('src/'), `${packageName} tarball leaked source file ${filePath}`);
 		}
 		const tarballPath = run('bun', ['run', 'pack:release'], cwd).trim().split('\n').at(-1);
