@@ -57,9 +57,10 @@ packages.
 ### Stable / Major Packages
 
 `@0xintuition/protocol` and `@0xintuition/sdk` follow normal semver because they
-continue existing npm lines. The stable `0.x` protocol-stack packages
-(`deployments`, `curves`, `periphery`, `cli`) also follow semver; while they stay
-below `1.0.0`, a breaking change bumps the minor version.
+continue existing npm lines. The protocol-stack packages (`deployments`, `curves`,
+`periphery`, `cli`) use explicit `0.1.0-alpha.x` candidates in this train. Once
+stable, they follow semver too; below `1.0.0`, a breaking change bumps the minor
+version.
 
 - Patch: compatible fixes and clarifications.
 - Minor: backward-compatible API additions.
@@ -144,8 +145,9 @@ dependency pins resolvable as each package is published.
 Release the changed package plus any package whose checked-in manifest,
 generated output, or public behavior must change as a result.
 
-Because internal `@0xintuition/*` dependency versions are exact pins during
-alpha, a lower-level package release may need matching releases for dependents.
+Dependencies on prerelease `@0xintuition/*` versions use exact pins, so those
+updates may need matching dependent releases. Stable dependencies use caret
+ranges and accept compatible updates without automatic dependent releases.
 Not every lower-level release forces every dependent to move; bump a dependent
 when its manifest, generated output, or public behavior should consume the new
 version.
