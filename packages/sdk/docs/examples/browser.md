@@ -3,13 +3,8 @@
 Target v1 public-surface example for a browser application.
 
 ```ts
-import {
-  createIntuitionApiClient,
-  getIntuitionApiUrl,
-  getMultiVaultAddressFromChainId,
-  intuitionMainnet,
-  multivaultPrepareDepositTx,
-} from '@0xintuition/sdk'
+import { createIntuitionApiClient, getIntuitionApiUrl, multivaultPrepareDepositTx } from '@0xintuition/sdk'
+import { getMultiVaultAddressFromChainId, intuitionMainnet } from '@0xintuition/sdk/protocol'
 import { createPublicClient, createWalletClient, custom, http } from 'viem'
 
 const api = createIntuitionApiClient({

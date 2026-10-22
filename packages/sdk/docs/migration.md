@@ -1,8 +1,8 @@
-# `@0xintuition/sdk` v1 Import Guidance
+# `@0xintuition/sdk` 4.0.0 Migration
 
 ## Goal
 
-Make the SDK-owned surface the default import path for external consumers without breaking existing code that still reaches protocol exports through the root package.
+Version 4.0.0 narrows the root to SDK actions, API reads, wallet and bridge workflows, formatting, and selected shared exports. Protocol-wide and ID-wide root re-exports have been removed.
 
 ## Recommended Imports
 
@@ -21,15 +21,18 @@ Prefer these entrypoints for new work:
 - `@0xintuition/sdk/protocol`
   - low-level escape hatch when you truly need direct protocol exports
 
-## Compatibility Rule
+## Root export changes
 
-`@0xintuition/sdk` still re-exports `@0xintuition/protocol` from the package root. Treat that as a compatibility bridge, not the preferred long-term public contract. When you need direct protocol access, prefer the explicit `@0xintuition/sdk/protocol` subpath.
+Import low-level wrappers, ABI values, network helpers, and protocol types from
+`@0xintuition/protocol` or `@0xintuition/sdk/protocol`. The latter is the explicit
+escape hatch and remains supported. Import other deterministic ID utilities from
+`@0xintuition/ids`.
 
-Implications:
-
-- Existing callers do not need an immediate breaking migration.
-- New external docs and examples should point at SDK-owned subpaths first.
-- Future narrowing of the root export surface should be additive or staged behind a release note.
+The only selected shared root exports are `calculateAtomId`,
+`calculateOAuthAtomId`, the types `AtomId`, `OAuthAtomInput`, `ReadConfig`, and
+`WriteConfig`. These support SDK wallet and action inputs. All SDK-owned modules
+remain available at the root and their documented subpaths. Pure action envelope
+builders now live in SDK actions; see [the CLI alias mapping](./action-plans.md).
 
 ## Migration Patterns
 
@@ -75,11 +78,8 @@ import { calculateAtomId } from '@0xintuition/ids'
 
 ### Low-level protocol escape hatch
 
-Before:
-
-```ts
-import { getMultiVaultAddressFromChainId } from '@0xintuition/sdk'
-```
+Previously, callers imported `getMultiVaultAddressFromChainId` from the SDK root.
+That import is removed in 4.0.0.
 
 After:
 
@@ -89,9 +89,7 @@ import { getMultiVaultAddressFromChainId } from '@0xintuition/sdk/protocol'
 
 ## Release Guidance
 
-For the v1 line:
-
-- Keep the root export surface working for compatibility.
-- Prefer subpath examples in docs, snippets, and release notes.
-- Prefer `@0xintuition/sdk/protocol` over the root package for low-level protocol access.
-- Treat any future removal of protocol-wide root exports as a separately announced change.
+Use the explicit `sdk/protocol` subpath for the full low-level protocol API.
+Update imports before upgrading to 4.0.0. Bytecode is available from
+`@0xintuition/deployments/bytecode` or `@0xintuition/protocol/contracts`, and curve
+math from `@0xintuition/curves`.

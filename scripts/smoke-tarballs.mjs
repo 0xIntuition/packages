@@ -220,10 +220,11 @@ try {
 		}
 		const sdk = await import('@0xintuition/sdk');
 		results.sdk = typeof sdk.multivaultPrepareDepositTx;
-		results.sdkMultiVault = sdk.getMultiVaultAddressFromChainId(deployments.INTUITION_MAINNET_CHAIN_ID);
+		if ('getMultiVaultAddressFromChainId' in sdk || 'MultiVaultAbi' in sdk || 'calculateTripleId' in sdk) throw new Error('SDK root leaked a low-level export');
 		const sdkApi = await import('@0xintuition/sdk/api');
 		const sdkActions = await import('@0xintuition/sdk/actions');
 		const sdkProtocol = await import('@0xintuition/sdk/protocol');
+		results.sdkMultiVault = sdkProtocol.getMultiVaultAddressFromChainId(deployments.INTUITION_MAINNET_CHAIN_ID);
 		const sdkTrustSwapAndBridgeRouter = await import('@0xintuition/sdk/trust-swap-and-bridge-router');
 		const sdkUtils = await import('@0xintuition/sdk/utils');
 		results.sdkApiSubpath = typeof sdkApi.createIntuitionApiClient;
