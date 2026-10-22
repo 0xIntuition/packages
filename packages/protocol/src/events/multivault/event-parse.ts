@@ -2,6 +2,7 @@ import {
 	type Address,
 	type ContractEventName,
 	type Hex,
+	type ParseEventLogsReturnType,
 	type PublicClient,
 	parseEventLogs,
 } from 'viem';
@@ -22,7 +23,7 @@ export async function eventParse(
 	hash: Hex,
 	eventName: ContractEventName<typeof MultiVaultAbi>,
 	address: Address | undefined = undefined
-) {
+): Promise<MultiVaultParsedEvents> {
 	const logs = await receiptLogs(client, hash, address);
 
 	const events = parseEventLogs({
@@ -33,3 +34,9 @@ export async function eventParse(
 
 	return events;
 }
+
+export type MultiVaultParsedEvents = ParseEventLogsReturnType<
+	typeof MultiVaultAbi,
+	ContractEventName<typeof MultiVaultAbi>,
+	true
+>;

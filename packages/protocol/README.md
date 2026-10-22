@@ -1703,7 +1703,9 @@ type CurveDetailsType = {
 
 ## Contract ABIs
 
-The package exports named ABI re-exports from deployments; bytecode is available only on `./contracts` for all protocol contracts:
+The root provides named ABI re-exports from deployments for the core contracts.
+Bytecode is available only through `@0xintuition/protocol/contracts`;
+`@0xintuition/deployments/bytecode` is the canonical source.
 
 ```typescript
 import {
