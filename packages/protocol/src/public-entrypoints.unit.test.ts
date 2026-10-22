@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 
 import { decodeFunctionData } from 'viem';
 import { describe, expect, it } from 'vitest';
-
+import * as contracts from './contracts';
 import * as protocol from './index';
 
 const packageJson = JSON.parse(
@@ -135,11 +135,12 @@ describe('@0xintuition/protocol wrapper entrypoints', () => {
 		);
 	});
 
-	it('exports the new ABIs and deployment bytecode', () => {
+	it('keeps deployment bytecode on the contracts subpath', () => {
 		expect(entrypoints.AtomWardenAbi).toEqual(expect.any(Array));
 		expect(entrypoints.DynamicFeeFlatPriceCurveAbi).toEqual(expect.any(Array));
-		expect(entrypoints.AtomWardenBytecode).toMatch(/^0x[0-9a-f]+$/i);
-		expect(entrypoints.DynamicFeeFlatPriceCurveBytecode).toMatch(/^0x[0-9a-f]+$/i);
+		expect(Object.keys(protocol).some((name) => name.endsWith('Bytecode'))).toBe(false);
+		expect(contracts.AtomWardenBytecode).toMatch(/^0x[0-9a-f]+$/i);
+		expect(contracts.DynamicFeeFlatPriceCurveBytecode).toMatch(/^0x[0-9a-f]+$/i);
 	});
 
 	it('exports every approval bit combination as a plain object', () => {

@@ -9,7 +9,7 @@ import {
 } from 'viem';
 import { describe, expect, it, vi } from 'vitest';
 
-import { MultiVaultAbi } from '../../contracts';
+import { MultiVaultAbi } from '../../contracts/abis';
 import {
 	type CreateAtomsWithUrisInputs,
 	multiVaultCreateAtomsWithUris,

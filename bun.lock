@@ -243,7 +243,6 @@
       "name": "@0xintuition/protocol",
       "version": "4.0.0",
       "dependencies": {
-        "@0xintuition/curves": "0.1.0",
         "@0xintuition/deployments": "0.1.0",
       },
       "devDependencies": {

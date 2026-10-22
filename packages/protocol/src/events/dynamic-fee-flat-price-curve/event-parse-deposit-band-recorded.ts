@@ -1,5 +1,6 @@
+import type { ParseEventLogsReturnType } from 'viem';
 import { type Address, type Hex, type PublicClient, parseEventLogs } from 'viem';
-import { DynamicFeeFlatPriceCurveAbi } from '../../contracts';
+import { DynamicFeeFlatPriceCurveAbi } from '../../contracts/abis';
 import { receiptLogs } from '../receipt-logs.js';
 
 /**
@@ -14,7 +15,7 @@ export async function eventParseDepositBandRecorded(
 	client: PublicClient,
 	hash: Hex,
 	address: Address | undefined = undefined
-) {
+): Promise<EventParseDepositBandRecordedResult> {
 	const logs = await receiptLogs(client, hash, address);
 
 	const events = parseEventLogs({
@@ -25,3 +26,9 @@ export async function eventParseDepositBandRecorded(
 
 	return events;
 }
+
+export type EventParseDepositBandRecordedResult = ParseEventLogsReturnType<
+	typeof DynamicFeeFlatPriceCurveAbi,
+	'DepositBandRecorded',
+	true
+>;

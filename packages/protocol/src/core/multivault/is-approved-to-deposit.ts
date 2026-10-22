@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, ContractFunctionReturnType } from 'viem';
 
-import { MultiVaultAbi } from '../../contracts';
+import { MultiVaultAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -13,9 +13,9 @@ import type { ReadConfig } from '../../types';
 export async function multiVaultIsApprovedToDeposit(
 	config: ReadConfig,
 	inputs: {
-		args: ContractFunctionArgs<typeof MultiVaultAbi, 'view', 'isApprovedToDeposit'>;
+		args: ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'isApprovedToDeposit'>;
 	}
-) {
+): Promise<MultiVaultIsApprovedToDepositResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 
@@ -26,3 +26,9 @@ export async function multiVaultIsApprovedToDeposit(
 		args,
 	});
 }
+
+export type MultiVaultIsApprovedToDepositResult = ContractFunctionReturnType<
+	typeof MultiVaultAbi,
+	'view' | 'pure',
+	'isApprovedToDeposit'
+>;

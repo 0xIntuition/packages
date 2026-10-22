@@ -9,7 +9,7 @@ import {
 } from 'viem';
 import { describe, expect, it, vi } from 'vitest';
 
-import { MultiVaultAbi } from '../../contracts';
+import { MultiVaultAbi } from '../../contracts/abis';
 import { associateAtomCreationContext } from './atom-creation-context.js';
 import { eventParseAtomContextRegistered } from './event-parse-atom-context-registered.js';
 import { eventParseAtomCreated } from './event-parse-atom-created.js';

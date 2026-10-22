@@ -1,13 +1,16 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, Hex } from 'viem';
 
-import { TrustAbi } from '../../contracts';
+import { TrustAbi } from '../../contracts/abis';
 import type { WriteConfig } from '../../types';
 
 export type TrustTransferInputs = {
 	args: ContractFunctionArgs<typeof TrustAbi, 'nonpayable', 'transfer'>;
 };
 
-export async function trustTransfer(config: WriteConfig, inputs: TrustTransferInputs) {
+export async function trustTransfer(
+	config: WriteConfig,
+	inputs: TrustTransferInputs
+): Promise<TrustTransferResult> {
 	const { address, walletClient, publicClient } = config;
 	const { args } = inputs;
 
@@ -21,3 +24,5 @@ export async function trustTransfer(config: WriteConfig, inputs: TrustTransferIn
 
 	return await walletClient.writeContract(request);
 }
+
+export type TrustTransferResult = Hex;

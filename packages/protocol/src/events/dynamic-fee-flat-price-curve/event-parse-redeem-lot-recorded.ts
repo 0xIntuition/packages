@@ -1,5 +1,6 @@
+import type { ParseEventLogsReturnType } from 'viem';
 import { type Address, type Hex, type Log, type PublicClient, parseEventLogs } from 'viem';
-import { DynamicFeeFlatPriceCurveAbi } from '../../contracts';
+import { DynamicFeeFlatPriceCurveAbi } from '../../contracts/abis';
 import { receiptLogs } from '../receipt-logs.js';
 
 /**
@@ -11,7 +12,7 @@ import { receiptLogs } from '../receipt-logs.js';
  * @param logs Logs to decode; anything that is not this event is ignored.
  * @returns Decoded RedeemLotRecorded event logs, one per lot a redeem drew from, highest tier first.
  */
-export function eventDecodeRedeemLotRecorded(logs: Log[]) {
+export function eventDecodeRedeemLotRecorded(logs: Log[]): EventDecodeRedeemLotRecordedResult {
 	return parseEventLogs({
 		abi: DynamicFeeFlatPriceCurveAbi,
 		logs,
@@ -30,7 +31,7 @@ export async function eventParseRedeemLotRecorded(
 	client: PublicClient,
 	hash: Hex,
 	address: Address | undefined = undefined
-) {
+): Promise<EventParseRedeemLotRecordedResult> {
 	const logs = await receiptLogs(client, hash, address);
 
 	const events = parseEventLogs({
@@ -41,3 +42,14 @@ export async function eventParseRedeemLotRecorded(
 
 	return events;
 }
+
+export type EventDecodeRedeemLotRecordedResult = ParseEventLogsReturnType<
+	typeof DynamicFeeFlatPriceCurveAbi,
+	'RedeemLotRecorded',
+	true
+>;
+export type EventParseRedeemLotRecordedResult = ParseEventLogsReturnType<
+	typeof DynamicFeeFlatPriceCurveAbi,
+	'RedeemLotRecorded',
+	true
+>;

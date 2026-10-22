@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, ContractFunctionReturnType } from 'viem';
 
-import { TrustBondingAbi } from '../../contracts';
+import { TrustBondingAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -12,9 +12,9 @@ import type { ReadConfig } from '../../types';
 export async function trustBondingEpochAtTimestamp(
 	config: ReadConfig,
 	inputs: {
-		args: ContractFunctionArgs<typeof TrustBondingAbi, 'view', 'epochAtTimestamp'>;
+		args: ContractFunctionArgs<typeof TrustBondingAbi, 'view' | 'pure', 'epochAtTimestamp'>;
 	}
-) {
+): Promise<TrustBondingEpochAtTimestampResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 
@@ -25,3 +25,9 @@ export async function trustBondingEpochAtTimestamp(
 		args,
 	});
 }
+
+export type TrustBondingEpochAtTimestampResult = ContractFunctionReturnType<
+	typeof TrustBondingAbi,
+	'view' | 'pure',
+	'epochAtTimestamp'
+>;

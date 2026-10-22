@@ -1,5 +1,5 @@
 import { type Address, encodeFunctionData, type Hex } from 'viem';
-import { MultiVaultAbi } from '../../contracts';
+import { MultiVaultAbi } from '../../contracts/abis';
 import {
 	type CreateAtomsWithUrisInputs,
 	multiVaultValidateCreateAtomsWithUris,

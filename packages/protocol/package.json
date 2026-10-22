@@ -67,7 +67,6 @@
 		"test:unit": "vitest run -c vitest.unit.config.ts"
 	},
 	"dependencies": {
-		"@0xintuition/curves": "0.1.0",
 		"@0xintuition/deployments": "0.1.0"
 	},
 	"peerDependencies": {

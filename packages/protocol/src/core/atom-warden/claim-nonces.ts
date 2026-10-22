@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, ContractFunctionReturnType } from 'viem';
 
-import { AtomWardenAbi } from '../../contracts';
+import { AtomWardenAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -12,9 +12,9 @@ import type { ReadConfig } from '../../types';
 export async function atomWardenClaimNonces(
 	config: ReadConfig,
 	inputs: {
-		args: ContractFunctionArgs<typeof AtomWardenAbi, 'view', 'claimNonces'>;
+		args: ContractFunctionArgs<typeof AtomWardenAbi, 'view' | 'pure', 'claimNonces'>;
 	}
-) {
+): Promise<AtomWardenClaimNoncesResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 
@@ -25,3 +25,9 @@ export async function atomWardenClaimNonces(
 		args,
 	});
 }
+
+export type AtomWardenClaimNoncesResult = ContractFunctionReturnType<
+	typeof AtomWardenAbi,
+	'view' | 'pure',
+	'claimNonces'
+>;

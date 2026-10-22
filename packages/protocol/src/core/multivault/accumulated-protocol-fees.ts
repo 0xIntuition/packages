@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, ContractFunctionReturnType } from 'viem';
 
-import { MultiVaultAbi } from '../../contracts';
+import { MultiVaultAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -12,9 +12,9 @@ import type { ReadConfig } from '../../types';
 export async function multiVaultAccumulatedProtocolFees(
 	config: ReadConfig,
 	inputs: {
-		args: ContractFunctionArgs<typeof MultiVaultAbi, 'view', 'accumulatedProtocolFees'>;
+		args: ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'accumulatedProtocolFees'>;
 	}
-) {
+): Promise<MultiVaultAccumulatedProtocolFeesResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 
@@ -25,3 +25,9 @@ export async function multiVaultAccumulatedProtocolFees(
 		args,
 	});
 }
+
+export type MultiVaultAccumulatedProtocolFeesResult = ContractFunctionReturnType<
+	typeof MultiVaultAbi,
+	'view' | 'pure',
+	'accumulatedProtocolFees'
+>;

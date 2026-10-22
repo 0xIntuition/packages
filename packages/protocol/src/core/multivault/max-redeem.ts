@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, ContractFunctionReturnType } from 'viem';
 
-import { type MultiVaultAbi, MultiVaultWithRevertsAbi } from '../../contracts';
+import { type MultiVaultAbi, MultiVaultWithRevertsAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -12,9 +12,9 @@ import type { ReadConfig } from '../../types';
 export async function multiVaultMaxRedeem(
 	config: ReadConfig,
 	inputs: {
-		args: ContractFunctionArgs<typeof MultiVaultAbi, 'view', 'maxRedeem'>;
+		args: ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'maxRedeem'>;
 	}
-) {
+): Promise<MultiVaultMaxRedeemResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 
@@ -25,3 +25,9 @@ export async function multiVaultMaxRedeem(
 		args,
 	});
 }
+
+export type MultiVaultMaxRedeemResult = ContractFunctionReturnType<
+	typeof MultiVaultWithRevertsAbi,
+	'view' | 'pure',
+	'maxRedeem'
+>;

@@ -1,8 +1,8 @@
+import { BeaconProxyBytecode } from '@0xintuition/deployments/bytecode';
 import type { AtomId, OAuthAtomInput } from '@0xintuition/ids';
 import { calculateOAuthAtomId } from '@0xintuition/ids';
 import {
 	AtomWalletAbi,
-	BeaconProxyBytecode,
 	multiVaultComputeAtomWalletAddr,
 	multiVaultGetWalletConfig,
 	type ReadConfig,

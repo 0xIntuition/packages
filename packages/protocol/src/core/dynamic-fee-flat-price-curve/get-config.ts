@@ -1,6 +1,6 @@
 import type { DynamicFeeConfig } from '@0xintuition/curves';
 
-import { DynamicFeeFlatPriceCurveAbi } from '../../contracts';
+import { DynamicFeeFlatPriceCurveAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**

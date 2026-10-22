@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, ContractFunctionReturnType } from 'viem';
 
-import { DynamicFeeFlatPriceCurveAbi } from '../../contracts';
+import { DynamicFeeFlatPriceCurveAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -13,9 +13,13 @@ import type { ReadConfig } from '../../types';
 export async function dynamicFeeFlatPriceCurveLotRewardDebt(
 	config: ReadConfig,
 	inputs: {
-		args: ContractFunctionArgs<typeof DynamicFeeFlatPriceCurveAbi, 'view', 'lotRewardDebt'>;
+		args: ContractFunctionArgs<
+			typeof DynamicFeeFlatPriceCurveAbi,
+			'view' | 'pure',
+			'lotRewardDebt'
+		>;
 	}
-) {
+): Promise<DynamicFeeFlatPriceCurveLotRewardDebtResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 
@@ -26,3 +30,9 @@ export async function dynamicFeeFlatPriceCurveLotRewardDebt(
 		args,
 	});
 }
+
+export type DynamicFeeFlatPriceCurveLotRewardDebtResult = ContractFunctionReturnType<
+	typeof DynamicFeeFlatPriceCurveAbi,
+	'view' | 'pure',
+	'lotRewardDebt'
+>;

@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, Hex } from 'viem';
 
-import { DynamicFeeFlatPriceCurveAbi } from '../../contracts';
+import { DynamicFeeFlatPriceCurveAbi } from '../../contracts/abis';
 import type { WriteConfig } from '../../types';
 
 export type DynamicFeeFlatPriceCurveClaimInputs = {
@@ -17,7 +17,7 @@ export type DynamicFeeFlatPriceCurveClaimInputs = {
 export async function dynamicFeeFlatPriceCurveClaim(
 	config: WriteConfig,
 	inputs: DynamicFeeFlatPriceCurveClaimInputs
-) {
+): Promise<DynamicFeeFlatPriceCurveClaimResult> {
 	const { address, walletClient, publicClient } = config;
 	const { args } = inputs;
 
@@ -31,3 +31,5 @@ export async function dynamicFeeFlatPriceCurveClaim(
 
 	return await walletClient.writeContract(request);
 }
+
+export type DynamicFeeFlatPriceCurveClaimResult = Hex;

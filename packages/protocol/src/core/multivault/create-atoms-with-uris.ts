@@ -1,6 +1,6 @@
 import { type ContractFunctionArgs, type Hex, zeroAddress } from 'viem';
 
-import { type MultiVaultAbi, MultiVaultWithRevertsAbi } from '../../contracts';
+import { type MultiVaultAbi, MultiVaultWithRevertsAbi } from '../../contracts/abis';
 import type { WriteConfig } from '../../types';
 
 export type AtomUriLimits = {
@@ -75,7 +75,7 @@ export function multiVaultValidateCreateAtomsWithUris(inputs: CreateAtomsWithUri
 export async function multiVaultCreateAtomsWithUris(
 	config: WriteConfig,
 	inputs: CreateAtomsWithUrisInputs
-) {
+): Promise<MultiVaultCreateAtomsWithUrisResult> {
 	multiVaultValidateCreateAtomsWithUris(inputs);
 	const { address, walletClient, publicClient } = config;
 	const { request } = await publicClient.simulateContract({
@@ -93,3 +93,5 @@ export async function multiVaultCreateAtomsWithUris(
 function hexByteLength(value: Hex): bigint {
 	return BigInt((value.length - 2) / 2);
 }
+
+export type MultiVaultCreateAtomsWithUrisResult = Hex;

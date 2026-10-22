@@ -1,10 +1,10 @@
-import type { Account, Address, ContractFunctionArgs } from 'viem';
+import type { Account, Address, ContractFunctionArgs, ContractFunctionReturnType } from 'viem';
 
-import { type MultiVaultAbi, MultiVaultWithRevertsAbi } from '../../contracts';
+import { type MultiVaultAbi, MultiVaultWithRevertsAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 export type PreviewAtomCreateInputs = {
-	args: ContractFunctionArgs<typeof MultiVaultAbi, 'view', 'previewAtomCreate'>;
+	args: ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'previewAtomCreate'>;
 	/**
 	 * Optional `from` for the call. MultiVault's preview path does not read `msg.sender`, so this
 	 * changes nothing on chain; it exists only for nodes or middleware that key on a caller.
@@ -26,7 +26,7 @@ export type PreviewAtomCreateInputs = {
 export async function multiVaultPreviewAtomCreate(
 	config: ReadConfig,
 	inputs: PreviewAtomCreateInputs
-) {
+): Promise<MultiVaultPreviewAtomCreateResult> {
 	const { address, publicClient } = config;
 	const { args, account } = inputs;
 
@@ -38,3 +38,9 @@ export async function multiVaultPreviewAtomCreate(
 		args,
 	});
 }
+
+export type MultiVaultPreviewAtomCreateResult = ContractFunctionReturnType<
+	typeof MultiVaultWithRevertsAbi,
+	'view' | 'pure',
+	'previewAtomCreate'
+>;

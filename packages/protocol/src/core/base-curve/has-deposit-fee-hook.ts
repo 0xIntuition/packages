@@ -1,4 +1,5 @@
-import { IBaseCurveAbi } from '../../contracts';
+import type { ContractFunctionReturnType } from 'viem';
+import { IBaseCurveAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -7,7 +8,9 @@ import type { ReadConfig } from '../../types';
  * @param config Curve address and public client.
  * @returns True if the curve implements the deposit fee hook.
  */
-export async function baseCurveHasDepositFeeHook(config: ReadConfig) {
+export async function baseCurveHasDepositFeeHook(
+	config: ReadConfig
+): Promise<BaseCurveHasDepositFeeHookResult> {
 	const { address, publicClient } = config;
 
 	return await publicClient.readContract({
@@ -16,3 +19,9 @@ export async function baseCurveHasDepositFeeHook(config: ReadConfig) {
 		functionName: 'hasDepositFeeHook',
 	});
 }
+
+export type BaseCurveHasDepositFeeHookResult = ContractFunctionReturnType<
+	typeof IBaseCurveAbi,
+	'view' | 'pure',
+	'hasDepositFeeHook'
+>;

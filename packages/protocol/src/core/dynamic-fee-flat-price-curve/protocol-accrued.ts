@@ -1,4 +1,5 @@
-import { DynamicFeeFlatPriceCurveAbi } from '../../contracts';
+import type { ContractFunctionReturnType } from 'viem';
+import { DynamicFeeFlatPriceCurveAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -7,7 +8,9 @@ import type { ReadConfig } from '../../types';
  * @param config Contract address and public client.
  * @returns The accrued protocol balance.
  */
-export async function dynamicFeeFlatPriceCurveProtocolAccrued(config: ReadConfig) {
+export async function dynamicFeeFlatPriceCurveProtocolAccrued(
+	config: ReadConfig
+): Promise<DynamicFeeFlatPriceCurveProtocolAccruedResult> {
 	const { address, publicClient } = config;
 
 	return await publicClient.readContract({
@@ -16,3 +19,9 @@ export async function dynamicFeeFlatPriceCurveProtocolAccrued(config: ReadConfig
 		functionName: 'protocolAccrued',
 	});
 }
+
+export type DynamicFeeFlatPriceCurveProtocolAccruedResult = ContractFunctionReturnType<
+	typeof DynamicFeeFlatPriceCurveAbi,
+	'view' | 'pure',
+	'protocolAccrued'
+>;

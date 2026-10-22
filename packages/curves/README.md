@@ -25,7 +25,7 @@ const preview = curve.previewDeposit(100n, { totalAssets: 0n, totalShares: 0n })
 This candidate targets `@0xintuition/contracts-v2@1.1.0-alpha.1`. Its
 net-anchored deposit bands differ from the older `1.1.0-alpha.0` contract revision.
 Exact contract parity, including uint256 overflow/revert behavior, remains a
-release gate. See the [contract artifact provenance](https://github.com/0xIntuition/packages/blob/update/v1.1.0-alpha/docs/contract-artifacts.md).
+release gate. See the [contract artifact provenance](https://github.com/0xIntuition/packages/blob/main/docs/contract-artifacts.md).
 
 ## Gross-up quotes
 

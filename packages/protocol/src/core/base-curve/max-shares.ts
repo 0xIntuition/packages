@@ -1,4 +1,5 @@
-import { IBaseCurveAbi } from '../../contracts';
+import type { ContractFunctionReturnType } from 'viem';
+import { IBaseCurveAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -8,7 +9,7 @@ import type { ReadConfig } from '../../types';
  * @param config Curve address and public client.
  * @returns The curve's share ceiling.
  */
-export async function baseCurveMaxShares(config: ReadConfig) {
+export async function baseCurveMaxShares(config: ReadConfig): Promise<BaseCurveMaxSharesResult> {
 	const { address, publicClient } = config;
 
 	return await publicClient.readContract({
@@ -17,3 +18,9 @@ export async function baseCurveMaxShares(config: ReadConfig) {
 		functionName: 'maxShares',
 	});
 }
+
+export type BaseCurveMaxSharesResult = ContractFunctionReturnType<
+	typeof IBaseCurveAbi,
+	'view' | 'pure',
+	'maxShares'
+>;

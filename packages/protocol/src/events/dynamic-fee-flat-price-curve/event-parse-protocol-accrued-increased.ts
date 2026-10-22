@@ -1,5 +1,6 @@
+import type { ParseEventLogsReturnType } from 'viem';
 import { type Address, type Hex, type Log, type PublicClient, parseEventLogs } from 'viem';
-import { DynamicFeeFlatPriceCurveAbi } from '../../contracts';
+import { DynamicFeeFlatPriceCurveAbi } from '../../contracts/abis';
 import { receiptLogs } from '../receipt-logs.js';
 
 /**
@@ -14,7 +15,7 @@ export async function eventParseProtocolAccruedIncreased(
 	client: PublicClient,
 	hash: Hex,
 	address: Address | undefined = undefined
-) {
+): Promise<EventParseProtocolAccruedIncreasedResult> {
 	const logs = await receiptLogs(client, hash, address);
 
 	const events = parseEventLogs({
@@ -35,10 +36,23 @@ export async function eventParseProtocolAccruedIncreased(
  * @param logs Logs to decode; anything that is not this event is ignored.
  * @returns Decoded ProtocolAccruedIncreased event logs.
  */
-export function eventDecodeProtocolAccruedIncreased(logs: Log[]) {
+export function eventDecodeProtocolAccruedIncreased(
+	logs: Log[]
+): EventDecodeProtocolAccruedIncreasedResult {
 	return parseEventLogs({
 		abi: DynamicFeeFlatPriceCurveAbi,
 		logs,
 		eventName: 'ProtocolAccruedIncreased',
 	});
 }
+
+export type EventParseProtocolAccruedIncreasedResult = ParseEventLogsReturnType<
+	typeof DynamicFeeFlatPriceCurveAbi,
+	'ProtocolAccruedIncreased',
+	true
+>;
+export type EventDecodeProtocolAccruedIncreasedResult = ParseEventLogsReturnType<
+	typeof DynamicFeeFlatPriceCurveAbi,
+	'ProtocolAccruedIncreased',
+	true
+>;

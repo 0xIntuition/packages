@@ -1,4 +1,5 @@
-import { TrustBondingAbi } from '../../contracts';
+import type { ContractFunctionReturnType } from 'viem';
+import { TrustBondingAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -6,7 +7,9 @@ import type { ReadConfig } from '../../types';
  * @param config Contract address and public client.
  * @returns System APY as returned by the contract.
  */
-export async function trustBondingGetSystemApy(config: ReadConfig) {
+export async function trustBondingGetSystemApy(
+	config: ReadConfig
+): Promise<TrustBondingGetSystemApyResult> {
 	const { address, publicClient } = config;
 
 	return await publicClient.readContract({
@@ -15,3 +18,9 @@ export async function trustBondingGetSystemApy(config: ReadConfig) {
 		functionName: 'getSystemApy',
 	});
 }
+
+export type TrustBondingGetSystemApyResult = ContractFunctionReturnType<
+	typeof TrustBondingAbi,
+	'view' | 'pure',
+	'getSystemApy'
+>;
