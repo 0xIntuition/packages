@@ -210,3 +210,12 @@ packages, but published versions must never be reused.
 Keep assistant instructions, prompts, and planning notes in ignored local directories
 such as `.local/`. Commit public API documentation, tests, and reproducible release
 checks. Package publication checks reject internal agent files in npm tarballs.
+
+## Relative ESM imports
+
+Use `.js` relative specifiers for new TypeScript modules where practical. Existing
+packages and generators still emit extensionless imports, so builds retain
+`scripts/normalize-dist-imports.mjs` to resolve them to Node-compatible `.js` and
+`/index.js` paths. Removing the normalizer requires migrating those sources and
+generators together and passing the Node tarball consumer checks; that migration
+is outside this pre-publication hygiene pass.
