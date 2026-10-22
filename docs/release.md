@@ -28,8 +28,18 @@ The public package set has two release tracks:
 | `@0xintuition/protocol`, `@0xintuition/sdk` | `4.x` | Publish this candidate to `alpha`; leave the existing `latest` line unchanged until a release owner explicitly promotes it |
 
 For this candidate, every entry in `release-plan.json` uses `alpha`, including
-protocol/SDK `4.0.0` and deployments/curves/periphery/CLI `0.1.0-alpha.0`. The absence of
-a prerelease suffix does not authorize promotion to `latest`.
+protocol/SDK `4.0.0`, deployments/curves/periphery `0.1.0-alpha.1`, and CLI
+`0.1.0-alpha.0`. The absence of a prerelease suffix on protocol/SDK does not authorize
+promotion to `latest`.
+
+Registry state recorded on 2026-10-22: deployments, curves, periphery, ids,
+classifications, predicates, primitives, react, and schema-org each have
+`0.1.0-alpha.0` published with both `latest` and `alpha` pointing at it (the registry
+created `latest` on first publication). Publishing their next alpha under `alpha`
+alone leaves `latest` on the older version; the release owner decides at publish time
+whether to move `latest` as well (`npm dist-tag add`) and records the choice in the
+release notes. iid-spec, iid, iid-registry, iid-ladder, pipeline-runtime, cli, and
+the atom packages have never been published.
 
 For packages with an existing stable line, keep `latest` pointed at the current
 recommended public version. Older versions remain installable by exact version.
@@ -124,9 +134,9 @@ Publish in dependency order:
 5. `@0xintuition/ids`
 6. `@0xintuition/schema-org`
 7. `@0xintuition/classifications`
-8. `@0xintuition/atom-parser`
-9. `@0xintuition/atom-classification`
-10. `@0xintuition/atom-enrichment`
+8. `@0xintuition/atom-parser` (held, see below)
+9. `@0xintuition/atom-classification` (held)
+10. `@0xintuition/atom-enrichment` (held)
 11. `@0xintuition/iid-registry`
 12. `@0xintuition/iid-ladder`
 13. `@0xintuition/predicates`
@@ -317,11 +327,21 @@ Prefer deprecation and superseding releases over unpublish.
 
 ## Candidate version decision
 
-This train uses `0.1.0-alpha.0` for deployments, curves, periphery, and CLI.
+This train uses `0.1.0-alpha.1` for deployments, curves, and periphery (their
+`0.1.0-alpha.0` is already on the registry) and `0.1.0-alpha.0` for the unpublished CLI.
 An alpha-track candidate in the 0.1.0 family must include its prerelease suffix;
 all dependent pins and `release-plan.json` move together. Registry validation
 reads manifest versions directly, so no second hard-coded version list exists.
 Protocol and SDK retain their planned 4.0.0 major versions. All candidates use
 the `alpha` tag, and promoting `latest` requires a separate release decision.
 Check registry availability before publishing and never overwrite an existing
-immutable version.
+immutable version: `bun run release:registry` is the live registry preflight, it is not
+part of CI, and it must pass on the exact revision being published.
+
+## Held packages
+
+`@0xintuition/atom-parser`, `@0xintuition/atom-classification`, and
+`@0xintuition/atom-enrichment` are registered workspace packages but are not in
+`release-plan.json`. Their `0.1.0-alpha.0` manifests carry the Core lineage, which is
+never published; the packages re-enter the plan as `0.1.0-alpha.1` once rebuilt from
+the application lineage (ENG-17076..17078). Do not publish them from this train.

@@ -28,9 +28,10 @@ Import low-level wrappers, ABI values, network helpers, and protocol types from
 escape hatch and remains supported. Import other deterministic ID utilities from
 `@0xintuition/ids`.
 
-The only selected shared root exports are `calculateAtomId`,
-`calculateOAuthAtomId`, the types `AtomId`, `OAuthAtomInput`, `ReadConfig`, and
-`WriteConfig`. These support SDK wallet and action inputs. All SDK-owned modules
+The only selected shared root exports are `calculateAtomId`, `calculateTripleId`,
+`calculateCounterTripleId`, `calculateOAuthAtomId`, the types `AtomId`, `TripleId`,
+`CounterTripleId`, `OAuthAtomInput`, `ReadConfig`, and `WriteConfig`. These support
+SDK wallet and action inputs (actions take atom and triple ids). All SDK-owned modules
 remain available at the root and their documented subpaths. Pure action envelope
 builders now live in SDK actions; see [the CLI alias mapping](./action-plans.md).
 

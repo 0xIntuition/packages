@@ -67,7 +67,7 @@
 		"test:unit": "vitest run -c vitest.unit.config.ts"
 	},
 	"dependencies": {
-		"@0xintuition/deployments": "0.1.0-alpha.0"
+		"@0xintuition/deployments": "0.1.0-alpha.1"
 	},
 	"peerDependencies": {
 		"viem": "^2.0.0"

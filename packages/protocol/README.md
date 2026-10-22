@@ -1977,6 +1977,12 @@ re-exports bytecode. Pure curve math now lives exclusively in
 | `LinearCurveState`, `ProgressiveCurveState`, `OffsetProgressiveCurveState` | `CurveState` |
 | `ProgressiveCurveConfig`, `OffsetProgressiveCurveConfig` | Same names |
 
+`dynamicFeeFlatPriceCurveGetConfig` now returns the ABI-derived
+`DynamicFeeFlatPriceCurveGetConfigResult` instead of the curves package's
+`DynamicFeeConfig`. The two are structurally compatible, so callers passing the
+result to `@0xintuition/curves` helpers need no change; code that named the old type
+should import the new one.
+
 Math utilities formerly available in the internal `core/curves/math` module
 (`WAD`, `mulDivDown`, `mulDivUp`, `mulWadDown`, `mulWadUp`, `divWadDown`,
 `divWadUp`, `sqrt`, `sqrtWad`, `squareWadDown`, `squareWadUp`,

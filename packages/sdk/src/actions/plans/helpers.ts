@@ -176,7 +176,7 @@ export function buildPlanMetadata(inputs: {
 		description: inputs.description,
 		tags: inputs.tags,
 		source: {
-			package: '@0xintuition/cli',
+			package: '@0xintuition/sdk',
 			module: inputs.module,
 			method: inputs.method,
 		},

@@ -90,6 +90,7 @@ In 4.0.0 the root exports SDK-owned APIs plus selected shared helpers and types.
   - **FeeProxy** (`actions/fee-proxy.ts`): `feeProxyPrepareCreateAtomsWithUrisTx`
   - **TrustBonding** (`actions/trust-bonding.ts`): `trustBondingGetRewardsDashboard`, `trustBondingGetClaimActionState`, `trustBondingPrepareLockAction`, `trustBondingClaimAndRestakePlan`, `trustBondingGetLockStateSummary`, `trustBondingGetEpochRewardsTimeline`
   - **Portfolio** (`actions/portfolio.ts`): `portfolioGetIntuitionPositionsSnapshot`, `portfolioGetActionableState`
+- pure, client-free action envelope builders and their schema (`actions/plans/*`, `actions/schema/*`), formerly the CLI plan builders; see [docs/action-plans.md](./docs/action-plans.md)
 - selected shared types and deterministic helpers; full protocol access through `./protocol`
 
 Action helpers and deterministic utilities are SDK responsibilities. The full protocol API is isolated behind the explicit `./protocol` subpath.
