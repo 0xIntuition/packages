@@ -220,6 +220,34 @@ try {
 		results.cli = typeof cli.buildMultiVaultDepositPlan;
 		const react = await import('@0xintuition/react');
 		results.react = typeof react.IntuitionProvider;
+		// Every runtime export must work from the tarball under both runtimes,
+		// including helper subpaths that Core does not happen to import today.
+		results.atomRuntimeExports = {};
+		for (const name of ['atom-parser', 'atom-classification', 'atom-enrichment']) {
+			const specifier = '@0xintuition/' + name;
+			const manifest = JSON.parse(readFileSync(require.resolve(specifier + '/package.json'), 'utf8'));
+			const subpaths = Object.keys(manifest.exports).filter((key) => key !== './package.json');
+			for (const subpath of subpaths) {
+				await import(specifier + (subpath === '.' ? '' : subpath.slice(1)));
+			}
+			results.atomRuntimeExports[name] = subpaths.length;
+		}
+		const { parseAtom } = await import('@0xintuition/atom-parser/parse');
+		results.parsedAtomKind = (await parseAtom('https://example.com', { remoteFetch: false })).kind;
+		const { createClientEngine } = await import('@0xintuition/atom-classification/client');
+		const { createPlainTextPlugin } = await import('@0xintuition/atom-classification/plugins/plain-text');
+		const { createTypeProfilesPlugin } = await import('@0xintuition/atom-classification/plugins/type-profiles');
+		const classified = await createClientEngine({ plugins: [createTypeProfilesPlugin(), createPlainTextPlugin()] }).classify({
+			input: 'a shared atom runtime', mode: 'client-only', classificationSessionId: 'packed-smoke',
+		});
+		results.classifiedAtomType = classified.resolved?.classifications[0]?.type;
+		const { createEnrichmentEngine } = await import('@0xintuition/atom-enrichment');
+		const { createMockPlugin, createMockArtifact, createMockRequest } = await import('@0xintuition/atom-enrichment/testing');
+		const enriched = await createEnrichmentEngine({
+			plugins: [createMockPlugin({ mockArtifacts: [createMockArtifact()] })],
+		}).enrich(createMockRequest());
+		results.enrichmentStatus = enriched.status;
+		results.enrichedArtifactTypes = enriched.artifacts.map((artifact) => artifact.artifact_type);
 		console.log(JSON.stringify(results));
 	`;
 
@@ -284,6 +312,11 @@ try {
 	assert.equal(nodeResult.sdkUtilsSubpath, 'function');
 	assert.equal(nodeResult.cli, 'function');
 	assert.equal(nodeResult.react, 'function');
+	for (const count of Object.values(nodeResult.atomRuntimeExports)) assert(count > 0);
+	assert.equal(nodeResult.parsedAtomKind, 'url');
+	assert.equal(nodeResult.classifiedAtomType, 'Thing');
+	assert.equal(nodeResult.enrichmentStatus, 'success');
+	assert.deepEqual(nodeResult.enrichedArtifactTypes, ['opengraph']);
 
 	const bunResult = JSON.parse(run('bun', ['--eval', importProgram]).trim());
 	assert.equal(bunResult.musicRecordingCreationProfile, 'music-recording');
@@ -310,6 +343,20 @@ try {
 		import { multiVaultCreateAtomsWithUrisEncode, eventParseAtomCreated } from '@0xintuition/protocol';
 		import { buildMultiVaultDepositPlan } from '@0xintuition/cli';
 		import { multivaultPrepareDepositTx } from '@0xintuition/sdk/actions';
+		import { parseAtom } from '@0xintuition/atom-parser/parse';
+		import type { ParseResult } from '@0xintuition/atom-parser/types';
+		import { createClientEngine } from '@0xintuition/atom-classification/client';
+		import { createPlainTextPlugin } from '@0xintuition/atom-classification/plugins/plain-text';
+		import { createTypeProfilesPlugin } from '@0xintuition/atom-classification/plugins/type-profiles';
+		import { createEnrichmentEngine, type EnrichmentRunResult } from '@0xintuition/atom-enrichment';
+		import { createMockPlugin, createMockArtifact, createMockRequest } from '@0xintuition/atom-enrichment/testing';
+		const parsed: ParseResult = await parseAtom('hello', { remoteFetch: false });
+		await createClientEngine({ plugins: [createTypeProfilesPlugin(), createPlainTextPlugin()] }).classify({
+			input: parsed.normalizedInput, mode: 'client-only', classificationSessionId: 'typed-smoke',
+		});
+		const enriched: EnrichmentRunResult = await createEnrichmentEngine({
+			plugins: [createMockPlugin({ mockArtifacts: [createMockArtifact()] })],
+		}).enrich(createMockRequest());
 		type CliPlan = ReturnType<typeof buildMultiVaultDepositPlan>;
 		type SdkPlan = Awaited<ReturnType<typeof multivaultPrepareDepositTx>>;
 		import type { Hex } from 'viem';

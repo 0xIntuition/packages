@@ -32,6 +32,21 @@
 			"tag": "alpha"
 		},
 		{
+			"directory": "atom-parser",
+			"version": "0.1.0-alpha.0",
+			"tag": "alpha"
+		},
+		{
+			"directory": "atom-classification",
+			"version": "0.1.0-alpha.0",
+			"tag": "alpha"
+		},
+		{
+			"directory": "atom-enrichment",
+			"version": "0.1.0-alpha.0",
+			"tag": "alpha"
+		},
+		{
 			"directory": "iid-registry",
 			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
