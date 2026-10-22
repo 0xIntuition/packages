@@ -19,6 +19,7 @@
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 export const PACKAGES = [
 	{ dirName: 'iid-spec', kind: 'docs-only' },
@@ -188,10 +189,10 @@ export function assertRegistryIntegrity(repoRoot) {
 }
 
 const isDirectInvocation =
-	process.argv[1] && resolve(process.argv[1]) === new URL(import.meta.url).pathname;
+	process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 
 if (isDirectInvocation) {
-	const repoRoot = resolve(new URL('..', import.meta.url).pathname);
+	const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
 	assertRegistryIntegrity(repoRoot);
 	console.log(
 		`Package registry integrity check passed for ${PACKAGES.length} packages: ${PACKAGE_ORDER.join(', ')}.`

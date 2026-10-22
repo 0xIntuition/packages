@@ -3,10 +3,11 @@
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const SCHEMA_ORG_CONTEXT = 'https://schema.org/';
 
-const repoRoot = resolve(new URL('..', import.meta.url).pathname);
+const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const generatedRoot = resolve(repoRoot, 'packages/classifications/src/generated/creation');
 
 const [{ CLASSIFICATION_SPECS }, { getMetadataPredicateRelation }, schemaOrg, predicates] =
@@ -42,7 +43,9 @@ function fieldSchemaProvenance(field, schemaProperties) {
 		return null;
 	}
 
-	const schemaProperty = schemaProperties.find((property) => property.name === field.schemaProperty);
+	const schemaProperty = schemaProperties.find(
+		(property) => property.name === field.schemaProperty
+	);
 
 	if (!schemaProperty) {
 		return null;
@@ -124,7 +127,9 @@ function profileForSpec(spec) {
 			schema: spec.schema,
 		},
 		fields: spec.fields.map((field) => creationFieldFor(field, schemaProperties)),
-		relationships: spec.metadataPredicates.map((predicateKey) => relationshipFor(spec, predicateKey)),
+		relationships: spec.metadataPredicates.map((predicateKey) =>
+			relationshipFor(spec, predicateKey)
+		),
 		availableFieldCount: schemaProperties.length || spec.fields.length,
 	};
 }
@@ -144,16 +149,10 @@ export default ${exportName};
 function indexSource(specs) {
 	const sortedSpecs = [...specs].sort(sortBySlug);
 	const imports = sortedSpecs
-		.map(
-			(spec) =>
-				`import { ${variableNameForSlug(spec.slug)} } from './${spec.slug}.js';`
-		)
+		.map((spec) => `import { ${variableNameForSlug(spec.slug)} } from './${spec.slug}.js';`)
 		.join('\n');
 	const exports = sortedSpecs
-		.map(
-			(spec) =>
-				`export { ${variableNameForSlug(spec.slug)} } from './${spec.slug}.js';`
-		)
+		.map((spec) => `export { ${variableNameForSlug(spec.slug)} } from './${spec.slug}.js';`)
 		.join('\n');
 	const profileEntries = sortedSpecs
 		.map((spec) => `\t${variableNameForSlug(spec.slug)},`)
