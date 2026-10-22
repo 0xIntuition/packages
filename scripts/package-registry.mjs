@@ -17,7 +17,7 @@
  * - 'docs-only' — normative documents/fixtures only; no build step, no dist/
  */
 
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, realpathSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -190,7 +190,7 @@ export function assertRegistryIntegrity(repoRoot) {
 }
 
 const isDirectInvocation =
-	process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+	process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url);
 
 if (isDirectInvocation) {
 	const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));

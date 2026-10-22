@@ -3,9 +3,10 @@
 import { execFileSync } from 'node:child_process';
 import { statSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { PACKAGE_ORDER, assertRegistryIntegrity, packageRootFor } from './package-registry.mjs';
+import { fileURLToPath } from 'node:url';
+import { assertRegistryIntegrity, PACKAGE_ORDER, packageRootFor } from './package-registry.mjs';
 
-const repoRoot = resolve(new URL('..', import.meta.url).pathname);
+const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
 
 assertRegistryIntegrity(repoRoot);
 
