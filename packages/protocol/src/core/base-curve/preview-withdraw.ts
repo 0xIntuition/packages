@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, ContractFunctionReturnType } from 'viem';
 
-import { IBaseCurveAbi } from '../../contracts';
+import { IBaseCurveAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -14,9 +14,9 @@ import type { ReadConfig } from '../../types';
 export async function baseCurvePreviewWithdraw(
 	config: ReadConfig,
 	inputs: {
-		args: ContractFunctionArgs<typeof IBaseCurveAbi, 'view', 'previewWithdraw'>;
+		args: ContractFunctionArgs<typeof IBaseCurveAbi, 'view' | 'pure', 'previewWithdraw'>;
 	}
-) {
+): Promise<BaseCurvePreviewWithdrawResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 
@@ -27,3 +27,9 @@ export async function baseCurvePreviewWithdraw(
 		args,
 	});
 }
+
+export type BaseCurvePreviewWithdrawResult = ContractFunctionReturnType<
+	typeof IBaseCurveAbi,
+	'view' | 'pure',
+	'previewWithdraw'
+>;

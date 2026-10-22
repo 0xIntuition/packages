@@ -3,8 +3,10 @@
 Shared identifier-projection ladder for application, seed, and import pipelines.
 ESM-only.
 
+## Install
+
 ```bash
-npm install @0xintuition/iid-ladder@alpha viem@^2
+npm install @0xintuition/iid-ladder@alpha
 ```
 
 The ladder selects the first canonical identity available in this order:
@@ -202,3 +204,7 @@ Known-answer fixtures in `__tests__/fixtures/provider-local-handles.json` are
 produced by the unmodified app at `7fc0c82b4`; their provenance records the generating
 command. Tests cover both modes, classification fixtures, all provider-local prefix
 rows, alias contexts, and boundary values.
+
+## License
+
+MIT.

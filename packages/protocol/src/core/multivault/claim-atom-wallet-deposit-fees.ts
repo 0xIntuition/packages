@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, Hex } from 'viem';
 
-import { MultiVaultAbi } from '../../contracts';
+import { MultiVaultAbi } from '../../contracts/abis';
 import type { WriteConfig } from '../../types';
 
 export type MultiVaultClaimAtomWalletDepositFeesInputs = {
@@ -16,7 +16,7 @@ export type MultiVaultClaimAtomWalletDepositFeesInputs = {
 export async function multiVaultClaimAtomWalletDepositFees(
 	config: WriteConfig,
 	inputs: MultiVaultClaimAtomWalletDepositFeesInputs
-) {
+): Promise<MultiVaultClaimAtomWalletDepositFeesResult> {
 	const { address, walletClient, publicClient } = config;
 	const { args } = inputs;
 
@@ -30,3 +30,5 @@ export async function multiVaultClaimAtomWalletDepositFees(
 
 	return await walletClient.writeContract(request);
 }
+
+export type MultiVaultClaimAtomWalletDepositFeesResult = Hex;

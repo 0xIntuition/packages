@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, Hex } from 'viem';
 
-import { AtomWardenAbi } from '../../contracts';
+import { AtomWardenAbi } from '../../contracts/abis';
 import type { WriteConfig } from '../../types';
 
 export type AtomWardenSetMaxValidAfterInputs = {
@@ -17,7 +17,7 @@ export type AtomWardenSetMaxValidAfterInputs = {
 export async function atomWardenSetMaxValidAfter(
 	config: WriteConfig,
 	inputs: AtomWardenSetMaxValidAfterInputs
-) {
+): Promise<AtomWardenSetMaxValidAfterResult> {
 	const { address, walletClient, publicClient } = config;
 	const { args } = inputs;
 
@@ -31,3 +31,5 @@ export async function atomWardenSetMaxValidAfter(
 
 	return await walletClient.writeContract(request);
 }
+
+export type AtomWardenSetMaxValidAfterResult = Hex;

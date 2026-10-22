@@ -50,8 +50,11 @@ Prefer extending the package that owns the concept:
 | `@0xintuition/protocol` | Core contract wrappers, event parsing, and protocol interaction helpers; re-exports core ABIs and addresses from `deployments` |
 | `@0xintuition/periphery` | Periphery contract helpers (bridge, router, FeeProxy); re-exports periphery ABIs and addresses from `deployments` |
 | `@0xintuition/sdk` | Integration-level API reads, onchain action planning, and deterministic utilities composed from the protocol packages |
-| `@0xintuition/cli` | Side-effect-free calldata encoders, agent action plan builders, and the `intuition` executable |
+| `@0xintuition/cli` | Side-effect-free calldata encoders, deprecated SDK action plan aliases, and the `intuition` executable |
 | `@0xintuition/react` | React providers and hooks |
+| `@0xintuition/atom-parser` | Input detection, normalization, optional remote inspection, parser types; apps own configured fetch policy and worker integration |
+| `@0xintuition/atom-classification` | Classification engine, plugin contracts, reusable classifiers/resolvers, configurable presets; apps own enabled plugins, fallback policy, injected identity capabilities and service wiring |
+| `@0xintuition/atom-enrichment` | Enrichment engine, provider adapters, extraction, artifact validation, cache interfaces and reusable adapters; apps own credentials, cache provisioning/configuration, queue scheduling, retries, persistence and service wiring |
 
 Keep package dependencies one-way. Focused foundation packages should stay
 usable on their own; for example, `ids` should not import `primitives`, and
@@ -122,7 +125,7 @@ and PR before implementation.
 
 ## Local Setup
 
-Use Node 22.12+ and the Bun version pinned in `package.json`. The repo enforces
+Use Node 20 minimum (Node 24 tested) and the Bun version pinned in `package.json`. The repo enforces
 Bun installs. Package consumers can use npm or another package manager.
 
 ```bash
@@ -208,3 +211,12 @@ packages, but published versions must never be reused.
 Keep assistant instructions, prompts, and planning notes in ignored local directories
 such as `.local/`. Commit public API documentation, tests, and reproducible release
 checks. Package publication checks reject internal agent files in npm tarballs.
+
+## Relative ESM imports
+
+Use `.js` relative specifiers for new TypeScript modules where practical. Existing
+packages and generators still emit extensionless imports, so builds retain
+`scripts/normalize-dist-imports.mjs` to resolve them to Node-compatible `.js` and
+`/index.js` paths. Removing the normalizer requires migrating those sources and
+generators together and passing the Node tarball consumer checks; that migration
+is outside this pre-publication hygiene pass.

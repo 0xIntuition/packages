@@ -1,6 +1,6 @@
-import type { Address, ContractFunctionArgs, PublicClient, WalletClient } from 'viem';
+import type { Address, ContractFunctionArgs, Hex, PublicClient, WalletClient } from 'viem';
 
-import { type MultiVaultAbi, MultiVaultWithRevertsAbi } from '../../contracts';
+import { type MultiVaultAbi, MultiVaultWithRevertsAbi } from '../../contracts/abis';
 
 export type RedeemConfig = {
 	address: Address;
@@ -20,7 +20,10 @@ export type RedeemInputs = {
  * @param inputs Function args for redeeming shares.
  * @returns Transaction hash from the wallet client.
  */
-export async function multiVaultRedeem(config: RedeemConfig, inputs: RedeemInputs) {
+export async function multiVaultRedeem(
+	config: RedeemConfig,
+	inputs: RedeemInputs
+): Promise<MultiVaultRedeemResult> {
 	const { address, walletClient, publicClient } = config;
 	const { args } = inputs;
 
@@ -34,3 +37,5 @@ export async function multiVaultRedeem(config: RedeemConfig, inputs: RedeemInput
 
 	return await walletClient.writeContract(request);
 }
+
+export type MultiVaultRedeemResult = Hex;

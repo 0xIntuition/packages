@@ -48,8 +48,10 @@ export async function checkReleaseRegistry({ manifests, plan, fetch = globalThis
 		const manifest = manifests.get(directory);
 		for (const field of ['dependencies', 'peerDependencies', 'optionalDependencies']) {
 			for (const [name, version] of Object.entries(manifest[field] ?? {})) {
+				// The registry policy permits exact prereleases or stable carets. Require the
+				// recorded baseline release to exist when it is outside this train.
 				if (!name.startsWith('@0xintuition/') || selected.has(name)) continue;
-				if (!Object.hasOwn((await registry(name)).versions, version))
+				if (!Object.hasOwn((await registry(name)).versions, version.replace(/^\^/, '')))
 					failures.push(
 						`${manifest.name}: ${name}@${version} is neither published nor in this release`
 					);

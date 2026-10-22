@@ -1,4 +1,5 @@
-import { DynamicFeeFlatPriceCurveAbi } from '../../contracts';
+import type { ContractFunctionReturnType } from 'viem';
+import { DynamicFeeFlatPriceCurveAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -7,7 +8,9 @@ import type { ReadConfig } from '../../types';
  * @param config Contract address and public client.
  * @returns The curve's name.
  */
-export async function dynamicFeeFlatPriceCurveName(config: ReadConfig) {
+export async function dynamicFeeFlatPriceCurveName(
+	config: ReadConfig
+): Promise<DynamicFeeFlatPriceCurveNameResult> {
 	const { address, publicClient } = config;
 
 	return await publicClient.readContract({
@@ -16,3 +19,9 @@ export async function dynamicFeeFlatPriceCurveName(config: ReadConfig) {
 		functionName: 'name',
 	});
 }
+
+export type DynamicFeeFlatPriceCurveNameResult = ContractFunctionReturnType<
+	typeof DynamicFeeFlatPriceCurveAbi,
+	'view' | 'pure',
+	'name'
+>;

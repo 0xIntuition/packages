@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, ContractFunctionReturnType } from 'viem';
 
-import { BondingCurveRegistryAbi } from '../../contracts';
+import { BondingCurveRegistryAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -12,9 +12,9 @@ import type { ReadConfig } from '../../types';
 export async function bondingCurveRegistryCurveAddresses(
 	config: ReadConfig,
 	inputs: {
-		args: ContractFunctionArgs<typeof BondingCurveRegistryAbi, 'view', 'curveAddresses'>;
+		args: ContractFunctionArgs<typeof BondingCurveRegistryAbi, 'view' | 'pure', 'curveAddresses'>;
 	}
-) {
+): Promise<BondingCurveRegistryCurveAddressesResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 
@@ -25,3 +25,9 @@ export async function bondingCurveRegistryCurveAddresses(
 		args,
 	});
 }
+
+export type BondingCurveRegistryCurveAddressesResult = ContractFunctionReturnType<
+	typeof BondingCurveRegistryAbi,
+	'view' | 'pure',
+	'curveAddresses'
+>;

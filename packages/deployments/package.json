@@ -1,6 +1,6 @@
 {
 	"name": "@0xintuition/deployments",
-	"version": "0.1.0",
+	"version": "0.1.0-alpha.1",
 	"description": "Intuition contract ABIs, bytecode, deployment addresses and chain metadata",
 	"private": false,
 	"license": "MIT",
@@ -72,5 +72,8 @@
 		"typescript": "^5.9.3",
 		"vitest": "^4.0.16",
 		"viem": "^2.31.4"
+	},
+	"engines": {
+		"node": ">=20"
 	}
 }

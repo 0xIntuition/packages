@@ -1,4 +1,5 @@
-import { MultiVaultAbi } from '../../contracts';
+import type { ContractFunctionReturnType } from 'viem';
+import { MultiVaultAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -6,7 +7,9 @@ import type { ReadConfig } from '../../types';
  * @param config Contract address and public client.
  * @returns Base triple creation cost as returned by the contract.
  */
-export async function multiVaultGetTripleCost(config: ReadConfig) {
+export async function multiVaultGetTripleCost(
+	config: ReadConfig
+): Promise<MultiVaultGetTripleCostResult> {
 	const { address, publicClient } = config;
 
 	return await publicClient.readContract({
@@ -15,3 +18,9 @@ export async function multiVaultGetTripleCost(config: ReadConfig) {
 		functionName: 'getTripleCost',
 	});
 }
+
+export type MultiVaultGetTripleCostResult = ContractFunctionReturnType<
+	typeof MultiVaultAbi,
+	'view' | 'pure',
+	'getTripleCost'
+>;

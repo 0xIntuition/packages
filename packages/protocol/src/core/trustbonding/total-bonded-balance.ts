@@ -1,4 +1,5 @@
-import { TrustBondingAbi } from '../../contracts';
+import type { ContractFunctionReturnType } from 'viem';
+import { TrustBondingAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -6,7 +7,9 @@ import type { ReadConfig } from '../../types';
  * @param config Contract address and public client.
  * @returns Total bonded balance as returned by the contract.
  */
-export async function trustBondingTotalBondedBalance(config: ReadConfig) {
+export async function trustBondingTotalBondedBalance(
+	config: ReadConfig
+): Promise<TrustBondingTotalBondedBalanceResult> {
 	const { address, publicClient } = config;
 
 	return await publicClient.readContract({
@@ -15,3 +18,9 @@ export async function trustBondingTotalBondedBalance(config: ReadConfig) {
 		functionName: 'totalBondedBalance',
 	});
 }
+
+export type TrustBondingTotalBondedBalanceResult = ContractFunctionReturnType<
+	typeof TrustBondingAbi,
+	'view' | 'pure',
+	'totalBondedBalance'
+>;

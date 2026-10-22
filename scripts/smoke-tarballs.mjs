@@ -2,12 +2,13 @@
 
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
 	assertRegistryIntegrity,
+	internalDependencyRange,
 	PACKAGES,
 	packageRootFor,
 	requiredTarballFiles,
@@ -74,7 +75,7 @@ function assertInternalDependencyVersions(packageJson, packageName) {
 				workspacePackageVersions.get(dependencyName);
 			assert.equal(
 				versionRange,
-				expectedVersion,
+				internalDependencyRange(expectedVersion),
 				`${packageName} ${fieldName}.${dependencyName} must match the packed workspace version.`
 			);
 		}
@@ -87,12 +88,26 @@ try {
 		if (kind === 'compiled') {
 			run('bun', ['run', 'build'], cwd);
 		}
+		if (packageName === 'cli') {
+			const library = readFileSync(resolve(cwd, 'dist/index.js'), 'utf8');
+			assert.match(library, /import[\s\S]*?from ['"]viem['"]/);
+			assert.doesNotMatch(
+				library,
+				/node_modules\/viem|function (?:encodeFunctionData|parseAbi|createPublicClient)\(/
+			);
+		}
 		const dryRun = JSON.parse(run('npm', ['pack', '--ignore-scripts', '--dry-run', '--json'], cwd));
 		const packedFiles = new Set(dryRun[0]?.files?.map((entry) => entry.path));
 		for (const filePath of requiredTarballFiles(kind)) {
 			assert(packedFiles.has(filePath), `${packageName} tarball is missing ${filePath}`);
 		}
 		for (const filePath of packedFiles) {
+			if (!packageName.startsWith('atom-')) {
+				assert(
+					!filePath.endsWith('.d.ts.map'),
+					`${packageName} ships an unusable declaration map: ${filePath}`
+				);
+			}
 			assert(!filePath.startsWith('src/'), `${packageName} tarball leaked source file ${filePath}`);
 		}
 		const tarballPath = run('bun', ['run', 'pack:release'], cwd).trim().split('\n').at(-1);
@@ -103,6 +118,8 @@ try {
 		assertNoWorkspaceProtocol(tarballPackageJson, `@0xintuition/${packageName}`);
 		assertInternalDependencyVersions(tarballPackageJson, `@0xintuition/${packageName}`);
 	}
+
+	run('node', [resolve(repoRoot, 'scripts/check-doc-imports.mjs')], repoRoot);
 
 	writeFileSync(
 		resolve(tempRoot, 'package.json'),
@@ -216,10 +233,12 @@ try {
 		}
 		const sdk = await import('@0xintuition/sdk');
 		results.sdk = typeof sdk.multivaultPrepareDepositTx;
-		results.sdkMultiVault = sdk.getMultiVaultAddressFromChainId(deployments.INTUITION_MAINNET_CHAIN_ID);
+		if ('getMultiVaultAddressFromChainId' in sdk || 'MultiVaultAbi' in sdk || 'MultiVaultBytecode' in sdk) throw new Error('SDK root leaked a low-level export');
+		if (typeof sdk.calculateTripleId !== 'function') throw new Error('SDK root must keep the deterministic id helpers');
 		const sdkApi = await import('@0xintuition/sdk/api');
 		const sdkActions = await import('@0xintuition/sdk/actions');
 		const sdkProtocol = await import('@0xintuition/sdk/protocol');
+		results.sdkMultiVault = sdkProtocol.getMultiVaultAddressFromChainId(deployments.INTUITION_MAINNET_CHAIN_ID);
 		const sdkTrustSwapAndBridgeRouter = await import('@0xintuition/sdk/trust-swap-and-bridge-router');
 		const sdkUtils = await import('@0xintuition/sdk/utils');
 		results.sdkApiSubpath = typeof sdkApi.createIntuitionApiClient;

@@ -1,5 +1,6 @@
+import type { ParseEventLogsReturnType } from 'viem';
 import { type Address, type Hex, type PublicClient, parseEventLogs } from 'viem';
-import { MultiVaultAbi } from '../../contracts';
+import { MultiVaultAbi } from '../../contracts/abis';
 import { receiptLogs } from '../receipt-logs.js';
 
 /**
@@ -14,7 +15,7 @@ export async function eventParsePersonalUtilizationRemoved(
 	client: PublicClient,
 	hash: Hex,
 	address: Address | undefined = undefined
-) {
+): Promise<EventParsePersonalUtilizationRemovedResult> {
 	const logs = await receiptLogs(client, hash, address);
 
 	const events = parseEventLogs({
@@ -25,3 +26,9 @@ export async function eventParsePersonalUtilizationRemoved(
 
 	return events;
 }
+
+export type EventParsePersonalUtilizationRemovedResult = ParseEventLogsReturnType<
+	typeof MultiVaultAbi,
+	'PersonalUtilizationRemoved',
+	true
+>;

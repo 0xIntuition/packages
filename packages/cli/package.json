@@ -1,7 +1,7 @@
 {
 	"name": "@0xintuition/cli",
-	"version": "0.1.0",
-	"description": "Agent-oriented encoders and action plan builders for Intuition protocol workflows.",
+	"version": "0.1.0-alpha.0",
+	"description": "Agent-oriented calldata encoders and the intuition executable for Intuition protocol workflows; action envelope builders live in @0xintuition/sdk.",
 	"private": false,
 	"license": "MIT",
 	"type": "module",
@@ -47,7 +47,7 @@
 	},
 	"scripts": {
 		"build": "node ../../scripts/clean-dist.mjs && bun run build:bundle && bun run build:cli && bun run build:types",
-		"build:bundle": "bun build ./src/index.ts --outfile ./dist/index.js --format esm --target node",
+		"build:bundle": "bun build ./src/index.ts --outfile ./dist/index.js --format esm --target node --external viem --external '@0xintuition/*'",
 		"build:cli": "node ./scripts/build-cli-bin.mjs",
 		"build:types": "tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
 		"clean": "git clean -xdf .cache .turbo dist node_modules",
@@ -78,14 +78,17 @@
 	},
 	"dependencies": {
 		"viem": "^2.31.4",
-		"@0xintuition/sdk": "4.0.0",
-		"@0xintuition/protocol": "4.0.0",
-		"@0xintuition/periphery": "0.1.0"
+		"@0xintuition/sdk": "^4.0.0",
+		"@0xintuition/protocol": "^4.0.0",
+		"@0xintuition/periphery": "0.1.0-alpha.1"
 	},
 	"devDependencies": {
-		"@0xintuition/curves": "0.1.0",
-		"@0xintuition/deployments": "0.1.0",
+		"@0xintuition/curves": "0.1.0-alpha.1",
+		"@0xintuition/deployments": "0.1.0-alpha.1",
 		"typescript": "^5.9.3",
 		"vitest": "^4.0.16"
+	},
+	"engines": {
+		"node": ">=20"
 	}
 }

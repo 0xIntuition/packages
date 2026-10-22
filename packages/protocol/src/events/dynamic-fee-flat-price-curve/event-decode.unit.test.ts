@@ -1,7 +1,7 @@
 import { type Address, encodeAbiParameters, encodeEventTopics, type Hex, type Log } from 'viem';
 import { describe, expect, it } from 'vitest';
 
-import { DynamicFeeFlatPriceCurveAbi } from '../../contracts';
+import { DynamicFeeFlatPriceCurveAbi } from '../../contracts/abis';
 import {
 	eventDecodeProtocolAccruedIncreased,
 	eventDecodeRedeemFeeRerouted,

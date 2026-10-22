@@ -56,5 +56,8 @@
 		"format:write": "biome format --write",
 		"check:write": "biome check --write",
 		"check:unsafe:write": "biome check --write --unsafe"
+	},
+	"engines": {
+		"node": ">=20"
 	}
 }

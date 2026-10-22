@@ -1,6 +1,6 @@
 import { encodeFunctionData, type Hex } from 'viem';
 
-import { DynamicFeeFlatPriceCurveAbi } from '../../contracts';
+import { DynamicFeeFlatPriceCurveAbi } from '../../contracts/abis';
 
 /**
  * Encodes calldata for the DynamicFeeFlatPriceCurve `claim` function.

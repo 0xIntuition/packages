@@ -1,9 +1,11 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, ContractFunctionReturnType } from 'viem';
 
-import { SatelliteEmissionsControllerAbi } from '../../contracts';
+import { SatelliteEmissionsControllerAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
-export async function satelliteEmissionsControllerGetTrustBonding(config: ReadConfig) {
+export async function satelliteEmissionsControllerGetTrustBonding(
+	config: ReadConfig
+): Promise<SatelliteEmissionsControllerGetTrustBondingResult> {
 	const { address, publicClient } = config;
 	return await publicClient.readContract({
 		address,
@@ -12,7 +14,9 @@ export async function satelliteEmissionsControllerGetTrustBonding(config: ReadCo
 	});
 }
 
-export async function satelliteEmissionsControllerGetBaseEmissionsController(config: ReadConfig) {
+export async function satelliteEmissionsControllerGetBaseEmissionsController(
+	config: ReadConfig
+): Promise<SatelliteEmissionsControllerGetBaseEmissionsControllerResult> {
 	const { address, publicClient } = config;
 	return await publicClient.readContract({
 		address,
@@ -30,7 +34,7 @@ export async function satelliteEmissionsControllerGetReclaimedEmissions(
 			'getReclaimedEmissions'
 		>;
 	}
-) {
+): Promise<SatelliteEmissionsControllerGetReclaimedEmissionsResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 	return await publicClient.readContract({
@@ -41,7 +45,9 @@ export async function satelliteEmissionsControllerGetReclaimedEmissions(
 	});
 }
 
-export async function satelliteEmissionsControllerGetStartTimestamp(config: ReadConfig) {
+export async function satelliteEmissionsControllerGetStartTimestamp(
+	config: ReadConfig
+): Promise<SatelliteEmissionsControllerGetStartTimestampResult> {
 	const { address, publicClient } = config;
 	return await publicClient.readContract({
 		address,
@@ -50,7 +56,9 @@ export async function satelliteEmissionsControllerGetStartTimestamp(config: Read
 	});
 }
 
-export async function satelliteEmissionsControllerGetEpochLength(config: ReadConfig) {
+export async function satelliteEmissionsControllerGetEpochLength(
+	config: ReadConfig
+): Promise<SatelliteEmissionsControllerGetEpochLengthResult> {
 	const { address, publicClient } = config;
 	return await publicClient.readContract({
 		address,
@@ -59,7 +67,9 @@ export async function satelliteEmissionsControllerGetEpochLength(config: ReadCon
 	});
 }
 
-export async function satelliteEmissionsControllerGetCurrentEpoch(config: ReadConfig) {
+export async function satelliteEmissionsControllerGetCurrentEpoch(
+	config: ReadConfig
+): Promise<SatelliteEmissionsControllerGetCurrentEpochResult> {
 	const { address, publicClient } = config;
 	return await publicClient.readContract({
 		address,
@@ -77,7 +87,7 @@ export async function satelliteEmissionsControllerGetEpochAtTimestamp(
 			'getEpochAtTimestamp'
 		>;
 	}
-) {
+): Promise<SatelliteEmissionsControllerGetEpochAtTimestampResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 	return await publicClient.readContract({
@@ -97,7 +107,7 @@ export async function satelliteEmissionsControllerGetEpochTimestampStart(
 			'getEpochTimestampStart'
 		>;
 	}
-) {
+): Promise<SatelliteEmissionsControllerGetEpochTimestampStartResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 	return await publicClient.readContract({
@@ -117,7 +127,7 @@ export async function satelliteEmissionsControllerGetEpochTimestampEnd(
 			'getEpochTimestampEnd'
 		>;
 	}
-) {
+): Promise<SatelliteEmissionsControllerGetEpochTimestampEndResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 	return await publicClient.readContract({
@@ -130,7 +140,7 @@ export async function satelliteEmissionsControllerGetEpochTimestampEnd(
 
 export async function satelliteEmissionsControllerGetCurrentEpochTimestampStart(
 	config: ReadConfig
-) {
+): Promise<SatelliteEmissionsControllerGetCurrentEpochTimestampStartResult> {
 	const { address, publicClient } = config;
 	return await publicClient.readContract({
 		address,
@@ -148,7 +158,7 @@ export async function satelliteEmissionsControllerGetEmissionsAtEpoch(
 			'getEmissionsAtEpoch'
 		>;
 	}
-) {
+): Promise<SatelliteEmissionsControllerGetEmissionsAtEpochResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 	return await publicClient.readContract({
@@ -168,7 +178,7 @@ export async function satelliteEmissionsControllerGetEmissionsAtTimestamp(
 			'getEmissionsAtTimestamp'
 		>;
 	}
-) {
+): Promise<SatelliteEmissionsControllerGetEmissionsAtTimestampResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 	return await publicClient.readContract({
@@ -179,7 +189,9 @@ export async function satelliteEmissionsControllerGetEmissionsAtTimestamp(
 	});
 }
 
-export async function satelliteEmissionsControllerGetCurrentEpochEmissions(config: ReadConfig) {
+export async function satelliteEmissionsControllerGetCurrentEpochEmissions(
+	config: ReadConfig
+): Promise<SatelliteEmissionsControllerGetCurrentEpochEmissionsResult> {
 	const { address, publicClient } = config;
 	return await publicClient.readContract({
 		address,
@@ -188,7 +200,9 @@ export async function satelliteEmissionsControllerGetCurrentEpochEmissions(confi
 	});
 }
 
-export async function satelliteEmissionsControllerGetFinalityState(config: ReadConfig) {
+export async function satelliteEmissionsControllerGetFinalityState(
+	config: ReadConfig
+): Promise<SatelliteEmissionsControllerGetFinalityStateResult> {
 	const { address, publicClient } = config;
 	return await publicClient.readContract({
 		address,
@@ -197,7 +211,9 @@ export async function satelliteEmissionsControllerGetFinalityState(config: ReadC
 	});
 }
 
-export async function satelliteEmissionsControllerGetMessageGasCost(config: ReadConfig) {
+export async function satelliteEmissionsControllerGetMessageGasCost(
+	config: ReadConfig
+): Promise<SatelliteEmissionsControllerGetMessageGasCostResult> {
 	const { address, publicClient } = config;
 	return await publicClient.readContract({
 		address,
@@ -206,7 +222,9 @@ export async function satelliteEmissionsControllerGetMessageGasCost(config: Read
 	});
 }
 
-export async function satelliteEmissionsControllerGetMetaERC20SpokeOrHub(config: ReadConfig) {
+export async function satelliteEmissionsControllerGetMetaERC20SpokeOrHub(
+	config: ReadConfig
+): Promise<SatelliteEmissionsControllerGetMetaERC20SpokeOrHubResult> {
 	const { address, publicClient } = config;
 	return await publicClient.readContract({
 		address,
@@ -215,7 +233,9 @@ export async function satelliteEmissionsControllerGetMetaERC20SpokeOrHub(config:
 	});
 }
 
-export async function satelliteEmissionsControllerGetRecipientDomain(config: ReadConfig) {
+export async function satelliteEmissionsControllerGetRecipientDomain(
+	config: ReadConfig
+): Promise<SatelliteEmissionsControllerGetRecipientDomainResult> {
 	const { address, publicClient } = config;
 	return await publicClient.readContract({
 		address,
@@ -227,9 +247,13 @@ export async function satelliteEmissionsControllerGetRecipientDomain(config: Rea
 export async function satelliteEmissionsControllerQuoteGasPayment(
 	config: ReadConfig,
 	inputs: {
-		args: ContractFunctionArgs<typeof SatelliteEmissionsControllerAbi, 'view', 'quoteGasPayment'>;
+		args: ContractFunctionArgs<
+			typeof SatelliteEmissionsControllerAbi,
+			'view' | 'pure',
+			'quoteGasPayment'
+		>;
 	}
-) {
+): Promise<SatelliteEmissionsControllerQuoteGasPaymentResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 	return await publicClient.readContract({
@@ -239,3 +263,96 @@ export async function satelliteEmissionsControllerQuoteGasPayment(
 		args,
 	});
 }
+
+export type SatelliteEmissionsControllerGetTrustBondingResult = ContractFunctionReturnType<
+	typeof SatelliteEmissionsControllerAbi,
+	'view' | 'pure',
+	'getTrustBonding'
+>;
+export type SatelliteEmissionsControllerGetBaseEmissionsControllerResult =
+	ContractFunctionReturnType<
+		typeof SatelliteEmissionsControllerAbi,
+		'view',
+		'getBaseEmissionsController'
+	>;
+export type SatelliteEmissionsControllerGetReclaimedEmissionsResult = ContractFunctionReturnType<
+	typeof SatelliteEmissionsControllerAbi,
+	'view' | 'pure',
+	'getReclaimedEmissions'
+>;
+export type SatelliteEmissionsControllerGetStartTimestampResult = ContractFunctionReturnType<
+	typeof SatelliteEmissionsControllerAbi,
+	'view' | 'pure',
+	'getStartTimestamp'
+>;
+export type SatelliteEmissionsControllerGetEpochLengthResult = ContractFunctionReturnType<
+	typeof SatelliteEmissionsControllerAbi,
+	'view' | 'pure',
+	'getEpochLength'
+>;
+export type SatelliteEmissionsControllerGetCurrentEpochResult = ContractFunctionReturnType<
+	typeof SatelliteEmissionsControllerAbi,
+	'view' | 'pure',
+	'getCurrentEpoch'
+>;
+export type SatelliteEmissionsControllerGetEpochAtTimestampResult = ContractFunctionReturnType<
+	typeof SatelliteEmissionsControllerAbi,
+	'view' | 'pure',
+	'getEpochAtTimestamp'
+>;
+export type SatelliteEmissionsControllerGetEpochTimestampStartResult = ContractFunctionReturnType<
+	typeof SatelliteEmissionsControllerAbi,
+	'view' | 'pure',
+	'getEpochTimestampStart'
+>;
+export type SatelliteEmissionsControllerGetEpochTimestampEndResult = ContractFunctionReturnType<
+	typeof SatelliteEmissionsControllerAbi,
+	'view' | 'pure',
+	'getEpochTimestampEnd'
+>;
+export type SatelliteEmissionsControllerGetCurrentEpochTimestampStartResult =
+	ContractFunctionReturnType<
+		typeof SatelliteEmissionsControllerAbi,
+		'view',
+		'getCurrentEpochTimestampStart'
+	>;
+export type SatelliteEmissionsControllerGetEmissionsAtEpochResult = ContractFunctionReturnType<
+	typeof SatelliteEmissionsControllerAbi,
+	'view' | 'pure',
+	'getEmissionsAtEpoch'
+>;
+export type SatelliteEmissionsControllerGetEmissionsAtTimestampResult = ContractFunctionReturnType<
+	typeof SatelliteEmissionsControllerAbi,
+	'view' | 'pure',
+	'getEmissionsAtTimestamp'
+>;
+export type SatelliteEmissionsControllerGetCurrentEpochEmissionsResult = ContractFunctionReturnType<
+	typeof SatelliteEmissionsControllerAbi,
+	'view' | 'pure',
+	'getCurrentEpochEmissions'
+>;
+export type SatelliteEmissionsControllerGetFinalityStateResult = ContractFunctionReturnType<
+	typeof SatelliteEmissionsControllerAbi,
+	'view' | 'pure',
+	'getFinalityState'
+>;
+export type SatelliteEmissionsControllerGetMessageGasCostResult = ContractFunctionReturnType<
+	typeof SatelliteEmissionsControllerAbi,
+	'view' | 'pure',
+	'getMessageGasCost'
+>;
+export type SatelliteEmissionsControllerGetMetaERC20SpokeOrHubResult = ContractFunctionReturnType<
+	typeof SatelliteEmissionsControllerAbi,
+	'view' | 'pure',
+	'getMetaERC20SpokeOrHub'
+>;
+export type SatelliteEmissionsControllerGetRecipientDomainResult = ContractFunctionReturnType<
+	typeof SatelliteEmissionsControllerAbi,
+	'view' | 'pure',
+	'getRecipientDomain'
+>;
+export type SatelliteEmissionsControllerQuoteGasPaymentResult = ContractFunctionReturnType<
+	typeof SatelliteEmissionsControllerAbi,
+	'view' | 'pure',
+	'quoteGasPayment'
+>;

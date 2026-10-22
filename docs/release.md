@@ -20,16 +20,26 @@ identity compatibility, and consuming applications using the checks below.
 
 ## Dist-Tag Policy
 
-The public package set has three release tracks:
+The public package set has two release tracks:
 
 | Package family | Current version line | Intended dist-tags |
 | --- | --- | --- |
-| Fresh public packages | `0.1.0-alpha.*` | `alpha` and `latest` can both point at the current alpha while no stable line exists |
-| `@0xintuition/protocol` | `4.x` | Publish this candidate to `alpha`; leave the existing `latest` line unchanged until a release owner explicitly promotes it |
+| Fresh public packages | `0.1.0-alpha.*` | Publish to `alpha`; inspect dist-tags after first publication and record any registry-created `latest` tag |
+| `@0xintuition/protocol`, `@0xintuition/sdk` | `4.x` | Publish this candidate to `alpha`; leave the existing `latest` line unchanged until a release owner explicitly promotes it |
 
 For this candidate, every entry in `release-plan.json` uses `alpha`, including
-protocol/SDK `4.0.0` and deployments/curves/periphery/CLI `0.1.0`. The absence of
-a prerelease suffix does not authorize promotion to `latest`.
+protocol/SDK `4.0.0`, deployments/curves/periphery `0.1.0-alpha.1`, and CLI
+`0.1.0-alpha.0`. The absence of a prerelease suffix on protocol/SDK does not authorize
+promotion to `latest`.
+
+Registry state recorded on 2026-10-22: deployments, curves, periphery, ids,
+classifications, predicates, primitives, react, and schema-org each have
+`0.1.0-alpha.0` published with both `latest` and `alpha` pointing at it (the registry
+created `latest` on first publication). Publishing their next alpha under `alpha`
+alone leaves `latest` on the older version; the release owner decides at publish time
+whether to move `latest` as well (`npm dist-tag add`) and records the choice in the
+release notes. iid-spec, iid, iid-registry, iid-ladder, pipeline-runtime, cli, and
+the atom packages have never been published.
 
 For packages with an existing stable line, keep `latest` pointed at the current
 recommended public version. Older versions remain installable by exact version.
@@ -57,9 +67,10 @@ packages.
 ### Stable / Major Packages
 
 `@0xintuition/protocol` and `@0xintuition/sdk` follow normal semver because they
-continue existing npm lines. The stable `0.x` protocol-stack packages
-(`deployments`, `curves`, `periphery`, `cli`) also follow semver; while they stay
-below `1.0.0`, a breaking change bumps the minor version.
+continue existing npm lines. The protocol-stack packages (`deployments`, `curves`,
+`periphery`, `cli`) use explicit `0.1.0-alpha.x` candidates in this train. Once
+stable, they follow semver too; below `1.0.0`, a breaking change bumps the minor
+version.
 
 - Patch: compatible fixes and clarifications.
 - Minor: backward-compatible API additions.
@@ -124,9 +135,9 @@ Publish in dependency order:
 6. `@0xintuition/schema-org`
 7. `@0xintuition/classifications`
 8. `@0xintuition/pipeline-runtime`
-9. `@0xintuition/atom-parser`
-10. `@0xintuition/atom-classification`
-11. `@0xintuition/atom-enrichment`
+9. `@0xintuition/atom-parser` (held, see below)
+10. `@0xintuition/atom-classification` (held)
+11. `@0xintuition/atom-enrichment` (held)
 12. `@0xintuition/iid-registry`
 13. `@0xintuition/iid-ladder`
 14. `@0xintuition/predicates`
@@ -145,8 +156,9 @@ dependency pins resolvable as each package is published.
 Release the changed package plus any package whose checked-in manifest,
 generated output, or public behavior must change as a result.
 
-Because internal `@0xintuition/*` dependency versions are exact pins during
-alpha, a lower-level package release may need matching releases for dependents.
+Dependencies on prerelease `@0xintuition/*` versions use exact pins, so those
+updates may need matching dependent releases. Stable dependencies use caret
+ranges and accept compatible updates without automatic dependent releases.
 Not every lower-level release forces every dependent to move; bump a dependent
 when its manifest, generated output, or public behavior should consume the new
 version.
@@ -156,7 +168,7 @@ Common cascades:
 - `deployments`: also release `protocol`, `periphery`, `sdk`, `cli`, and `react`
   when their ABIs, address helpers, vendored ABIs, or package pins should consume
   the new artifacts or deployment data.
-- `curves`: also release `protocol`, `sdk`, and `cli` when they should consume
+- `curves`: also release `sdk` and `cli` when they should consume
   the new curve version.
 - `schema-org`: also release `classifications` when schema validation, Creation
   Profiles, or generated classification output changes.
@@ -179,17 +191,17 @@ Common cascades:
 - `periphery`: also release `sdk` and `cli` when they should consume the new
   periphery version.
 - `sdk`: also release `cli` when its plans should consume the new SDK version.
-  `cli` bundles `protocol`, `periphery`, and `sdk` and pins them as exact
-  dependencies (also required by its TypeScript declarations), so any change to those packages that should reach the
-  executable needs a `cli` release.
+  The CLI library externalizes runtime packages. Its executable bundles its encoder
+  dependencies and needs a rebuild/release when those embedded artifacts change.
 - Leaf packages such as `primitives`, `cli`, and `react` usually release
   on their own unless shared data, examples, or docs need to move with them.
 
 Use the dependency graph as the starting point, but validate with the diff:
 
 1. If only implementation inside one leaf package changed, release that package.
-2. If a lower-level package changed and dependents need the new exact pin, bump
-   and publish the dependents in graph order.
+2. For prerelease updates, update exact pins and publish affected dependents in
+   graph order. Stable compatible updates use the existing caret range; release
+   dependents only when their code, generated output, or minimum version changes.
 3. If generated artifacts changed, publish the package that owns the generated
    artifacts even if the source change lives elsewhere.
 4. If package behavior changes but no dependent needs to move yet, document that
@@ -231,9 +243,19 @@ can be restored if needed.
 helper. It builds the package, validates the direct-publish guard, runs
 `npm pack` from the package root, and prints the produced tarball path.
 
-Internal package dependencies are pinned to exact package versions in checked-in
-manifests. Keep that lockstep policy until the release owner explicitly chooses
-semver ranges.
+Internal dependencies on stable workspace versions use caret ranges anchored to
+the current workspace version (for example, `^4.0.0`). Dependencies on
+`0.1.0-alpha.x` packages remain exact pins, including the four newly suffixed
+candidates. This rule also applies to peer and development dependencies.
+`registry:check` and tarball smoke tests enforce it.
+
+A compatible stable patch can be consumed without releasing every dependent.
+Release a dependent when its behavior, generated artifacts, or declared minimum
+version changes; update the caret baseline if it requires a newly introduced API.
+For prerelease updates, bump affected exact pins and release dependents in
+dependency order. A stable dependency change does not by itself require a
+dependent release. Registry preflight verifies the recorded minimum version is
+already published or included in the train.
 
 ## Registry Verification
 
@@ -303,3 +325,24 @@ Prefer deprecation and superseding releases over unpublish.
   `npm dist-tag add`.
 - If a schema URL or deterministic ID surface is wrong, stop adoption, publish a
   corrected version, and document the identity impact.
+
+## Candidate version decision
+
+This train uses `0.1.0-alpha.1` for deployments, curves, and periphery (their
+`0.1.0-alpha.0` is already on the registry) and `0.1.0-alpha.0` for the unpublished CLI.
+An alpha-track candidate in the 0.1.0 family must include its prerelease suffix;
+all dependent pins and `release-plan.json` move together. Registry validation
+reads manifest versions directly, so no second hard-coded version list exists.
+Protocol and SDK retain their planned 4.0.0 major versions. All candidates use
+the `alpha` tag, and promoting `latest` requires a separate release decision.
+Check registry availability before publishing and never overwrite an existing
+immutable version: `bun run release:registry` is the live registry preflight, it is not
+part of CI, and it must pass on the exact revision being published.
+
+## Held packages
+
+`@0xintuition/atom-parser`, `@0xintuition/atom-classification`, and
+`@0xintuition/atom-enrichment` are registered workspace packages but are not in
+`release-plan.json`. Their `0.1.0-alpha.0` manifests carry the Core lineage, which is
+never published; the packages re-enter the plan as `0.1.0-alpha.1` once rebuilt from
+the application lineage (ENG-17076..17078). Do not publish them from this train.

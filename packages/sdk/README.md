@@ -23,7 +23,7 @@ Out of scope for v1:
 
 ## Status
 
-This is the `4.0.0` candidate, published to `alpha` only after release gates pass. It contains protocol re-exports, deterministic utilities, and higher-level action helpers. The v1 design terminology below describes the integration API design, not the npm major version. Contract artifacts are pending authoritative publication; new functions require matching deployments.
+This is the `4.0.0` candidate, published to `alpha` only after release gates pass. It contains selected shared types, deterministic utilities, and higher-level action helpers. The v1 design terminology below describes the integration API design, not the npm major version. Contract artifacts are pending authoritative publication; new functions require matching deployments.
 
 Import guidance:
 - [`./docs/migration.md`](./docs/migration.md)
@@ -71,7 +71,7 @@ Use SDK-owned subpaths for new code:
 - `@0xintuition/predicates` for the canonical predicate registry, atom-data helpers, and launch constants
 - `@0xintuition/sdk/protocol` only when you need low-level protocol escape hatches
 
-The root `@0xintuition/sdk` export still forwards `@0xintuition/protocol` today for compatibility. Treat that as a transition layer rather than the preferred long-term import path; if you need direct protocol access, prefer `@0xintuition/sdk/protocol`.
+In 4.0.0 the root exports SDK-owned APIs plus selected shared helpers and types. Use `@0xintuition/sdk/protocol` for the full protocol escape hatch. See [migration guidance](./docs/migration.md) for the removed root exports.
 
 ## Public API Areas
 
@@ -90,9 +90,10 @@ The root `@0xintuition/sdk` export still forwards `@0xintuition/protocol` today 
   - **FeeProxy** (`actions/fee-proxy.ts`): `feeProxyPrepareCreateAtomsWithUrisTx`
   - **TrustBonding** (`actions/trust-bonding.ts`): `trustBondingGetRewardsDashboard`, `trustBondingGetClaimActionState`, `trustBondingPrepareLockAction`, `trustBondingClaimAndRestakePlan`, `trustBondingGetLockStateSummary`, `trustBondingGetEpochRewardsTimeline`
   - **Portfolio** (`actions/portfolio.ts`): `portfolioGetIntuitionPositionsSnapshot`, `portfolioGetActionableState`
-- protocol-level exports inherited from `@0xintuition/protocol`
+- pure, client-free action envelope builders and their schema (`actions/plans/*`, `actions/schema/*`), formerly the CLI plan builders; see [docs/action-plans.md](./docs/action-plans.md)
+- selected shared types and deterministic helpers; full protocol access through `./protocol`
 
-The v1 design keeps the action helpers and deterministic utilities as first-class SDK responsibilities, while treating the current wholesale protocol re-export as broader than the intended long-term public surface.
+Action helpers and deterministic utilities are SDK responsibilities. The full protocol API is isolated behind the explicit `./protocol` subpath.
 
 ## Configuration Model
 
@@ -116,14 +117,8 @@ That separation keeps upload/provider concerns out of the public SDK surface and
 ## Minimal Example
 
 ```ts
-import {
-  calculateAtomId,
-  createIntuitionApiClient,
-  getIntuitionApiUrl,
-  getMultiVaultAddressFromChainId,
-  intuitionTestnet,
-  multivaultCreateAndSeedTerm,
-} from '@0xintuition/sdk'
+import { calculateAtomId, createIntuitionApiClient, getIntuitionApiUrl, multivaultCreateAndSeedTerm } from '@0xintuition/sdk'
+import { getMultiVaultAddressFromChainId, intuitionTestnet } from '@0xintuition/sdk/protocol'
 import { createPublicClient, createWalletClient, http } from 'viem'
 
 const publicClient = createPublicClient({

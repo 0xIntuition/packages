@@ -1,10 +1,10 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, ContractFunctionReturnType } from 'viem';
 
-import { type MultiVaultAbi, MultiVaultWithRevertsAbi } from '../../contracts';
+import { type MultiVaultAbi, MultiVaultWithRevertsAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 export type MultiVaultPreviewTripleCreateInputs = {
-	args: ContractFunctionArgs<typeof MultiVaultAbi, 'view', 'previewTripleCreate'>;
+	args: ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'previewTripleCreate'>;
 };
 
 /**
@@ -19,7 +19,7 @@ export type MultiVaultPreviewTripleCreateInputs = {
 export async function multiVaultPreviewTripleCreate(
 	config: ReadConfig,
 	inputs: MultiVaultPreviewTripleCreateInputs
-) {
+): Promise<MultiVaultPreviewTripleCreateResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 
@@ -30,3 +30,9 @@ export async function multiVaultPreviewTripleCreate(
 		args,
 	});
 }
+
+export type MultiVaultPreviewTripleCreateResult = ContractFunctionReturnType<
+	typeof MultiVaultWithRevertsAbi,
+	'view' | 'pure',
+	'previewTripleCreate'
+>;

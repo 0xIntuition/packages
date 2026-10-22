@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, Hex } from 'viem';
 
-import { AtomWardenAbi } from '../../contracts';
+import { AtomWardenAbi } from '../../contracts/abis';
 import type { WriteConfig } from '../../types';
 
 export type AtomWardenIncrementNonceInputs = {
@@ -17,7 +17,7 @@ export type AtomWardenIncrementNonceInputs = {
 export async function atomWardenIncrementNonce(
 	config: WriteConfig,
 	inputs: AtomWardenIncrementNonceInputs
-) {
+): Promise<AtomWardenIncrementNonceResult> {
 	const { address, walletClient, publicClient } = config;
 	const { args } = inputs;
 
@@ -31,3 +31,5 @@ export async function atomWardenIncrementNonce(
 
 	return await walletClient.writeContract(request);
 }
+
+export type AtomWardenIncrementNonceResult = Hex;

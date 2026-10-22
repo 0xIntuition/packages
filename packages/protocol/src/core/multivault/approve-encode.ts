@@ -1,6 +1,6 @@
 import { encodeFunctionData } from 'viem';
 
-import { MultiVaultAbi } from '../../contracts';
+import { MultiVaultAbi } from '../../contracts/abis';
 import type { ApprovalTypes } from '../../types';
 
 /**

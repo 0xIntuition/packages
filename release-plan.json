@@ -1,5 +1,5 @@
 {
-	"description": "Candidate versions in dependency order. Validate the release using docs/release.md. schema-org is unchanged and already published.",
+	"description": "Candidate versions in dependency order. Validate the release using docs/release.md. schema-org is unchanged and already published. atom-parser, atom-classification and atom-enrichment are held: their 0.1.0-alpha.0 manifests are the Core lineage and are never published; they re-enter this plan as 0.1.0-alpha.1 once rebuilt from the application lineage (ENG-17076..17078).",
 	"packages": [
 		{
 			"directory": "iid-spec",
@@ -13,12 +13,12 @@
 		},
 		{
 			"directory": "deployments",
-			"version": "0.1.0",
+			"version": "0.1.0-alpha.1",
 			"tag": "alpha"
 		},
 		{
 			"directory": "curves",
-			"version": "0.1.0",
+			"version": "0.1.0-alpha.1",
 			"tag": "alpha"
 		},
 		{
@@ -33,21 +33,6 @@
 		},
 		{
 			"directory": "pipeline-runtime",
-			"version": "0.1.0-alpha.0",
-			"tag": "alpha"
-		},
-		{
-			"directory": "atom-parser",
-			"version": "0.1.0-alpha.0",
-			"tag": "alpha"
-		},
-		{
-			"directory": "atom-classification",
-			"version": "0.1.0-alpha.0",
-			"tag": "alpha"
-		},
-		{
-			"directory": "atom-enrichment",
 			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
 		},
@@ -78,7 +63,7 @@
 		},
 		{
 			"directory": "periphery",
-			"version": "0.1.0",
+			"version": "0.1.0-alpha.1",
 			"tag": "alpha"
 		},
 		{
@@ -88,7 +73,7 @@
 		},
 		{
 			"directory": "cli",
-			"version": "0.1.0",
+			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
 		},
 		{

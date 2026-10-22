@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, ContractFunctionReturnType } from 'viem';
 
-import { MultiVaultAbi } from '../../contracts';
+import { MultiVaultAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -12,9 +12,9 @@ import type { ReadConfig } from '../../types';
 export async function multiVaultGetAtom(
 	config: ReadConfig,
 	inputs: {
-		args: ContractFunctionArgs<typeof MultiVaultAbi, 'view', 'getAtom'>;
+		args: ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'getAtom'>;
 	}
-) {
+): Promise<MultiVaultGetAtomResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 
@@ -25,3 +25,9 @@ export async function multiVaultGetAtom(
 		args,
 	});
 }
+
+export type MultiVaultGetAtomResult = ContractFunctionReturnType<
+	typeof MultiVaultAbi,
+	'view' | 'pure',
+	'getAtom'
+>;

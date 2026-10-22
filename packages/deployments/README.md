@@ -46,7 +46,7 @@ ABIs and bytecode are generated from the Intuition contracts build.
 
 Core v1.1.0 artifacts match `@0xintuition/contracts-v2@1.1.0-alpha.1`; router artifacts match `@0xintuition/contracts-v2-periphery@1.1.0-alpha.0`. A deployment address alone does not imply support for the new ABI:
 mainnet must be upgraded before new functions can be used there. See the
-[contract artifact provenance](https://github.com/0xIntuition/packages/blob/update/v1.1.0-alpha/docs/contract-artifacts.md).
+[contract artifact provenance](https://github.com/0xIntuition/packages/blob/main/docs/contract-artifacts.md).
 
 `MultiVaultBytecode` includes an unresolved `MultiVaultLib` link placeholder.
 Link the library using the matching Foundry build's link references before deployment.

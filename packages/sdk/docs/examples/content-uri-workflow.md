@@ -23,13 +23,8 @@ Read protocol-adjacent metadata from the backend API, then prepare an onchain ac
 ## Example
 
 ```ts
-import {
-  calculateAtomId,
-  createIntuitionApiClient,
-  getMultiVaultAddressFromChainId,
-  intuitionTestnet,
-  multivaultCreateAndSeedTerm,
-} from '@0xintuition/sdk'
+import { calculateAtomId, createIntuitionApiClient, multivaultCreateAndSeedTerm } from '@0xintuition/sdk'
+import { getMultiVaultAddressFromChainId, intuitionTestnet } from '@0xintuition/sdk/protocol'
 import { createPublicClient, createWalletClient, http, toHex } from 'viem'
 
 const contentUri = 'ipfs://bafybeibexample'
