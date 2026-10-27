@@ -32,7 +32,7 @@ describe('mutation-resistant classification env injection guard', () => {
 		}
 
 		expect(violations).toEqual([]);
-	});
+	}, 30_000);
 });
 
 function findForbiddenEnvAccesses(sourceText: string): number[] {

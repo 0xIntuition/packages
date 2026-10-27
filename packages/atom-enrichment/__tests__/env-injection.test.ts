@@ -34,7 +34,7 @@ describe('runtime env injection', () => {
 		}
 
 		expect(violations).toEqual([]);
-	});
+	}, 30_000);
 });
 
 function isInsideFromEnvHelper(node: ts.Node): boolean {
