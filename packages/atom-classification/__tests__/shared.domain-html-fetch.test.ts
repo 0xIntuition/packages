@@ -997,8 +997,8 @@ console.log(JSON.stringify({ body, mismatchCode }));
 				new Response(child.stdout).text(),
 			]);
 
-			expect(exitCode).toBe(0);
 			expect(stderr).toBe('');
+			expect(exitCode).toBe(0);
 			expect(JSON.parse(stdout)).toEqual({
 				body: 'trusted TLS fixture',
 				mismatchCode: 'ERR_TLS_CERT_ALTNAME_INVALID',

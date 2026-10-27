@@ -5,7 +5,7 @@
 	"description": "Public Intuition packages monorepo for alpha package publication. The root package is private and never published; release trains are labeled by branch/PR name, not by this version.",
 	"license": "MIT",
 	"type": "module",
-	"packageManager": "bun@1.3.3",
+	"packageManager": "bun@1.3.11",
 	"workspaces": [
 		"packages/*",
 		"examples/*"
