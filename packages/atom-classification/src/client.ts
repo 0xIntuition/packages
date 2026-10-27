@@ -5,10 +5,10 @@ export type CreateClientEngineOptions = Omit<CreateClassificationEngineOptions, 
 	plugins?: AtomClassificationPlugin[];
 };
 
-export function createClientEngine(options: CreateClientEngineOptions = {}) {
+export function createClientEngine(options: CreateClientEngineOptions) {
 	return createClassificationEngine({
 		...options,
 		runtime: 'client',
-		plugins: options.plugins ?? [],
+		plugins: options?.plugins ?? [],
 	});
 }

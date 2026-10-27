@@ -15,6 +15,12 @@ export type AmazonPluginOptions = PlatformV0PluginOptions & {
 
 export const amazonProfile: PlatformV0Profile = {
 	domain: 'amazon',
+	display: {
+		classificationSlugs: ['product', 'company'],
+		exampleUrl: 'https://www.amazon.com/dp/0062316095',
+		host: 'amazon.com',
+		label: 'Amazon',
+	},
 	supportsOEmbed: false,
 	classifier: {
 		id: 'amazon-url-classifier',

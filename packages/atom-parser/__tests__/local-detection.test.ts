@@ -285,14 +285,159 @@ describe('local detection: precedence', () => {
 	});
 });
 
-it('preserves typed Wikidata and arbitrary colon-bearing values as plain strings', async () => {
+describe('local detection: Intuition identifiers', () => {
+	const forbiddenWdEdgeCharacters = [
+		'\uFEFF',
+		'\u00A0',
+		'\u1680',
+		'\u2000',
+		'\u2001',
+		'\u2002',
+		'\u2003',
+		'\u2004',
+		'\u2005',
+		'\u2006',
+		'\u2007',
+		'\u2008',
+		'\u2009',
+		'\u200A',
+		'\u2028',
+		'\u2029',
+		'\u202F',
+		'\u205F',
+		'\u3000',
+	] as const;
+
+	it('detects a valid P0 IID before the URL detector', async () => {
+		const result = await parseAtom('int:isrc:USQX91300108', localOnly);
+
+		expect(result).toMatchObject({
+			kind: 'iid',
+			valid: true,
+			scheme: 'isrc',
+			value: 'USQX91300108',
+			canonicalIid: 'int:isrc:USQX91300108',
+			anchorEligible: true,
+		});
+	});
+
+	it('preserves a valid polymorphic IID without making it anchor eligible', async () => {
+		const result = await parseAtom('int:wd:Q42', localOnly);
+
+		expect(result).toMatchObject({
+			kind: 'iid',
+			valid: true,
+			scheme: 'wd',
+			value: 'Q42',
+			canonicalIid: 'int:wd:Q42',
+			anchorEligible: false,
+		});
+	});
+
+	it.each([
+		[
+			'int:mbid:recording:d28cfc80-b16c-47c9-a370-f13f49732e75',
+			'mbid',
+			'recording:d28cfc80-b16c-47c9-a370-f13f49732e75',
+		],
+		[
+			'int:gen1:book:r3:59a02a73cbe0d2a4223719fdc4d006ab',
+			'gen1',
+			'book:r3:59a02a73cbe0d2a4223719fdc4d006ab',
+		],
+	])('preserves the full in-value-typed value for %s', async (input, scheme, value) => {
+		const result = await parseAtom(input, localOnly);
+
+		expect(result).toMatchObject({
+			kind: 'iid',
+			valid: true,
+			scheme,
+			value,
+			canonicalIid: input,
+		});
+	});
+
+	it('canonicalizes a valid non-canonical IID value', async () => {
+		const result = await parseAtom('int:isbn:0-684-83272-0', localOnly);
+
+		expect(result).toMatchObject({
+			kind: 'iid',
+			valid: true,
+			scheme: 'isbn',
+			value: '9780684832722',
+			canonicalIid: 'int:isbn:9780684832722',
+			anchorEligible: true,
+		});
+	});
+
+	it('case-folds the prefix and scheme segments without touching the value', async () => {
+		const result = await parseAtom('INT:ISRC:usqx91300108', localOnly);
+
+		expect(result).toMatchObject({
+			kind: 'iid',
+			valid: true,
+			scheme: 'isrc',
+			value: 'USQX91300108',
+			canonicalIid: 'int:isrc:USQX91300108',
+			anchorEligible: true,
+		});
+	});
+
+	it('rejects every TWD-9d Unicode character at either whole-IID edge', async () => {
+		for (const edgeCharacter of forbiddenWdEdgeCharacters) {
+			const trailing = await parseAtom(`int:wd:film:Q42${edgeCharacter}`, localOnly);
+			expect(trailing.kind, `trailing U+${edgeCharacter.codePointAt(0)?.toString(16)}`).toBe('iid');
+			if (trailing.kind === 'iid') {
+				expect(trailing.valid).toBe(false);
+				expect(trailing.anchorEligible).toBe(false);
+			}
+
+			const leading = await parseAtom(`${edgeCharacter}int:wd:film:Q42`, localOnly);
+			expect(leading.kind, `leading U+${edgeCharacter.codePointAt(0)?.toString(16)}`).not.toBe(
+				'iid'
+			);
+		}
+	});
+
+	it('quarantines an uppercase-prefixed malformed IID instead of plain text', async () => {
+		const result = await parseAtom('Int:bogus:x', localOnly);
+
+		expect(result).toMatchObject({
+			kind: 'iid',
+			valid: false,
+			scheme: 'bogus',
+			reason: 'unknown_or_malformed_iid',
+		});
+	});
+
+	it.each([
+		'int:bogus:x',
+		'int:isrc:notanisrc',
+		'int:isrc:X',
+	])('quarantines malformed IID input instead of falling through: %s', async (input) => {
+		const result = await parseAtom(input, localOnly);
+
+		expect(result.kind).toBe('iid');
+		if (result.kind === 'iid') {
+			expect(result.valid).toBe(false);
+			expect(result.canonicalIid).toBeNull();
+			expect(result.anchorEligible).toBe(false);
+			expect(result.reason).toBeString();
+		}
+	});
+});
+
+it('preserves typed Wikidata and arbitrary colon-bearing values in the IID lane', async () => {
 	for (const input of [
 		'int:wd:film:Q188035',
 		'int:wd:written-work:Q47461344',
 		'int:other:value:with:colons',
 	]) {
 		const result = await parseAtom(input, localOnly);
-		expect(result.kind).toBe('plain_string');
+		expect(result.kind).toBe('iid');
 		expect(result.normalizedInput).toBe(input);
+		if (result.kind === 'iid') {
+			expect(result.value).toBe(input.split(':').slice(2).join(':'));
+		}
 	}
 });

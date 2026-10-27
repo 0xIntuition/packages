@@ -1,6 +1,8 @@
+import { observeProviderRequest } from '@0xintuition/pipeline-runtime/provider-request-observation';
 import { defineEnrichmentPlugin, type EnrichmentPlugin } from '../../../plugins';
 import type { EnrichmentRequest } from '../../../types';
 import { type FetchLike, fetchJsonWithSchema } from '../__shared__/http';
+import { classifyProviderRequestError } from '../__shared__/provider-request-observer';
 import { getIdentifier, getRequestName, getRequestUrl } from '../__shared__/request';
 import { youTubeVideoResponseSchema } from './external';
 import { youtubeDataSchema } from './schema';
@@ -10,6 +12,8 @@ type CreateYouTubePluginOptions = {
 	priority?: number;
 	TTL?: number;
 	apiKey?: string;
+	/** Where `YOUTUBE_API_KEY` is read when `apiKey` is not passed. Default: `process.env`. */
+	env?: Readonly<Record<string, string | undefined>>;
 };
 
 type YouTubeVideoResponse = {
@@ -36,8 +40,14 @@ type YouTubeVideoResponse = {
 
 const youtubeVideoIdPattern = /^[A-Za-z0-9_-]{11}$/;
 
+/**
+ * Dormant without `YOUTUBE_API_KEY`, exactly like TMDB: a keyless runtime makes no request and
+ * moves no series (it used to call the API and collect a 403 on every run). The key stays
+ * optional so every keyless runtime still builds the plugin.
+ */
 export function createYouTubePlugin(options: CreateYouTubePluginOptions = {}): EnrichmentPlugin {
 	const fetcher = options.fetch ?? (globalThis.fetch as FetchLike);
+	const apiKey = (options.apiKey ?? youtubeApiKeyFromEnv(options.env))?.trim();
 
 	return defineEnrichmentPlugin({
 		id: 'youtube',
@@ -47,29 +57,49 @@ export function createYouTubePlugin(options: CreateYouTubePluginOptions = {}): E
 		priority: options.priority ?? 42,
 		TTL: options.TTL ?? 3_600,
 
+		observability: {
+			provider: 'youtube',
+			// A cached run stands in for the one lookup it would have made. Dormant: no lookup.
+			cacheOperations(request) {
+				return apiKey && resolveYouTubeVideoId(request) ? ['video'] : [];
+			},
+		},
+
 		supports(request: EnrichmentRequest) {
-			return !!resolveYouTubeVideoId(request);
+			return Boolean(apiKey && resolveYouTubeVideoId(request));
 		},
 
 		async enrich(request, ctx) {
 			const videoId = resolveYouTubeVideoId(request);
-			if (!videoId) {
+			if (!(videoId && apiKey)) {
 				return [];
 			}
 
 			const query = new URLSearchParams({
 				part: 'snippet,contentDetails,statistics,player',
 				id: videoId,
+				key: apiKey,
 			});
-			if (options.apiKey) {
-				query.set('key', options.apiKey);
-			}
 
-			const payload = await fetchJsonWithSchema(
-				fetcher,
-				`https://www.googleapis.com/youtube/v3/videos?${query.toString()}`,
-				youTubeVideoResponseSchema,
-				{ signal: ctx.signal }
+			const payload = await observeProviderRequest(
+				{
+					provider: 'youtube',
+					operation: 'video',
+					context: { signal: ctx.signal, deadlineAtMs: ctx.deadlineAtMs },
+					classifyError: classifyVideoError,
+					// `videos.list` answers 200 with an empty `items` for an unknown or private id.
+					classifyResult: (value) => (value.items?.[0] ? 'hit' : 'miss'),
+				},
+				() =>
+					fetchJsonWithSchema(
+						fetcher,
+						`https://www.googleapis.com/youtube/v3/videos?${query.toString()}`,
+						youTubeVideoResponseSchema,
+						// The key rides in the URL: never follow a redirect with it (ENG-17014 review finding).
+						{ redirect: 'error', signal: ctx.signal },
+						// Read Google's error reason so only a key-related 400 is `auth_failed`.
+						{ captureErrorCode: true }
+					)
 			);
 
 			const item = payload.items?.[0];
@@ -109,6 +139,27 @@ export function createYouTubePlugin(options: CreateYouTubePluginOptions = {}): E
 					},
 				},
 			];
+		},
+	});
+}
+
+function youtubeApiKeyFromEnv(env: CreateYouTubePluginOptions['env']): string | undefined {
+	return (env ?? process.env).YOUTUBE_API_KEY;
+}
+
+/**
+ * 403 is a revoked key or an exhausted quota. An invalid key is a 400 (observed live), but only
+ * the Google reason `API_KEY_INVALID` / `API_KEY_EXPIRED` is the key: any other 400 is a malformed
+ * request and is an ordinary `http_4xx`, so it never fires the auth alert.
+ */
+function classifyVideoError(error: unknown) {
+	return classifyProviderRequestError(error, {
+		statusOutcomes: {
+			400: {
+				byErrorCode: { API_KEY_INVALID: 'auth_failed', API_KEY_EXPIRED: 'auth_failed' },
+				default: 'http_4xx',
+			},
+			403: 'auth_failed',
 		},
 	});
 }

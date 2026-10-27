@@ -1,3 +1,8 @@
+import { request as httpRequest } from 'node:http';
+import { request as httpsRequest } from 'node:https';
+import { isIP } from 'node:net';
+import { pipeline, Readable } from 'node:stream';
+import { createBrotliDecompress, createGunzip, createInflate } from 'node:zlib';
 import { analyzeStructuredDocument } from './structured.js';
 import type {
 	ParseResult,
@@ -8,9 +13,20 @@ import type {
 	StructuredDocumentCandidate,
 } from './types.js';
 
+const runtimeFetch = globalThis.fetch;
+
+type ValidatedConnection = { hostname: string; address: string; family: number };
+type PinnedRequestInit = RequestInit & { connection?: ValidatedConnection };
+
+export type RemoteFetchOptions = {
+	fetcher?: (input: string, init?: PinnedRequestInit) => Promise<Response>;
+	resolve?: (hostname: string) => Promise<readonly { address: string; family: number }[]>;
+};
+
 export async function inspectRemote(
 	result: ParseResult,
-	policy: ResolvedFetchPolicy
+	policy: ResolvedFetchPolicy,
+	options: RemoteFetchOptions = {}
 ): Promise<
 	| {
 			inspection: RemoteInspection;
@@ -44,11 +60,12 @@ export async function inspectRemote(
 			target.url,
 			target.timeoutMs,
 			policy,
-			result.kind === 'ipfs' ? 'resolved_ipfs' : 'resolved_url'
+			result.kind === 'ipfs' ? 'resolved_ipfs' : 'resolved_url',
+			options
 		);
 	} catch (err) {
 		const message = err instanceof Error ? err.message : String(err);
-		if (isDeniedError(message)) {
+		if (err instanceof RemotePolicyDeniedError) {
 			return {
 				inspection: {
 					attempted: true,
@@ -94,20 +111,15 @@ function resolveRemoteTarget(
 	}
 }
 
-function isDeniedError(message: string): boolean {
-	return (
-		(message.includes('scheme') && message.includes('not allowed')) ||
-		message.includes('denied IP') ||
-		message.includes('localhost') ||
-		message.includes('missing a host')
-	);
-}
+class RemotePolicyDeniedError extends Error {}
+class RemoteResolutionError extends Error {}
 
 async function fetchWithRedirects(
 	initialUrl: string,
 	timeoutMs: number,
 	policy: ResolvedFetchPolicy,
-	source: 'resolved_url' | 'resolved_ipfs'
+	source: 'resolved_url' | 'resolved_ipfs',
+	options: RemoteFetchOptions
 ): Promise<{
 	inspection: RemoteInspection;
 	warnings: ParseWarning[];
@@ -117,16 +129,27 @@ async function fetchWithRedirects(
 	let redirectCount = 0;
 
 	while (true) {
-		validateTarget(currentUrl, policy);
-
+		let response: Response | undefined;
 		const controller = new AbortController();
 		const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-		let response: Response | undefined;
 		try {
-			response = await fetch(currentUrl, {
-				redirect: 'manual',
-				signal: controller.signal,
-			});
+			const connection = await waitForOperation(
+				validateTarget(currentUrl, policy, options),
+				controller.signal
+			);
+			const transport =
+				!options.fetcher || options.fetcher === runtimeFetch
+					? fetchWithPinnedNodeTransport
+					: options.fetcher;
+			response = await waitForOperation(
+				transport(currentUrl, {
+					redirect: 'manual',
+					signal: controller.signal,
+					connection,
+				}),
+				controller.signal
+			);
+
 			if (response.status >= 300 && response.status < 400) {
 				if (redirectCount >= policy.maxRedirects) {
 					return {
@@ -178,10 +201,21 @@ async function fetchWithRedirects(
 				continue;
 			}
 
-			return await inspectResponse(currentUrl, redirectCount, response, policy, source);
+			return await inspectResponse(
+				currentUrl,
+				redirectCount,
+				response,
+				policy,
+				source,
+				controller.signal
+			);
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);
-			if ((err instanceof DOMException && err.name === 'AbortError') || message.includes('abort')) {
+			if (err instanceof RemotePolicyDeniedError) throw err;
+			if (
+				!(err instanceof RemoteResolutionError) &&
+				((err instanceof DOMException && err.name === 'AbortError') || message.includes('abort'))
+			) {
 				return {
 					inspection: {
 						attempted: true,
@@ -225,80 +259,142 @@ async function fetchWithRedirects(
 			clearTimeout(timeoutId);
 			controller.abort();
 			if (response?.body && !response.body.locked) {
-				// Discarded bodies can keep sockets busy. Cleanup must not wait on
-				// a custom stream's cancellation or replace the inspection result.
+				// Cleanup must not await a custom stream's cancellation or replace the result.
 				void response.body.cancel().catch(() => undefined);
 			}
 		}
 	}
 }
 
-function validateTarget(url: string, policy: ResolvedFetchPolicy): void {
+async function validateTarget(
+	url: string,
+	policy: ResolvedFetchPolicy,
+	options: RemoteFetchOptions
+): Promise<ValidatedConnection> {
 	let parsed: URL;
 	try {
 		parsed = new URL(url);
 	} catch {
-		throw new Error(`remote fetch target is missing a host`);
+		throw new RemotePolicyDeniedError('remote fetch target is missing a host');
 	}
-
-	const scheme = parsed.protocol.replace(/:$/, '');
-	if (scheme === 'https') {
-		// allowed
-	} else if (scheme === 'http' && policy.allowHttp) {
-		// allowed
-	} else {
-		throw new Error(`remote fetch scheme ${scheme} is not allowed`);
+	if (parsed.protocol !== 'https:' && !(parsed.protocol === 'http:' && policy.allowHttp)) {
+		throw new RemotePolicyDeniedError('remote fetch scheme is not allowed');
 	}
-
-	if (policy.allowPrivateNetworks) return;
-
-	const hostname = parsed.hostname.replace(/^\[|\]$/g, '').toLowerCase();
-	if (!hostname) {
-		throw new Error('remote fetch target is missing a host');
+	const hostname = normalizeHostname(parsed.hostname);
+	if (!hostname) throw new RemotePolicyDeniedError('remote fetch target is missing a host');
+	if (!policy.allowPrivateNetworks && ['localhost', '127.0.0.1', '::1'].includes(hostname)) {
+		throw new RemotePolicyDeniedError('remote fetch target resolves to localhost');
 	}
-
-	if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') {
-		throw new Error('remote fetch target resolves to localhost');
+	const denied = () =>
+		new RemotePolicyDeniedError('remote fetch target resolves to a denied IP address');
+	if (
+		!policy.allowPrivateNetworks &&
+		(parsed.username ||
+			parsed.password ||
+			hostname === 'localhost' ||
+			/\.(?:home|internal|intranet|lan|local|localdomain|localhost)$/u.test(hostname))
+	)
+		throw denied();
+	if (isIP(hostname)) {
+		if (!policy.allowPrivateNetworks && !isPublicIpAddress(hostname)) throw denied();
+		return { hostname, address: hostname, family: isIP(hostname) };
 	}
-
-	if (isDeniedHostname(hostname)) {
-		throw new Error(`remote fetch target resolves to a denied IP address: ${hostname}`);
+	const resolve =
+		options.resolve ??
+		(async (host: string) => {
+			const { lookup } = await import('node:dns/promises');
+			return lookup(host, { all: true, verbatim: true });
+		});
+	let addresses: Awaited<ReturnType<typeof resolve>>;
+	try {
+		addresses = await resolve(hostname);
+	} catch (error) {
+		throw new RemoteResolutionError(error instanceof Error ? error.message : String(error), {
+			cause: error,
+		});
 	}
+	if (!addresses.length) throw new RemoteResolutionError('remote fetch DNS returned no addresses');
+	if (
+		addresses.some(
+			(entry) =>
+				isIP(entry.address) !== entry.family ||
+				(!policy.allowPrivateNetworks && !isPublicIpAddress(entry.address))
+		)
+	)
+		throw denied();
+	return { hostname, ...(addresses.find((entry) => entry.family === 4) ?? addresses[0]!) };
 }
 
-function isDeniedHostname(hostname: string): boolean {
-	if (hostname.includes(':')) {
-		const [head, tail] = hostname.split('::');
-		const left = head ? head.split(':') : [];
-		const right = tail ? tail.split(':') : [];
-		const words = [...left, ...Array(8 - left.length - right.length).fill('0'), ...right].map(
-			(word) => Number.parseInt(word, 16)
+function normalizeHostname(hostname: string): string {
+	return hostname
+		.toLowerCase()
+		.replace(/^\[|\]$/g, '')
+		.replace(/\.+$/u, '');
+}
+
+function ipAddressFamily(address: string): 4 | 6 | undefined {
+	const normalized = normalizeHostname(address);
+	const segments = normalized.split('.');
+	if (
+		segments.length === 4 &&
+		segments.every((segment) => /^\d{1,3}$/u.test(segment) && Number(segment) <= 255)
+	) {
+		return 4;
+	}
+	return expandIpv6Address(normalized) ? 6 : undefined;
+}
+
+function isPublicIpAddress(address: string): boolean {
+	const normalized = normalizeHostname(address);
+	if (ipAddressFamily(normalized) === 4) {
+		const [first = 0, second = 0, third = 0] = normalized.split('.').map(Number);
+		return !(
+			first === 0 ||
+			first === 10 ||
+			first === 127 ||
+			(first === 100 && second >= 64 && second <= 127) ||
+			(first === 169 && second === 254) ||
+			(first === 172 && second >= 16 && second <= 31) ||
+			(first === 192 && second === 0 && third === 0) ||
+			(first === 192 && second === 0 && third === 2) ||
+			(first === 192 && second === 88 && third === 99) ||
+			(first === 192 && second === 168) ||
+			(first === 198 && (second === 18 || second === 19)) ||
+			(first === 198 && second === 51 && third === 100) ||
+			(first === 203 && second === 0 && third === 113) ||
+			first >= 224
 		);
-		const first = words[0]!;
-		if (words.slice(0, 6).every((word) => word === 0)) return true;
-		if ((first & 0xfe00) === 0xfc00) return true; // Unique local addresses.
-		if ((first & 0xffc0) === 0xfe80) return true; // Link local addresses.
-		if ((first & 0xffc0) === 0xfec0) return true; // Deprecated site local addresses.
-		if ((first & 0xff00) === 0xff00) return true; // Multicast.
-		if (words.slice(0, 5).every((word) => word === 0) && words[5] === 0xffff) {
-			return isDeniedHostname(
-				`${words[6]! >>> 8}.${words[6]! & 255}.${words[7]! >>> 8}.${words[7]! & 255}`
-			);
-		}
-		return false;
 	}
-	const parts = hostname.split('.').map(Number);
-	if (parts.length === 4 && parts.every((p) => !Number.isNaN(p) && p >= 0 && p <= 255)) {
-		const [a, b, c, d] = parts as [number, number, number, number];
-		if (a === 10) return true;
-		if (a === 172 && b >= 16 && b <= 31) return true;
-		if (a === 192 && b === 168) return true;
-		if (a === 127) return true;
-		if (a === 0) return true;
-		if (a === 100 && b >= 64 && b <= 127) return true;
-		if (a === 169 && b === 254) return true;
+	const ipv6 = expandIpv6Address(normalized);
+	if (!ipv6) return false;
+	const [first = 0, second = 0] = ipv6;
+	return !(
+		first < 0x2000 ||
+		first > 0x3fff ||
+		(first === 0x2001 && second <= 0x01ff) ||
+		(first === 0x2001 && second === 0x0db8) ||
+		first === 0x2002 ||
+		(first === 0x3fff && (second & 0xf000) === 0)
+	);
+}
+
+function expandIpv6Address(hostname: string): number[] | undefined {
+	const compressionIndex = hostname.indexOf('::');
+	if (compressionIndex !== -1 && compressionIndex !== hostname.lastIndexOf('::')) return undefined;
+	const [left = '', right = ''] = hostname.split('::');
+	const leftSegments = left ? left.split(':') : [];
+	const rightSegments = right ? right.split(':') : [];
+	const missing = 8 - leftSegments.length - rightSegments.length;
+	if ((compressionIndex === -1 && missing !== 0) || missing < 0) return undefined;
+	const segments = [
+		...leftSegments,
+		...Array.from({ length: missing }, () => '0'),
+		...rightSegments,
+	];
+	if (segments.length !== 8 || segments.some((segment) => !/^[\da-f]{1,4}$/iu.test(segment))) {
+		return undefined;
 	}
-	return false;
+	return segments.map((segment) => Number.parseInt(segment, 16));
 }
 
 async function inspectResponse(
@@ -306,7 +402,8 @@ async function inspectResponse(
 	redirectCount: number,
 	response: Response,
 	policy: ResolvedFetchPolicy,
-	source: 'resolved_url' | 'resolved_ipfs'
+	source: 'resolved_url' | 'resolved_ipfs',
+	signal: AbortSignal
 ): Promise<{
 	inspection: RemoteInspection;
 	warnings: ParseWarning[];
@@ -345,7 +442,8 @@ async function inspectResponse(
 		({ inspectedBytes, fullBody } = await readBodyLimited(
 			response,
 			policy.maxResponseBytes,
-			policy.inspectBytes
+			policy.inspectBytes,
+			signal
 		));
 	} catch (err) {
 		if (err instanceof OversizedError) {
@@ -401,7 +499,8 @@ class OversizedError extends Error {
 async function readBodyLimited(
 	response: Response,
 	maxBytes: number,
-	inspectBytes: number
+	inspectBytes: number,
+	signal: AbortSignal
 ): Promise<{ inspectedBytes: Uint8Array; fullBody: Uint8Array }> {
 	if (!response.body) {
 		return {
@@ -411,18 +510,23 @@ async function readBodyLimited(
 	}
 
 	const reader = response.body.getReader();
-	try {
-		const inspectedChunks: Uint8Array[] = [];
-		const allChunks: Uint8Array[] = [];
-		let totalBytes = 0;
-		let inspectedLength = 0;
+	const inspectedChunks: Uint8Array[] = [];
+	const allChunks: Uint8Array[] = [];
+	let totalBytes = 0;
+	let inspectedLength = 0;
 
+	const abort = () => {
+		void reader.cancel().catch(() => undefined);
+	};
+	signal.addEventListener('abort', abort, { once: true });
+	try {
 		while (true) {
-			const { done, value } = await reader.read();
+			const { done, value } = await waitForOperation(reader.read(), signal);
 			if (done || !value) break;
 
 			totalBytes += value.length;
 			if (totalBytes > maxBytes) {
+				void reader.cancel().catch(() => undefined);
 				throw new OversizedError();
 			}
 
@@ -451,6 +555,7 @@ async function readBodyLimited(
 
 		return { inspectedBytes, fullBody };
 	} finally {
+		signal.removeEventListener('abort', abort);
 		reader.releaseLock();
 	}
 }
@@ -542,4 +647,105 @@ function analyzeRemoteStructuredDocument(
 	} catch {
 		return undefined;
 	}
+}
+
+/** Pin DNS lookup while retaining the original Host and HTTPS SNI/certificate name. */
+export async function fetchWithPinnedNodeTransport(
+	input: string,
+	init?: PinnedRequestInit
+): Promise<Response> {
+	const parsed = new URL(input);
+	const connection = init?.connection;
+	const hostname = normalizeHostname(parsed.hostname);
+	if (!connection || normalizeHostname(connection.hostname) !== hostname) {
+		throw new Error('Parser transport requires a validated connection');
+	}
+	if (init?.body != null && typeof init.body !== 'string') {
+		throw new Error('Pinned parser transport does not support this request body');
+	}
+	const headers = new Headers(init?.headers);
+	headers.set('host', parsed.host);
+	const request = parsed.protocol === 'https:' ? httpsRequest : httpRequest;
+	if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+		throw new Error('Pinned parser transport requires HTTP');
+	}
+	return await new Promise<Response>((resolve, reject) => {
+		const req = request(
+			parsed,
+			{
+				agent: false,
+				...(parsed.protocol === 'https:' && !isIP(hostname) ? { servername: hostname } : {}),
+				method: init?.method ?? 'GET',
+				headers: Object.fromEntries(headers),
+				signal: init?.signal ?? undefined,
+				lookup: (host, options, callback) => {
+					if (normalizeHostname(host) !== hostname) {
+						callback(new Error('Unvalidated connection hostname'), '', 0);
+						return;
+					}
+					if (options.all) {
+						callback(null, [{ address: connection.address, family: connection.family }]);
+					} else {
+						callback(null, connection.address, connection.family);
+					}
+				},
+			},
+			(incoming) => {
+				const responseHeaders = new Headers();
+				for (let index = 0; index < incoming.rawHeaders.length; index += 2) {
+					responseHeaders.append(incoming.rawHeaders[index]!, incoming.rawHeaders[index + 1]!);
+				}
+				const status = incoming.statusCode ?? 502;
+				let readable: Readable = incoming;
+				const hasBody = init?.method !== 'HEAD' && ![204, 205, 304].includes(status);
+				const encoding = responseHeaders.get('content-encoding')?.trim().toLowerCase();
+				if (hasBody && encoding && encoding !== 'identity') {
+					const decoder =
+						encoding === 'gzip'
+							? createGunzip()
+							: encoding === 'deflate'
+								? createInflate()
+								: encoding === 'br'
+									? createBrotliDecompress()
+									: undefined;
+					if (!decoder) {
+						incoming.destroy();
+						reject(new Error('Unsupported response content encoding'));
+						return;
+					}
+					pipeline(incoming, decoder, () => undefined);
+					readable = decoder;
+					responseHeaders.delete('content-encoding');
+					responseHeaders.delete('content-length');
+				}
+				const body = hasBody
+					? (Readable.toWeb(readable) as unknown as ReadableStream<Uint8Array>)
+					: null;
+				if (!body) incoming.resume();
+				const response = new Response(body, { status, headers: responseHeaders });
+				Object.defineProperty(response, 'url', { value: parsed.href });
+				resolve(response);
+			}
+		);
+		req.on('error', reject);
+		req.end(init?.body ?? undefined);
+	});
+}
+
+async function waitForOperation<T>(operation: Promise<T>, signal: AbortSignal): Promise<T> {
+	if (signal.aborted) throw signal.reason;
+	return await new Promise<T>((resolve, reject) => {
+		const abort = () => reject(signal.reason);
+		signal.addEventListener('abort', abort, { once: true });
+		operation.then(
+			(value) => {
+				signal.removeEventListener('abort', abort);
+				resolve(value);
+			},
+			(error: unknown) => {
+				signal.removeEventListener('abort', abort);
+				reject(error);
+			}
+		);
+	});
 }

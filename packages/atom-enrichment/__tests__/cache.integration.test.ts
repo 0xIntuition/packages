@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'bun:test';
-
 import {
 	buildCacheKey,
 	type CacheAdapter,
@@ -8,6 +7,7 @@ import {
 	createUpstashCacheAdapterFromEnv,
 } from '../src/cache';
 import { createEnrichmentEngine } from '../src/engine';
+import { createWikipediaPlugin } from '../src/plugins/providers/wikipedia';
 import { createMockRequest } from '../src/testing';
 
 describe('cache adapter and engine cache integration', () => {
@@ -71,6 +71,97 @@ describe('cache adapter and engine cache integration', () => {
 		});
 
 		expect(left).not.toBe(right);
+	});
+
+	it('keys P0 and P2 profiles for the same canonical IID identically', () => {
+		const p0 = buildCacheKey('spotify', {
+			atomType: 'song',
+			identifier: {
+				iid: 'int:isrc:USUM71703861',
+				scheme: 'isrc',
+				value: 'USUM71703861',
+			},
+		});
+		const p2 = buildCacheKey('spotify', {
+			atomType: 'song',
+			jsonLd: {
+				'@type': 'MusicRecording',
+				identifier: 'int:isrc:us-um7-17-03861',
+				name: 'Fixture Song',
+				byArtist: 'Fixture Artist',
+			},
+		});
+
+		expect(p0).toBe(p2);
+		expect(p0).toContain('iid:int%3Aisrc%3AUSUM71703861');
+	});
+
+	it('never aliases two different canonical IIDs', () => {
+		const left = buildCacheKey('spotify', {
+			atomType: 'song',
+			jsonLd: { identifier: 'int:isrc:USUM71703861' },
+		});
+		const right = buildCacheKey('spotify', {
+			atomType: 'song',
+			jsonLd: { identifier: 'int:isrc:GBAYE0601498' },
+		});
+
+		expect(left).not.toBe(right);
+	});
+
+	it('serves a rich P2 request from a bare P0 IID cache entry', async () => {
+		const cache = createMemoryCacheAdapter();
+		let calls = 0;
+		const engine = createEnrichmentEngine({
+			cache,
+			plugins: [
+				{
+					id: 'iid-cache-fixture',
+					version: '1.0.0',
+					runtime: 'universal',
+					artifactTypes: ['opengraph'],
+					TTL: 60,
+					supports: () => true,
+					enrich: async () => {
+						calls += 1;
+						return [];
+					},
+				},
+			],
+		});
+		const source = {
+			classificationEngine: 'iid-cache-fixture',
+			classifiedAt: '2026-08-07T12:00:00.000Z',
+		};
+
+		const p0 = await engine.enrich({
+			input: {
+				atomType: 'song',
+				identifier: {
+					iid: 'int:isrc:USUM71703861',
+					scheme: 'isrc',
+					value: 'USUM71703861',
+				},
+				source,
+			},
+			runtime: 'server',
+		});
+		const p2 = await engine.enrich({
+			input: {
+				atomType: 'song',
+				jsonLd: {
+					'@type': 'MusicRecording',
+					identifier: 'int:isrc:us-um7-17-03861',
+					name: 'Fixture Song',
+				},
+				source,
+			},
+			runtime: 'server',
+		});
+
+		expect(calls).toBe(1);
+		expect(p0.timings.cacheMisses).toBe(1);
+		expect(p2.timings.cacheHits).toBe(1);
 	});
 
 	it('createUpstashCacheAdapterFromEnv returns undefined when env vars are absent', () => {
@@ -247,4 +338,20 @@ describe('cache adapter and engine cache integration', () => {
 		expect(result.status).toBe('success');
 		expect(result.artifacts).toHaveLength(1);
 	});
+});
+
+it('plugin versions separate both iid and fallback cache keys', () => {
+	for (const input of [
+		{ atomType: 'thing', hints: { name: 'Suspiria' } },
+		{ atomType: 'thing', identifier: { iid: 'int:wd:Q546900' } },
+	]) {
+		const oldKey = buildCacheKey('wikipedia', input, '1.0.0');
+		const plugin = createWikipediaPlugin();
+		const key = buildCacheKey(plugin.id, input, plugin.version);
+		expect(buildCacheKey(plugin.id, input, '1.1.0')).not.toBe(oldKey);
+		expect(plugin.version).toBe('1.1.0');
+		expect(key).not.toBe(oldKey);
+		expect(key).toContain(`:v:${plugin.version}:`);
+		expect(key.replace(`:v:${plugin.version}:`, ':')).toBe(buildCacheKey(plugin.id, input));
+	}
 });

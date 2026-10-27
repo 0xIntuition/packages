@@ -1,0 +1,54 @@
+{
+	"id": 169,
+	"url": "https://www.tvmaze.com/shows/169/breaking-bad",
+	"name": "Breaking Bad",
+	"type": "Scripted",
+	"language": "English",
+	"genres": ["Drama", "Crime", "Thriller"],
+	"status": "Ended",
+	"runtime": 60,
+	"averageRuntime": 60,
+	"premiered": "2008-01-20",
+	"ended": "2013-09-29",
+	"officialSite": "https://www.amc.com/shows/breaking-bad--1002078",
+	"schedule": {
+		"time": "21:00",
+		"days": ["Sunday"]
+	},
+	"rating": {
+		"average": 9.3
+	},
+	"weight": 99,
+	"network": {
+		"id": 20,
+		"name": "AMC",
+		"country": {
+			"name": "United States",
+			"code": "US",
+			"timezone": "America/New_York"
+		},
+		"officialSite": "https://www.amc.com/"
+	},
+	"webChannel": null,
+	"dvdCountry": null,
+	"externals": {
+		"tvrage": 18164,
+		"thetvdb": 81189,
+		"imdb": "tt0903747"
+	},
+	"image": {
+		"medium": "https://static.tvmaze.com/uploads/images/medium_portrait/0/2400.jpg",
+		"original": "https://static.tvmaze.com/uploads/images/original_untouched/0/2400.jpg"
+	},
+	"summary": "<p>A chemistry teacher becomes a methamphetamine producer.</p>",
+	"updated": 1745308561,
+	"_links": {
+		"self": {
+			"href": "https://api.tvmaze.com/shows/169"
+		},
+		"previousepisode": {
+			"href": "https://api.tvmaze.com/episodes/38579",
+			"name": "Felina"
+		}
+	}
+}

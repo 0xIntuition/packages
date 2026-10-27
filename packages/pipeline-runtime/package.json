@@ -10,6 +10,7 @@
 	"types": "./dist/index.d.ts",
 	"files": [
 		"dist",
+		"src/testing/golden",
 		"README.md",
 		"LICENSE"
 	],
@@ -70,7 +71,39 @@
 			"types": "./dist/concurrency.d.ts",
 			"import": "./dist/concurrency.js"
 		},
-		"./package.json": "./package.json"
+		"./package.json": "./package.json",
+		"./provider-metrics-contract.expected": {
+			"types": "./dist/provider-metrics-contract.expected.d.ts",
+			"import": "./dist/provider-metrics-contract.expected.js"
+		},
+		"./provider-registry": {
+			"types": "./dist/provider-registry/index.d.ts",
+			"import": "./dist/provider-registry/index.js"
+		},
+		"./provider-request-observation": {
+			"types": "./dist/provider-request-observation.d.ts",
+			"import": "./dist/provider-request-observation.js"
+		},
+		"./request-slot": {
+			"types": "./dist/request-slot.d.ts",
+			"import": "./dist/request-slot.js"
+		},
+		"./testing/provider-golden": {
+			"types": "./dist/testing/provider-golden.d.ts",
+			"import": "./dist/testing/provider-golden.js"
+		},
+		"./testing/held-request-slot": {
+			"types": "./dist/testing/held-request-slot.d.ts",
+			"import": "./dist/testing/held-request-slot.js"
+		},
+		"./testing/virtual-clock": {
+			"types": "./dist/testing/virtual-clock.d.ts",
+			"import": "./dist/testing/virtual-clock.js"
+		},
+		"./provider-metrics": {
+			"types": "./dist/provider-metrics-contract.d.ts",
+			"import": "./dist/provider-metrics-contract.js"
+		}
 	},
 	"keywords": [
 		"intuition",

@@ -48,6 +48,13 @@ const TYPE_DEFINITIONS: BuiltinTypeDefinition[] = [
 	createTypeDefinition('Person', 'person', ['name'], ['description', 'sameAs'], ['sameAs']),
 	createTypeDefinition('Place', 'place', ['name'], ['address', 'sameAs'], ['sameAs']),
 	createTypeDefinition(
+		'LocalBusiness',
+		'place',
+		['name'],
+		['address', 'telephone', 'sameAs'],
+		['sameAs']
+	),
+	createTypeDefinition(
 		'Organization',
 		'company',
 		['name'],
@@ -61,9 +68,22 @@ const TYPE_DEFINITIONS: BuiltinTypeDefinition[] = [
 		['brand', 'offers', 'sameAs'],
 		['gtin', 'sku']
 	),
-	createTypeDefinition('MusicRecording', 'song', ['name'], ['byArtist', 'inAlbum'], ['sameAs']),
-	createTypeDefinition('MusicAlbum', 'music-album', ['name'], ['byArtist', 'sameAs'], ['sameAs']),
-	createTypeDefinition('MusicGroup', 'artist', ['name'], ['sameAs'], ['sameAs']),
+	createTypeDefinition(
+		'MusicRecording',
+		'song',
+		['name'],
+		['byArtist', 'inAlbum'],
+		['isrcCode', 'sameAs']
+	),
+	createTypeDefinition('MusicAlbum', 'song', ['name'], ['byArtist', 'sameAs'], ['sameAs']),
+	createTypeDefinition(
+		'MusicPlaylist',
+		'song',
+		['name'],
+		['description', 'image', 'author', 'numTracks', 'url', 'sameAs'],
+		['url', 'sameAs']
+	),
+	createTypeDefinition('MusicGroup', 'song', ['name'], ['sameAs'], ['sameAs']),
 	createTypeDefinition(
 		'PodcastSeries',
 		'podcast',
@@ -97,7 +117,22 @@ const TYPE_DEFINITIONS: BuiltinTypeDefinition[] = [
 	createTypeDefinition('WebSite', 'thing', ['name'], ['url', 'sameAs'], ['url', 'sameAs']),
 	createTypeDefinition('Movie', 'thing', ['name'], ['datePublished', 'sameAs'], ['sameAs']),
 	createTypeDefinition('TVSeries', 'thing', ['name'], ['sameAs'], ['sameAs']),
+	createTypeDefinition('VideoGame', 'thing', ['name'], ['sameAs'], ['sameAs']),
+	createTypeDefinition(
+		'Cryptocurrency',
+		'thing',
+		['name'],
+		['identifier', 'sameAs'],
+		['identifier', 'sameAs']
+	),
 	createTypeDefinition('Book', 'thing', ['name'], ['isbn', 'sameAs'], ['isbn']),
+	createTypeDefinition(
+		'Newspaper',
+		'thing',
+		['name'],
+		['publisher', 'url', 'sameAs'],
+		['url', 'sameAs']
+	),
 	createTypeDefinition(
 		'DefinedTerm',
 		'thing',

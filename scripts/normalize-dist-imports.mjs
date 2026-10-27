@@ -24,7 +24,7 @@ function walkFiles(directory) {
 
 function hasExtension(specifier) {
 	const lastSegment = specifier.split('/').at(-1) ?? '';
-	return extname(lastSegment).length > 0;
+	return ['.js', '.mjs', '.cjs', '.json', '.node', '.wasm'].includes(extname(lastSegment));
 }
 
 function normalizeSpecifier(sourceFilePath, specifier) {

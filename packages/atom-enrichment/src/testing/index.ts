@@ -1,3 +1,4 @@
+export { useStubbedPublicDns } from './dns';
 export {
 	createMockArtifact,
 	createMockAtomInput,

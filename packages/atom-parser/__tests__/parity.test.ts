@@ -1,6 +1,7 @@
-import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
+import { beforeAll, describe, expect, it } from 'bun:test';
 import { parseAtom } from '../src/parse.ts';
 import { ParseError, type ParseOptions, type ParseResult } from '../src/types.ts';
+import { installFixtureTransport } from './fixture-transport';
 
 type FixtureFile = {
 	localCases: SuccessFixture[];
@@ -37,121 +38,116 @@ const fixtures = (await Bun.file(
 	new URL('./fixtures/atom-parser-contract-fixtures.json', import.meta.url)
 ).json()) as FixtureFile;
 
-let server: ReturnType<typeof Bun.serve>;
 let baseUrl: string;
 
 beforeAll(() => {
-	server = Bun.serve({
-		port: 0,
-		fetch(req) {
-			const url = new URL(req.url);
+	installFixtureTransport(async (url) => {
+		if (url.pathname === '/page') {
+			return new Response('<html><body>ok</body></html>', {
+				headers: { 'content-type': 'text/html' },
+			});
+		}
 
-			if (url.pathname === '/page') {
-				return new Response('<html><body>ok</body></html>', {
-					headers: { 'content-type': 'text/html' },
-				});
-			}
+		if (url.pathname === '/data') {
+			return new Response('{"ok":true}', {
+				headers: { 'content-type': 'application/json' },
+			});
+		}
 
-			if (url.pathname === '/data') {
-				return new Response('{"ok":true}', {
-					headers: { 'content-type': 'application/json' },
-				});
-			}
+		if (url.pathname === '/json-no-ct') {
+			return new Response(
+				new Uint8Array([
+					0x5b, 0x7b, 0x22, 0x6f, 0x6b, 0x22, 0x3a, 0x74, 0x72, 0x75, 0x65, 0x7d, 0x5d,
+				]),
+				{ headers: { 'content-type': 'application/octet-stream' } }
+			);
+		}
 
-			if (url.pathname === '/json-no-ct') {
-				return new Response(
-					new Uint8Array([
-						0x5b, 0x7b, 0x22, 0x6f, 0x6b, 0x22, 0x3a, 0x74, 0x72, 0x75, 0x65, 0x7d, 0x5d,
-					])
-				);
-			}
+		if (url.pathname === '/html-no-ct') {
+			return new Response(
+				new Uint8Array([
+					0x3c, 0x68, 0x74, 0x6d, 0x6c, 0x3e, 0x3c, 0x62, 0x6f, 0x64, 0x79, 0x3e, 0x6f, 0x6b, 0x3c,
+					0x2f, 0x62, 0x6f, 0x64, 0x79, 0x3e, 0x3c, 0x2f, 0x68, 0x74, 0x6d, 0x6c, 0x3e,
+				]),
+				{ headers: { 'content-type': 'application/octet-stream' } }
+			);
+		}
 
-			if (url.pathname === '/html-no-ct') {
-				return new Response(
-					new Uint8Array([
-						0x3c, 0x68, 0x74, 0x6d, 0x6c, 0x3e, 0x3c, 0x62, 0x6f, 0x64, 0x79, 0x3e, 0x6f, 0x6b,
-						0x3c, 0x2f, 0x62, 0x6f, 0x64, 0x79, 0x3e, 0x3c, 0x2f, 0x68, 0x74, 0x6d, 0x6c, 0x3e,
-					])
-				);
-			}
+		if (url.pathname === '/image-sniffed') {
+			return new Response(new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), {
+				headers: { 'content-type': 'application/octet-stream' },
+			});
+		}
 
-			if (url.pathname === '/image-sniffed') {
-				return new Response(new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
-			}
+		if (url.pathname === '/audio-sniffed') {
+			return new Response(
+				new Uint8Array([0x49, 0x44, 0x33, 0x70, 0x61, 0x79, 0x6c, 0x6f, 0x61, 0x64]),
+				{ headers: { 'content-type': 'application/octet-stream' } }
+			);
+		}
 
-			if (url.pathname === '/audio-sniffed') {
-				return new Response(
-					new Uint8Array([0x49, 0x44, 0x33, 0x70, 0x61, 0x79, 0x6c, 0x6f, 0x61, 0x64])
-				);
-			}
+		if (url.pathname === '/empty') {
+			return new Response(null);
+		}
 
-			if (url.pathname === '/empty') {
-				return new Response(null);
-			}
+		if (url.pathname === '/text-file') {
+			return new Response('plain text payload', {
+				headers: { 'content-type': 'text/plain' },
+			});
+		}
 
-			if (url.pathname === '/text-file') {
-				return new Response('plain text payload', {
-					headers: { 'content-type': 'text/plain' },
-				});
-			}
+		if (url.pathname === '/step-1') {
+			return new Response(null, {
+				status: 302,
+				headers: { location: '/step-2' },
+			});
+		}
 
-			if (url.pathname === '/step-1') {
-				return new Response(null, {
-					status: 302,
-					headers: { location: '/step-2' },
-				});
-			}
+		if (url.pathname === '/step-2') {
+			return new Response(null, {
+				status: 302,
+				headers: { location: '/step-3' },
+			});
+		}
 
-			if (url.pathname === '/step-2') {
-				return new Response(null, {
-					status: 302,
-					headers: { location: '/step-3' },
-				});
-			}
+		if (url.pathname === '/broken-redirect') {
+			return new Response(null, { status: 302 });
+		}
 
-			if (url.pathname === '/broken-redirect') {
-				return new Response(null, { status: 302 });
-			}
+		if (url.pathname === '/big') {
+			return new Response('this response is larger than eight bytes', {
+				headers: { 'content-type': 'text/plain' },
+			});
+		}
 
-			if (url.pathname === '/big') {
-				return new Response('this response is larger than eight bytes', {
-					headers: { 'content-type': 'text/plain' },
-				});
-			}
+		if (url.pathname === '/slow') {
+			return new Promise((resolve) => {
+				setTimeout(() => resolve(new Response('slow body')), 100);
+			});
+		}
 
-			if (url.pathname === '/slow') {
-				return new Promise((resolve) => {
-					setTimeout(() => resolve(new Response('slow body')), 100);
-				});
-			}
+		if (url.pathname === '/redirect') {
+			return new Response(null, {
+				status: 302,
+				headers: { location: '/final' },
+			});
+		}
 
-			if (url.pathname === '/redirect') {
-				return new Response(null, {
-					status: 302,
-					headers: { location: '/final' },
-				});
-			}
+		if (url.pathname === '/final') {
+			return new Response('', {
+				headers: { 'content-type': 'image/png' },
+			});
+		}
 
-			if (url.pathname === '/final') {
-				return new Response('', {
-					headers: { 'content-type': 'image/png' },
-				});
-			}
+		if (url.pathname.startsWith('/ipfs/')) {
+			return new Response('', {
+				headers: { 'content-type': 'audio/mpeg' },
+			});
+		}
 
-			if (url.pathname.startsWith('/ipfs/')) {
-				return new Response('', {
-					headers: { 'content-type': 'audio/mpeg' },
-				});
-			}
-
-			return new Response('not found', { status: 404 });
-		},
+		return new Response('not found', { status: 404 });
 	});
-	baseUrl = `http://localhost:${server.port}`;
-});
-
-afterAll(() => {
-	server.stop();
+	baseUrl = 'http://localhost';
 });
 
 describe('contract parity fixtures', () => {
@@ -250,6 +246,15 @@ function extractKindData(result: ParseResult): Record<string, unknown> {
 				topLevelType: result.topLevelType,
 				objectKeyCount: result.objectKeyCount ?? null,
 				arrayLength: result.arrayLength ?? null,
+			};
+		case 'iid':
+			return {
+				valid: result.valid,
+				scheme: result.scheme,
+				value: result.value,
+				canonicalIid: result.canonicalIid,
+				anchorEligible: result.anchorEligible,
+				...(result.reason === undefined ? {} : { reason: result.reason }),
 			};
 		case 'url':
 			return {

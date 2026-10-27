@@ -1,7 +1,12 @@
 import { normalizeWhitespace } from '../shared/domain-html/document';
+import {
+	type DomainHtmlFetchLike,
+	type DomainHtmlResolveHostname,
+	resolveDomainHtmlFetch,
+} from '../shared/domain-html/fetch';
 import { buildIdentityResolverAtom } from '../shared/domain-html/identity';
 import { toRecordMaybe, toStringMaybe } from '../shared/helpers';
-import type { PlatformStageAdapter } from '../shared/platform';
+import { PLATFORM_STAGE_MISS, type PlatformStageAdapter } from '../shared/platform';
 import {
 	extractAmazonAsinFromUrl,
 	isAmazonShortLinkUrl,
@@ -11,18 +16,9 @@ import {
 } from './url';
 
 type FetchLike = (
-	input: string,
-	init?: {
-		headers?: Record<string, string>;
-		redirect?: 'follow' | 'manual' | 'error';
-	}
-) => Promise<{
-	ok: boolean;
-	status: number;
-	url?: string;
-	json(): Promise<unknown>;
-	text(): Promise<string>;
-}>;
+	input: Parameters<DomainHtmlFetchLike>[0],
+	init?: Parameters<DomainHtmlFetchLike>[1]
+) => Promise<Awaited<ReturnType<DomainHtmlFetchLike>> & { json(): Promise<unknown> }>;
 
 type CanopyAmazonProductPayload = {
 	data?: {
@@ -35,6 +31,7 @@ const CANOPY_BASE_URL = 'https://rest.canopyapi.co/api/amazon/product';
 export type AmazonDomainApiAdapterOptions = {
 	apiKey?: string;
 	fetch?: FetchLike;
+	resolveHostname?: DomainHtmlResolveHostname;
 };
 
 export type AmazonDomainApiAdapter = PlatformStageAdapter;
@@ -43,10 +40,16 @@ export function createAmazonDomainApiAdapter(
 	options: AmazonDomainApiAdapterOptions = {}
 ): AmazonDomainApiAdapter {
 	const fetcher = options.fetch ?? resolveGlobalFetch();
+	const shortLinkFetcher = resolveDomainHtmlFetch(options.fetch);
 
 	return async ({ domain, classification, canonicalUrl, credential }) => {
-		if (domain !== 'amazon' || classification.subtype !== 'product' || !fetcher) {
-			return null;
+		if (
+			domain !== 'amazon' ||
+			classification.subtype !== 'product' ||
+			!fetcher ||
+			!shortLinkFetcher
+		) {
+			return PLATFORM_STAGE_MISS;
 		}
 
 		const apiKey =
@@ -54,20 +57,22 @@ export function createAmazonDomainApiAdapter(
 			toStringMaybe(credential?.apiKey) ??
 			toStringMaybe(credential?.token);
 		if (!apiKey) {
-			return null;
+			return PLATFORM_STAGE_MISS;
 		}
 
 		let productUrl = canonicalUrl;
 		let asin = toStringMaybe(classification.meta.asin) ?? extractAmazonAsinFromUrl(canonicalUrl);
 		if (!asin && isAmazonShortLinkUrl(canonicalUrl)) {
-			const destination = await resolveAmazonShortLink(fetcher, canonicalUrl);
+			const destination = await resolveAmazonShortLink(shortLinkFetcher, canonicalUrl, {
+				resolveHostname: options.resolveHostname,
+			});
 			asin = destination ? extractAmazonAsinFromUrl(destination) : undefined;
 			if (destination && asin) {
 				productUrl = normalizeAmazonCanonicalUrl(destination, asin);
 			}
 		}
 		if (!asin) {
-			return null;
+			return PLATFORM_STAGE_MISS;
 		}
 
 		const response = await fetcher(buildCanopyProductUrl(productUrl, asin), {
@@ -83,12 +88,12 @@ export function createAmazonDomainApiAdapter(
 		const payload = (await response.json()) as CanopyAmazonProductPayload;
 		const product = toRecordMaybe(payload.data?.amazonProduct);
 		if (!product) {
-			return null;
+			return PLATFORM_STAGE_MISS;
 		}
 
 		const title = normalizeWhitespace(toStringMaybe(product.title));
 		if (!title) {
-			return null;
+			return PLATFORM_STAGE_MISS;
 		}
 
 		const brand = normalizeWhitespace(toStringMaybe(product.brand)) ?? undefined;

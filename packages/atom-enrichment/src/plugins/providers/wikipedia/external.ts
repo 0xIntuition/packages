@@ -3,6 +3,7 @@ import { z } from 'zod/v4';
 export const wikipediaSummaryResponseSchema = z
 	.object({
 		title: z.string().optional(),
+		description: z.string().optional(),
 		extract: z.string().optional(),
 		extract_html: z.string().nullable().optional(),
 		thumbnail: z

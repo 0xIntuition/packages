@@ -1,0 +1,23 @@
+{
+	"key": "/books/OL7353617M",
+	"title": "Fantastic Mr. Fox",
+	"works": [
+		{
+			"key": "/works/OL45804W"
+		}
+	],
+	"authors": [
+		{
+			"key": "/authors/OL34184A"
+		}
+	],
+	"isbn_10": ["0140328726"],
+	"isbn_13": ["9780140328721"],
+	"publish_date": "October 1, 1988",
+	"publishers": ["Puffin"],
+	"covers": [15152634, -1],
+	"identifiers": {
+		"oclc": ["18352925"],
+		"lccn": ["88012345"]
+	}
+}

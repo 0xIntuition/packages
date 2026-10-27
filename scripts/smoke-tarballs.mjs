@@ -108,7 +108,11 @@ try {
 					`${packageName} ships an unusable declaration map: ${filePath}`
 				);
 			}
-			assert(!filePath.startsWith('src/'), `${packageName} tarball leaked source file ${filePath}`);
+			assert(
+				!filePath.startsWith('src/') ||
+					(packageName === 'pipeline-runtime' && /^src\/testing\/golden\/[a-z-]+\.txt$/.test(filePath)),
+				`${packageName} tarball leaked source file ${filePath}`
+			);
 		}
 		const tarballPath = run('bun', ['run', 'pack:release'], cwd).trim().split('\n').at(-1);
 		assert.ok(tarballPath, `${packageName} release pack did not return a tarball path`);
@@ -253,7 +257,7 @@ try {
 		// Every runtime export must work from the tarball under both runtimes,
 		// including helper subpaths that Core does not happen to import today.
 		results.atomRuntimeExports = {};
-		for (const name of ['atom-parser', 'atom-classification', 'atom-enrichment']) {
+		for (const name of ['atom-parser', 'atom-classification', 'atom-enrichment', 'atom-runtime']) {
 			const specifier = '@0xintuition/' + name;
 			const manifest = JSON.parse(readFileSync(require.resolve(specifier + '/package.json'), 'utf8'));
 			const subpaths = Object.keys(manifest.exports).filter((key) => key !== './package.json');
@@ -262,6 +266,11 @@ try {
 			}
 			results.atomRuntimeExports[name] = subpaths.length;
 		}
+		const { createProcessingRuntime, computeProcessingConfigFingerprint } = await import('@0xintuition/atom-runtime');
+		const processing = createProcessingRuntime({ env: {}, cache: { provider: 'none' } });
+		if (processing.fingerprint !== computeProcessingConfigFingerprint({ env: {}, cache: { provider: 'none' } })) throw new Error('Runtime fingerprint mismatch');
+		if (processing.classification.engine() !== processing.classification.engine()) throw new Error('Runtime engines must be memoized');
+		processing.dispose();
 		const { parseAtom } = await import('@0xintuition/atom-parser/parse');
 		results.parsedAtomKind = (await parseAtom('https://example.com', { remoteFetch: false })).kind;
 		const { createClientEngine } = await import('@0xintuition/atom-classification/client');
@@ -396,6 +405,12 @@ try {
 		import { createTypeProfilesPlugin } from '@0xintuition/atom-classification/plugins/type-profiles';
 		import { createEnrichmentEngine, type EnrichmentRunResult } from '@0xintuition/atom-enrichment';
 		import { createMockPlugin, createMockArtifact, createMockRequest } from '@0xintuition/atom-enrichment/testing';
+		import { createProcessingRuntime, computeProcessingConfigFingerprint } from '@0xintuition/atom-runtime';
+		const runtime = createProcessingRuntime({ config: { env: {}, cache: { provider: 'none' } } });
+		const fingerprint: string = computeProcessingConfigFingerprint(runtime.config);
+		runtime.classification.engine();
+		runtime.enrichment.engine('default');
+		runtime.dispose();
 		const parsed: ParseResult = await parseAtom('hello', { remoteFetch: false });
 		await createClientEngine({ plugins: [createTypeProfilesPlugin(), createPlainTextPlugin()] }).classify({
 			input: parsed.normalizedInput, mode: 'client-only', classificationSessionId: 'typed-smoke',

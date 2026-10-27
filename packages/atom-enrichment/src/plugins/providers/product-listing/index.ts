@@ -5,8 +5,8 @@ import {
 	isAmazonShortLinkUrl,
 	normalizeAmazonCanonicalUrl,
 	resolveAmazonMarketplace,
-	resolveAmazonShortLink,
 } from '../__shared__/amazon';
+import { resolveAmazonShortLink } from '../__shared__/amazon-short-link';
 import { type FetchLike, fetchJsonWithSchema } from '../__shared__/http';
 import { getAmazonTarget, getRequestUrl } from '../__shared__/request';
 import { canopyAmazonProductResponseSchema } from './external';

@@ -13,7 +13,6 @@ import {
 	extractVideoObjectFields,
 } from './direct-providers';
 import { extractPageNativeFields } from './page-native';
-import { getIdentityArtifacts, isTitleStrengthDescriptiveField } from './quarantine';
 import {
 	CONFIDENCE,
 	field,
@@ -54,18 +53,21 @@ function truncateAtSentence(value: string, maxLength: number): string {
 	return `${slice.trimEnd()}…`;
 }
 
-/** Expand provider identifiers consistently, as in v2's identity quarantine helper. */
+/** Shared template expansion for extraction and identity quarantine. */
 export function wikidataSameAsUrls(
 	claims: unknown,
 	maps: readonly WikidataClassificationMap[] = Object.values(WIKIDATA_CLASSIFICATION_MAPS)
 ): string[] {
-	const urls = maps.flatMap((map) =>
-		(map.sameAsTemplates ?? []).flatMap(({ property, template }) => {
-			const value = readStringClaimValues(claims, property)[0];
-			return value ? [template.replace('{value}', encodeURIComponent(value))] : [];
-		})
-	);
-	return [...new Set(urls)];
+	return [
+		...new Set(
+			maps.flatMap((map) =>
+				(map.sameAsTemplates ?? []).flatMap((template) => {
+					const value = readStringClaimValues(claims, template.property)[0];
+					return value ? [template.template.replace('{value}', encodeURIComponent(value))] : [];
+				})
+			)
+		),
+	];
 }
 
 // ── Wikidata claim-map executor ──────────────────────────────────────────────
@@ -83,12 +85,9 @@ async function extractWikidataClaimFields(
 
 	const claims = wikidata.data.claims;
 	const evidenceUrl = `https://www.wikidata.org/wiki/${wikidata.data.entityId}`;
-	const mappings = map.fields.filter((mapping) =>
-		context.spec.fields.some((field) => field.key === mapping.field)
-	);
 
 	const entityIdByField = new Map<string, string>();
-	for (const mapping of mappings) {
+	for (const mapping of map.fields) {
 		if (mapping.kind !== 'entity-label') continue;
 		const entityId = readEntityIdClaimValues(claims, mapping.property)[0];
 		if (entityId) entityIdByField.set(mapping.field, entityId);
@@ -102,7 +101,7 @@ async function extractWikidataClaimFields(
 			: new Map<string, string>();
 
 	const fields: ExtractedField[] = [];
-	for (const mapping of mappings) {
+	for (const mapping of map.fields) {
 		if (mapping.kind === 'entity-label') {
 			const entityId = entityIdByField.get(mapping.field);
 			const label = entityId ? labels.get(entityId) : undefined;
@@ -127,7 +126,9 @@ async function extractWikidataClaimFields(
 	// sameAs: input + knowledge urls + external-id templates (X handle, IMDb,
 	// TMDb, LinkedIn, …). Only emitted when the spec defines sameAs.
 	if (context.spec.fields.some((specField) => specField.key === 'sameAs')) {
-		const identityArtifacts = getIdentityArtifacts(context.artifacts);
+		const identityArtifacts = context.artifacts.filter(
+			(artifact) => artifact.meta.identityStrength !== 'title'
+		);
 		const wikipedia = findArtifactData(identityArtifacts, 'wikipedia', parseWikipedia);
 		const identityWikidata = findArtifactData(identityArtifacts, 'wikidata', parseWikidata);
 		const identityEvidenceUrl = identityWikidata
@@ -136,7 +137,6 @@ async function extractWikidataClaimFields(
 		const templated = identityWikidata
 			? wikidataSameAsUrls(identityWikidata.data.claims, [map])
 			: [];
-
 		const sameAs = [
 			...new Set(
 				[context.url, wikipedia?.data.pageUrl, identityEvidenceUrl, ...templated].filter(
@@ -144,9 +144,7 @@ async function extractWikidataClaimFields(
 				)
 			),
 		];
-		fields.push(
-			field('sameAs', sameAs, 'wikidata', CONFIDENCE.wikidataResolvedLabel, identityEvidenceUrl)
-		);
+		fields.push(field('sameAs', sameAs, 'wikidata', CONFIDENCE.wikidataResolvedLabel, evidenceUrl));
 	}
 
 	return fields;
@@ -291,16 +289,11 @@ function extractKnowledgeFields(context: ExtractionContext): ExtractedField[] {
 
 // Metadata tier: page OG fallbacks plus input-derived url/sameAs. Lowest rank.
 function extractGenericFields(context: ExtractionContext): ExtractedField[] {
-	const wikidata = findArtifactData(
-		getIdentityArtifacts(context.artifacts),
-		'wikidata',
-		parseWikidata
+	const identityArtifacts = context.artifacts.filter(
+		(artifact) => artifact.meta.identityStrength !== 'title'
 	);
-	const wikipedia = findArtifactData(
-		getIdentityArtifacts(context.artifacts),
-		'wikipedia',
-		parseWikipedia
-	);
+	const wikidata = findArtifactData(identityArtifacts, 'wikidata', parseWikidata);
+	const wikipedia = findArtifactData(identityArtifacts, 'wikipedia', parseWikipedia);
 	const opengraph = findArtifactData(context.artifacts, 'opengraph', parseOpengraph);
 	const fields: ExtractedField[] = [];
 
@@ -318,7 +311,9 @@ function extractGenericFields(context: ExtractionContext): ExtractedField[] {
 		);
 	}
 
-	fields.push(field('url', context.url, 'input-url', CONFIDENCE.inputUrl));
+	if (context.url) {
+		fields.push(field('url', context.url, 'input-url', CONFIDENCE.inputUrl));
+	}
 
 	const sameAs = [
 		...new Set(
@@ -327,7 +322,9 @@ function extractGenericFields(context: ExtractionContext): ExtractedField[] {
 			)
 		),
 	];
-	fields.push(field('sameAs', sameAs, 'input-url', CONFIDENCE.inputUrl));
+	if (sameAs.length > 0) {
+		fields.push(field('sameAs', sameAs, 'input-url', CONFIDENCE.inputUrl));
+	}
 
 	return fields;
 }
@@ -342,19 +339,6 @@ function coerceValueForFieldType(fieldType: string, value: unknown): unknown {
 		return [value.trim()];
 	}
 	return value;
-}
-
-async function extractCandidateFields(context: ExtractionContext): Promise<ExtractedField[]> {
-	const specificExtractor = CLASSIFICATION_EXTRACTORS[context.spec.slug];
-	const specificFields = specificExtractor ? await specificExtractor(context) : [];
-	// Tier order: provider extractors > knowledge graph (wikidata/wikipedia)
-	// > the page's own schema.org JSON-LD > page metadata fallbacks.
-	return [
-		...specificFields,
-		...extractKnowledgeFields(context),
-		...extractPageNativeFields(context),
-		...extractGenericFields(context),
-	];
 }
 
 export async function extractClassificationFields(
@@ -374,25 +358,13 @@ export async function extractClassificationFields(
 		...(input.signal ? { signal: input.signal } : {}),
 	};
 
-	const identityArtifacts = getIdentityArtifacts(context.artifacts);
-	const hasTitleArtifacts = identityArtifacts.length !== context.artifacts.length;
-	const candidates = await extractCandidateFields(
-		hasTitleArtifacts
-			? {
-					...context,
-					spec: {
-						...spec,
-						fields: spec.fields.filter((field) => isTitleStrengthDescriptiveField(field.key)),
-					},
-				}
-			: context
-	);
-	// Every extractor uses the same quarantined artifact set for identity fields.
-	// Descriptions, names and images still use all artifacts. Reuse the ordinary
-	// pass when no title evidence exists, preserving the usual request count.
-	const identityCandidates = !hasTitleArtifacts
-		? candidates
-		: await extractCandidateFields({ ...context, artifacts: identityArtifacts });
+	const specificExtractor = CLASSIFICATION_EXTRACTORS[spec.slug];
+	const specificFields = specificExtractor ? await specificExtractor(context) : [];
+	// Tier order: provider extractors > knowledge graph (wikidata/wikipedia)
+	// > the page's own schema.org JSON-LD > page metadata fallbacks.
+	const knowledgeFields = extractKnowledgeFields(context);
+	const pageNativeFields = extractPageNativeFields(context);
+	const genericFields = extractGenericFields(context);
 
 	// Classification-specific extractors win over the generic metadata tier;
 	// within a tier the first extracted value for a key wins.
@@ -401,8 +373,10 @@ export async function extractClassificationFields(
 	const droppedFields: FieldExtractionResult['droppedFields'] = [];
 
 	for (const candidate of [
-		...candidates.filter((candidate) => isTitleStrengthDescriptiveField(candidate.key)),
-		...identityCandidates.filter((candidate) => !isTitleStrengthDescriptiveField(candidate.key)),
+		...specificFields,
+		...knowledgeFields,
+		...pageNativeFields,
+		...genericFields,
 	]) {
 		const specField = specFieldTypes.get(candidate.key);
 		if (!specField) {

@@ -5,6 +5,13 @@
 // atom-enrichment carries an equivalent copy in plugins/providers/__shared__/
 // amazon.ts; keep the two in sync.
 
+import {
+	DomainHtmlFetchError,
+	type DomainHtmlFetchLike,
+	type DomainHtmlResolveHostname,
+	resolvePublicHttpUrlResult,
+} from '../shared/domain-html/fetch';
+
 export const AMAZON_MARKETPLACE_BY_HOST_SUFFIX = new Map<string, string>([
 	['amazon.ca', 'CA'],
 	['amazon.co.uk', 'GB'],
@@ -149,29 +156,28 @@ export function normalizeAmazonCanonicalUrl(value: string, asin: string): string
 	}
 }
 
-type AmazonRedirectFetchLike = (
-	input: string,
-	init?: {
-		redirect?: 'follow' | 'manual' | 'error';
-		headers?: Record<string, string>;
-	}
-) => Promise<{ url?: string }>;
-
 // Follows the shortener redirect and returns the destination product URL.
 // Returns undefined when the redirect does not land on an Amazon host, so a
 // hijacked or expired short link can never inject a foreign URL downstream.
 export async function resolveAmazonShortLink(
-	fetcher: AmazonRedirectFetchLike,
-	url: string
+	fetcher: DomainHtmlFetchLike,
+	url: string,
+	options: {
+		resolveHostname?: DomainHtmlResolveHostname;
+		timeoutMs?: number;
+	} = {}
 ): Promise<string | undefined> {
-	try {
-		const response = await fetcher(url, { redirect: 'follow' });
-		const destination = typeof response.url === 'string' ? response.url : undefined;
-		if (!destination) {
-			return undefined;
-		}
-		return isAmazonHostname(new URL(destination).hostname) ? destination : undefined;
-	} catch {
-		return undefined;
+	const destinationResult = await resolvePublicHttpUrlResult(fetcher, {
+		url,
+		acceptDestination: (candidate) =>
+			isAmazonHostname(new URL(candidate).hostname) &&
+			extractAmazonAsinFromUrl(candidate) !== undefined,
+		resolveHostname: options.resolveHostname,
+		timeoutMs: options.timeoutMs,
+	});
+	if (destinationResult.ok === false) {
+		throw new DomainHtmlFetchError(destinationResult.failure);
 	}
+	const destination = destinationResult.value;
+	return isAmazonHostname(new URL(destination).hostname) ? destination : undefined;
 }

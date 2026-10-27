@@ -1,9 +1,13 @@
-export { harvestAugmentationLookups, mergeHarvests } from './augmentation';
-export type { ChainHarvest } from './chaining';
+export {
+	harvestAugmentationLookups,
+	isGeneratedSpotifyDisplayName,
+	mergeHarvests,
+} from './augmentation';
+export type { ChainHarvest, ChainHarvestCollision } from './chaining';
 export { harvestChainIdentifiers } from './chaining';
 export { extractClassificationFields } from './extract';
+export { isValidIsrc, normalizeIsrc } from './isrc';
 export { extractPageNativeFields, pickPrimaryJsonLdType } from './page-native';
-export { getIdentityArtifacts, TITLE_STRENGTH_DESCRIPTIVE_FIELDS } from './quarantine';
 export { suggestClassifications } from './suggest';
 export type {
 	ClassificationFieldExtractor,

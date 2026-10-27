@@ -1,17 +1,201 @@
-import { describe, expect, it } from 'bun:test';
+import { beforeEach, describe, expect, it } from 'bun:test';
 
 import { createClassificationEngine } from '../src/engine';
 import {
+	createDefaultUrlPlugin,
 	createV0TypeProfilesPlugin,
 	createXDomainApiAdapter,
 	createXOpenGraphAdapter,
 	createXPlugin,
 	createXPublicMetadataAdapter,
 } from '../src/index';
+import { resetDomainHtmlHostCircuitBreakersForTests } from '../src/plugins/shared/domain-html/fetch';
+import { createDefaultTestPlugins } from './helpers/default-plugins';
+import { resolvePublicTestHostname } from './helpers/public-dns';
+
+// default-url now optionally fetches OpenGraph metadata (ENG-13195); pass a
+// non-network stub so this test never touches globalThis.fetch even though
+// the x classifier is expected to win before default-url's resolver runs.
+const NO_NETWORK_FETCH = async () => new Response(null, { status: 404 });
 
 describe('x plugin', () => {
+	beforeEach(() => {
+		resetDomainHtmlHostCircuitBreakersForTests();
+	});
+
+	it('names the open host and breaker state in the public-metadata classify diagnostic', async () => {
+		let fetchCallCount = 0;
+		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
+			runtime: 'server',
+			plugins: [
+				createV0TypeProfilesPlugin(),
+				createXPlugin({
+					useDefaultDomainApiAdapter: false,
+					useDefaultOpenGraphAdapter: false,
+					adapters: {
+						publicMetadata: createXPublicMetadataAdapter({
+							resolveHostname: resolvePublicTestHostname,
+							fetch: async () => {
+								fetchCallCount += 1;
+								return new Response('', { status: 503 });
+							},
+						}),
+					},
+				}),
+			],
+		});
+
+		let finalResult: Awaited<ReturnType<typeof engine.classify>> | undefined;
+		for (let index = 0; index < 4; index += 1) {
+			finalResult = await engine.classify({
+				input: `https://x.com/0xIntuition/status/192050517088821670${index}`,
+				mode: 'progressive',
+				classificationSessionId: `x-public-metadata-open-${index}`,
+			});
+		}
+
+		expect(fetchCallCount).toBe(3);
+		expect(finalResult?.resolverErrors?.map((error) => error.message).join('\n')).toMatch(
+			/public-metadata:circuit_open: Host cdn\.syndication\.twimg\.com circuit is open \(failures=3, openForMs=\d+, resetAfterMs=300000\)/
+		);
+	});
+
+	it('keeps X status URLs as SocialMediaPosting through the default preset with or without metadata (ENG-13374)', async () => {
+		const input = 'https://x.com/0xIntuition/status/1920505170888216700';
+		const identityOnlyEngine = createClassificationEngine({
+			onClassifierError: () => undefined,
+			runtime: 'server',
+			plugins: createDefaultTestPlugins(),
+		});
+		const enrichedEngine = createClassificationEngine({
+			onClassifierError: () => undefined,
+			runtime: 'server',
+			plugins: createDefaultTestPlugins({
+				xPluginOptions: {
+					adapters: {
+						publicMetadata: createXPublicMetadataAdapter({
+							resolveHostname: resolvePublicTestHostname,
+							fetch: async () => new Response(JSON.stringify(X_PUBLIC_JSON_TWEET)),
+						}),
+					},
+				},
+			}),
+		});
+
+		const identityOnly = await identityOnlyEngine.classify({
+			input,
+			mode: 'progressive',
+			classificationSessionId: 'x-default-preset-identity-only',
+		});
+		const enriched = await enrichedEngine.classify({
+			input,
+			mode: 'progressive',
+			classificationSessionId: 'x-default-preset-enriched',
+		});
+
+		for (const result of [identityOnly, enriched]) {
+			expect(result.classification).toMatchObject({
+				domain: 'x',
+				subtype: 'post',
+				meta: {
+					postId: '1920505170888216700',
+					canonicalUrl: input,
+				},
+			});
+			expect(result.resolved?.atoms[0]).toMatchObject({
+				schemaType: 'SocialMediaPosting',
+				category: 'thing',
+				canonicalId: 'x:post:1920505170888216700',
+				sameAs: [input],
+				data: {
+					'@type': 'SocialMediaPosting',
+					identifier: '1920505170888216700',
+					url: input,
+					sameAs: [input],
+				},
+			});
+		}
+
+		expect(identityOnly.resolved?.atoms[0]?.metadata).toMatchObject({
+			resolutionMode: 'identity-only',
+			fallbackStage: 'generic',
+		});
+		expect(enriched.resolved?.atoms[0]?.metadata).toMatchObject({
+			resolutionMode: 'enriched',
+			fallbackStage: 'public-metadata',
+		});
+		expect(enriched.resolved?.atoms[0]?.data.text).toBe('Atoms are social objects.');
+	});
+
+	// ENG-13569: two X profile URLs created back-to-back resolved to different
+	// categories (Person vs Thing). Root cause: the x classifier required an
+	// absolute URL (scheme required), so a profile pasted/typed without
+	// "https://" fell through to the generic default-url plugin's Website/thing
+	// fallback instead of the platform's deterministic identity-only Person
+	// fallback — a URL-shape-dependent type flip, not a fetch-dependent one.
+	it('classifies a schemeless x profile URL as Person, not the generic default-url fallback', async () => {
+		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
+			runtime: 'server',
+			plugins: [
+				createV0TypeProfilesPlugin(),
+				createXPlugin({
+					useDefaultDomainApiAdapter: false,
+					useDefaultPublicMetadataAdapter: false,
+					useDefaultOpenGraphAdapter: false,
+				}),
+				createDefaultUrlPlugin({ fetch: NO_NETWORK_FETCH }),
+			],
+		});
+
+		const result = await engine.classify({
+			input: 'x.com/0xIntuition',
+			mode: 'progressive',
+			classificationSessionId: 'x-schemeless-profile',
+		});
+
+		expect(result.classification?.domain).toBe('x');
+		expect(result.classification?.subtype).toBe('profile');
+		expect(result.resolved?.atoms[0]?.schemaType).toBe('SocialMediaAccount');
+		expect(result.resolved?.atoms[0]?.category).toBe('person');
+	});
+
+	// Phase 3 determinism guard: an X profile must resolve to Person even when
+	// every enrichment stage fails outright — the type decision comes from the
+	// URL shape, never from whether metadata could be fetched.
+	it('never returns a category other than person for a profile URL even when every adapter throws', async () => {
+		const throwingFetch = async () => {
+			throw new Error('network unavailable');
+		};
+		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
+			runtime: 'server',
+			plugins: [
+				createV0TypeProfilesPlugin(),
+				createXPlugin({
+					adapters: {
+						domainApi: createXDomainApiAdapter({ token: 'test-token', fetch: throwingFetch }),
+						publicMetadata: createXPublicMetadataAdapter({ fetch: throwingFetch }),
+						openGraph: createXOpenGraphAdapter({ fetch: throwingFetch }),
+					},
+				}),
+			],
+		});
+
+		const result = await engine.classify({
+			input: 'https://x.com/0xIntuition',
+			mode: 'progressive',
+			classificationSessionId: 'x-fetch-failure',
+		});
+
+		expect(result.resolved?.atoms[0]?.category).toBe('person');
+		expect(result.resolved?.atoms[0]?.schemaType).toBe('SocialMediaAccount');
+	});
+
 	it('returns identity-only post output without fabricating tweet text', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [
 				createV0TypeProfilesPlugin(),
@@ -62,8 +246,103 @@ describe('x plugin', () => {
 		});
 	});
 
+	it('treats the default domain-api adapter without credentials as a clean miss', async () => {
+		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
+			runtime: 'server',
+			plugins: [
+				createV0TypeProfilesPlugin(),
+				createXPlugin({
+					useDefaultPublicMetadataAdapter: false,
+					useDefaultOpenGraphAdapter: false,
+				}),
+			],
+		});
+
+		const result = await engine.classify({
+			input: 'https://x.com/0xIntuition',
+			mode: 'progressive',
+			classificationSessionId: 'x-domain-api-no-credential-clean-miss',
+		});
+
+		expect(result.status).toBe('complete');
+		expect(result.resolved?.atoms[0]?.source).toBe('platform-v0:generic');
+		expect(result.resolved?.atoms[0]?.schemaType).toBe('SocialMediaAccount');
+		expect(result.resolverErrors ?? []).toEqual([]);
+	});
+
+	it('treats a profile passed to post-only public metadata as a clean miss', async () => {
+		let fetchCount = 0;
+		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
+			runtime: 'server',
+			plugins: [
+				createV0TypeProfilesPlugin(),
+				createXPlugin({
+					useDefaultDomainApiAdapter: false,
+					useDefaultPublicMetadataAdapter: false,
+					useDefaultOpenGraphAdapter: false,
+					adapters: {
+						publicMetadata: createXPublicMetadataAdapter({
+							resolveHostname: resolvePublicTestHostname,
+							fetch: async () => {
+								fetchCount += 1;
+								return new Response('{}');
+							},
+						}),
+					},
+				}),
+			],
+		});
+
+		const result = await engine.classify({
+			input: 'https://x.com/0xIntuition',
+			mode: 'progressive',
+			classificationSessionId: 'x-profile-public-metadata-clean-miss',
+		});
+
+		expect(result.status).toBe('complete');
+		expect(result.resolved?.atoms[0]?.source).toBe('platform-v0:generic');
+		expect(result.resolved?.atoms[0]?.schemaType).toBe('SocialMediaAccount');
+		expect(result.resolverErrors ?? []).toEqual([]);
+		expect(fetchCount).toBe(0);
+	});
+
+	it('treats an X tombstone response as a clean miss', async () => {
+		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
+			runtime: 'server',
+			plugins: [
+				createV0TypeProfilesPlugin(),
+				createXPlugin({
+					useDefaultDomainApiAdapter: false,
+					useDefaultPublicMetadataAdapter: false,
+					useDefaultOpenGraphAdapter: false,
+					adapters: {
+						publicMetadata: createXPublicMetadataAdapter({
+							resolveHostname: resolvePublicTestHostname,
+							fetch: async () => new Response(JSON.stringify({ __typename: 'TweetTombstone' })),
+						}),
+					},
+				}),
+			],
+		});
+
+		const result = await engine.classify({
+			input: 'https://x.com/0xIntuition/status/1920505170888216700',
+			mode: 'progressive',
+			classificationSessionId: 'x-tombstone-clean-miss',
+		});
+
+		expect(result.status).toBe('complete');
+		expect(result.resolved?.atoms[0]?.source).toBe('platform-v0:generic');
+		expect(result.resolved?.atoms[0]?.schemaType).toBe('SocialMediaPosting');
+		expect(result.resolverErrors ?? []).toEqual([]);
+	});
+
 	it('uses the official x domain api adapter to enrich publishable post content', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [
 				createV0TypeProfilesPlugin(),
@@ -139,6 +418,7 @@ describe('x plugin', () => {
 
 	it('promotes approved rich-public fields from structured public metadata', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [
 				createV0TypeProfilesPlugin(),
@@ -148,11 +428,8 @@ describe('x plugin', () => {
 					useDefaultOpenGraphAdapter: false,
 					adapters: {
 						publicMetadata: createXPublicMetadataAdapter({
-							fetch: async () => ({
-								ok: true,
-								status: 200,
-								text: async () => JSON.stringify(X_PUBLIC_JSON_TWEET),
-							}),
+							resolveHostname: resolvePublicTestHostname,
+							fetch: async () => new Response(JSON.stringify(X_PUBLIC_JSON_TWEET)),
 						}),
 					},
 				}),
@@ -214,6 +491,7 @@ describe('x plugin', () => {
 
 	it('uses the optional enrichment adapter when x credentials are configured', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [
 				createV0TypeProfilesPlugin(),
@@ -275,6 +553,7 @@ describe('x plugin', () => {
 
 	it('uses the x opengraph adapter opportunistically without expanding publishable text', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [
 				createV0TypeProfilesPlugin(),
@@ -284,11 +563,8 @@ describe('x plugin', () => {
 					useDefaultOpenGraphAdapter: false,
 					adapters: {
 						openGraph: createXOpenGraphAdapter({
-							fetch: async () => ({
-								ok: true,
-								status: 200,
-								text: async () => X_POST_OPEN_GRAPH_HTML,
-							}),
+							resolveHostname: resolvePublicTestHostname,
+							fetch: async () => new Response(X_POST_OPEN_GRAPH_HTML),
 						}),
 					},
 				}),

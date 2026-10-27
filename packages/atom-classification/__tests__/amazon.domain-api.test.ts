@@ -10,6 +10,7 @@ import {
 describe('amazon domain-api adapter', () => {
 	it('uses Canopy product data before html fallback when credentials are configured', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [
 				createV0TypeProfilesPlugin(),

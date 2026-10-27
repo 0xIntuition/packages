@@ -7,6 +7,7 @@ const SPOTIFY_TRACK_URL = 'https://open.spotify.com/track/0ojU4I7FDbtkvh4lnkPI1C
 describe('pluginIds filtering', () => {
 	it('uses the selected plugin stack when pluginIds are provided', async () => {
 		const engine = createServerEngine({
+			onClassifierError: () => undefined,
 			plugins: createDefaultTestPlugins(),
 		});
 

@@ -1,90 +1,107 @@
+import { parseIsbn } from '../shared/isbn';
 import { createNonUrlPlugin, type NonUrlV0Profile } from '../shared/non-url';
+import {
+	buildOpenLibraryWorkAtom,
+	type OpenLibraryWorkLookupOptions,
+	openLibraryLookupFailureError,
+	resolveOpenLibraryWork,
+} from '../shared/openlibrary-lookup';
 
-const ISBN_PREFIX_REGEX = /^isbn(?::|\s)+/i;
-const ISBN_10_REGEX = /^[0-9]{9}[0-9X]$/i;
-const ISBN_13_REGEX = /^97[89][0-9]{10}$/;
-
-export const isbnProfile: NonUrlV0Profile = {
-	id: 'isbn',
-	classifier: {
-		id: 'isbn-identifier-classifier',
-		priority: 25,
-		classify: (input) => {
-			const trimmed = input.trim();
-			const withoutPrefix = trimmed.replace(ISBN_PREFIX_REGEX, '');
-			const compact = withoutPrefix.replace(/[-\s]/g, '').toUpperCase();
-
-			if (ISBN_10_REGEX.test(compact)) {
-				return {
-					type: 'identifier',
-					domain: 'isbn',
-					subtype: 'isbn-10',
-					confidence: 0.97,
-					meta: {
-						normalizedIsbn: compact,
-						identifierType: 'ISBN10',
-					},
-				};
-			}
-
-			if (ISBN_13_REGEX.test(compact)) {
-				return {
-					type: 'identifier',
-					domain: 'isbn',
-					subtype: 'isbn-13',
-					confidence: 0.98,
-					meta: {
-						normalizedIsbn: compact,
-						identifierType: 'ISBN13',
-					},
-				};
-			}
-
-			return null;
-		},
-	},
-	canResolve: (classification) => classification.domain === 'isbn',
-	resolve: ({ classification, request, now }) => {
-		const normalized =
-			(typeof classification.meta.normalizedIsbn === 'string' &&
-				classification.meta.normalizedIsbn) ||
-			request.input.trim();
-		const sourceUrl = `https://www.worldcat.org/isbn/${normalized}`;
-		const name = `Book (ISBN ${normalized})`;
-
-		return {
-			fallbackUsed: true,
-			atoms: [
-				{
-					schemaType: 'Book',
-					category: 'thing',
-					title: name,
-					canonicalId: `isbn:${normalized}`,
-					sameAs: [sourceUrl],
-					data: {
-						'@context': 'https://schema.org/',
-						'@type': 'Book',
-						name,
-						isbn: normalized,
-						sameAs: [sourceUrl],
-					},
-					metadata: {
-						pluginId: 'isbn',
-						provider: 'isbn',
-						fetchedAt: now,
-						sourceUrl,
-						identifierType: classification.subtype,
-					},
-				},
-			],
-		};
-	},
+export type IsbnPluginOptions = {
+	/** Open Library uses a shared 5000ms default; set budgetMs to override, or false to skip. */
+	openLibrary?: OpenLibraryWorkLookupOptions | false;
 };
 
-export function createIsbnPlugin() {
+function buildIsbnFallback(normalized: string, subtype: string | undefined, now: string) {
+	const sourceUrl = `https://www.worldcat.org/isbn/${normalized}`;
+	const name = `Book (ISBN ${normalized})`;
+	return {
+		fallbackUsed: true,
+		atoms: [
+			{
+				schemaType: 'Book' as const,
+				category: 'thing' as const,
+				title: name,
+				canonicalId: `isbn:${normalized}`,
+				sameAs: [sourceUrl],
+				data: {
+					'@context': 'https://schema.org/',
+					'@type': 'Book',
+					name,
+					isbn: normalized,
+					sameAs: [sourceUrl],
+				},
+				metadata: {
+					pluginId: 'isbn',
+					provider: 'isbn',
+					fetchedAt: now,
+					sourceUrl,
+					identifierType: subtype,
+				},
+			},
+		],
+	};
+}
+
+function createIsbnProfile(options: IsbnPluginOptions = {}): NonUrlV0Profile {
+	return {
+		id: 'isbn',
+		classifier: {
+			id: 'isbn-identifier-classifier',
+			priority: 25,
+			classify: (input) => {
+				const parsed = parseIsbn(input);
+				if (!parsed) return null;
+				const isbn10 = parsed.sourceType === 'isbn-10';
+				return {
+					type: 'identifier',
+					domain: 'isbn',
+					subtype: isbn10 ? 'isbn-10' : 'isbn-13',
+					confidence: isbn10 ? 0.97 : 0.98,
+					meta: {
+						normalizedIsbn: parsed.isbn13,
+						identifierType: isbn10 ? 'ISBN10' : 'ISBN13',
+					},
+				};
+			},
+		},
+		canResolve: (classification) => classification.domain === 'isbn',
+		resolve: async ({ classification, request, now, runtime, signal }) => {
+			const normalized =
+				(typeof classification.meta.normalizedIsbn === 'string' &&
+					classification.meta.normalizedIsbn) ||
+				request.input.trim();
+			const fallback = buildIsbnFallback(normalized, classification.subtype, now);
+			if (runtime !== 'server' || options.openLibrary === false) return fallback;
+
+			const result = await resolveOpenLibraryWork(
+				{ kind: 'isbn', value: normalized },
+				{ ...options.openLibrary, signal }
+			);
+			if (result.status === 'miss' || result.status === 'ambiguous') return fallback;
+			if (result.status === 'failure') {
+				return { ...fallback, errors: [openLibraryLookupFailureError(result).message] };
+			}
+
+			const atom = buildOpenLibraryWorkAtom(result);
+			atom.metadata = {
+				pluginId: 'isbn',
+				provider: 'openlibrary',
+				fetchedAt: now,
+				sourceUrl: result.workUrl,
+				identifierType: classification.subtype,
+			};
+			return { fallbackUsed: false, atoms: [atom] };
+		},
+	};
+}
+
+export const isbnProfile: NonUrlV0Profile = createIsbnProfile();
+
+export function createIsbnPlugin(options: IsbnPluginOptions = {}) {
 	return createNonUrlPlugin({
 		pluginId: 'isbn',
 		resolverId: 'isbn-resolver',
-		profile: isbnProfile,
+		profile: createIsbnProfile(options),
 	});
 }

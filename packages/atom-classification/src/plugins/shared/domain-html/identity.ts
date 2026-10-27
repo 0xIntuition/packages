@@ -1,6 +1,12 @@
 import type { ResolverAtom } from '../../../plugins';
 
-type IdentityFieldValue = string | string[] | number | boolean | Record<string, unknown>;
+type IdentityFieldValue =
+	| string
+	| string[]
+	| number
+	| boolean
+	| Record<string, unknown>
+	| Record<string, unknown>[];
 
 export function buildIdentityResolverAtom(input: {
 	schemaType: string;

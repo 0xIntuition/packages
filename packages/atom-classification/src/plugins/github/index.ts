@@ -35,6 +35,12 @@ const RESERVED_PROFILE_SEGMENTS = new Set([
 
 export const githubProfile: PlatformV0Profile = {
 	domain: 'github',
+	display: {
+		classificationSlugs: ['software', 'social-media-account', 'thing'],
+		exampleUrl: 'https://github.com/ethereum/go-ethereum',
+		host: 'github.com',
+		label: 'GitHub',
+	},
 	supportsOEmbed: false,
 	allowDomainApiWithoutCredentials: true,
 	classifier: {

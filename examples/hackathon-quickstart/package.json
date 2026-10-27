@@ -13,8 +13,8 @@
 		"clean": "node -e \"fs.rmSync('dist', { recursive: true, force: true })\""
 	},
 	"dependencies": {
-		"@0xintuition/classifications": "workspace:*",
-		"@0xintuition/ids": "workspace:*",
+		"@0xintuition/classifications": "0.1.0-alpha.1",
+		"@0xintuition/ids": "0.1.0-alpha.1",
 		"react": "catalog:",
 		"react-dom": "catalog:"
 	},

@@ -1,5 +1,4 @@
 import { z } from 'zod/v4';
-import { spotifyExternalIdentifierSchema } from './schema';
 
 const nullableStringSchema = z.union([z.string(), z.null()]);
 
@@ -56,9 +55,7 @@ export const spotifyTrackResponseSchema = z
 			.optional(),
 		external_ids: z
 			.object({
-				isrc: spotifyExternalIdentifierSchema,
-				upc: spotifyExternalIdentifierSchema,
-				ean: spotifyExternalIdentifierSchema,
+				isrc: z.string().optional(),
 			})
 			.passthrough()
 			.optional(),
@@ -69,6 +66,7 @@ export const spotifyTrackResponseSchema = z
 
 export const spotifyAlbumResponseSchema = z
 	.object({
+		external_ids: z.object({ upc: z.string().optional(), ean: z.string().optional() }).optional(),
 		id: z.string().optional(),
 		name: z.string().optional(),
 		popularity: z.number().optional(),
@@ -76,14 +74,6 @@ export const spotifyAlbumResponseSchema = z
 		external_urls: z
 			.object({
 				spotify: z.string().optional(),
-			})
-			.passthrough()
-			.optional(),
-		external_ids: z
-			.object({
-				isrc: spotifyExternalIdentifierSchema,
-				upc: spotifyExternalIdentifierSchema,
-				ean: spotifyExternalIdentifierSchema,
 			})
 			.passthrough()
 			.optional(),
@@ -157,6 +147,35 @@ export const spotifyEpisodeResponseSchema = z
 		images: z.array(spotifyImageResponseSchema).optional(),
 		show: spotifyEpisodeShowResponseSchema.optional(),
 	})
+	.passthrough();
+
+export const spotifyTracksBatchResponseSchema = z
+	.object({ tracks: z.array(z.union([spotifyTrackResponseSchema, z.null()])) })
+	.passthrough();
+
+export const spotifySearchResponseSchema = z
+	.object({
+		tracks: z
+			.object({ items: z.array(spotifyTrackResponseSchema) })
+			.passthrough()
+			.optional(),
+	})
+	.passthrough();
+
+export const spotifyAlbumsBatchResponseSchema = z
+	.object({ albums: z.array(z.union([spotifyAlbumResponseSchema, z.null()])) })
+	.passthrough();
+
+export const spotifyArtistsBatchResponseSchema = z
+	.object({ artists: z.array(z.union([spotifyArtistResponseSchema, z.null()])) })
+	.passthrough();
+
+export const spotifyShowsBatchResponseSchema = z
+	.object({ shows: z.array(z.union([spotifyShowResponseSchema, z.null()])) })
+	.passthrough();
+
+export const spotifyEpisodesBatchResponseSchema = z
+	.object({ episodes: z.array(z.union([spotifyEpisodeResponseSchema, z.null()])) })
 	.passthrough();
 
 export type SpotifyTokenResponse = z.infer<typeof spotifyTokenResponseSchema>;

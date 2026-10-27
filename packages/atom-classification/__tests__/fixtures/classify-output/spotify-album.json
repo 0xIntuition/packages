@@ -1,0 +1,32 @@
+{
+	"name": "spotify-album",
+	"url": "https://open.spotify.com/album/4uLU6hMCjMI75M1A2tKUQC",
+	"atom": {
+		"schemaType": "MusicAlbum",
+		"category": "music-album",
+		"title": "Fixture spotify-album",
+		"canonicalId": "spotify:album:4uLU6hMCjMI75M1A2tKUQC",
+		"sameAs": ["https://open.spotify.com/album/4uLU6hMCjMI75M1A2tKUQC"],
+		"hints": {
+			"identifiers": {
+				"spotifyAlbumId": "4uLU6hMCjMI75M1A2tKUQC"
+			}
+		},
+		"metadata": {},
+		"data": {
+			"@type": "MusicAlbum",
+			"identifier": "int:spotify:album:4uLU6hMCjMI75M1A2tKUQC",
+			"name": "Fixture spotify-album"
+		}
+	},
+	"identifierRung": [
+		{
+			"rung": "spotify:album",
+			"value": "4uLU6hMCjMI75M1A2tKUQC"
+		}
+	],
+	"aliases": [],
+	"identifierSet": ["int:spotify:album:4uLU6hMCjMI75M1A2tKUQC"],
+	"primaryIid": "int:spotify:album:4uLU6hMCjMI75M1A2tKUQC",
+	"appAliases": ["int:spotify:album:4uLU6hMCjMI75M1A2tKUQC"]
+}

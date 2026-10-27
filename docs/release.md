@@ -135,18 +135,19 @@ Publish in dependency order:
 6. `@0xintuition/schema-org`
 7. `@0xintuition/classifications`
 8. `@0xintuition/pipeline-runtime`
-9. `@0xintuition/atom-parser` (held, see below)
-10. `@0xintuition/atom-classification` (held)
-11. `@0xintuition/atom-enrichment` (held)
-12. `@0xintuition/iid-registry`
-13. `@0xintuition/iid-ladder`
-14. `@0xintuition/predicates`
-15. `@0xintuition/primitives`
-16. `@0xintuition/protocol`
-17. `@0xintuition/periphery`
-18. `@0xintuition/sdk`
-19. `@0xintuition/cli`
-20. `@0xintuition/react`
+9. `@0xintuition/atom-parser`
+10. `@0xintuition/iid-registry`
+11. `@0xintuition/iid-ladder`
+12. `@0xintuition/predicates`
+13. `@0xintuition/primitives`
+14. `@0xintuition/protocol`
+15. `@0xintuition/atom-enrichment`
+16. `@0xintuition/atom-classification`
+17. `@0xintuition/atom-runtime`
+18. `@0xintuition/periphery`
+19. `@0xintuition/sdk`
+20. `@0xintuition/cli`
+21. `@0xintuition/react`
 
 This order matches the release packing/smoke scripts and keeps internal
 dependency pins resolvable as each package is published.
@@ -342,7 +343,8 @@ part of CI, and it must pass on the exact revision being published.
 ## Held packages
 
 `@0xintuition/atom-parser`, `@0xintuition/atom-classification`, and
-`@0xintuition/atom-enrichment` are registered workspace packages but are not in
-`release-plan.json`. Their `0.1.0-alpha.0` manifests carry the Core lineage, which is
-never published; the packages re-enter the plan as `0.1.0-alpha.1` once rebuilt from
-the application lineage (ENG-17076..17078). Do not publish them from this train.
+`@0xintuition/atom-enrichment` are reconciled with the application lineage and
+included in `release-plan.json` at `0.1.0-alpha.1`. The Promise-based composition
+root, `@0xintuition/atom-runtime`, joins at `0.1.0-alpha.0`. Publish prerequisites
+first, then parser, enrichment, classification, and runtime in registry order.
+Publication remains subject to the release gates above.

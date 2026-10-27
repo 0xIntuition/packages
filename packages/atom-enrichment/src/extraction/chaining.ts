@@ -3,18 +3,24 @@
 // Wikidata's external-id claims) so a follow-up pass can run ONLY the plugins
 // those ids unlock — never fuzzy search. See classification-parity-spec.md §2.
 
+import { parseIntuitionId, SCHEMES } from '@0xintuition/iid';
 import type { EnrichmentArtifact } from '../types';
-import { getIdentityArtifacts } from './quarantine';
 import { parsePlaces, parseWikidata, parseWikipedia, readString } from './shared';
 import { readCoordinateClaimValue, readStringClaimValues } from './wikidata-claims';
 
-export { getIdentityArtifacts } from './quarantine';
-
 export type ChainHarvest = {
+	/** Deterministic identity conflicts discovered while deriving follow-up keys. */
+	collisions?: ChainHarvestCollision[];
 	/** hints.identifiers entries for the next enrichment pass. */
 	identifiers: Record<string, string>;
 	/** Plugin slugs those identifiers unlock. */
 	pluginSlugs: string[];
+};
+
+export type ChainHarvestCollision = {
+	kind: 'wikidata-slug-conflict';
+	qid: string;
+	slugs: string[];
 };
 
 // Wikidata external-id properties → identifier keys the target plugins read.
@@ -37,15 +43,48 @@ function harvestFromWikipedia(
 	artifacts: readonly EnrichmentArtifact[],
 	harvest: ChainHarvest
 ): void {
+	let harvested: { qid: string; slug?: string } | undefined;
+	const slugs = new Set<string>();
 	for (const artifact of artifacts) {
 		if (artifact.artifact_type !== 'wikipedia') continue;
 		const wikibaseItem = readString(artifact.data.wikibaseItem);
-		if (wikibaseItem && /^Q\d+$/i.test(wikibaseItem)) {
-			harvest.identifiers.wikidata = wikibaseItem.toUpperCase();
-			harvest.pluginSlugs.push('wikidata');
-			return;
+		const identity = wikibaseItem ? parseWdHarvestIdentity(wikibaseItem) : undefined;
+		if (!identity) continue;
+		if (!harvested) {
+			harvested = identity;
+		}
+		if (identity.qid !== harvested.qid) continue;
+		if (identity.slug) {
+			slugs.add(identity.slug);
 		}
 	}
+	if (!harvested) return;
+	harvest.identifiers.wikidata = harvested.qid;
+	harvest.pluginSlugs.push('wikidata');
+	if (slugs.size > 1) {
+		harvest.collisions?.push({
+			kind: 'wikidata-slug-conflict',
+			qid: harvested.qid,
+			slugs: [...slugs].sort(),
+		});
+	}
+}
+
+function parseWdHarvestIdentity(value: string): { qid: string; slug?: string } | undefined {
+	const parsed = value.startsWith('int:') ? parseIntuitionId(value) : undefined;
+	if (value.startsWith('int:') && parsed?.scheme !== 'wd') {
+		return undefined;
+	}
+	const canonical = SCHEMES.wd.canonicalize(parsed?.value ?? value);
+	if (!canonical) {
+		return undefined;
+	}
+	const typed = /^([^:]+):(Q[1-9]\d*)$/.exec(canonical);
+	return typed
+		? { qid: typed[2] ?? '', slug: typed[1] ?? '' }
+		: /^Q[1-9]\d*$/.test(canonical)
+			? { qid: canonical }
+			: undefined;
 }
 
 function harvestFromWikidata(
@@ -98,12 +137,11 @@ function harvestFromWikidata(
  * that already produced an artifact (no point re-running them).
  */
 export function harvestChainIdentifiers(artifacts: readonly EnrichmentArtifact[]): ChainHarvest {
-	const harvest: ChainHarvest = { identifiers: {}, pluginSlugs: [] };
-	const identityArtifacts = getIdentityArtifacts(artifacts);
-	harvestFromWikipedia(identityArtifacts, harvest);
-	harvestFromWikidata(identityArtifacts, harvest);
+	const harvest: ChainHarvest = { collisions: [], identifiers: {}, pluginSlugs: [] };
+	harvestFromWikipedia(artifacts, harvest);
+	harvestFromWikidata(artifacts, harvest);
 
-	const presentTypes = new Set(identityArtifacts.map((artifact) => artifact.artifact_type));
+	const presentTypes = new Set(artifacts.map((artifact) => artifact.artifact_type));
 	const slugToArtifactType: Record<string, string> = {
 		wikidata: 'wikidata',
 		tmdb: 'tmdb',
@@ -119,20 +157,20 @@ export function harvestChainIdentifiers(artifacts: readonly EnrichmentArtifact[]
 	});
 
 	if (pluginSlugs.length === 0) {
-		return { identifiers: {}, pluginSlugs: [] };
+		return { collisions: harvest.collisions, identifiers: {}, pluginSlugs: [] };
 	}
-	return { identifiers: harvest.identifiers, pluginSlugs };
+	return { collisions: harvest.collisions, identifiers: harvest.identifiers, pluginSlugs };
 }
 
 // Confirms whether a places artifact actually resolved (used for loop tests).
 export function hasResolvedPlace(artifacts: readonly EnrichmentArtifact[]): boolean {
-	return getIdentityArtifacts(artifacts).some(
+	return artifacts.some(
 		(artifact) => artifact.artifact_type === 'places' && parsePlaces(artifact.data) !== null
 	);
 }
 
 export function hasWikipediaPivot(artifacts: readonly EnrichmentArtifact[]): boolean {
-	return getIdentityArtifacts(artifacts).some(
+	return artifacts.some(
 		(artifact) =>
 			artifact.artifact_type === 'wikipedia' &&
 			parseWikipedia(artifact.data)?.wikibaseItem !== undefined

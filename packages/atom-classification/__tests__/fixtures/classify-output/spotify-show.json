@@ -1,0 +1,31 @@
+{
+	"name": "spotify-show",
+	"url": "https://open.spotify.com/show/4uLU6hMCjMI75M1A2tKUQC",
+	"atom": {
+		"schemaType": "PodcastSeries",
+		"category": "thing",
+		"title": "Fixture spotify-show",
+		"canonicalId": "spotify:show:4uLU6hMCjMI75M1A2tKUQC",
+		"sameAs": ["https://open.spotify.com/show/4uLU6hMCjMI75M1A2tKUQC"],
+		"hints": {
+			"identifiers": {
+				"spotifyShowId": "4uLU6hMCjMI75M1A2tKUQC"
+			}
+		},
+		"metadata": {},
+		"data": {
+			"@type": "PodcastSeries",
+			"identifier": "int:spotify:show:4uLU6hMCjMI75M1A2tKUQC",
+			"name": "Fixture spotify-show"
+		}
+	},
+	"identifierRung": [
+		{
+			"rung": "spotify:show",
+			"value": "4uLU6hMCjMI75M1A2tKUQC"
+		}
+	],
+	"aliases": [],
+	"identifierSet": ["int:spotify:show:4uLU6hMCjMI75M1A2tKUQC"],
+	"appAliases": ["int:spotify:show:4uLU6hMCjMI75M1A2tKUQC"]
+}

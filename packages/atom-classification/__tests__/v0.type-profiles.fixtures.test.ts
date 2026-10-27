@@ -12,11 +12,13 @@ const V0_TARGET_CATEGORY_FIXTURES = [
 	{ type: 'PodcastSeries', category: 'podcast', name: 'Bankless' },
 	{ type: 'PodcastEpisode', category: 'podcast', name: 'The Future of Onchain Reputation' },
 	{ type: 'SoftwareApplication', category: 'software', name: 'Notion' },
+	{ type: 'VideoGame', category: 'thing', name: 'Dota 2' },
 ] as const;
 
 describe('v0 type profile fixtures', () => {
 	it('registers profile fixtures for every v0 target category', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [createV0TypeProfilesPlugin()],
 		});

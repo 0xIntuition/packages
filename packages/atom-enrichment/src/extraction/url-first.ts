@@ -1,6 +1,5 @@
 import { getClassification } from '@0xintuition/classifications';
 import type { AtomType, ClassifiedAtomInput, EnrichmentArtifact } from '../types';
-import { getIdentityArtifacts } from './quarantine';
 
 // URL-first creation: the user picks a classification spec, then provides a
 // single URL. These helpers turn that pair into the classified-atom input the
@@ -18,7 +17,16 @@ export type UrlFirstClassification = {
 	requiredFieldKeys: string[];
 };
 
-const SCHEMA_TYPE_TO_ATOM_TYPE: Record<string, AtomType> = {
+// ENG-13699: kept in sync by hand with the equivalent table in
+// apps/experimental/src/features/atoms/create/use-atom-create-flow.ts — the
+// two packages can't share this directly without a new cross-package
+// dependency, so a schemaType added to one must be added to both, or the
+// type-picker and the auto/paste preview will disagree on the same URL.
+// Exported (not just for internal use) so both sides' tests can assert
+// against the shared schema-type-to-atom-type.snapshot.json fixture in this
+// same directory — see extraction.url-first.test.ts and the mirrored test in
+// apps/experimental/src/features/atoms/create/.
+export const SCHEMA_TYPE_TO_ATOM_TYPE: Record<string, AtomType> = {
 	Person: 'person',
 	Place: 'place',
 	LocalBusiness: 'place',
@@ -27,15 +35,18 @@ const SCHEMA_TYPE_TO_ATOM_TYPE: Record<string, AtomType> = {
 	Service: 'company',
 	Product: 'product',
 	MusicRecording: 'song',
-	MusicAlbum: 'music-album',
-	MusicGroup: 'artist',
+	MusicAlbum: 'song',
+	MusicPlaylist: 'song',
+	MusicGroup: 'song',
+	PodcastSeries: 'podcast',
+	PodcastEpisode: 'podcast',
 	SoftwareApplication: 'software',
 	SoftwareSourceCode: 'software',
 	MobileApplication: 'software',
 };
 
 function resolvePreset(atomType: AtomType, category: string): UrlFirstEnrichmentPreset {
-	if (atomType === 'song' || atomType === 'music-album' || atomType === 'artist') return 'music';
+	if (atomType === 'song') return 'music';
 	if (atomType === 'company') return 'company';
 	if (category === 'Blockchain') return 'crypto';
 	return 'default';
@@ -87,7 +98,7 @@ const WIKIBASE_ITEM_PATTERN = /^Q\d+$/i;
 export function readWikibaseItemFromArtifacts(
 	artifacts: readonly EnrichmentArtifact[]
 ): string | undefined {
-	for (const artifact of getIdentityArtifacts(artifacts)) {
+	for (const artifact of artifacts) {
 		if (artifact.artifact_type !== 'wikipedia') continue;
 		const wikibaseItem = artifact.data.wikibaseItem;
 		if (typeof wikibaseItem === 'string' && WIKIBASE_ITEM_PATTERN.test(wikibaseItem.trim())) {
@@ -101,7 +112,5 @@ export function hasArtifactOfType(
 	artifacts: readonly EnrichmentArtifact[],
 	artifactType: string
 ): boolean {
-	return getIdentityArtifacts(artifacts).some(
-		(artifact) => artifact.artifact_type === artifactType
-	);
+	return artifacts.some((artifact) => artifact.artifact_type === artifactType);
 }

@@ -44,8 +44,18 @@
     },
     "packages/atom-classification": {
       "name": "@0xintuition/atom-classification",
-      "version": "0.1.0-alpha.0",
+      "version": "0.1.0-alpha.1",
       "dependencies": {
+        "@0xintuition/atom-enrichment": "0.1.0-alpha.1",
+        "@0xintuition/atom-parser": "0.1.0-alpha.1",
+        "@0xintuition/classifications": "0.1.0-alpha.1",
+        "@0xintuition/iid": "0.1.0-alpha.0",
+        "@0xintuition/iid-ladder": "0.1.0-alpha.1",
+        "@0xintuition/iid-registry": "0.1.0-alpha.0",
+        "@0xintuition/pipeline-runtime": "0.1.0-alpha.0",
+        "@0xintuition/predicates": "0.1.0-alpha.1",
+        "@0xintuition/primitives": "0.1.0-alpha.1",
+        "@0xintuition/schema-org": "0.1.0-alpha.0",
         "zod": "4.1.12",
       },
       "devDependencies": {
@@ -55,9 +65,15 @@
     },
     "packages/atom-enrichment": {
       "name": "@0xintuition/atom-enrichment",
-      "version": "0.1.0-alpha.0",
+      "version": "0.1.0-alpha.1",
       "dependencies": {
         "@0xintuition/classifications": "0.1.0-alpha.1",
+        "@0xintuition/iid": "0.1.0-alpha.0",
+        "@0xintuition/iid-ladder": "0.1.0-alpha.1",
+        "@0xintuition/iid-registry": "0.1.0-alpha.0",
+        "@0xintuition/pipeline-runtime": "0.1.0-alpha.0",
+        "@0xintuition/protocol": "^4.0.0",
+        "@0xintuition/schema-org": "0.1.0-alpha.0",
         "zod": "4.1.12",
       },
       "devDependencies": {
@@ -67,12 +83,29 @@
     },
     "packages/atom-parser": {
       "name": "@0xintuition/atom-parser",
-      "version": "0.1.0-alpha.0",
+      "version": "0.1.0-alpha.1",
       "dependencies": {
+        "@0xintuition/iid": "0.1.0-alpha.0",
         "multiformats": "^13.3.2",
         "viem": "^2.23.2",
       },
       "devDependencies": {
+        "typescript": "^5.9.3",
+      },
+    },
+    "packages/atom-runtime": {
+      "name": "@0xintuition/atom-runtime",
+      "version": "0.1.0-alpha.0",
+      "dependencies": {
+        "@0xintuition/atom-classification": "0.1.0-alpha.1",
+        "@0xintuition/atom-enrichment": "0.1.0-alpha.1",
+        "@0xintuition/atom-parser": "0.1.0-alpha.1",
+        "@0xintuition/iid-registry": "0.1.0-alpha.0",
+        "@0xintuition/pipeline-runtime": "0.1.0-alpha.0",
+        "zod": "4.1.12",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.3.3",
         "typescript": "^5.9.3",
       },
     },
@@ -345,6 +378,8 @@
     "@0xintuition/atom-enrichment": ["@0xintuition/atom-enrichment@workspace:packages/atom-enrichment"],
 
     "@0xintuition/atom-parser": ["@0xintuition/atom-parser@workspace:packages/atom-parser"],
+
+    "@0xintuition/atom-runtime": ["@0xintuition/atom-runtime@workspace:packages/atom-runtime"],
 
     "@0xintuition/classifications": ["@0xintuition/classifications@workspace:packages/classifications"],
 

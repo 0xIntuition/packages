@@ -1,408 +1,392 @@
+import { forEachBounded } from '@0xintuition/pipeline-runtime/concurrency';
+import { type Outcome, runWithSignal, withTimeout } from '@0xintuition/pipeline-runtime/outcome';
+import { RATE_LIMITED_KIND } from '@0xintuition/pipeline-runtime/provider-observer';
+import {
+	RequestSlotTimeoutError,
+	slotRefusalOf,
+	slotRefusalRetryDelayMs,
+} from '@0xintuition/pipeline-runtime/request-slot';
 import {
 	buildCacheKey,
-	type CacheAdapter,
 	type CachedEntry,
 	isCachedEntryFresh,
-	NO_IDENTITY_POLICY_MARKER,
+	toCancellableCacheAdapter,
 } from './cache';
+import { observeArtifactCacheHit } from './cache-observation';
 import {
 	type ClassificationRegistry,
 	createDefaultClassificationRegistry,
 } from './classifications';
 import { redactProviderDiagnostic } from './diagnostics';
+import { hasInvalidEmbeddedIid } from './identifier';
+import { enrichOutcome } from './outcome';
+import { createRunPageCache, type RunPageCache } from './page-cache';
+import { createEnrichmentPluginRegistry } from './plugin-registry';
+import type { EnrichmentPlugin } from './plugins';
+import { ProviderHttpError } from './plugins/providers/__shared__/http';
 import {
-	createEnrichmentPluginRegistry,
-	type RegisterPluginOptions,
-	type ResolvePluginsResult,
-} from './plugin-registry';
-import type {
-	EnrichmentIdentityCapability,
-	EnrichmentPlugin,
-	EnrichmentPluginContext,
-	EnrichmentPluginLogger,
-} from './plugins';
+	isOpenGraphHttpError,
+	type OpenGraphFetchError,
+} from './plugins/providers/__shared__/page-fetch-error';
+import { isSharedPageConsumer } from './plugins/providers/__shared__/shared-page';
 import { canonicalizeEnrichmentSlugs } from './slug-aliases';
 import {
+	BUDGET_EXHAUSTED_ERROR_CLASS,
 	type EnrichmentArtifact,
+	type EnrichmentEngine,
+	type EnrichmentEngineConfig,
 	type EnrichmentRequest,
 	type EnrichmentRunResult,
 	enrichmentRequestSchema,
 	type PluginExecutionError,
 	type PluginExecutionErrorCode,
+	type ProviderHttpErrorDetails,
 } from './types';
 
-const DEFAULT_CONCURRENCY = 5;
-const DEFAULT_TIMEOUT_MS = 10_000;
-
-type EnrichExecutionOptions = {
-	signal?: AbortSignal;
-};
-
-export type EnrichmentEngineConfig = {
-	plugins?: EnrichmentPlugin[];
-	identity?: EnrichmentIdentityCapability;
-	concurrency?: number;
-	timeoutMs?: number;
-	classifications?: ClassificationRegistry;
-	logger?: EnrichmentPluginLogger;
-	now?: () => string;
-	secrets?: Record<string, string>;
-	cache?: CacheAdapter;
-};
-
-export type EnrichmentEngine = {
-	registerPlugin(plugin: EnrichmentPlugin, options?: RegisterPluginOptions): void;
-	unregisterPlugin(pluginId: string): boolean;
-	listPlugins(): EnrichmentPlugin[];
-	resolvePlugins(request: EnrichmentRequest): ResolvePluginsResult;
-	enrich(
-		request: EnrichmentRequest,
-		options?: EnrichExecutionOptions
-	): Promise<EnrichmentRunResult>;
-};
+export type {
+	EnrichmentPluginRegistry,
+	RegisterPluginOptions,
+	ResolvePluginsResult,
+} from './plugin-registry';
+export { createEnrichmentPluginRegistry } from './plugin-registry';
+export type { EnrichmentEngine, EnrichmentEngineConfig, EnrichRunOptions } from './types';
+export const DEFAULT_ENRICHMENT_CONCURRENCY = 5;
+export const DEFAULT_ENRICHMENT_TIMEOUT_MS = 10_000;
 
 export function createEnrichmentEngine(config: EnrichmentEngineConfig = {}): EnrichmentEngine {
-	if (config.identity !== undefined) {
-		const fingerprint = config.identity?.fingerprint;
-		if (
-			typeof fingerprint !== 'string' ||
-			fingerprint.length === 0 ||
-			fingerprint !== fingerprint.trim() ||
-			fingerprint === NO_IDENTITY_POLICY_MARKER ||
-			fingerprint.length > 256
-		) {
-			throw new Error(
-				'Enrichment identity fingerprint must be a non-empty trimmed string of at most 256 characters and must not use the absent-policy marker.'
-			);
-		}
+	if (
+		config.identity &&
+		(!config.identity.fingerprint || config.identity.fingerprint.trim().length === 0)
+	) {
+		throw new Error('EnrichmentEngineConfig.identity.fingerprint must be a non-empty string');
 	}
 	const now = config.now ?? (() => new Date().toISOString());
-	const pluginRegistry = createEnrichmentPluginRegistry(config.plugins ?? []);
+	const registry = createEnrichmentPluginRegistry(config.plugins ?? []);
 	const classificationRegistry = config.classifications ?? createDefaultClassificationRegistry();
-
-	return {
-		registerPlugin(plugin, options) {
-			pluginRegistry.register(plugin, options);
-		},
-
-		unregisterPlugin(pluginId) {
-			return pluginRegistry.unregister(pluginId);
-		},
-
-		listPlugins() {
-			return pluginRegistry.list();
-		},
-
-		resolvePlugins(request) {
-			return pluginRegistry.resolve(request);
-		},
-
+	const engine: EnrichmentEngine = {
+		registerPlugin: (plugin, options) => registry.register(plugin, options),
+		unregisterPlugin: (id) => registry.unregister(id),
+		listPlugins: () => registry.list(),
+		resolvePlugins: (request) => registry.resolve(request),
+		enrichOutcome: (request, options) => enrichOutcome(engine, request, options),
 		async enrich(request, options) {
+			if (hasInvalidEmbeddedIid(request.input)) {
+				config.logger?.debug('Ignoring invalid embedded IID for enrichment hints.', {
+					source: 'jsonLd.identifier',
+				});
+			}
 			const parsedRequest = enrichmentRequestSchema.parse(request);
 			const startedAt = now();
 			const startedAtMs = Date.now();
-			const perPluginMs: Record<string, number> = {};
-			const errors: PluginExecutionError[] = [];
-			const artifactsByPlugin = new Map<string, EnrichmentArtifact[]>();
-			let cacheHits = 0;
-			let cacheMisses = 0;
-
-			const resolved = pluginRegistry.resolve(parsedRequest);
+			const resolved = registry.resolve(parsedRequest);
 			const skipped = [...resolved.skipped];
-			const applicablePlugins: EnrichmentPlugin[] = [];
-
+			const errors: PluginExecutionError[] = [];
+			const applicable: EnrichmentPlugin[] = [];
 			for (const plugin of resolved.plugins) {
-				try {
-					const supports = await Promise.resolve(plugin.supports(parsedRequest));
-
-					if (!supports) {
-						skipped.push({
-							pluginId: plugin.id,
-							reason: 'not_applicable',
-						});
-						continue;
-					}
-
-					applicablePlugins.push(plugin);
-				} catch (error) {
+				const support = await runWithSignal(async () => plugin.supports(parsedRequest));
+				if (support.kind === 'success') {
+					if (support.value) applicable.push(plugin);
+					else skipped.push({ pluginId: plugin.id, reason: 'not_applicable' });
+				} else {
 					errors.push(
 						createPluginError(
 							plugin.id,
 							'internal_error',
-							`supports() failed: ${getErrorMessage(error)}`,
+							`supports() failed: ${getErrorMessage(outcomeError(support))}`,
 							false
 						)
 					);
 				}
 			}
-
 			const concurrency = Math.max(
 				1,
-				parsedRequest.concurrency ?? config.concurrency ?? DEFAULT_CONCURRENCY
+				parsedRequest.concurrency ?? config.concurrency ?? DEFAULT_ENRICHMENT_CONCURRENCY
 			);
 			const timeoutMs = Math.max(
 				1,
-				parsedRequest.timeoutMs ?? config.timeoutMs ?? DEFAULT_TIMEOUT_MS
+				parsedRequest.timeoutMs ?? config.timeoutMs ?? DEFAULT_ENRICHMENT_TIMEOUT_MS
 			);
-
-			for (const chunk of chunkBy(applicablePlugins, concurrency)) {
-				const settledChunk = await Promise.allSettled(
-					chunk.map((plugin) =>
-						executePluginWithCache({
-							plugin,
-							request: parsedRequest,
-							timeoutMs,
-							logger: config.logger,
-							now,
-							secrets: config.secrets,
-							identity: config.identity,
-							parentSignal: options?.signal,
-							cache: config.cache,
-						})
-					)
-				);
-
-				for (const [index, settled] of settledChunk.entries()) {
-					const plugin = chunk[index];
-					if (!plugin) {
-						continue;
-					}
-
-					if (settled.status === 'rejected') {
-						errors.push(
-							createPluginError(
-								plugin.id,
-								'internal_error',
-								`Unexpected execution failure: ${getErrorMessage(settled.reason)}`,
-								false
-							)
-						);
-						continue;
-					}
-
-					if (settled.value.cacheHit) {
-						cacheHits += 1;
-					}
-					if (settled.value.cacheMiss) {
-						cacheMisses += 1;
-					}
-
-					perPluginMs[plugin.id] = settled.value.durationMs;
-
-					if (settled.value.error) {
-						errors.push(settled.value.error);
-						continue;
-					}
-
-					const normalizedArtifacts = normalizeArtifacts({
-						plugin,
-						artifacts: settled.value.artifacts,
-						classificationRegistry,
+			const consumers = await pageConsumers(applicable, parsedRequest, config, options?.signal);
+			const pages = createRunPageCache({ consumers });
+			const workItems = applicable.map(
+				(plugin): PluginWorkItem => ({
+					plugin,
+					state: {
+						startedAtMs: 0,
+						durationMs: 0,
+						timingRecorded: false,
+						cacheHit: false,
+						cacheMiss: false,
+					},
+				})
+			);
+			// Domain cancellation is classified per plugin, including queued work. The pool
+			// itself must finish collecting those results instead of rejecting the run.
+			const results = await forEachBounded(
+				workItems,
+				(item) =>
+					executePluginWorkItem({
+						item,
+						request: parsedRequest,
+						config,
 						now,
-						errors,
-					});
-
-					if (
-						!settled.value.fromCache &&
-						config.cache &&
-						settled.value.cacheKey &&
-						typeof settled.value.TTL === 'number' &&
-						settled.value.TTL > 0
-					) {
-						const ttlMs = toTtlMs(settled.value.TTL);
-						if (ttlMs) {
-							const cacheEntry: CachedEntry = {
-								artifacts: normalizedArtifacts,
-								cachedAt: now(),
-								ttlMs,
-							};
-							try {
-								await config.cache.set(settled.value.cacheKey, cacheEntry, ttlMs);
-							} catch (error) {
-								config.logger?.warn('Cache set failed for enrichment plugin.', {
-									pluginId: plugin.id,
-									error: getErrorMessage(error),
-								});
-							}
-						}
-					}
-
-					artifactsByPlugin.set(plugin.id, normalizedArtifacts);
-				}
-			}
-
+						classificationRegistry,
+						pages,
+						timeoutMs,
+						signal: options?.signal,
+					}),
+				{ concurrency }
+			);
 			const artifacts: EnrichmentArtifact[] = [];
-			for (const plugin of applicablePlugins) {
-				const pluginArtifacts = artifactsByPlugin.get(plugin.id) ?? [];
-				for (const artifact of filterArtifactsForRequest(pluginArtifacts, parsedRequest)) {
-					artifacts.push(artifact);
+			for (const [index, outer] of results.entries()) {
+				const item = workItems[index]!;
+				const outcome = outer.kind === 'success' ? outer.value : outer;
+				if (outcome.kind === 'success') {
+					errors.push(...outcome.value.validationErrors);
+					artifacts.push(...filterArtifactsForRequest(outcome.value.artifacts, parsedRequest));
+				} else if (outcome.kind === 'timeout') {
+					errors.push(
+						createPluginError(
+							item.plugin.id,
+							'timeout',
+							`Plugin timed out after ${timeoutMs}ms`,
+							true
+						)
+					);
+				} else {
+					errors.push(toPluginExecutionError(item.plugin.id, outcomeError(outcome), config.random));
 				}
 			}
-
-			const finishedAt = now();
-			const durationMs = Math.max(0, Date.now() - startedAtMs);
-
-			const status = resolveRunStatus(artifacts.length, errors.length);
-
 			return {
-				status,
+				status: resolveRunStatus(artifacts.length, errors.length),
 				artifacts,
 				errors,
 				skipped,
 				timings: {
 					startedAt,
-					finishedAt,
-					durationMs,
-					perPluginMs,
-					cacheHits,
-					cacheMisses,
+					finishedAt: now(),
+					durationMs: Math.max(0, Date.now() - startedAtMs),
+					perPluginMs: Object.fromEntries(
+						workItems.map(({ plugin, state }) => [plugin.id, state.durationMs])
+					),
+					cacheHits: workItems.filter(({ state }) => state.cacheHit).length,
+					cacheMisses: workItems.filter(({ state }) => state.cacheMiss).length,
 				},
 				traceId: parsedRequest.traceId,
 			};
 		},
 	};
+	return engine;
 }
 
-type ExecutePluginParams = {
-	plugin: EnrichmentPlugin;
-	identity?: EnrichmentIdentityCapability;
-	request: EnrichmentRequest;
-	timeoutMs: number;
-	logger?: EnrichmentPluginLogger;
-	now: () => string;
-	secrets?: Record<string, string>;
-	parentSignal?: AbortSignal;
-	cache?: CacheAdapter;
-};
+function outcomeError(outcome: Exclude<Outcome<unknown>, { kind: 'success' }>): unknown {
+	switch (outcome.kind) {
+		case 'failure':
+		case 'defect':
+			return outcome.error;
+		case 'interrupted':
+			return outcome.reason ?? new Error('Plugin execution was interrupted.');
+		case 'timeout':
+			return new Error('Plugin execution timed out.');
+	}
+}
 
-type ExecutePluginResult = {
-	artifacts: EnrichmentArtifact[];
+function pluginCacheKey(
+	plugin: EnrichmentPlugin,
+	request: EnrichmentRequest,
+	config: EnrichmentEngineConfig
+): string {
+	return buildCacheKey(
+		plugin.id,
+		request.input,
+		plugin.version ?? (config.identity ? { identity: config.identity.fingerprint } : undefined)
+	);
+}
+
+/** Cache-served page plugins must not widen the shared fetch's body or redirect policy. */
+async function pageConsumers(
+	plugins: readonly EnrichmentPlugin[],
+	request: EnrichmentRequest,
+	config: EnrichmentEngineConfig,
+	signal?: AbortSignal
+): Promise<string[]> {
+	const cache = config.cache ? toCancellableCacheAdapter(config.cache) : undefined;
+	const consumers: string[] = [];
+	for (const plugin of plugins.filter((candidate) => isSharedPageConsumer(candidate.id))) {
+		if (!cache || toTtlMs(plugin.TTL) === undefined) {
+			consumers.push(plugin.id);
+			continue;
+		}
+		const entry = await runWithSignal(
+			(childSignal) => cache.get(pluginCacheKey(plugin, request, config), { signal: childSignal }),
+			{ signal }
+		);
+		if (entry.kind !== 'success' || !entry.value || !isCachedEntryFresh(entry.value))
+			consumers.push(plugin.id);
+	}
+	return consumers;
+}
+
+type PluginExecutionState = {
+	startedAtMs: number;
 	durationMs: number;
-	error?: PluginExecutionError;
-	fromCache: boolean;
+	timingRecorded: boolean;
 	cacheHit: boolean;
 	cacheMiss: boolean;
-	cacheKey?: string;
-	TTL?: number;
+};
+type PluginWorkItem = { plugin: EnrichmentPlugin; state: PluginExecutionState };
+type ExecutePluginSuccess = {
+	artifacts: EnrichmentArtifact[];
+	validationErrors: PluginExecutionError[];
+};
+type ExecuteParams = {
+	item: PluginWorkItem;
+	request: EnrichmentRequest;
+	config: EnrichmentEngineConfig;
+	now: () => string;
+	classificationRegistry: ClassificationRegistry;
+	pages: RunPageCache;
+	timeoutMs: number;
+	signal?: AbortSignal;
+};
+type PreparedExecution = {
+	result: ExecutePluginSuccess;
+	cacheWrite?: {
+		cache: ReturnType<typeof toCancellableCacheAdapter>;
+		key: string;
+		entry: CachedEntry;
+		ttlMs: number;
+	};
 };
 
-async function executePluginWithCache(params: ExecutePluginParams): Promise<ExecutePluginResult> {
-	const startedAtMs = Date.now();
-	const ttlMs = toTtlMs(params.plugin.TTL);
-	const canUseCache = !!params.cache && typeof ttlMs === 'number';
-	const cacheKey = canUseCache
-		? buildCacheKey(params.plugin.id, params.request.input, {
-				identity: params.identity?.fingerprint,
-			})
-		: undefined;
-
-	if (canUseCache && params.cache && cacheKey) {
-		try {
-			const cachedEntry = await params.cache.get(cacheKey);
-			if (cachedEntry && isCachedEntryFresh(cachedEntry)) {
-				return {
-					artifacts: cachedEntry.artifacts.map((artifact) => ({
-						artifact_type: artifact.artifact_type,
-						data: { ...artifact.data },
-						meta: {
-							...artifact.meta,
-							pluginId: params.plugin.id,
-							fromCache: true,
-							cachedAt: cachedEntry.cachedAt,
-						},
-					})),
-					durationMs: Math.max(0, Date.now() - startedAtMs),
-					fromCache: true,
-					cacheHit: true,
-					cacheMiss: false,
-					cacheKey,
-					TTL: params.plugin.TTL,
-				};
+async function executePluginWorkItem(
+	params: ExecuteParams
+): Promise<Outcome<ExecutePluginSuccess>> {
+	const { state, plugin } = params.item;
+	state.startedAtMs = Date.now();
+	try {
+		const outcome = await runWithSignal((signal) => preparePluginExecution(params, signal), {
+			signal: params.signal,
+		});
+		if (outcome.kind !== 'success') return outcome;
+		const { result, cacheWrite } = outcome.value;
+		if (cacheWrite) {
+			// Cancellation detaches even a legacy, signal-unaware adapter, retaining the
+			// normalized provider output. All eventual write rejections are observed.
+			const write = await runWithSignal(
+				(signal) =>
+					cacheWrite.cache.set(cacheWrite.key, cacheWrite.entry, cacheWrite.ttlMs, { signal }),
+				{ signal: params.signal }
+			);
+			if (write.kind === 'failure' || write.kind === 'defect') {
+				params.config.logger?.warn('Cache set failed for enrichment plugin.', {
+					pluginId: plugin.id,
+					error: redactProviderDiagnostic(getErrorMessage(write.error)),
+				});
 			}
-
-			if (cachedEntry && !isCachedEntryFresh(cachedEntry)) {
-				try {
-					await params.cache.delete(cacheKey);
-				} catch {
-					// non-fatal cache cleanup failure
-				}
-			}
-		} catch (error) {
-			params.logger?.warn('Cache get failed for enrichment plugin.', {
-				pluginId: params.plugin.id,
-				error: getErrorMessage(error),
-			});
 		}
+		return { kind: 'success', value: result };
+	} finally {
+		if (!state.timingRecorded) recordPluginDuration(state);
 	}
-
-	const executionResult = await executePlugin({
-		plugin: params.plugin,
-		request: params.request,
-		timeoutMs: params.timeoutMs,
-		logger: params.logger,
-		now: params.now,
-		secrets: params.secrets,
-		identity: params.identity,
-		parentSignal: params.parentSignal,
-	});
-
-	return {
-		...executionResult,
-		fromCache: false,
-		cacheHit: false,
-		cacheMiss: canUseCache,
-		cacheKey,
-		TTL: params.plugin.TTL,
-	};
 }
 
-async function executePlugin(
-	params: Omit<ExecutePluginParams, 'cache'>
-): Promise<Omit<ExecutePluginResult, 'fromCache' | 'cacheHit' | 'cacheMiss' | 'cacheKey' | 'TTL'>> {
-	const startedAtMs = Date.now();
-	const controller = new AbortController();
-
-	const parentAbortUnsubscribe = linkAbortSignals(params.parentSignal, controller);
-
-	let timeout: ReturnType<typeof setTimeout> | undefined;
-
-	try {
-		const pluginContext: EnrichmentPluginContext = {
-			now: params.now,
-			signal: controller.signal,
-			logger: params.logger,
-			secrets: params.secrets,
-			...(params.identity ? { identity: params.identity } : {}),
-		};
-
-		const timeoutPromise = new Promise<never>((_resolve, reject) => {
-			timeout = setTimeout(() => {
-				controller.abort();
-				reject(new PluginTimeoutError(params.timeoutMs));
-			}, params.timeoutMs);
-		});
-
-		const artifacts = await Promise.race([
-			Promise.resolve(params.plugin.enrich(params.request, pluginContext)),
-			timeoutPromise,
-		]);
-
-		return {
-			artifacts,
-			durationMs: Math.max(0, Date.now() - startedAtMs),
-		};
-	} catch (error) {
-		return {
-			artifacts: [],
-			durationMs: Math.max(0, Date.now() - startedAtMs),
-			error: toPluginExecutionError(params.plugin.id, error),
-		};
-	} finally {
-		if (timeout) {
-			clearTimeout(timeout);
+async function preparePluginExecution(
+	params: ExecuteParams,
+	signal: AbortSignal
+): Promise<PreparedExecution> {
+	const { plugin, state } = params.item;
+	const { config } = params;
+	const ttlMs = toTtlMs(plugin.TTL);
+	const cache = config.cache ? toCancellableCacheAdapter(config.cache) : undefined;
+	const key =
+		cache && ttlMs !== undefined ? pluginCacheKey(plugin, params.request, config) : undefined;
+	if (cache && key) {
+		let cachedEntry: CachedEntry | null = null;
+		try {
+			cachedEntry = await cache.get(key, { signal });
+		} catch (error) {
+			signal.throwIfAborted();
+			config.logger?.warn('Cache get failed for enrichment plugin.', {
+				pluginId: plugin.id,
+				error: redactProviderDiagnostic(getErrorMessage(error)),
+			});
 		}
-		parentAbortUnsubscribe();
+		signal.throwIfAborted();
+		if (cachedEntry && isCachedEntryFresh(cachedEntry)) {
+			state.cacheHit = true;
+			const artifacts = cachedEntry.artifacts.map((artifact) => ({
+				artifact_type: artifact.artifact_type,
+				data: { ...artifact.data },
+				meta: {
+					...artifact.meta,
+					pluginId: plugin.id,
+					fromCache: true,
+					cachedAt: cachedEntry.cachedAt,
+				},
+			}));
+			recordPluginDuration(state);
+			observeArtifactCacheHit(plugin, params.request, artifacts.length);
+			return {
+				result: normalizeArtifacts({
+					plugin,
+					artifacts,
+					classificationRegistry: params.classificationRegistry,
+					now: params.now,
+				}),
+			};
+		}
+		state.cacheMiss = true;
+		if (cachedEntry) {
+			try {
+				await cache.remove(key, { signal });
+			} catch {
+				/* stale entry cleanup is best effort */
+			}
+			signal.throwIfAborted();
+		}
 	}
+	signal.throwIfAborted();
+	state.startedAtMs = Date.now();
+	state.timingRecorded = false;
+	let artifacts: EnrichmentArtifact[];
+	try {
+		artifacts = await withTimeout(
+			async (pluginSignal) =>
+				plugin.enrich(params.request, {
+					now: params.now,
+					signal: pluginSignal,
+					deadlineAtMs: Date.now() + params.timeoutMs,
+					logger: config.logger,
+					secrets: config.secrets,
+					network: config.network,
+					pages: params.pages,
+					...(config.identity ? { identity: config.identity } : {}),
+				}),
+			params.timeoutMs
+		)(signal);
+	} finally {
+		recordPluginDuration(state);
+	}
+	const result = normalizeArtifacts({
+		plugin,
+		artifacts,
+		classificationRegistry: params.classificationRegistry,
+		now: params.now,
+	});
+	return {
+		result,
+		...(cache && key && ttlMs
+			? {
+					cacheWrite: {
+						cache,
+						key,
+						ttlMs,
+						entry: { artifacts: result.artifacts, cachedAt: params.now(), ttlMs },
+					},
+				}
+			: {}),
+	};
 }
 
 type NormalizeArtifactsParams = {
@@ -410,11 +394,11 @@ type NormalizeArtifactsParams = {
 	artifacts: EnrichmentArtifact[];
 	classificationRegistry: ClassificationRegistry;
 	now: () => string;
-	errors: PluginExecutionError[];
 };
 
-function normalizeArtifacts(params: NormalizeArtifactsParams): EnrichmentArtifact[] {
-	const normalized: EnrichmentArtifact[] = [];
+function normalizeArtifacts(params: NormalizeArtifactsParams): ExecutePluginSuccess {
+	const artifacts: EnrichmentArtifact[] = [];
+	const validationErrors: PluginExecutionError[] = [];
 
 	for (const artifact of params.artifacts) {
 		const hydratedMeta = {
@@ -423,19 +407,18 @@ function normalizeArtifacts(params: NormalizeArtifactsParams): EnrichmentArtifac
 			provider: artifact.meta?.provider ?? params.plugin.id,
 			fetchedAt: artifact.meta?.fetchedAt ?? params.now(),
 		};
-
 		const candidate: EnrichmentArtifact = {
 			artifact_type: artifact.artifact_type,
 			data: artifact.data,
 			meta: hydratedMeta,
 		};
-
 		const dataSchemaResult = params.classificationRegistry.validate(
 			candidate.artifact_type,
 			candidate.data
 		);
+
 		if (!dataSchemaResult.success) {
-			params.errors.push(
+			validationErrors.push(
 				createPluginError(
 					params.plugin.id,
 					'validation_error',
@@ -446,17 +429,20 @@ function normalizeArtifacts(params: NormalizeArtifactsParams): EnrichmentArtifac
 			continue;
 		}
 
-		normalized.push(candidate);
+		artifacts.push(candidate);
 	}
 
-	return [...normalized].sort((left, right) => {
-		const classificationDiff = left.artifact_type.localeCompare(right.artifact_type);
-		if (classificationDiff !== 0) {
-			return classificationDiff;
-		}
+	return {
+		artifacts: [...artifacts].sort((left, right) => {
+			const classificationDiff = left.artifact_type.localeCompare(right.artifact_type);
+			if (classificationDiff !== 0) {
+				return classificationDiff;
+			}
 
-		return left.meta.provider.localeCompare(right.meta.provider);
-	});
+			return left.meta.provider.localeCompare(right.meta.provider);
+		}),
+		validationErrors,
+	};
 }
 
 function filterArtifactsForRequest(
@@ -489,9 +475,50 @@ function resolveRunStatus(
 	return 'failed';
 }
 
-function toPluginExecutionError(pluginId: string, error: unknown): PluginExecutionError {
-	if (error instanceof PluginTimeoutError) {
-		return createPluginError(pluginId, 'timeout', error.message, true);
+/**
+ * Our own pacing slot turned the request away before anything was sent (`slotRefusalOf`): queue
+ * full, it cannot start before the deadline, or the deadline passed while it still waited for its
+ * lane. Retriable, with a delay (the slot's own hint, clamped, plus jitter that scales with it),
+ * under its own identity: the code stays `internal_error` (what a refusal always was, so the error
+ * series gain no label value) and `rate_limited` stays reserved for a real upstream throttle.
+ *
+ * A `RequestSlotTimeoutError` raised after the request was sent is not a refusal: the provider
+ * overran, which is a retriable `timeout` like the engine's own timer.
+ */
+function toSlotErrorOrUndefined(
+	pluginId: string,
+	error: unknown,
+	random: (() => number) | undefined
+): PluginExecutionError | undefined {
+	const refusal = slotRefusalOf(error);
+	if (refusal) {
+		return createPluginError(pluginId, 'internal_error', getErrorMessage(error), true, {
+			retryAfterMs: Math.round(slotRefusalRetryDelayMs(refusal.retryAfterMs, random)),
+			errorClass: BUDGET_EXHAUSTED_ERROR_CLASS,
+		});
+	}
+	if (error instanceof RequestSlotTimeoutError) {
+		return createPluginError(pluginId, 'timeout', getErrorMessage(error), true);
+	}
+	return undefined;
+}
+
+function toPluginExecutionError(
+	pluginId: string,
+	error: unknown,
+	random: (() => number) | undefined
+): PluginExecutionError {
+	const slotError = toSlotErrorOrUndefined(pluginId, error, random);
+	if (slotError) return slotError;
+
+	if (error instanceof ProviderHttpError) {
+		return classifyProviderHttpError(pluginId, error);
+	}
+
+	// The page fetch's own HTTP failures (429, 5xx, ...) carry their status and Retry-After like a
+	// ProviderHttpError, so they are not guessed from the message.
+	if (isOpenGraphHttpError(error)) {
+		return classifyOpenGraphHttpError(pluginId, error, error.httpStatus);
 	}
 
 	const message = getErrorMessage(error);
@@ -516,17 +543,64 @@ function toPluginExecutionError(pluginId: string, error: unknown): PluginExecuti
 	return createPluginError(pluginId, 'internal_error', message, false);
 }
 
+function classifyProviderHttpError(
+	pluginId: string,
+	error: ProviderHttpError
+): PluginExecutionError {
+	const details: ProviderHttpErrorDetails = {
+		status: error.status,
+		...(error.retryAfterMs === undefined ? {} : { retryAfterMs: error.retryAfterMs }),
+		errorClass: error.errorClass,
+	};
+
+	// `rate_limited` is the class a plugin gives a provider's own throttle response (MusicBrainz 503).
+	if (error.status === 429 || error.errorClass === RATE_LIMITED_KIND) {
+		return createPluginError(pluginId, 'rate_limited', error.message, true, details);
+	}
+
+	if (error.status === 401 || error.status === 403) {
+		return createPluginError(pluginId, 'auth_failed', error.message, false, details);
+	}
+
+	if (error.status >= 400 && error.status < 500) {
+		return createPluginError(pluginId, 'upstream_error', error.message, false, details);
+	}
+
+	return createPluginError(pluginId, 'upstream_error', error.message, true, details);
+}
+
+function classifyOpenGraphHttpError(
+	pluginId: string,
+	error: OpenGraphFetchError,
+	status: number
+): PluginExecutionError {
+	const details: ProviderHttpErrorDetails = {
+		status,
+		...(error.retryAfterMs === undefined ? {} : { retryAfterMs: error.retryAfterMs }),
+		errorClass: error.code,
+	};
+	return createPluginError(
+		pluginId,
+		status === 429 ? 'rate_limited' : 'upstream_error',
+		error.message,
+		error.retryable,
+		details
+	);
+}
+
 function createPluginError(
 	pluginId: string,
 	code: PluginExecutionErrorCode,
 	message: string,
-	retriable: boolean
+	retriable: boolean,
+	details?: ProviderHttpErrorDetails
 ): PluginExecutionError {
 	return {
 		pluginId,
 		code,
 		message: redactProviderDiagnostic(message),
 		retriable,
+		...(details ? { details } : {}),
 	};
 }
 
@@ -538,18 +612,9 @@ function toTtlMs(ttlSeconds: number | undefined): number | undefined {
 	return ttlSeconds * 1_000;
 }
 
-function chunkBy<TItem>(items: TItem[], size: number): TItem[][] {
-	if (size <= 0) {
-		return [items];
-	}
-
-	const chunks: TItem[][] = [];
-
-	for (let index = 0; index < items.length; index += size) {
-		chunks.push(items.slice(index, index + size));
-	}
-
-	return chunks;
+function recordPluginDuration(state: PluginExecutionState): void {
+	state.durationMs = Math.max(0, Date.now() - state.startedAtMs);
+	state.timingRecorded = true;
 }
 
 function getErrorMessage(error: unknown): string {
@@ -563,41 +628,3 @@ function getErrorMessage(error: unknown): string {
 
 	return 'Unknown error';
 }
-
-function linkAbortSignals(
-	source: AbortSignal | undefined,
-	targetController: AbortController
-): () => void {
-	if (!source) {
-		return () => {};
-	}
-
-	if (source.aborted) {
-		targetController.abort(source.reason);
-		return () => {};
-	}
-
-	const abortHandler = () => {
-		targetController.abort(source.reason);
-	};
-
-	source.addEventListener('abort', abortHandler, { once: true });
-
-	return () => {
-		source.removeEventListener('abort', abortHandler);
-	};
-}
-
-class PluginTimeoutError extends Error {
-	constructor(timeoutMs: number) {
-		super(`Plugin timed out after ${timeoutMs}ms`);
-		this.name = 'PluginTimeoutError';
-	}
-}
-
-export type {
-	EnrichmentPluginRegistry,
-	RegisterPluginOptions,
-	ResolvePluginsResult,
-} from './plugin-registry';
-export { createEnrichmentPluginRegistry } from './plugin-registry';

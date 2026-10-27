@@ -21,6 +21,10 @@ export function matchPlainTextInput(input: string): PlainTextInputMatch | null {
 		return null;
 	}
 
+	if (/^int:/i.test(value)) {
+		return null;
+	}
+
 	const tokens = value.split(' ').filter(Boolean);
 	return {
 		value,

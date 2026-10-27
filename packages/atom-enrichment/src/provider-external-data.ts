@@ -49,6 +49,12 @@ export {
 	oembedResponseSchema,
 } from './plugins/providers/oembed/external';
 export {
+	type OpenLibraryAuthorResponse,
+	type OpenLibraryEntityResponse,
+	openLibraryAuthorResponseSchema,
+	openLibraryEntityResponseSchema,
+} from './plugins/providers/openlibrary/external';
+export {
 	type CanopyAmazonProduct,
 	type CanopyAmazonProductResponse,
 	canopyAmazonProductResponseSchema,
@@ -70,6 +76,10 @@ export {
 	spotifyTokenResponseSchema,
 	spotifyTrackResponseSchema,
 } from './plugins/providers/spotify/external';
+export {
+	type SteamAppDetailsResponse,
+	steamAppDetailsResponseSchema,
+} from './plugins/providers/steam/external';
 export {
 	type TmdbDetailsResponse,
 	tmdbDetailsResponseSchema,

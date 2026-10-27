@@ -1,0 +1,40 @@
+{
+	"name": "spotify-artist-bridge-miss",
+	"url": "https://open.spotify.com/artist/4uLU6hMCjMI75M1A2tKUQC",
+	"atom": {
+		"schemaType": "MusicGroup",
+		"category": "artist",
+		"title": "Fixture spotify-artist",
+		"canonicalId": "spotify:artist:4uLU6hMCjMI75M1A2tKUQC",
+		"sameAs": ["https://open.spotify.com/artist/4uLU6hMCjMI75M1A2tKUQC"],
+		"hints": {
+			"identifiers": {
+				"spotifyArtistId": "4uLU6hMCjMI75M1A2tKUQC"
+			},
+			"identifierSet": ["int:spotify:artist:4uLU6hMCjMI75M1A2tKUQC"]
+		},
+		"metadata": {
+			"identityBridge": {
+				"property": "P1902",
+				"providerCanonicalId": "spotify:artist:4uLU6hMCjMI75M1A2tKUQC",
+				"outcome": "miss",
+				"promotionPending": true
+			}
+		},
+		"data": {
+			"@type": "MusicGroup",
+			"identifier": "int:spotify:artist:4uLU6hMCjMI75M1A2tKUQC",
+			"name": "Fixture spotify-artist"
+		}
+	},
+	"identifierSet": ["int:spotify:artist:4uLU6hMCjMI75M1A2tKUQC"],
+	"primaryIid": "int:spotify:artist:4uLU6hMCjMI75M1A2tKUQC",
+	"identifierRung": [
+		{
+			"rung": "spotify:artist",
+			"value": "4uLU6hMCjMI75M1A2tKUQC"
+		}
+	],
+	"aliases": [],
+	"appAliases": ["int:spotify:artist:4uLU6hMCjMI75M1A2tKUQC"]
+}

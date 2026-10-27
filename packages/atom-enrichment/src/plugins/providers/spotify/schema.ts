@@ -1,12 +1,5 @@
 import { z } from 'zod/v4';
 
-// Malformed optional IDs must not discard otherwise usable provider metadata.
-// Preserve valid strings exactly, including their leading zeroes.
-export const spotifyExternalIdentifierSchema = z.preprocess(
-	(value) => (typeof value === 'string' && value.trim().length > 0 ? value : undefined),
-	z.string().optional()
-);
-
 export const spotifyDataSchema = z.object({
 	name: z.string(),
 	type: z.enum(['track', 'album', 'artist', 'playlist', 'show', 'episode']),
@@ -23,9 +16,9 @@ export const spotifyDataSchema = z.object({
 	releaseDate: z.string().optional(),
 	durationMs: z.number().optional(),
 	popularity: z.number().optional(),
-	isrc: spotifyExternalIdentifierSchema,
-	upc: spotifyExternalIdentifierSchema,
-	ean: spotifyExternalIdentifierSchema,
+	isrc: z.string().optional(),
+	upc: z.string().optional(),
+	ean: z.string().optional(),
 	genres: z.array(z.string()).optional(),
 	totalEpisodes: z.number().optional(),
 	languages: z.array(z.string()).optional(),

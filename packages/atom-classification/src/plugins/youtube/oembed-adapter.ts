@@ -1,27 +1,40 @@
+import {
+	fetchProviderJson,
+	type PinAwareFetch,
+	ProviderHttpError,
+} from '@0xintuition/atom-enrichment/provider-fetch';
+import { z } from 'zod/v4';
 import type { ResolverAtom } from '../../plugins';
-import type { PlatformStageAdapter } from '../shared/platform';
+import { PLATFORM_STAGE_MISS, type PlatformStageAdapter } from '../shared/platform';
+import { toProviderStageDiagnostic } from '../shared/provider-stage-diagnostic';
+import { canonicalYouTubeVideoId } from './video-id';
 
-type FetchLike = (
-	input: string,
-	init?: {
-		headers?: Record<string, string>;
-	}
-) => Promise<{
-	ok: boolean;
-	status: number;
-	json(): Promise<unknown>;
-}>;
+/** An oEmbed answer is a few hundred bytes; 64 KiB is generous and far below the 1 MiB ceiling. */
+const YOUTUBE_OEMBED_MAX_BYTES = 64 * 1024;
 
-type YouTubeOEmbedResponse = {
-	title?: string;
-	author_name?: string;
-	thumbnail_url?: string;
-};
+/**
+ * What the endpoint answers for a private (401/403), missing (404) or deleted (410) video: nothing
+ * for this id. One set drives both the metric (`miss`) and the stage result (`PLATFORM_STAGE_MISS`),
+ * so the dashboard and `resolverErrors` never disagree.
+ */
+const YOUTUBE_NO_RECORD_STATUSES = [401, 403, 404, 410] as const;
+const NO_RECORD_OUTCOMES = Object.fromEntries(
+	YOUTUBE_NO_RECORD_STATUSES.map((status) => [status, 'miss' as const])
+);
 
-const YOUTUBE_VIDEO_ID_PATTERN = /^[A-Za-z0-9_-]{11}$/;
+/** Only the fields the atom uses, each read tolerantly. A non-object body fails the parse. */
+const youtubeOEmbedSchema = z.object({
+	title: z.unknown().optional(),
+	author_name: z.unknown().optional(),
+	thumbnail_url: z.unknown().optional(),
+});
 
 export type YouTubeOEmbedAdapterOptions = {
-	fetch?: FetchLike;
+	/**
+	 * Transport seam for fixtures: a pin-aware fetch (`createPinAwareFetch`). A plain fetcher is a
+	 * type error. Omit it for the shared pinned transport.
+	 */
+	fetch?: PinAwareFetch;
 	endpoint?: string;
 };
 
@@ -30,45 +43,61 @@ export type YouTubeOEmbedAdapter = PlatformStageAdapter;
 export function createYouTubeOEmbedAdapter(
 	options: YouTubeOEmbedAdapterOptions = {}
 ): YouTubeOEmbedAdapter {
-	const fetcher = options.fetch ?? resolveGlobalFetch();
 	const endpoint = toStringMaybe(options.endpoint) ?? 'https://www.youtube.com/oembed';
 
-	return async ({ domain, classification, canonicalUrl }) => {
+	return async ({ domain, classification, canonicalUrl, signal, deadlineAtMs }) => {
 		if (domain !== 'youtube') {
-			return null;
+			return PLATFORM_STAGE_MISS;
 		}
 
 		if (classification.subtype !== 'video') {
-			return null;
-		}
-
-		if (!fetcher) {
-			return null;
+			return PLATFORM_STAGE_MISS;
 		}
 
 		const videoId =
-			toStringMaybe(classification.meta.videoId) ?? extractYouTubeVideoIdFromUrl(canonicalUrl);
+			toStringMaybe(classification.meta.videoId) ?? canonicalYouTubeVideoId(canonicalUrl);
 		const oembedUrl = new URL(endpoint);
 		oembedUrl.searchParams.set('url', canonicalUrl);
 		oembedUrl.searchParams.set('format', 'json');
 
-		const response = await fetcher(oembedUrl.toString(), {
-			headers: {
-				accept: 'application/json',
-			},
-		});
-		if (!response.ok) {
-			return null;
+		// The guarded pinned fetch honours the stage signal, caps the body and records
+		// `youtube|classify_oembed` (the enrichment `oembed|youtube` lookup is a separate series).
+		let payload: z.infer<typeof youtubeOEmbedSchema>;
+		try {
+			payload = await fetchProviderJson({
+				url: oembedUrl.toString(),
+				fetch: options.fetch,
+				headers: { accept: 'application/json' },
+				signal,
+				deadlineAtMs,
+				maxResponseBytes: YOUTUBE_OEMBED_MAX_BYTES,
+				schema: youtubeOEmbedSchema,
+				observe: {
+					provider: 'youtube',
+					operation: 'classify_oembed',
+					// A private, deleted or non-embeddable video: nothing for this id.
+					statusOutcomes: NO_RECORD_OUTCOMES,
+					classifyResult: (value) => (toStringMaybe(value.title) ? 'hit' : 'miss'),
+				},
+			});
+		} catch (error) {
+			if (
+				error instanceof ProviderHttpError &&
+				error.errorClass === 'provider_http_error' &&
+				(YOUTUBE_NO_RECORD_STATUSES as readonly number[]).includes(error.status)
+			) {
+				return PLATFORM_STAGE_MISS;
+			}
+			throw toProviderStageDiagnostic(error, 'YouTube', { signal, deadlineAtMs });
 		}
 
-		const payload = toRecordMaybe(await response.json()) as YouTubeOEmbedResponse | undefined;
-		const title = toStringMaybe(payload?.title);
+		const title = toStringMaybe(payload.title);
 		if (!title) {
-			return null;
+			return PLATFORM_STAGE_MISS;
 		}
 
-		const authorName = toStringMaybe(payload?.author_name);
-		const thumbnailUrl = toStringMaybe(payload?.thumbnail_url);
+		const authorName = toStringMaybe(payload.author_name);
+		const thumbnailUrl = toStringMaybe(payload.thumbnail_url);
 
 		return {
 			schemaType: 'VideoObject',
@@ -103,69 +132,8 @@ export function createYouTubeOEmbedAdapter(
 	};
 }
 
-function resolveGlobalFetch(): FetchLike | undefined {
-	const globalFetch = (globalThis as { fetch?: FetchLike }).fetch;
-	if (typeof globalFetch !== 'function') {
-		return undefined;
-	}
-
-	return globalFetch;
-}
-
-function extractYouTubeVideoIdFromUrl(value: string): string | undefined {
-	try {
-		const parsed = new URL(value);
-		const normalizedHost = parsed.hostname.toLowerCase().replace(/^www\./, '');
-
-		if (normalizedHost === 'youtu.be') {
-			const candidate = parsed.pathname.split('/').filter(Boolean)[0];
-			if (candidate && YOUTUBE_VIDEO_ID_PATTERN.test(candidate)) {
-				return candidate;
-			}
-
-			return undefined;
-		}
-
-		if (
-			normalizedHost !== 'youtube.com' &&
-			normalizedHost !== 'm.youtube.com' &&
-			normalizedHost !== 'youtube-nocookie.com'
-		) {
-			return undefined;
-		}
-
-		const fromQuery = parsed.searchParams.get('v');
-		if (fromQuery && YOUTUBE_VIDEO_ID_PATTERN.test(fromQuery)) {
-			return fromQuery;
-		}
-
-		const segments = parsed.pathname.split('/').filter(Boolean);
-		const firstSegment = segments[0];
-		const secondSegment = segments[1];
-		if (
-			secondSegment &&
-			(firstSegment === 'shorts' || firstSegment === 'embed') &&
-			YOUTUBE_VIDEO_ID_PATTERN.test(secondSegment)
-		) {
-			return secondSegment;
-		}
-
-		return undefined;
-	} catch {
-		return undefined;
-	}
-}
-
 function toStringMaybe(value: unknown): string | undefined {
 	return typeof value === 'string' && value.trim().length > 0 ? value.trim() : undefined;
-}
-
-function toRecordMaybe(value: unknown): Record<string, unknown> | undefined {
-	if (!value || typeof value !== 'object' || Array.isArray(value)) {
-		return undefined;
-	}
-
-	return value as Record<string, unknown>;
 }
 
 function slugify(value: string): string {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test';
+import { beforeEach, describe, expect, it } from 'bun:test';
 
 import { createClassificationEngine } from '../src/engine';
 import {
@@ -6,21 +6,25 @@ import {
 	createAmazonPlugin,
 	createV0TypeProfilesPlugin,
 } from '../src/index';
+import { resetDomainHtmlHostCircuitBreakersForTests } from '../src/plugins/shared/domain-html/fetch';
+import { resolvePublicTestHostname } from './helpers/public-dns';
 
 describe('amazon domain-html adapter', () => {
+	beforeEach(() => {
+		resetDomainHtmlHostCircuitBreakersForTests();
+	});
+
 	it('extracts deterministic identity fields from amazon product html', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [
 				createV0TypeProfilesPlugin(),
 				createAmazonPlugin({
 					adapters: {
 						domainHtml: createAmazonDomainHtmlAdapter({
-							fetch: async () => ({
-								ok: true,
-								status: 200,
-								text: async () => AMAZON_PRODUCT_HTML,
-							}),
+							resolveHostname: resolvePublicTestHostname,
+							fetch: async () => new Response(AMAZON_PRODUCT_HTML),
 						}),
 					},
 				}),
@@ -64,6 +68,42 @@ describe('amazon domain-html adapter', () => {
 			skippedStages: ['domain-api:no-credentials'],
 			stageErrors: [],
 		});
+	});
+
+	it('names the open host and breaker state in the domain-html classify diagnostic', async () => {
+		let fetchCallCount = 0;
+		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
+			runtime: 'server',
+			plugins: [
+				createV0TypeProfilesPlugin(),
+				createAmazonPlugin({
+					adapters: {
+						domainHtml: createAmazonDomainHtmlAdapter({
+							resolveHostname: resolvePublicTestHostname,
+							fetch: async () => {
+								fetchCallCount += 1;
+								return new Response('', { status: 503 });
+							},
+						}),
+					},
+				}),
+			],
+		});
+
+		let finalResult: Awaited<ReturnType<typeof engine.classify>> | undefined;
+		for (let index = 0; index < 4; index += 1) {
+			finalResult = await engine.classify({
+				input: `https://www.amazon.com/dp/B0916J47${index}T`,
+				mode: 'progressive',
+				classificationSessionId: `amazon-domain-html-open-${index}`,
+			});
+		}
+
+		expect(fetchCallCount).toBe(3);
+		expect(finalResult?.resolverErrors?.map((error) => error.message).join('\n')).toMatch(
+			/domain-html:circuit_open: Host www\.amazon\.com circuit is open \(failures=3, openForMs=\d+, resetAfterMs=300000\)/
+		);
 	});
 });
 

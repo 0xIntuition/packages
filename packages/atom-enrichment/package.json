@@ -79,7 +79,47 @@
 			"types": "./dist/extraction/index.d.ts",
 			"import": "./dist/extraction/index.js"
 		},
-		"./package.json": "./package.json"
+		"./package.json": "./package.json",
+		"./data-resolved-schema": {
+			"types": "./dist/data-resolved-schema.d.ts",
+			"import": "./dist/data-resolved-schema.js"
+		},
+		"./spotify-client": {
+			"types": "./dist/plugins/providers/spotify/client.d.ts",
+			"import": "./dist/plugins/providers/spotify/client.js"
+		},
+		"./tmdb-request-observer": {
+			"types": "./dist/plugins/providers/tmdb/request-observer.d.ts",
+			"import": "./dist/plugins/providers/tmdb/request-observer.js"
+		},
+		"./provider-fetch": {
+			"types": "./dist/plugins/providers/__shared__/provider-fetch.d.ts",
+			"import": "./dist/plugins/providers/__shared__/provider-fetch.js"
+		},
+		"./plugin-api": {
+			"types": "./dist/plugin-api.d.ts",
+			"import": "./dist/plugin-api.js"
+		},
+		"./outcome": {
+			"types": "./dist/outcome.d.ts",
+			"import": "./dist/outcome.js"
+		},
+		"./adapters/upstash": {
+			"types": "./dist/adapters/upstash.d.ts",
+			"import": "./dist/adapters/upstash.js"
+		},
+		"./ssrf": {
+			"types": "./dist/ssrf.d.ts",
+			"import": "./dist/ssrf.js"
+		},
+		"./identifier-rung-projection": {
+			"types": "./dist/identifier-rung-projection.d.ts",
+			"import": "./dist/identifier-rung-projection.js"
+		},
+		"./url-hygiene": {
+			"types": "./dist/url-hygiene.d.ts",
+			"import": "./dist/url-hygiene.js"
+		}
 	},
 	"license": "MIT",
 	"scripts": {
@@ -104,14 +144,20 @@
 		"test:node": "bun run build && node --test tests/node-testing.test.mjs"
 	},
 	"dependencies": {
+		"@0xintuition/iid": "0.1.0-alpha.0",
+		"@0xintuition/iid-ladder": "0.1.0-alpha.1",
+		"@0xintuition/pipeline-runtime": "0.1.0-alpha.0",
+		"@0xintuition/protocol": "^4.0.0",
+		"@0xintuition/schema-org": "0.1.0-alpha.0",
 		"@0xintuition/classifications": "0.1.0-alpha.1",
+		"@0xintuition/iid-registry": "0.1.0-alpha.0",
 		"zod": "4.1.12"
 	},
 	"devDependencies": {
 		"@types/bun": "^1.3.3",
 		"typescript": "^5.9.3"
 	},
-	"version": "0.1.0-alpha.0",
+	"version": "0.1.0-alpha.1",
 	"description": "Composable atom enrichment engine, provider adapters, extraction, and cache contracts",
 	"sideEffects": false,
 	"main": "./dist/index.js",

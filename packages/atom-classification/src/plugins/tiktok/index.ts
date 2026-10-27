@@ -9,6 +9,12 @@ export type TikTokPluginOptions = PlatformV0PluginOptions;
 
 export const tiktokProfile: PlatformV0Profile = {
 	domain: 'tiktok',
+	display: {
+		classificationSlugs: ['social-media-account', 'video-object'],
+		exampleUrl: 'https://www.tiktok.com/@tiktok',
+		host: 'tiktok.com',
+		label: 'TikTok',
+	},
 	supportsOEmbed: true,
 	classifier: {
 		id: 'tiktok-url-classifier',

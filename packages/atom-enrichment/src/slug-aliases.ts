@@ -1,6 +1,22 @@
-const canonicalSlugAliases = new Map<string, string>([['twitter-profile', 'x-profile']]);
+const canonicalSlugAliases = new Map<string, string>([
+	['open-library', 'openlibrary'],
+	['openlibrary-book', 'openlibrary'],
+	['openlibrary_book', 'openlibrary'],
+	['steam', 'steam-app'],
+	['steam-game', 'steam-app'],
+	['steam_app', 'steam-app'],
+	['twitter-profile', 'x-profile'],
+]);
 
 const equivalentSlugGroups = new Map<string, string[]>([
+	['open-library', ['openlibrary', 'openlibrary-book', 'openlibrary_book', 'open-library']],
+	['openlibrary', ['openlibrary', 'openlibrary-book', 'openlibrary_book', 'open-library']],
+	['openlibrary-book', ['openlibrary', 'openlibrary-book', 'openlibrary_book', 'open-library']],
+	['openlibrary_book', ['openlibrary', 'openlibrary-book', 'openlibrary_book', 'open-library']],
+	['steam', ['steam-app', 'steam-game', 'steam', 'steam_app']],
+	['steam-app', ['steam-app', 'steam-game', 'steam', 'steam_app']],
+	['steam-game', ['steam-app', 'steam-game', 'steam', 'steam_app']],
+	['steam_app', ['steam-app', 'steam-game', 'steam', 'steam_app']],
 	['twitter-profile', ['x-profile', 'twitter-profile']],
 	['x-profile', ['x-profile', 'twitter-profile']],
 ]);

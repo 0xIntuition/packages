@@ -1,3 +1,4 @@
+import { pickWikidataLabel } from '@0xintuition/iid-ladder';
 import { z } from 'zod/v4';
 import type { FetchLike } from '../plugins/providers/__shared__/http';
 import { fetchJsonWithSchema } from '../plugins/providers/__shared__/http';
@@ -137,26 +138,6 @@ export function readTimeClaimValue(claims: unknown, propertyId: string): string 
 		if (match?.[1]) {
 			return match[1];
 		}
-	}
-	return undefined;
-}
-
-// Local policy from v2 iid-ladder/src/wikidata-label.ts; Core has no ladder dependency.
-export function pickWikidataLabel(
-	labels: Readonly<Record<string, unknown>> | undefined,
-	language = 'en'
-): string | undefined {
-	for (const locale of [language, 'en', 'en-gb', 'en-us', 'en-ca', 'en-au', 'mul']) {
-		if (
-			['__proto__', 'constructor', 'prototype'].includes(locale) ||
-			!labels ||
-			!Object.hasOwn(labels, locale)
-		)
-			continue;
-		const entry = labels[locale];
-		if (!entry || typeof entry !== 'object' || Array.isArray(entry)) continue;
-		const value = Object.hasOwn(entry, 'value') ? (entry as { value?: unknown }).value : undefined;
-		if (typeof value === 'string' && value.trim()) return value.trim();
 	}
 	return undefined;
 }

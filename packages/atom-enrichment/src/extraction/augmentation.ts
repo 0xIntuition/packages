@@ -8,7 +8,6 @@
 
 import type { EnrichmentArtifact } from '../types';
 import type { ChainHarvest } from './chaining';
-import { getIdentityArtifacts } from './quarantine';
 import { findArtifactData, parseAppleMusic, parseSpotify, readString } from './shared';
 
 // Spotify fallback artifacts synthesize names like "Show 4rOoJ6Egrf8K2I..."
@@ -18,9 +17,18 @@ const GENERATED_SPOTIFY_NAME_PATTERN =
 
 const PODCAST_INDEX_DATA_KEYS = ['feedUrl', 'itunesId'] as const;
 
+/**
+ * True for synthesized spotify fallback display names ("Track 4rOoJ6Egrf…").
+ * Shared with the tRPC track-preview resolver (ENG-13713 round 4) so lazy
+ * song-catalog searches never fire on generated names either.
+ */
+export function isGeneratedSpotifyDisplayName(value: string): boolean {
+	return GENERATED_SPOTIFY_NAME_PATTERN.test(value);
+}
+
 function usableName(value: unknown): string | undefined {
 	const name = readString(value);
-	return name && !GENERATED_SPOTIFY_NAME_PATTERN.test(name) ? name : undefined;
+	return name && !isGeneratedSpotifyDisplayName(name) ? name : undefined;
 }
 
 // spotify show/episode → iTunes podcast catalog (gated search). The iTunes
@@ -32,7 +40,7 @@ function harvestSpotifyPodcastPeers(
 	harvest: ChainHarvest
 ): void {
 	if (presentTypes.has('apple-music')) return;
-	const spotify = findArtifactData(getIdentityArtifacts(artifacts), 'spotify', parseSpotify);
+	const spotify = findArtifactData(artifacts, 'spotify', parseSpotify);
 	if (!spotify) return;
 
 	const isShow = spotify.data.type === 'show';
@@ -48,6 +56,12 @@ function harvestSpotifyPodcastPeers(
 	harvest.pluginSlugs.push('apple-music');
 }
 
+// There is deliberately NO spotify track -> iTunes edge here (ENG-16981). It used to
+// harvest the track's ISRC "for apple-music", but the free iTunes API cannot look
+// anything up by ISRC (`apple-music` rejects the identifier), so the follow-up
+// pass dialled nothing. Preview recovery for tracks is the tRPC track-preview
+// resolver's gated name + artist song search.
+
 // apple-music podcast → Podcast Index (exact joins: feedUrl, else itunesId).
 function harvestApplePodcastPeers(
 	artifacts: readonly EnrichmentArtifact[],
@@ -55,11 +69,7 @@ function harvestApplePodcastPeers(
 	harvest: ChainHarvest
 ): void {
 	if (presentTypes.has('podcast-index')) return;
-	const appleMusic = findArtifactData(
-		getIdentityArtifacts(artifacts),
-		'apple-music',
-		parseAppleMusic
-	);
+	const appleMusic = findArtifactData(artifacts, 'apple-music', parseAppleMusic);
 	if (appleMusic?.data.type !== 'podcast') return;
 
 	const feedUrl = readString(appleMusic.data.feedUrl);
@@ -83,9 +93,7 @@ function harvestPodcastIndexPeers(
 	harvest: ChainHarvest
 ): void {
 	if (presentTypes.has('apple-music')) return;
-	const podcastIndex = getIdentityArtifacts(artifacts).find(
-		(artifact) => artifact.artifact_type === 'podcast-index'
-	);
+	const podcastIndex = artifacts.find((artifact) => artifact.artifact_type === 'podcast-index');
 	if (!podcastIndex) return;
 
 	const data = podcastIndex.data as Record<(typeof PODCAST_INDEX_DATA_KEYS)[number], unknown>;
@@ -103,12 +111,11 @@ function harvestPodcastIndexPeers(
  */
 export function harvestAugmentationLookups(artifacts: readonly EnrichmentArtifact[]): ChainHarvest {
 	const harvest: ChainHarvest = { identifiers: {}, pluginSlugs: [] };
-	const identityArtifacts = getIdentityArtifacts(artifacts);
-	const presentTypes = new Set(identityArtifacts.map((artifact) => artifact.artifact_type));
+	const presentTypes = new Set(artifacts.map((artifact) => artifact.artifact_type));
 
-	harvestSpotifyPodcastPeers(identityArtifacts, presentTypes, harvest);
-	harvestApplePodcastPeers(identityArtifacts, presentTypes, harvest);
-	harvestPodcastIndexPeers(identityArtifacts, presentTypes, harvest);
+	harvestSpotifyPodcastPeers(artifacts, presentTypes, harvest);
+	harvestApplePodcastPeers(artifacts, presentTypes, harvest);
+	harvestPodcastIndexPeers(artifacts, presentTypes, harvest);
 
 	const pluginSlugs = [...new Set(harvest.pluginSlugs)];
 	if (pluginSlugs.length === 0) {
@@ -119,6 +126,7 @@ export function harvestAugmentationLookups(artifacts: readonly EnrichmentArtifac
 
 /** Merges chain + augmentation harvests into one follow-up enrichment pass. */
 export function mergeHarvests(...harvests: ChainHarvest[]): ChainHarvest {
+	const collisions = harvests.flatMap((harvest) => harvest.collisions ?? []);
 	const identifiers: Record<string, string> = {};
 	const pluginSlugs: string[] = [];
 	for (const harvest of harvests) {
@@ -127,5 +135,9 @@ export function mergeHarvests(...harvests: ChainHarvest[]): ChainHarvest {
 		}
 		pluginSlugs.push(...harvest.pluginSlugs);
 	}
-	return { identifiers, pluginSlugs: [...new Set(pluginSlugs)] };
+	return {
+		...(collisions.length > 0 ? { collisions } : {}),
+		identifiers,
+		pluginSlugs: [...new Set(pluginSlugs)],
+	};
 }

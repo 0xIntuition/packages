@@ -1,5 +1,6 @@
 import { CID } from 'multiformats/cid';
 import { getAddress, isAddress } from 'viem';
+import { type IidCandidate, parseIidCandidate } from './iid.js';
 import { analyzeStructuredDocument } from './structured.js';
 import type { IsbnFormat, JsonTopLevelType, ParseResult } from './types.js';
 
@@ -37,6 +38,11 @@ export function detectLocal(
 		return { ...base, kind: 'json', ...json };
 	}
 
+	const iid = tryIid(normalizedInput);
+	if (iid) {
+		return { ...base, kind: 'iid', structuredDocument: undefined, ...iid };
+	}
+
 	const url = tryUrl(normalizedInput);
 	if (url) {
 		return {
@@ -61,6 +67,10 @@ export function detectLocal(
 		original: input,
 		trimmed: normalizedInput,
 	};
+}
+
+function tryIid(normalizedInput: string): IidCandidate | undefined {
+	return parseIidCandidate(normalizedInput);
 }
 
 interface IpfsData {

@@ -1,7 +1,21 @@
-import { pickWikidataLabel } from '../../../extraction/wikidata-claims';
-import { defineEnrichmentPlugin, type EnrichmentPlugin } from '../../../plugins';
+import { pickWikidataLabel } from '@0xintuition/iid-ladder';
+import type { ObservedRequestContext } from '@0xintuition/pipeline-runtime/provider-request-observation';
+import {
+	isUnsentSlotRefusal,
+	RequestSlotTimeoutError,
+} from '@0xintuition/pipeline-runtime/request-slot';
+import {
+	defineEnrichmentPlugin,
+	type EnrichmentPlugin,
+	type EnrichmentPluginLogger,
+} from '../../../plugins';
 import type { EnrichmentRequest } from '../../../types';
-import { type FetchLike, fetchJsonWithSchema } from '../__shared__/http';
+import type { PinAwareFetch } from '../__shared__/http';
+import {
+	classifyWikimediaError,
+	isWikimediaMiss,
+	WIKIMEDIA_MAXLAG_SECONDS,
+} from '../__shared__/provider-fetch';
 import {
 	getIdentifier,
 	getRequestName,
@@ -9,11 +23,17 @@ import {
 	isSynthesizedProviderPlaceholderTitle,
 } from '../__shared__/request';
 import { fetchWikidataEntity, wikidataTypeAgreement } from '../__shared__/wikidata-type';
+import {
+	createWikimediaClient,
+	type WikimediaClient,
+	type WikimediaClientOptions,
+	wikimediaJson,
+} from '../__shared__/wikimedia';
 import { wikidataSearchResponseSchema } from './external';
 import { wikidataDataSchema } from './schema';
 
-type CreateWikidataPluginOptions = {
-	fetch?: FetchLike;
+type CreateWikidataPluginOptions = WikimediaClientOptions & {
+	fetch?: PinAwareFetch;
 	priority?: number;
 	TTL?: number;
 	language?: string;
@@ -51,56 +71,60 @@ type WikidataEntityResponse = {
 const wikidataEntityIdPattern = /^Q\d+$/i;
 
 export function createWikidataPlugin(options: CreateWikidataPluginOptions = {}): EnrichmentPlugin {
-	const fetcher = options.fetch ?? (globalThis.fetch as FetchLike);
+	const client = createWikimediaClient(options.fetch, options);
 	const language = options.language ?? 'en';
 
 	return defineEnrichmentPlugin({
 		id: 'wikidata',
-		version: '1.0.0',
+		version: '1.1.0',
 		runtime: 'server',
 		artifactTypes: ['wikidata'],
 		priority: options.priority ?? 35,
 		TTL: options.TTL ?? 43_200,
 
-		supports(request: EnrichmentRequest) {
-			return (
-				!!resolveWikidataEntityId(request) ||
-				(!!getRequestName(request) && !isSynthesizedProviderPlaceholderTitle(request))
-			);
+		observability: {
+			provider: 'wikidata',
+			// A cached run stands in for the one lookup its request selects: the entity fetch for a
+			// request that carries an entity id, the title search otherwise.
+			cacheOperations(request) {
+				if (!supportsRequest(request)) return [];
+				return [resolveWikidataEntityId(request) ? 'entity' : 'search'];
+			},
 		},
 
+		supports: supportsRequest,
+
 		async enrich(request, ctx) {
+			let titleOnly = false;
 			let entityId = resolveWikidataEntityId(request);
-			const identityStrength = entityId ? 'identifier' : 'title';
+			let entity = entityId ? await fetchWikidataEntity(client, entityId, ctx) : undefined;
 			if (!entityId) {
 				const name = getRequestName(request);
 				if (!name || isSynthesizedProviderPlaceholderTitle(request, name)) {
 					return [];
 				}
 
-				entityId = await searchEntityId(fetcher, name, language, ctx.signal);
+				const candidate = await searchEntityId(
+					client,
+					name,
+					language,
+					ctx,
+					request.input.jsonLd['@type'],
+					ctx.logger
+				);
+				entityId = candidate?.entityId;
+				entity = candidate?.entity;
+				titleOnly = candidate?.titleOnly ?? false;
 				if (!entityId) {
 					return [];
 				}
 			}
 
-			const entity = await fetchWikidataEntity(fetcher, entityId, ctx.signal);
 			if (!entity) {
 				return [];
 			}
-			const agreement =
-				identityStrength === 'title'
-					? wikidataTypeAgreement(
-							entity.claims,
-							request.input.jsonLd['@type'],
-							ctx.identity,
-							ctx.logger,
-							ctx.signal
-						)
-					: 'unknown';
-			if (agreement === 'mismatch') return [];
 
-			const label = pickWikidataLabel(entity.labels, language) ?? entity.id;
+			const label = pickWikidataLabel(entity.labels, language);
 			if (!label) {
 				return [];
 			}
@@ -124,7 +148,7 @@ export function createWikidataPlugin(options: CreateWikidataPluginOptions = {}):
 					}),
 					meta: {
 						pluginId: 'wikidata',
-						...(agreement === 'agree' ? {} : { identityStrength }),
+						...(titleOnly ? { identityStrength: 'title' as const } : {}),
 						provider: 'wikidata',
 						fetchedAt: ctx.now(),
 						sourceUrl,
@@ -133,6 +157,14 @@ export function createWikidataPlugin(options: CreateWikidataPluginOptions = {}):
 			];
 		},
 	});
+}
+
+function supportsRequest(request: EnrichmentRequest): boolean {
+	const name = getRequestName(request);
+	return (
+		!!resolveWikidataEntityId(request) ||
+		(!!name && !isSynthesizedProviderPlaceholderTitle(request, name))
+	);
 }
 
 function resolveWikidataEntityId(request: EnrichmentRequest): string | undefined {
@@ -158,25 +190,99 @@ function resolveWikidataEntityId(request: EnrichmentRequest): string | undefined
 }
 
 async function searchEntityId(
-	fetcher: FetchLike,
+	client: WikimediaClient,
 	name: string,
 	language: string,
-	signal: AbortSignal
-): Promise<string | undefined> {
+	context: ObservedRequestContext & { signal: AbortSignal },
+	expectedType: unknown,
+	logger?: EnrichmentPluginLogger
+) {
+	const { signal } = context;
+	signal.throwIfAborted();
+	// `maxlag` makes Wikimedia refuse the read (HTTP 200, `Retry-After`) while replication lags,
+	// instead of adding load; EntityData ignores it (live check), so only the action API gets it.
 	const searchUrl =
-		`https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&limit=1` +
+		`https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&limit=5` +
+		`&maxlag=${WIKIMEDIA_MAXLAG_SECONDS}` +
 		`&language=${encodeURIComponent(language)}` +
 		`&search=${encodeURIComponent(name)}`;
-	const payload = await fetchJsonWithSchema(fetcher, searchUrl, wikidataSearchResponseSchema, {
-		signal,
-	});
+	const payload = await searchWikidata(client, searchUrl, context);
+	if (!payload) return undefined;
 
-	const candidate = payload.search?.[0]?.id;
-	if (!candidate || !wikidataEntityIdPattern.test(candidate)) {
-		return undefined;
+	let firstUnknown: { entityId: string; entity: WikidataEntity; titleOnly: boolean } | undefined;
+	let firstError: unknown;
+	let fetchedCandidate = false;
+	for (const candidate of (payload.search ?? []).slice(0, 5)) {
+		if (!candidate.id || !wikidataEntityIdPattern.test(candidate.id)) continue;
+		const entityId = candidate.id.toUpperCase();
+		signal.throwIfAborted();
+		let entity: Awaited<ReturnType<typeof fetchWikidataEntity>>;
+		try {
+			entity = await fetchWikidataEntity(client, entityId, context);
+			signal.throwIfAborted();
+			fetchedCandidate = true;
+		} catch (error) {
+			signal.throwIfAborted();
+			// A throttle ends the loop: Wikimedia asked us to back off, so no more candidates are
+			// fetched. So does our own pacing slot refusing the request (`budget_exhausted`): the next
+			// candidate would be refused the same way, and each refusal is a recorded series. What we
+			// already hold is returned; otherwise the error is rethrown. A throttle reaches the engine
+			// as `rate_limited` with its `retryAfterMs`. A slot refusal ends the loop but not the lookup:
+			// the engine maps it to a retriable `internal_error` with `details.errorClass:
+			// 'budget_exhausted'` and a `retryAfterMs` (ENG-17116), and the worker requeues the stage.
+			if (endsCandidateLoop(error) || classifyWikimediaError(error).reason === 'rate_limited') {
+				if (firstUnknown) return firstUnknown;
+				throw error;
+			}
+			firstError ??= error;
+			logger?.warn('Wikidata candidate fetch failed', {
+				entityId,
+				errorClass: error instanceof Error ? error.name : 'unknown',
+			});
+			continue;
+		}
+		if (!entity) continue;
+		const agreement = wikidataTypeAgreement(entity.claims, expectedType);
+		if (agreement === 'agree') return { entityId, entity, titleOnly: false };
+		if (agreement === 'unknown' && !firstUnknown)
+			firstUnknown = { entityId, entity, titleOnly: true };
 	}
+	signal.throwIfAborted();
+	if (!firstUnknown && !fetchedCandidate && firstError) throw firstError;
+	return firstUnknown;
+}
 
-	return candidate.toUpperCase();
+/**
+ * Whether the candidate loop must stop: our own pacing slot refused the request (`slotRefusalOf`:
+ * queue full, cannot start before the deadline, or the deadline passed while it queued), or the
+ * deadline passed after the dial (`RequestSlotTimeoutError`; `signal.throwIfAborted()` normally ends
+ * the run first). Either way the next candidate would meet the same slot (ENG-17085).
+ */
+function endsCandidateLoop(error: unknown): boolean {
+	return isUnsentSlotRefusal(error) || error instanceof RequestSlotTimeoutError;
+}
+
+/** The title search; a 404 (recorded as a miss) is "no candidates", not a failed run. */
+async function searchWikidata(
+	client: WikimediaClient,
+	searchUrl: string,
+	context: ObservedRequestContext
+): Promise<WikidataSearchResponse | undefined> {
+	try {
+		return await wikimediaJson({
+			client,
+			provider: 'wikidata',
+			operation: 'search',
+			url: searchUrl,
+			schema: wikidataSearchResponseSchema,
+			context,
+			actionApi: true,
+			classifyResult: (value) => ((value.search ?? []).length > 0 ? 'hit' : 'miss'),
+		});
+	} catch (error) {
+		if (isWikimediaMiss(error)) return undefined;
+		throw error;
+	}
 }
 
 function parseWikidataEntityIdFromUrl(url: string): string | undefined {

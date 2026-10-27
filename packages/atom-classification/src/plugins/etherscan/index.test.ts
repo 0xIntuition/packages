@@ -47,6 +47,7 @@ describe('etherscan plugin', () => {
 		}) as (input: string, init?: RequestInit) => Promise<Response>;
 
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [
 				createTypeProfilesPlugin(),
@@ -101,6 +102,7 @@ describe('etherscan plugin', () => {
 		}) as (input: string, init?: RequestInit) => Promise<Response>;
 
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [
 				createTypeProfilesPlugin(),
@@ -140,6 +142,7 @@ describe('etherscan plugin', () => {
 		}) as (input: string, init?: RequestInit) => Promise<Response>;
 
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [
 				createTypeProfilesPlugin(),

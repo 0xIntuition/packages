@@ -1,6 +1,9 @@
+import type { ProviderOperationOf } from '@0xintuition/pipeline-runtime/provider-registry';
+import { observeProviderRequest } from '@0xintuition/pipeline-runtime/provider-request-observation';
 import { defineEnrichmentPlugin, type EnrichmentPlugin } from '../../../plugins';
 import type { EnrichmentRequest } from '../../../types';
 import { type FetchLike, fetchJsonWithSchema } from '../__shared__/http';
+import { classifyProviderRequestError } from '../__shared__/provider-request-observer';
 import { getRequestUrl } from '../__shared__/request';
 import { oembedResponseSchema } from './external';
 import { oembedDataSchema } from './schema';
@@ -34,23 +37,51 @@ type OEmbedResponse = {
 	url?: string;
 };
 
-const defaultProviders: OEmbedProvider[] = [
+/** A built-in provider: its id is a registered `oembed` operation, so a bad id is a compile error. */
+type BuiltInOEmbedProvider = OEmbedProvider & { id: ProviderOperationOf<'oembed'> };
+
+const defaultProviders: BuiltInOEmbedProvider[] = [
 	{
 		id: 'youtube',
-		matcher: /https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\//i,
+		matcher: /^https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\//i,
 		oembedEndpoint: 'https://www.youtube.com/oembed',
 	},
 	{
 		id: 'vimeo',
-		matcher: /https?:\/\/(?:www\.)?vimeo\.com\//i,
+		matcher: /^https?:\/\/(?:www\.)?vimeo\.com\//i,
 		oembedEndpoint: 'https://vimeo.com/api/oembed.json',
 	},
 	{
 		id: 'twitter',
-		matcher: /https?:\/\/(?:www\.)?(?:x\.com|twitter\.com)\//i,
-		oembedEndpoint: 'https://publish.twitter.com/oembed',
+		matcher: /^https?:\/\/(?:www\.)?(?:x\.com|twitter\.com)\//i,
+		// publish.twitter.com/oembed always answers 301 to this host (observed live): dial it directly.
+		oembedEndpoint: 'https://publish.x.com/oembed',
 	},
 ];
+
+const OPERATION_BY_ENDPOINT: ReadonlyMap<string, ProviderOperationOf<'oembed'>> = new Map(
+	defaultProviders.map((provider) => [provider.oembedEndpoint, provider.id])
+);
+
+/**
+ * The metric operation of a provider: decided by the endpoint it dials, matched against the fixed
+ * built-in endpoints, never by `options.providers` ids (caller-supplied, so a custom provider may
+ * call itself `vimeo`). A provider that dials any other endpoint is not observed.
+ */
+function observedOperation(provider: OEmbedProvider): ProviderOperationOf<'oembed'> | undefined {
+	return OPERATION_BY_ENDPOINT.get(provider.oembedEndpoint);
+}
+
+/**
+ * 401, 403, 404 and 410 are what the endpoints answer for a private, deleted or non-embeddable
+ * item (YouTube and Vimeo 404 a missing id, observed live): nothing for this id, so a `miss`.
+ * The endpoints are unauthenticated, so none of these is an auth failure.
+ */
+function classifyOEmbedError(error: unknown) {
+	return classifyProviderRequestError(error, {
+		statusOutcomes: { 401: 'miss', 403: 'miss', 404: 'miss', 410: 'miss' },
+	});
+}
 
 export function createOEmbedPlugin(options: CreateOEmbedPluginOptions = {}): EnrichmentPlugin {
 	const fetcher = options.fetch ?? (globalThis.fetch as FetchLike);
@@ -63,6 +94,17 @@ export function createOEmbedPlugin(options: CreateOEmbedPluginOptions = {}): Enr
 		artifactTypes: ['oembed'],
 		priority: options.priority ?? 20,
 		TTL: options.TTL ?? 3_600,
+
+		observability: {
+			provider: 'oembed',
+			// A cached run stands in for the one lookup its URL selects.
+			cacheOperations(request) {
+				const url = getRequestUrl(request);
+				const provider = url ? resolveProvider(url, providers) : undefined;
+				const operation = provider ? observedOperation(provider) : undefined;
+				return operation ? [operation] : [];
+			},
+		},
 
 		supports(request: EnrichmentRequest) {
 			const url = getRequestUrl(request);
@@ -88,14 +130,22 @@ export function createOEmbedPlugin(options: CreateOEmbedPluginOptions = {}): Enr
 			endpoint.searchParams.set('url', url);
 			endpoint.searchParams.set('format', 'json');
 
-			const payload = await fetchJsonWithSchema(
-				fetcher,
-				endpoint.toString(),
-				oembedResponseSchema,
-				{
+			const fetchPayload = () =>
+				fetchJsonWithSchema(fetcher, endpoint.toString(), oembedResponseSchema, {
 					signal: ctx.signal,
-				}
-			);
+				});
+			const operation = observedOperation(provider);
+			const payload = operation
+				? await observeProviderRequest(
+						{
+							provider: 'oembed',
+							operation,
+							context: { signal: ctx.signal, deadlineAtMs: ctx.deadlineAtMs },
+							classifyError: classifyOEmbedError,
+						},
+						fetchPayload
+					)
+				: await fetchPayload();
 
 			return [
 				{
@@ -131,7 +181,7 @@ function resolveProvider(url: string, providers: OEmbedProvider[]): OEmbedProvid
 	return providers.find((provider) => provider.matcher.test(url));
 }
 
-function toOptionalNumber(value: number | string | undefined): number | undefined {
+function toOptionalNumber(value: number | string | null | undefined): number | undefined {
 	if (typeof value === 'number' && Number.isFinite(value)) {
 		return value;
 	}

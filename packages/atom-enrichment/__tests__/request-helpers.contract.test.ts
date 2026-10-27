@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'bun:test';
-import { getRequestName } from '../src/plugins/providers/__shared__/request';
+import { getIdentifier, getRequestName } from '../src/plugins/providers/__shared__/request';
 import type { EnrichmentRequest } from '../src/types';
+import { classifiedAtomInputSchema } from '../src/types';
 
 const BASE_REQUEST: Omit<EnrichmentRequest, 'input'> = {
 	runtime: 'server',
@@ -50,5 +51,25 @@ describe('request helper name resolution', () => {
 		});
 
 		expect(getRequestName(request)).toBe('next.js');
+	});
+});
+
+describe('request helper identifier resolution', () => {
+	it('resolves a first-class IID without URL or caller-populated hints', () => {
+		const input = classifiedAtomInputSchema.parse({
+			atomType: 'song',
+			identifier: {
+				iid: 'int:isrc:USUM71703861',
+				scheme: 'isrc',
+				value: 'USUM71703861',
+			},
+			source: {
+				classificationEngine: 'iid-fixture',
+				classifiedAt: '2026-08-07T12:00:00.000Z',
+			},
+		});
+		const request = createRequest(input);
+
+		expect(getIdentifier(request, 'isrc')).toBe('USUM71703861');
 	});
 });

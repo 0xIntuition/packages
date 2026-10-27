@@ -6,6 +6,7 @@ import {
 	isAmazonShortLinkUrl,
 	resolveAmazonMarketplace,
 } from '../../src/plugins/providers/__shared__/amazon';
+import { createPinAwareFetch } from '../../src/plugins/providers/__shared__/http';
 import { createMockAtomInput, createMockRequest } from '../../src/testing';
 
 describe('shared amazon url helpers', () => {
@@ -53,12 +54,14 @@ describe('product-listing short-link resolution', () => {
 		return async (input) => {
 			fetchedUrls.push(input);
 			if (input.startsWith('https://a.co/')) {
-				const response = new Response('', { status: 200 });
-				Object.defineProperty(response, 'url', {
-					value: 'https://www.amazon.com/Carepod-Humidifier/dp/B0916J478T/ref=share',
+				return new Response(null, {
+					status: 302,
+					headers: {
+						location: 'https://www.amazon.com/Carepod-Humidifier/dp/B0916J478T/ref=share',
+					},
 				});
-				return response;
 			}
+			if (input.startsWith('https://www.amazon.com/')) return new Response('product');
 			return new Response(
 				JSON.stringify({
 					data: {
@@ -87,7 +90,7 @@ describe('product-listing short-link resolution', () => {
 		const fetchedUrls: string[] = [];
 		const plugin = createProductListingPlugin({
 			apiKey: 'test-key',
-			fetch: createShortLinkFetchMock(fetchedUrls),
+			fetch: createPinAwareFetch(createShortLinkFetchMock(fetchedUrls)),
 		});
 
 		const request = createMockRequest({
@@ -99,8 +102,9 @@ describe('product-listing short-link resolution', () => {
 		});
 
 		expect(fetchedUrls[0]).toBe('https://a.co/d/4DUuJRf');
-		expect(fetchedUrls[1]).toContain('rest.canopyapi.co');
-		expect(fetchedUrls[1]).toContain('asin=B0916J478T');
+		expect(fetchedUrls[1]).toContain('www.amazon.com');
+		expect(fetchedUrls[2]).toContain('rest.canopyapi.co');
+		expect(fetchedUrls[2]).toContain('asin=B0916J478T');
 		expect(artifacts[0]?.artifact_type).toBe('product-listing');
 		expect(artifacts[0]?.data).toMatchObject({
 			name: 'Carepod One Stainless Steel Humidifier for Large Room',
@@ -112,11 +116,11 @@ describe('product-listing short-link resolution', () => {
 	it('returns no artifacts when the short link does not land on Amazon', async () => {
 		const plugin = createProductListingPlugin({
 			apiKey: 'test-key',
-			fetch: async () => {
+			fetch: createPinAwareFetch(async () => {
 				const response = new Response('', { status: 200 });
 				Object.defineProperty(response, 'url', { value: 'https://evil.example/landing' });
 				return response;
-			},
+			}),
 		});
 
 		const request = createMockRequest({

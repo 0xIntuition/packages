@@ -1,5 +1,5 @@
 {
-	"description": "Candidate versions in dependency order. Validate the release using docs/release.md. schema-org is unchanged and already published. atom-parser, atom-classification and atom-enrichment are held: their 0.1.0-alpha.0 manifests are the Core lineage and are never published; they re-enter this plan as 0.1.0-alpha.1 once rebuilt from the application lineage (ENG-17076..17078).",
+	"description": "Candidate versions in dependency order, including the reconciled Promise-based atom packages. Validate the release using docs/release.md. schema-org is unchanged and already published.",
 	"packages": [
 		{
 			"directory": "iid-spec",
@@ -37,6 +37,11 @@
 			"tag": "alpha"
 		},
 		{
+			"directory": "atom-parser",
+			"version": "0.1.0-alpha.1",
+			"tag": "alpha"
+		},
+		{
 			"directory": "iid-registry",
 			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
@@ -59,6 +64,21 @@
 		{
 			"directory": "protocol",
 			"version": "4.0.0",
+			"tag": "alpha"
+		},
+		{
+			"directory": "atom-enrichment",
+			"version": "0.1.0-alpha.1",
+			"tag": "alpha"
+		},
+		{
+			"directory": "atom-classification",
+			"version": "0.1.0-alpha.1",
+			"tag": "alpha"
+		},
+		{
+			"directory": "atom-runtime",
+			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
 		},
 		{

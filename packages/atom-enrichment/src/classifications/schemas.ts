@@ -3,6 +3,7 @@ import { z } from 'zod/v4';
 export const classificationCategorySchema = z.enum([
 	'web-metadata',
 	'brand-identity',
+	'book',
 	'knowledge',
 	'location',
 	'music',
@@ -80,6 +81,10 @@ export {
 } from '../plugins/providers/github/schema';
 export { type IsbnData, isbnDataSchema } from '../plugins/providers/isbn/schema';
 export {
+	type LetterboxdData,
+	letterboxdDataSchema,
+} from '../plugins/providers/letterboxd/schema';
+export {
 	type MicrodataData,
 	microdataDataSchema,
 } from '../plugins/providers/microdata/schema';
@@ -116,6 +121,7 @@ export {
 	screenshotDataSchema,
 } from '../plugins/providers/screenshot/schema';
 export { type SpotifyData, spotifyDataSchema } from '../plugins/providers/spotify/schema';
+export { type SteamAppData, steamAppDataSchema } from '../plugins/providers/steam/schema';
 export { type TmdbData, tmdbDataSchema } from '../plugins/providers/tmdb/schema';
 export { type VimeoData, vimeoDataSchema } from '../plugins/providers/vimeo/schema';
 export { type WikidataData, wikidataDataSchema } from '../plugins/providers/wikidata/schema';

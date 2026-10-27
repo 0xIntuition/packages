@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import type { FetchLike } from '../../src/plugins/providers/__shared__/http';
+import { createPinAwareFetch, type FetchLike } from '../../src/plugins/providers/__shared__/http';
 import { createPlacesPlugin, parseMapsUrl } from '../../src/plugins/providers/places';
 import type { EnrichmentRequest } from '../../src/types';
 
@@ -105,15 +105,17 @@ describe('places plugin', () => {
 	it('confirms the place via text search with location bias when keyed', async () => {
 		const plugin = createPlacesPlugin({
 			apiKey: 'test-key',
-			fetch: searchFetcher({
-				displayName: 'Eiffel Tower',
-				assertBody: (body) => {
-					expect(body.textQuery).toBe('Eiffel Tower');
-					expect(body.locationBias).toMatchObject({
-						circle: { center: { latitude: 48.8583701, longitude: 2.2922926 } },
-					});
-				},
-			}),
+			fetch: createPinAwareFetch(
+				searchFetcher({
+					displayName: 'Eiffel Tower',
+					assertBody: (body) => {
+						expect(body.textQuery).toBe('Eiffel Tower');
+						expect(body.locationBias).toMatchObject({
+							circle: { center: { latitude: 48.8583701, longitude: 2.2922926 } },
+						});
+					},
+				})
+			),
 		});
 		const artifacts = await plugin.enrich(request(EIFFEL_URL), ctx);
 		expect(artifacts[0]?.data).toMatchObject({
@@ -128,7 +130,7 @@ describe('places plugin', () => {
 	it('falls back to url-derived data when the top result name does not match', async () => {
 		const plugin = createPlacesPlugin({
 			apiKey: 'test-key',
-			fetch: searchFetcher({ displayName: 'Completely Different Restaurant' }),
+			fetch: createPinAwareFetch(searchFetcher({ displayName: 'Completely Different Restaurant' })),
 		});
 		const artifacts = await plugin.enrich(request(EIFFEL_URL), ctx);
 		expect(artifacts[0]?.data.name).toBe('Eiffel Tower');
@@ -186,10 +188,12 @@ describe('places photo resolution', () => {
 	it('stores the key-free photoUri as photoUrl', async () => {
 		const plugin = createPlacesPlugin({
 			apiKey: 'test-key',
-			fetch: photoFetcher({
-				displayName: 'Eiffel Tower',
-				photoUri: 'https://lh3.googleusercontent.com/places/photo-abc=s1600',
-			}),
+			fetch: createPinAwareFetch(
+				photoFetcher({
+					displayName: 'Eiffel Tower',
+					photoUri: 'https://lh3.googleusercontent.com/places/photo-abc=s1600',
+				})
+			),
 		});
 		const artifacts = await plugin.enrich(request(EIFFEL_URL), ctx);
 		expect(artifacts[0]?.data.photoUrl).toBe(
@@ -200,10 +204,12 @@ describe('places photo resolution', () => {
 	it('refuses photo uris that embed the api key', async () => {
 		const plugin = createPlacesPlugin({
 			apiKey: 'test-key',
-			fetch: photoFetcher({
-				displayName: 'Eiffel Tower',
-				photoUri: 'https://example.com/photo?key=test-key',
-			}),
+			fetch: createPinAwareFetch(
+				photoFetcher({
+					displayName: 'Eiffel Tower',
+					photoUri: 'https://example.com/photo?key=test-key',
+				})
+			),
 		});
 		const artifacts = await plugin.enrich(request(EIFFEL_URL), ctx);
 		expect(artifacts[0]?.data.photoUrl).toBeUndefined();
@@ -212,7 +218,7 @@ describe('places photo resolution', () => {
 	it('degrades cleanly when the media lookup returns no uri', async () => {
 		const plugin = createPlacesPlugin({
 			apiKey: 'test-key',
-			fetch: photoFetcher({ displayName: 'Eiffel Tower' }),
+			fetch: createPinAwareFetch(photoFetcher({ displayName: 'Eiffel Tower' })),
 		});
 		const artifacts = await plugin.enrich(request(EIFFEL_URL), ctx);
 		expect(artifacts[0]?.data.name).toBe('Eiffel Tower');
@@ -250,15 +256,17 @@ describe('places identifier-chained targets', () => {
 	it('searches with the chained label and coordinates when keyed', async () => {
 		const plugin = createPlacesPlugin({
 			apiKey: 'test-key',
-			fetch: searchFetcher({
-				displayName: 'Eiffel Tower',
-				assertBody: (body) => {
-					expect(body.textQuery).toBe('Eiffel Tower');
-					expect(body.locationBias).toMatchObject({
-						circle: { center: { latitude: 48.8583701, longitude: 2.2944813 } },
-					});
-				},
-			}),
+			fetch: createPinAwareFetch(
+				searchFetcher({
+					displayName: 'Eiffel Tower',
+					assertBody: (body) => {
+						expect(body.textQuery).toBe('Eiffel Tower');
+						expect(body.locationBias).toMatchObject({
+							circle: { center: { latitude: 48.8583701, longitude: 2.2944813 } },
+						});
+					},
+				})
+			),
 		});
 		const artifacts = await plugin.enrich(
 			identifierRequest({

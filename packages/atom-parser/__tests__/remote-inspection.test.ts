@@ -1,136 +1,129 @@
-import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
+import { beforeAll, describe, expect, it } from 'bun:test';
 import { parseAtom } from '../src/parse.ts';
-import { classifyRemoteKind } from '../src/remote.ts';
+import { classifyRemoteKind, inspectRemote } from '../src/remote.ts';
+import { DEFAULT_FETCH_POLICY, type ResolvedFetchPolicy } from '../src/types.ts';
+import { installFixtureTransport } from './fixture-transport';
 
-let server: ReturnType<typeof Bun.serve>;
 let baseUrl: string;
 
 beforeAll(() => {
-	server = Bun.serve({
-		port: 0,
-		fetch(req) {
-			const url = new URL(req.url);
-			const path = url.pathname;
+	installFixtureTransport(async (url) => {
+		const path = url.pathname;
 
-			if (path === '/stalled-body') {
-				return new Response(
-					new ReadableStream({
-						start(controller) {
-							controller.enqueue(new TextEncoder().encode('partial body'));
-						},
-					}),
-					{ headers: { 'content-type': 'text/plain' } }
-				);
-			}
-			if (path === '/page') {
-				return new Response('<html><body>ok</body></html>', {
-					headers: { 'content-type': 'text/html' },
-				});
-			}
-			if (path === '/data') {
-				return new Response('{"ok":true}', {
-					headers: { 'content-type': 'application/json' },
-				});
-			}
-			if (path === '/schema') {
-				return new Response(
-					'{"@context":"https://schema.org","@type":"MusicRecording","url":"https://example.com/track"}',
-					{
-						headers: { 'content-type': 'application/ld+json' },
-					}
-				);
-			}
-			if (path === '/schema-no-url') {
-				return new Response('{"@context":"https://schema.org","@type":"WebSite"}', {
+		if (path === '/stalled-body') {
+			return new Response(
+				new ReadableStream({
+					start(controller) {
+						controller.enqueue(new TextEncoder().encode('partial body'));
+					},
+				}),
+				{ headers: { 'content-type': 'text/plain' } }
+			);
+		}
+		if (path === '/page') {
+			return new Response('<html><body>ok</body></html>', {
+				headers: { 'content-type': 'text/html' },
+			});
+		}
+		if (path === '/data') {
+			return new Response('{"ok":true}', {
+				headers: { 'content-type': 'application/json' },
+			});
+		}
+		if (path === '/schema') {
+			return new Response(
+				'{"@context":"https://schema.org","@type":"MusicRecording","url":"https://example.com/track"}',
+				{
 					headers: { 'content-type': 'application/ld+json' },
-				});
-			}
-			if (path === '/html-no-ct') {
-				return new Response('<html><body>ok</body></html>');
-			}
-			if (path === '/json-no-ct') {
-				return new Response('[{"ok":true}]');
-			}
-			if (path === '/clip') {
-				return new Response('', { headers: { 'content-type': 'video/mp4' } });
-			}
-			if (path === '/audio-ct') {
-				return new Response('', { headers: { 'content-type': 'audio/mpeg' } });
-			}
-			if (path === '/image-png') {
-				const body = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
-				return new Response(body, {
-					headers: { 'content-type': 'application/octet-stream' },
-				});
-			}
-			if (path === '/audio-id3') {
-				const body = new Uint8Array([0x49, 0x44, 0x33, 0x70, 0x61, 0x79, 0x6c, 0x6f, 0x61, 0x64]);
-				return new Response(body, {
-					headers: { 'content-type': 'application/octet-stream' },
-				});
-			}
-			if (path === '/text-plain') {
-				return new Response('just some text', {
-					headers: { 'content-type': 'text/plain' },
-				});
-			}
-			if (path === '/empty') {
-				return new Response('');
-			}
-			if (path === '/redirect') {
-				return new Response(null, {
-					status: 302,
-					headers: { location: '/final' },
-				});
-			}
-			if (path === '/final') {
-				return new Response('', { headers: { 'content-type': 'image/png' } });
-			}
-			if (path === '/step-1') {
-				return new Response(null, {
-					status: 302,
-					headers: { location: '/step-2' },
-				});
-			}
-			if (path === '/step-2') {
-				return new Response(null, {
-					status: 302,
-					headers: { location: '/step-3' },
-				});
-			}
-			if (path === '/step-3') {
-				return new Response(null, {
-					status: 302,
-					headers: { location: '/step-final' },
-				});
-			}
-			if (path === '/broken-redirect') {
-				return new Response(null, { status: 302 });
-			}
-			if (path === '/big') {
-				return new Response('x'.repeat(2048));
-			}
-			if (
-				path === '/ipfs/bafybeigdyrzt5rj6uqb6t5x3r7b6g6j4gh7f6wzsp4r4i2l3x6jt6s5z3e/metadata.json'
-			) {
-				return new Response(
-					'{"@context":"https://schema.org","@type":"MusicRecording","url":"https://example.com/track"}',
-					{
-						headers: { 'content-type': 'application/ld+json' },
-					}
-				);
-			}
-			if (path.startsWith('/ipfs/')) {
-				return new Response('', { headers: { 'content-type': 'audio/mpeg' } });
-			}
-			return new Response('not found', { status: 404 });
-		},
+				}
+			);
+		}
+		if (path === '/schema-no-url') {
+			return new Response('{"@context":"https://schema.org","@type":"WebSite"}', {
+				headers: { 'content-type': 'application/ld+json' },
+			});
+		}
+		if (path === '/html-no-ct') {
+			return new Response('<html><body>ok</body></html>');
+		}
+		if (path === '/json-no-ct') {
+			return new Response('[{"ok":true}]');
+		}
+		if (path === '/clip') {
+			return new Response('', { headers: { 'content-type': 'video/mp4' } });
+		}
+		if (path === '/audio-ct') {
+			return new Response('', { headers: { 'content-type': 'audio/mpeg' } });
+		}
+		if (path === '/image-png') {
+			const body = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+			return new Response(body, {
+				headers: { 'content-type': 'application/octet-stream' },
+			});
+		}
+		if (path === '/audio-id3') {
+			const body = new Uint8Array([0x49, 0x44, 0x33, 0x70, 0x61, 0x79, 0x6c, 0x6f, 0x61, 0x64]);
+			return new Response(body, {
+				headers: { 'content-type': 'application/octet-stream' },
+			});
+		}
+		if (path === '/text-plain') {
+			return new Response('just some text', {
+				headers: { 'content-type': 'text/plain' },
+			});
+		}
+		if (path === '/empty') {
+			return new Response('');
+		}
+		if (path === '/redirect') {
+			return new Response(null, {
+				status: 302,
+				headers: { location: '/final' },
+			});
+		}
+		if (path === '/final') {
+			return new Response('', { headers: { 'content-type': 'image/png' } });
+		}
+		if (path === '/step-1') {
+			return new Response(null, {
+				status: 302,
+				headers: { location: '/step-2' },
+			});
+		}
+		if (path === '/step-2') {
+			return new Response(null, {
+				status: 302,
+				headers: { location: '/step-3' },
+			});
+		}
+		if (path === '/step-3') {
+			return new Response(null, {
+				status: 302,
+				headers: { location: '/step-final' },
+			});
+		}
+		if (path === '/broken-redirect') {
+			return new Response(null, { status: 302 });
+		}
+		if (path === '/big') {
+			return new Response('x'.repeat(2048));
+		}
+		if (
+			path === '/ipfs/bafybeigdyrzt5rj6uqb6t5x3r7b6g6j4gh7f6wzsp4r4i2l3x6jt6s5z3e/metadata.json'
+		) {
+			return new Response(
+				'{"@context":"https://schema.org","@type":"MusicRecording","url":"https://example.com/track"}',
+				{
+					headers: { 'content-type': 'application/ld+json' },
+				}
+			);
+		}
+		if (path.startsWith('/ipfs/')) {
+			return new Response('', { headers: { 'content-type': 'audio/mpeg' } });
+		}
+		return new Response('not found', { status: 404 });
 	});
-	baseUrl = `http://localhost:${server.port}`;
-});
-
-afterAll(() => {
-	server.stop();
+	baseUrl = 'http://localhost';
 });
 
 const remoteOpts = (extra?: Record<string, unknown>) => ({
@@ -414,7 +407,6 @@ describe('remote inspection: response cleanup', () => {
 		'redirect_limit',
 		'missing_location',
 	])('cancels an unread body after %s', async (scenario) => {
-		const originalFetch = globalThis.fetch;
 		let cancelled = false;
 		let requestSignal: AbortSignal | undefined;
 		const response = new Response(
@@ -427,35 +419,30 @@ describe('remote inspection: response cleanup', () => {
 				? { headers: { 'content-length': '2097152' } }
 				: { status: 302, headers: scenario === 'redirect_limit' ? { location: '/next' } : {} }
 		);
-		globalThis.fetch = (async (_input: unknown, init?: RequestInit) => {
+		const fetcher = (async (_input: unknown, init?: RequestInit) => {
 			requestSignal = init?.signal ?? undefined;
 			return response;
 		}) as typeof fetch;
-		try {
-			const result = await parseAtom('https://example.test/', {
-				maxRedirects: scenario === 'missing_location' ? 3 : 0,
-			});
-			if (result.kind !== 'url') throw new Error('expected URL result');
-			expect(result.remote?.outcome).toBe(
-				scenario === 'oversized'
-					? 'oversized'
-					: scenario === 'missing_location'
-						? 'error'
-						: 'redirect_limit_exceeded'
-			);
-			expect(cancelled).toBe(true);
-			expect(requestSignal?.aborted).toBe(true);
-		} finally {
-			globalThis.fetch = originalFetch;
-		}
+		const result = await inspectFixture(fetcher, {
+			maxRedirects: scenario === 'missing_location' ? 3 : 0,
+		});
+		if (result.kind !== 'url') throw new Error('expected URL result');
+		expect(result.remote?.outcome).toBe(
+			scenario === 'oversized'
+				? 'oversized'
+				: scenario === 'missing_location'
+					? 'error'
+					: 'redirect_limit_exceeded'
+		);
+		expect(cancelled).toBe(true);
+		expect(requestSignal?.aborted).toBe(true);
 	});
 
 	it('cancels each discarded redirect body without waiting for cancellation', async () => {
-		const originalFetch = globalThis.fetch;
 		let cancelled = false;
 		let calls = 0;
 		const finalResponse = new Response('hello');
-		globalThis.fetch = (async () => {
+		const fetcher = (async () => {
 			calls++;
 			return calls === 1
 				? new Response(
@@ -472,20 +459,15 @@ describe('remote inspection: response cleanup', () => {
 					)
 				: finalResponse;
 		}) as typeof fetch;
-		try {
-			const result = await parseAtom('https://example.test/');
-			if (result.kind !== 'url') throw new Error('expected URL result');
-			expect(result.remote?.outcome).toBe('success');
-			expect(result.remote?.redirectCount).toBe(1);
-			expect(cancelled).toBe(true);
-			expect(finalResponse.body?.locked).toBe(false);
-		} finally {
-			globalThis.fetch = originalFetch;
-		}
+		const result = await inspectFixture(fetcher);
+		if (result.kind !== 'url') throw new Error('expected URL result');
+		expect(result.remote?.outcome).toBe('success');
+		expect(result.remote?.redirectCount).toBe(1);
+		expect(cancelled).toBe(true);
+		expect(finalResponse.body?.locked).toBe(false);
 	});
 
 	it('contains cancellation rejections when a streaming response exceeds the byte limit', async () => {
-		const originalFetch = globalThis.fetch;
 		const response = new Response(
 			new ReadableStream({
 				start(controller) {
@@ -496,15 +478,25 @@ describe('remote inspection: response cleanup', () => {
 				},
 			})
 		);
-		globalThis.fetch = (async () => response) as typeof fetch;
-		try {
-			const result = await parseAtom('https://example.test/', { maxResponseBytes: 16 });
-			if (result.kind !== 'url') throw new Error('expected URL result');
-			expect(result.remote?.outcome).toBe('oversized');
-			expect(response.body?.locked).toBe(false);
-			await new Promise((resolve) => setTimeout(resolve, 0));
-		} finally {
-			globalThis.fetch = originalFetch;
-		}
+		const fetcher = (async () => response) as typeof fetch;
+		const result = await inspectFixture(fetcher, { maxResponseBytes: 16 });
+		if (result.kind !== 'url') throw new Error('expected URL result');
+		expect(result.remote?.outcome).toBe('oversized');
+		expect(response.body?.locked).toBe(false);
+		await new Promise((resolve) => setTimeout(resolve, 0));
 	});
 });
+
+async function inspectFixture(fetcher: typeof fetch, policy: Partial<ResolvedFetchPolicy> = {}) {
+	const result = await parseAtom('https://example.test/', { remoteFetch: false });
+	if (result.kind !== 'url') throw new Error('expected URL result');
+	const output = await inspectRemote(
+		result,
+		{ ...DEFAULT_FETCH_POLICY, ...policy },
+		{
+			fetcher,
+			resolve: async () => [{ address: '8.8.8.8', family: 4 }],
+		}
+	);
+	return { ...result, remote: output?.inspection };
+}

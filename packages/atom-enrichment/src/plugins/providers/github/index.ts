@@ -1,4 +1,5 @@
 import type { z } from 'zod/v4';
+import { recordEnrichmentPluginRetry } from '../../../plugin-tracing';
 import { defineEnrichmentPlugin, type EnrichmentPlugin } from '../../../plugins';
 import type { EnrichmentRequest, GitHubTarget } from '../../../types';
 import { type FetchLike, fetchJsonWithSchema } from '../__shared__/http';
@@ -85,6 +86,10 @@ export function createGitHubPlugin(options: CreateGitHubPluginOptions = {}): Enr
 						'github: configured token was rejected (expired or revoked?); retrying anonymously',
 						{ endpoint }
 					);
+					recordEnrichmentPluginRetry(ctx.signal, {
+						attempt: 2,
+						reason: 'authentication_rejected',
+					});
 					return await fetchJsonWithSchema(fetcher, endpoint, schema, {
 						signal: ctx.signal,
 						headers: { Accept: 'application/vnd.github+json' },

@@ -4,12 +4,43 @@ import type {
 	ClassificationSourceFamily,
 } from '../../types';
 
-export function tryParseUrl(input: string): URL | null {
+export type TryParseUrlOptions = {
+	// Some platform URLs are pasted/typed without a scheme (e.g. "x.com/handle"
+	// instead of "https://x.com/handle"). `new URL()` throws on those, which
+	// otherwise silently drops the classifier match and lets the input fall
+	// through to the generic default-url plugin — a URL-shape-dependent type
+	// flip rather than a deterministic one. Opt in per-plugin so unrelated
+	// callers (e.g. tmdb) keep their exact current matching behavior.
+	allowBareHost?: boolean;
+};
+
+export function tryParseUrl(input: string, options?: TryParseUrlOptions): URL | null {
+	const trimmed = input.trim();
 	try {
-		return new URL(input.trim());
+		return new URL(trimmed);
 	} catch {
+		if (options?.allowBareHost && isLikelyBareHost(trimmed)) {
+			try {
+				return new URL(`https://${trimmed}`);
+			} catch {
+				return null;
+			}
+		}
 		return null;
 	}
+}
+
+function isLikelyBareHost(value: string): boolean {
+	if (value.length === 0 || /\s/.test(value) || value.includes('@') || value.includes('://')) {
+		return false;
+	}
+
+	const [authority] = value.split(/[/?#]/, 1);
+	if (!authority || !authority.includes('.')) {
+		return false;
+	}
+
+	return !authority.startsWith('.') && !authority.endsWith('.');
 }
 
 export function toStringMaybe(value: unknown): string | undefined {

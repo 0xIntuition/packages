@@ -1,20 +1,30 @@
-import type { DomainHtmlFetchLike } from '../shared/domain-html/fetch';
-import { slugify, toStringMaybe, tryParseUrl, withPlatformMetadata } from '../shared/helpers';
+import type { ResolverAtom, ResolverContext } from '../../plugins';
 import {
-	createPlatformPlugin,
-	type PlatformV0PluginOptions,
-	type PlatformV0Profile,
-} from '../shared/platform';
-import { createImdbDomainHtmlAdapter } from './domain-html-adapter';
+	slugify,
+	toRecordMaybe,
+	toStringMaybe,
+	tryParseUrl,
+	withPlatformMetadata,
+} from '../shared/helpers';
+import { createPlatformPlugin, type PlatformV0Profile } from '../shared/platform';
+import {
+	createImdbDomainHtmlAdapter,
+	type ImdbDomainHtmlAdapterOptions,
+} from './domain-html-adapter';
 import { isImdbHostname } from './url';
 
-export type ImdbPluginOptions = PlatformV0PluginOptions & {
+export type ImdbPluginOptions = ImdbDomainHtmlAdapterOptions & {
 	useDefaultDomainHtmlAdapter?: boolean;
-	fetch?: DomainHtmlFetchLike;
 };
 
 export const imdbProfile: PlatformV0Profile = {
 	domain: 'imdb',
+	display: {
+		classificationSlugs: ['movie', 'tv-series', 'social-media-account'],
+		exampleUrl: 'https://www.imdb.com/title/tt1375666/',
+		host: 'imdb.com',
+		label: 'IMDb',
+	},
 	supportsOEmbed: false,
 	classifier: {
 		id: 'imdb-url-classifier',
@@ -102,15 +112,16 @@ export const imdbProfile: PlatformV0Profile = {
 };
 
 export function createImdbPlugin(options: ImdbPluginOptions = {}) {
-	const { useDefaultDomainHtmlAdapter = true, fetch, ...platformOptions } = options;
-	// Refuse legacy stage adapters: they cannot establish catalog-only title provenance.
-	// Callers may inject the catalog fetch instead; person resolution stays offline.
-	const hasLegacyAdapters = Object.values(platformOptions.adapters ?? {}).some(
-		(adapter) => adapter != null
-	);
+	// Reject legacy callers at runtime as well as removing adapters from the public type.
+	const hasLegacyAdapters = 'adapters' in options && options.adapters != null;
 	const domainHtmlAdapter =
-		!hasLegacyAdapters && useDefaultDomainHtmlAdapter
-			? createImdbDomainHtmlAdapter({ apiKey: platformOptions.credentials?.tmdb?.apiKey, fetch })
+		!hasLegacyAdapters && options.useDefaultDomainHtmlAdapter !== false
+			? createImdbDomainHtmlAdapter({
+					apiKey: options.apiKey ?? imdbApiKeyFromEnv(),
+					fetch: options.fetch,
+					resolveHostname: options.resolveHostname,
+					findTimeoutMs: options.findTimeoutMs,
+				})
 			: undefined;
 
 	const plugin = createPlatformPlugin({
@@ -118,80 +129,53 @@ export function createImdbPlugin(options: ImdbPluginOptions = {}) {
 		resolverId: 'imdb-resolver',
 		profile: imdbProfile,
 		options: {
-			...platformOptions,
-			adapters: undefined,
+			adapters: {
+				domainHtml: domainHtmlAdapter,
+			},
 		},
 	});
-
-	// The shared fallback runner catches stage errors and continues to generic output.
-	// Titles must instead terminate on a catalog miss and preserve resolver errors.
-	const resolver = plugin.resolvers![0]!;
-	const resolvePlatform = resolver.resolve;
-	const resolveImdb: typeof resolver.resolve = async (context) => {
-		const { classification, runtime, request, now } = context;
-		if (classification.subtype !== 'title') return resolvePlatform(context);
-		if (classification.domain !== 'imdb' || classification.type !== 'url') return null;
-		const credential = platformOptions.credentials?.tmdb;
-		if (
-			runtime !== 'server' ||
-			credential?.enabled === false ||
-			!credential?.apiKey?.trim() ||
-			!domainHtmlAdapter
-		)
-			return null;
-		const canonicalUrl = toStringMaybe(classification.meta.canonicalUrl) ?? request.input;
-		const atom = await domainHtmlAdapter({
-			runtime,
-			domain: 'imdb',
-			classification,
-			requestInput: request.input,
-			canonicalUrl,
-			credential,
-		});
-		if (!atom) return null;
-		return {
-			atoms: [
-				{
-					...atom,
-					source: atom.source ?? 'platform-v0:domain-api',
-					metadata: {
-						...atom.metadata,
-						fetchedAt: now,
-						platform: 'imdb',
-						fallbackStage: 'domain-api',
-						fallbackChain: ['domain-api'],
+	return {
+		...plugin,
+		resolvers: plugin.resolvers?.map((resolver) => ({
+			...resolver,
+			resolve: async (context: ResolverContext) => {
+				const result = hasLegacyAdapters ? null : await resolver.resolve(context);
+				if (result?.atoms?.length && result.atoms.every(hasAcquiredImdbTitle)) return result;
+				const imdbBridge = toRecordMaybe(result?.atoms?.[0]?.metadata?.imdbBridge) ??
+					toRecordMaybe(context.classification.meta.imdbBridge) ?? {
+						status: 'unavailable',
+						hits: 0,
+					};
+				return {
+					...result,
+					atoms: [],
+					terminal: true,
+					fallbackUsed: true,
+					metadata: { ...result?.metadata, imdbBridge },
+					classificationMetaPatch: {
+						...result?.classificationMetaPatch,
+						imdbBridge,
+						acquisitionOutcome: { status: 'unavailable', terminal: true, reason: 'adapter_null' },
 					},
-				},
-			],
-			fallbackUsed: false,
-			metadata: {
-				platformResolver: {
-					domain: 'imdb',
-					fallbackStage: 'domain-api',
-					attemptedStages: ['domain-api'],
-					skippedStages: [],
-					stageErrors: [],
-				},
+				};
 			},
-		};
+		})),
 	};
-	resolver.resolve = async (context) => {
-		try {
-			return await resolveImdb(context);
-		} catch (error) {
-			// The engine records exception messages verbatim. Only fixed diagnostics may escape.
-			const safeMessages = [
-				'TMDB find 429 rate limit',
-				'TMDB find auth 401',
-				'TMDB find auth 403',
-				'TMDB find upstream request failed',
-			];
-			const message = error instanceof Error ? error.message : '';
-			if (safeMessages.includes(message) || /^TMDB find upstream 5\d{2}$/.test(message)) {
-				throw new Error(message);
-			}
-			throw new Error('TMDB find upstream request failed');
-		}
-	};
-	return plugin;
+}
+
+function imdbApiKeyFromEnv(): string | undefined {
+	return typeof process === 'undefined' ? undefined : process.env.TMDB_API_KEY;
+}
+
+function hasAcquiredImdbTitle(atom: ResolverAtom): boolean {
+	const bridge = toRecordMaybe(atom.metadata?.imdbBridge);
+	const title = atom.title?.trim();
+	const name = toStringMaybe(atom.data?.name)?.trim();
+	const placeholder = /^(?:IMDb\s+(?:Title|Person)\b|(?:tt|nm)\d+$)/i;
+	return (
+		(bridge?.status === 'hit' || bridge?.status === 'miss') &&
+		!!title &&
+		!placeholder.test(title) &&
+		(!name || !placeholder.test(name))
+	);
 }

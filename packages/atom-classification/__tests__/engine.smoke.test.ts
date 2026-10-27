@@ -6,6 +6,7 @@ import { createDefaultTestPlugins } from './helpers/default-plugins';
 describe('@0xintuition/atom-classification scaffold', () => {
 	it('returns placeholder result for client runtime', async () => {
 		const engine = createClientEngine({
+			onClassifierError: () => undefined,
 			plugins: createDefaultTestPlugins(),
 		});
 		const result = await engine.classify({
@@ -29,6 +30,7 @@ describe('@0xintuition/atom-classification scaffold', () => {
 
 	it('returns placeholder result for server runtime', async () => {
 		const engine = createServerEngine({
+			onClassifierError: () => undefined,
 			plugins: createDefaultTestPlugins(),
 		});
 		const result = await engine.classify({
@@ -51,6 +53,7 @@ describe('@0xintuition/atom-classification scaffold', () => {
 
 	it('maps spotify tracks to MusicRecording in client-only deterministic fallback', async () => {
 		const engine = createServerEngine({
+			onClassifierError: () => undefined,
 			plugins: createDefaultTestPlugins(),
 		});
 		const result = await engine.classify({
@@ -84,5 +87,100 @@ describe('@0xintuition/atom-classification scaffold', () => {
 			fallbackStage: 'generic',
 			fallbackChain: ['oembed', 'opengraph', 'generic'],
 		});
+	});
+
+	it('prefers deterministic platform builtins over the default-url WebSite fallback', async () => {
+		const fixtures = [
+			{
+				input: 'https://store.steampowered.com/app/570/Dota_2/',
+				domain: 'steam',
+				resolverId: 'steam-resolver',
+				schemaType: 'VideoGame',
+			},
+			{
+				input: 'https://openlibrary.org/books/OL7353617M/The_Hobbit',
+				domain: 'openlibrary',
+				resolverId: 'openlibrary-resolver',
+				schemaType: 'Book',
+			},
+			{
+				input: 'https://coingecko.com/en/coins/bitcoin',
+				domain: 'coingecko',
+				resolverId: 'coingecko-resolver',
+				schemaType: 'Cryptocurrency',
+			},
+			{
+				input: 'https://coinmarketcap.com/currencies/bitcoin/',
+				domain: 'coinmarketcap',
+				resolverId: 'coinmarketcap-resolver',
+				schemaType: 'Cryptocurrency',
+			},
+			{
+				input: 'https://www.etsy.com/listing/1234567890/handmade-blue-mug',
+				domain: 'etsy',
+				resolverId: 'etsy-resolver',
+				schemaType: 'Product',
+			},
+			{
+				input: 'https://acme-store.myshopify.com/products/handmade-blue-mug',
+				domain: 'shopify',
+				resolverId: 'shopify-resolver',
+				schemaType: 'Product',
+			},
+		] as const;
+
+		for (const fixture of fixtures) {
+			const engine = createServerEngine({
+				onClassifierError: () => undefined,
+				plugins: createDefaultTestPlugins(),
+			});
+			const result = await engine.classify({
+				input: fixture.input,
+				mode: 'progressive',
+				classificationSessionId: `builtin-over-default-${fixture.domain}`,
+			});
+
+			expect(result.classification?.domain).toBe(fixture.domain);
+			expect(result.resolved?.resolverId).toBe(fixture.resolverId);
+			expect(result.resolved?.atoms[0]?.schemaType).toBe(fixture.schemaType);
+			expect(result.resolved?.atoms[0]?.schemaType).not.toBe('WebSite');
+			expect(result.resolved?.atoms[0]?.metadata.pluginId).not.toBe('default-url');
+		}
+	});
+
+	it('keeps crypto and marketplace identity URL-only when shared adapters are configured', async () => {
+		let sharedAdapterCalls = 0;
+		const engine = createServerEngine({
+			onClassifierError: () => undefined,
+			plugins: createDefaultTestPlugins({
+				platformV0PluginOptions: {
+					adapters: {
+						openGraph: () => {
+							sharedAdapterCalls += 1;
+							return null;
+						},
+					},
+				},
+			}),
+		});
+		const fixtures = [
+			['https://coingecko.com/en/coins/bitcoin', 'coingecko'],
+			['https://coinmarketcap.com/currencies/bitcoin/', 'coinmarketcap'],
+			['https://www.etsy.com/listing/1234567890/handmade-blue-mug', 'etsy'],
+			['https://acme-store.myshopify.com/products/handmade-blue-mug', 'shopify'],
+		] as const;
+
+		for (const [input, domain] of fixtures) {
+			const result = await engine.classify({
+				input,
+				mode: 'progressive',
+				classificationSessionId: `url-only-${domain}`,
+			});
+
+			expect(result.classification?.domain).toBe(domain);
+			expect(result.resolved?.atoms[0]?.metadata.fallbackStage).toBe('generic');
+		}
+
+		expect(sharedAdapterCalls).toBe(0);
 	});
 });

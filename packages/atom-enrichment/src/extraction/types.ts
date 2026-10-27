@@ -35,7 +35,8 @@ export type FieldExtractionResult = {
 
 export type ExtractionContext = {
 	spec: ClassificationSpec;
-	url: string;
+	/** Absent for identifier-only extraction (bare-IID atoms have no URL). */
+	url?: string;
 	artifacts: readonly EnrichmentArtifact[];
 	fetcher: FetchLike;
 	language: string;
@@ -48,7 +49,8 @@ export type ClassificationFieldExtractor = (
 
 export type ExtractClassificationFieldsInput = {
 	classification: string;
-	url: string;
+	/** Absent for identifier-only extraction (bare-IID atoms have no URL). */
+	url?: string;
 	artifacts: readonly EnrichmentArtifact[];
 	fetcher?: FetchLike;
 	language?: string;

@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'bun:test';
-
 import {
 	type ClassificationRegistry,
 	createDefaultClassificationRegistry,
 } from '../../src/classifications';
+import { createEnrichmentEngine } from '../../src/engine';
 import {
 	createBrandPlugin,
 	createCoinGeckoPlugin,
@@ -15,18 +15,21 @@ import {
 	createNpmPlugin,
 	createOEmbedPlugin,
 	createOpenGraphPlugin,
+	createOpenLibraryPlugin,
 	createProductListingPlugin,
 	createSpotifyPlugin,
+	createSteamPlugin,
 	createTmdbPlugin,
 	createWikidataPlugin,
 	createWikipediaPlugin,
 	createXProfilePlugin,
 	createYouTubePlugin,
 	type FetchLike,
+	parseOpenLibraryTargetFromUrl,
 } from '../../src/plugins/providers';
+import { createPinAwareFetch } from '../../src/plugins/providers/__shared__/http';
 import {
 	createMockAtomInput,
-	createMockPluginContext,
 	createMockRequest,
 	runPluginConformanceSuite,
 } from '../../src/testing';
@@ -58,6 +61,32 @@ function createFetchMock(
 	};
 }
 
+function createOpenLibraryFetchMock(input: {
+	author: string;
+	edition: string;
+	work: string;
+	onRequest?: (url: string, init?: RequestInit) => void;
+}): FetchLike {
+	return async (url, init) => {
+		const href = String(url);
+		input.onRequest?.(href, init);
+		if (href.includes('/authors/OL34184A')) {
+			return jsonResponse(input.author);
+		}
+		if (href.includes('/books/OL7353617M') || href.includes('/isbn/9780140328721')) {
+			return jsonResponse(input.edition);
+		}
+		if (href.includes('/works/OL45804W')) {
+			return jsonResponse(input.work);
+		}
+		return new Response(JSON.stringify({ error: 'not found' }), { status: 404 });
+	};
+}
+
+function jsonResponse(body: string): Response {
+	return new Response(body, { headers: { 'content-type': 'application/json' } });
+}
+
 function createNoNameNoUrlInput() {
 	return createMockAtomInput({
 		jsonLd: { '@context': 'https://schema.org', '@type': 'Thing' },
@@ -65,14 +94,43 @@ function createNoNameNoUrlInput() {
 	});
 }
 
+const resolvePublicTestHostname = async () => [{ address: '93.184.216.34', family: 4 as const }];
+
 describe('v1 provider plugins conformance', () => {
 	describe('opengraph', () => {
+		it('never treats a TMDB URL as a fetchable source', async () => {
+			const requestedUrls: string[] = [];
+			const plugin = createOpenGraphPlugin({
+				fetch: createPinAwareFetch(async (url) => {
+					requestedUrls.push(String(url));
+					return new Response('<html></html>');
+				}),
+			});
+			const request = createMockRequest({
+				input: createMockAtomInput({
+					hints: { url: 'https://www.themoviedb.org/movie/550-fight-club' },
+				}),
+			});
+
+			expect(plugin.supports(request)).toBe(false);
+			expect(
+				await plugin.enrich(request, {
+					now: () => '2026-01-01T00:00:00.000Z',
+					signal: new AbortController().signal,
+				})
+			).toEqual([]);
+			expect(requestedUrls).toEqual([]);
+		});
+
 		it('normalizes metadata from html fixture', async () => {
 			const html = await readFixture(
 				'../../src/plugins/providers/opengraph/__fixtures__/page.html'
 			);
 			const plugin = createOpenGraphPlugin({
-				fetch: createFetchMock([{ body: html, headers: { 'content-type': 'text/html' } }]),
+				fetch: createPinAwareFetch(
+					createFetchMock([{ body: html, headers: { 'content-type': 'text/html' } }])
+				),
+				resolveHostname: resolvePublicTestHostname,
 			});
 
 			const request = createMockRequest({
@@ -100,12 +158,15 @@ describe('v1 provider plugins conformance', () => {
 
 		runPluginConformanceSuite(
 			createOpenGraphPlugin({
-				fetch: createFetchMock([
-					{
-						body: '<html><head><meta property="og:title" content="Acme"/></head></html>',
-						headers: { 'content-type': 'text/html' },
-					},
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{
+							body: '<html><head><meta property="og:title" content="Acme"/></head></html>',
+							headers: { 'content-type': 'text/html' },
+						},
+					])
+				),
+				resolveHostname: resolvePublicTestHostname,
 			}),
 			[
 				{
@@ -134,9 +195,9 @@ describe('v1 provider plugins conformance', () => {
 				'../../src/plugins/providers/oembed/__fixtures__/response.json'
 			);
 			const plugin = createOEmbedPlugin({
-				fetch: createFetchMock([
-					{ body: response, headers: { 'content-type': 'application/json' } },
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([{ body: response, headers: { 'content-type': 'application/json' } }])
+				),
 			});
 
 			const request = createMockRequest({
@@ -160,17 +221,19 @@ describe('v1 provider plugins conformance', () => {
 
 		runPluginConformanceSuite(
 			createOEmbedPlugin({
-				fetch: createFetchMock([
-					{
-						body: JSON.stringify({
-							type: 'video',
-							title: 'Demo',
-							provider_name: 'YouTube',
-							provider_url: 'https://www.youtube.com/',
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{
+							body: JSON.stringify({
+								type: 'video',
+								title: 'Demo',
+								provider_name: 'YouTube',
+								provider_url: 'https://www.youtube.com/',
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+					])
+				),
 			}),
 			[
 				{
@@ -202,43 +265,46 @@ describe('v1 provider plugins conformance', () => {
 			const plugin = createSpotifyPlugin({
 				clientId: 'client-id',
 				clientSecret: 'client-secret',
-				fetch: createFetchMock([
-					{
-						body: JSON.stringify({
-							access_token: 'spotify-token',
-							token_type: 'Bearer',
-							expires_in: 3600,
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-					{
-						body: JSON.stringify({
-							id: '1kcfGBb6kSrGqNIMW7rAlB',
-							name: 'Oh Devil',
-							preview_url: 'https://p.scdn.co/mp3-preview/1a2b3c4d5e6f7g8h9i0j?cid=spotify-client',
-							duration_ms: 209000,
-							popularity: 64,
-							external_urls: {
-								spotify: 'https://open.spotify.com/track/1kcfGBb6kSrGqNIMW7rAlB',
-							},
-							external_ids: {
-								isrc: 'USAAA1700001',
-							},
-							artists: [
-								{
-									id: '0u2FHSq3ln94y5QxwL7I9R',
-									name: 'Electric Guest',
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{
+							body: JSON.stringify({
+								access_token: 'spotify-token',
+								token_type: 'Bearer',
+								expires_in: 3600,
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+						{
+							body: JSON.stringify({
+								id: '1kcfGBb6kSrGqNIMW7rAlB',
+								name: 'Oh Devil',
+								preview_url:
+									'https://p.scdn.co/mp3-preview/1a2b3c4d5e6f7g8h9i0j?cid=spotify-client',
+								duration_ms: 209000,
+								popularity: 64,
+								external_urls: {
+									spotify: 'https://open.spotify.com/track/1kcfGBb6kSrGqNIMW7rAlB',
 								},
-							],
-							album: {
-								name: 'Plural',
-								release_date: '2017-02-01',
-								images: [{ url: 'https://i.scdn.co/image/ab67616d0000b273example' }],
-							},
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-				]),
+								external_ids: {
+									isrc: 'USAAA1700001',
+								},
+								artists: [
+									{
+										id: '0u2FHSq3ln94y5QxwL7I9R',
+										name: 'Electric Guest',
+									},
+								],
+								album: {
+									name: 'Plural',
+									release_date: '2017-02-01',
+									images: [{ url: 'https://i.scdn.co/image/ab67616d0000b273example' }],
+								},
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+					])
+				),
 			});
 
 			const request = createMockRequest({
@@ -273,26 +339,28 @@ describe('v1 provider plugins conformance', () => {
 			createSpotifyPlugin({
 				clientId: 'client-id',
 				clientSecret: 'client-secret',
-				fetch: createFetchMock([
-					{
-						body: JSON.stringify({
-							access_token: 'spotify-token',
-							token_type: 'Bearer',
-							expires_in: 3600,
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-					{
-						body: JSON.stringify({
-							id: '1kcfGBb6kSrGqNIMW7rAlB',
-							name: 'Oh Devil',
-							external_urls: {
-								spotify: 'https://open.spotify.com/track/1kcfGBb6kSrGqNIMW7rAlB',
-							},
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{
+							body: JSON.stringify({
+								access_token: 'spotify-token',
+								token_type: 'Bearer',
+								expires_in: 3600,
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+						{
+							body: JSON.stringify({
+								id: '1kcfGBb6kSrGqNIMW7rAlB',
+								name: 'Oh Devil',
+								external_urls: {
+									spotify: 'https://open.spotify.com/track/1kcfGBb6kSrGqNIMW7rAlB',
+								},
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+					])
+				),
 			}),
 			[
 				{
@@ -323,27 +391,29 @@ describe('v1 provider plugins conformance', () => {
 		it('normalizes Canopy Amazon product payload from explicit product target', async () => {
 			const plugin = createProductListingPlugin({
 				apiKey: 'test-key',
-				fetch: createFetchMock([
-					{
-						body: JSON.stringify({
-							data: {
-								amazonProduct: {
-									title: 'Carepod One Stainless Steel Humidifier for Large Room',
-									brand: 'Carepod',
-									asin: 'B0916J478T',
-									url: 'https://www.amazon.com/dp/B0916J478T',
-									mainImageUrl: 'https://m.media-amazon.com/images/I/61vPRPWGPaL._AC_SL1500_.jpg',
-									currentPrice: '199.99',
-									currencyCode: 'USD',
-									rating: 4.7,
-									reviewCount: 1200,
-									availability: 'In Stock',
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{
+							body: JSON.stringify({
+								data: {
+									amazonProduct: {
+										title: 'Carepod One Stainless Steel Humidifier for Large Room',
+										brand: 'Carepod',
+										asin: 'B0916J478T',
+										url: 'https://www.amazon.com/dp/B0916J478T',
+										mainImageUrl: 'https://m.media-amazon.com/images/I/61vPRPWGPaL._AC_SL1500_.jpg',
+										currentPrice: '199.99',
+										currencyCode: 'USD',
+										rating: 4.7,
+										reviewCount: 1200,
+										availability: 'In Stock',
+									},
 								},
-							},
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-				]),
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+					])
+				),
 			});
 
 			const request = createMockRequest({
@@ -381,20 +451,22 @@ describe('v1 provider plugins conformance', () => {
 		runPluginConformanceSuite(
 			createProductListingPlugin({
 				apiKey: 'test-key',
-				fetch: createFetchMock([
-					{
-						body: JSON.stringify({
-							data: {
-								amazonProduct: {
-									title: 'Carepod One',
-									asin: 'B0916J478T',
-									url: 'https://www.amazon.com/dp/B0916J478T',
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{
+							body: JSON.stringify({
+								data: {
+									amazonProduct: {
+										title: 'Carepod One',
+										asin: 'B0916J478T',
+										url: 'https://www.amazon.com/dp/B0916J478T',
+									},
 								},
-							},
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-				]),
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+					])
+				),
 			}),
 			[
 				{
@@ -439,29 +511,31 @@ describe('v1 provider plugins conformance', () => {
 		it('normalizes authenticated X profile metadata from explicit profile target', async () => {
 			const plugin = createXProfilePlugin({
 				token: 'test-token',
-				fetch: createFetchMock([
-					{
-						body: JSON.stringify({
-							data: {
-								id: '1489350103840219144',
-								username: '0xIntuition',
-								name: 'Intuition',
-								description: 'Belief graph infrastructure.',
-								profile_banner_url:
-									'https://pbs.twimg.com/profile_banners/1489350103840219144/example',
-								profile_image_url: 'https://pbs.twimg.com/profile_images/example_normal.jpg',
-								verified: true,
-								created_at: '2024-01-02T00:00:00.000Z',
-								public_metrics: {
-									followers_count: 4200,
-									following_count: 120,
-									tweet_count: 980,
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{
+							body: JSON.stringify({
+								data: {
+									id: '1489350103840219144',
+									username: '0xIntuition',
+									name: 'Intuition',
+									description: 'Belief graph infrastructure.',
+									profile_banner_url:
+										'https://pbs.twimg.com/profile_banners/1489350103840219144/example',
+									profile_image_url: 'https://pbs.twimg.com/profile_images/example_normal.jpg',
+									verified: true,
+									created_at: '2024-01-02T00:00:00.000Z',
+									public_metrics: {
+										followers_count: 4200,
+										following_count: 120,
+										tweet_count: 980,
+									},
 								},
-							},
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-				]),
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+					])
+				),
 			});
 
 			const request = createMockRequest({
@@ -500,17 +574,19 @@ describe('v1 provider plugins conformance', () => {
 		runPluginConformanceSuite(
 			createXProfilePlugin({
 				token: 'test-token',
-				fetch: createFetchMock([
-					{
-						body: JSON.stringify({
-							data: {
-								id: '1489350103840219144',
-								username: '0xIntuition',
-							},
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{
+							body: JSON.stringify({
+								data: {
+									id: '1489350103840219144',
+									username: '0xIntuition',
+								},
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+					])
+				),
 			}),
 			[
 				{
@@ -558,9 +634,9 @@ describe('v1 provider plugins conformance', () => {
 				'../../src/plugins/providers/wikipedia/__fixtures__/summary.json'
 			);
 			const plugin = createWikipediaPlugin({
-				fetch: createFetchMock([
-					{ body: response, headers: { 'content-type': 'application/json' } },
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([{ body: response, headers: { 'content-type': 'application/json' } }])
+				),
 			});
 
 			const request = createMockRequest({
@@ -575,26 +651,30 @@ describe('v1 provider plugins conformance', () => {
 			expect(artifacts[0]?.artifact_type).toBe('wikipedia');
 			expect(artifacts[0]?.data).toMatchObject({
 				title: 'Acme Labs',
+				description: 'Developer tooling company',
 				extract: 'Acme Labs is a developer tooling company.',
+				wikibaseItem: 'Q12345',
 			});
 		});
 
 		runPluginConformanceSuite(
 			createWikipediaPlugin({
-				fetch: createFetchMock([
-					{
-						body: JSON.stringify({
-							title: 'Acme Labs',
-							extract: 'Acme Labs company profile',
-							content_urls: {
-								desktop: {
-									page: 'https://en.wikipedia.org/wiki/Acme_Labs',
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{
+							body: JSON.stringify({
+								title: 'Acme Labs',
+								extract: 'Acme Labs company profile',
+								content_urls: {
+									desktop: {
+										page: 'https://en.wikipedia.org/wiki/Acme_Labs',
+									},
 								},
-							},
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-				]),
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+					])
+				),
 			}),
 			[
 				{
@@ -625,9 +705,9 @@ describe('v1 provider plugins conformance', () => {
 				'../../src/plugins/providers/wikidata/__fixtures__/entity.json'
 			);
 			const plugin = createWikidataPlugin({
-				fetch: createFetchMock([
-					{ body: response, headers: { 'content-type': 'application/json' } },
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([{ body: response, headers: { 'content-type': 'application/json' } }])
+				),
 			});
 
 			const request = createMockRequest({
@@ -655,19 +735,21 @@ describe('v1 provider plugins conformance', () => {
 
 		runPluginConformanceSuite(
 			createWikidataPlugin({
-				fetch: createFetchMock([
-					{
-						body: JSON.stringify({
-							entities: {
-								Q12345: {
-									id: 'Q12345',
-									labels: { en: { value: 'Acme Labs' } },
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{
+							body: JSON.stringify({
+								entities: {
+									Q12345: {
+										id: 'Q12345',
+										labels: { en: { value: 'Acme Labs' } },
+									},
 								},
-							},
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-				]),
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+					])
+				),
 			}),
 			[
 				{
@@ -701,9 +783,11 @@ describe('v1 provider plugins conformance', () => {
 				'../../src/plugins/providers/github/__fixtures__/repo.json'
 			);
 			const plugin = createGitHubPlugin({
-				fetch: createFetchMock([
-					{ body: repositoryResponse, headers: { 'content-type': 'application/json' } },
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{ body: repositoryResponse, headers: { 'content-type': 'application/json' } },
+					])
+				),
 			});
 
 			const request = createMockRequest({
@@ -728,42 +812,44 @@ describe('v1 provider plugins conformance', () => {
 
 		it('omits nullable and blank github fields that would fail artifact validation', async () => {
 			const plugin = createGitHubPlugin({
-				fetch: createFetchMock([
-					{
-						body: JSON.stringify({
-							owner: { login: 'charmbracelet' },
-							name: 'gum',
-							full_name: 'charmbracelet/gum',
-							description: 'A tool for glamorous shell scripts',
-							language: 'Go',
-							stargazers_count: 1,
-							forks_count: 2,
-							open_issues_count: 3,
-							topics: [],
-							license: null,
-							created_at: '2024-01-01T00:00:00Z',
-							updated_at: '2024-01-02T00:00:00Z',
-							homepage: '',
-							default_branch: 'main',
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-					{
-						body: JSON.stringify({
-							login: 'acme',
-							name: 'Acme Labs',
-							avatar_url: 'https://avatars.githubusercontent.com/u/123?v=4',
-							bio: null,
-							company: null,
-							location: null,
-							blog: '',
-							public_repos: 10,
-							followers: 20,
-							following: 30,
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{
+							body: JSON.stringify({
+								owner: { login: 'charmbracelet' },
+								name: 'gum',
+								full_name: 'charmbracelet/gum',
+								description: 'A tool for glamorous shell scripts',
+								language: 'Go',
+								stargazers_count: 1,
+								forks_count: 2,
+								open_issues_count: 3,
+								topics: [],
+								license: null,
+								created_at: '2024-01-01T00:00:00Z',
+								updated_at: '2024-01-02T00:00:00Z',
+								homepage: '',
+								default_branch: 'main',
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+						{
+							body: JSON.stringify({
+								login: 'acme',
+								name: 'Acme Labs',
+								avatar_url: 'https://avatars.githubusercontent.com/u/123?v=4',
+								bio: null,
+								company: null,
+								location: null,
+								blog: '',
+								public_repos: 10,
+								followers: 20,
+								following: 30,
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+					])
+				),
 			});
 
 			const repoArtifacts = await plugin.enrich(
@@ -810,40 +896,42 @@ describe('v1 provider plugins conformance', () => {
 
 		runPluginConformanceSuite(
 			createGitHubPlugin({
-				fetch: createFetchMock([
-					{
-						body: JSON.stringify({
-							owner: { login: 'acme' },
-							name: 'acme-sdk',
-							full_name: 'acme/acme-sdk',
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-					{
-						body: JSON.stringify({
-							owner: { login: 'acme' },
-							name: 'acme-sdk',
-							full_name: 'acme/acme-sdk',
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-					{
-						body: JSON.stringify({
-							login: 'acme',
-							name: 'Acme Labs',
-							avatar_url: 'https://avatars.githubusercontent.com/u/123?v=4',
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-					{
-						body: JSON.stringify({
-							login: 'acme',
-							name: 'Acme Labs',
-							avatar_url: 'https://avatars.githubusercontent.com/u/123?v=4',
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{
+							body: JSON.stringify({
+								owner: { login: 'acme' },
+								name: 'acme-sdk',
+								full_name: 'acme/acme-sdk',
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+						{
+							body: JSON.stringify({
+								owner: { login: 'acme' },
+								name: 'acme-sdk',
+								full_name: 'acme/acme-sdk',
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+						{
+							body: JSON.stringify({
+								login: 'acme',
+								name: 'Acme Labs',
+								avatar_url: 'https://avatars.githubusercontent.com/u/123?v=4',
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+						{
+							body: JSON.stringify({
+								login: 'acme',
+								name: 'Acme Labs',
+								avatar_url: 'https://avatars.githubusercontent.com/u/123?v=4',
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+					])
+				),
 			}),
 			[
 				{
@@ -897,10 +985,12 @@ describe('v1 provider plugins conformance', () => {
 				'../../src/plugins/providers/npm/__fixtures__/downloads.json'
 			);
 			const plugin = createNpmPlugin({
-				fetch: createFetchMock([
-					{ body: registryFixture, headers: { 'content-type': 'application/json' } },
-					{ body: downloadsFixture, headers: { 'content-type': 'application/json' } },
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{ body: registryFixture, headers: { 'content-type': 'application/json' } },
+						{ body: downloadsFixture, headers: { 'content-type': 'application/json' } },
+					])
+				),
 			});
 
 			const request = createMockRequest({
@@ -924,24 +1014,26 @@ describe('v1 provider plugins conformance', () => {
 
 		runPluginConformanceSuite(
 			createNpmPlugin({
-				fetch: createFetchMock([
-					{
-						body: JSON.stringify({
-							name: 'acme-sdk',
-							'dist-tags': { latest: '1.0.0' },
-							versions: {
-								'1.0.0': {
-									homepage: 'https://acme.example',
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{
+							body: JSON.stringify({
+								name: 'acme-sdk',
+								'dist-tags': { latest: '1.0.0' },
+								versions: {
+									'1.0.0': {
+										homepage: 'https://acme.example',
+									},
 								},
-							},
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-					{
-						body: JSON.stringify({ downloads: 10 }),
-						headers: { 'content-type': 'application/json' },
-					},
-				]),
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+						{
+							body: JSON.stringify({ downloads: 10 }),
+							headers: { 'content-type': 'application/json' },
+						},
+					])
+				),
 			}),
 			[
 				{
@@ -967,40 +1059,14 @@ describe('v1 provider plugins conformance', () => {
 	});
 
 	describe('musicbrainz', () => {
-		it('resolves canonical ISRC hints before classification-name fallback', async () => {
-			const response = await readFixture(
-				'../../src/plugins/providers/musicbrainz/__fixtures__/recording.json'
-			);
-			let requestedUrl = '';
-			const plugin = createMusicBrainzPlugin({
-				fetch: async (url) => {
-					requestedUrl = url;
-					return new Response(JSON.stringify({ recordings: [JSON.parse(response)] }), {
-						headers: { 'content-type': 'application/json' },
-					});
-				},
-			});
-			const request = createMockRequest({
-				input: createMockAtomInput({
-					atomType: 'thing',
-					jsonLd: { '@context': 'https://schema.org', '@type': 'Thing' },
-					hints: { identifiers: { isrc: 'usacm0000001' } },
-				}),
-			});
-
-			expect(plugin.supports(request)).toBe(true);
-			const artifacts = await plugin.enrich(request, createMockPluginContext());
-			expect(requestedUrl).toContain('query=isrc%3AUSACM0000001');
-			expect(artifacts[0]?.artifact_type).toBe('musicbrainz');
-		});
 		it('normalizes musicbrainz recording fixture', async () => {
 			const response = await readFixture(
 				'../../src/plugins/providers/musicbrainz/__fixtures__/recording.json'
 			);
 			const plugin = createMusicBrainzPlugin({
-				fetch: createFetchMock([
-					{ body: response, headers: { 'content-type': 'application/json' } },
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([{ body: response, headers: { 'content-type': 'application/json' } }])
+				),
 			});
 
 			const request = createMockRequest({
@@ -1026,14 +1092,16 @@ describe('v1 provider plugins conformance', () => {
 
 		runPluginConformanceSuite(
 			createMusicBrainzPlugin({
-				fetch: createFetchMock([
-					{
-						body: JSON.stringify({
-							recordings: [{ id: 'a3f4ec8d-7dd5-4da6-9e53-3f5aa4bd0d66', title: 'Acme Theme' }],
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{
+							body: JSON.stringify({
+								recordings: [{ id: 'a3f4ec8d-7dd5-4da6-9e53-3f5aa4bd0d66', title: 'Acme Theme' }],
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+					])
+				),
 			}),
 			[
 				{
@@ -1111,14 +1179,95 @@ describe('v1 provider plugins conformance', () => {
 	});
 
 	describe('tmdb', () => {
-		it('normalizes tmdb movie fixture', async () => {
+		it('supports and fetches TMDB when an API key and typed identifier are present', async () => {
+			const requestedUrls: string[] = [];
+			const plugin = createTmdbPlugin({
+				apiKey: 'test-key',
+				fetch: createPinAwareFetch(async (url) => {
+					requestedUrls.push(String(url));
+					return new Response(JSON.stringify({ id: 550, title: 'Fight Club' }), {
+						headers: { 'content-type': 'application/json' },
+					});
+				}),
+			});
+			const request = createMockRequest({
+				input: createMockAtomInput({
+					hints: {
+						identifiers: { tmdb: 'movie:550' },
+						url: 'https://www.themoviedb.org/movie/550-fight-club',
+					},
+				}),
+			});
+
+			expect(plugin.supports(request)).toBe(true);
+			expect(
+				(
+					await plugin.enrich(request, {
+						now: () => '2026-01-01T00:00:00.000Z',
+						signal: new AbortController().signal,
+					})
+				)[0]
+			).toMatchObject({ artifact_type: 'tmdb', data: { tmdbId: 550 } });
+			expect(requestedUrls).toHaveLength(1);
+		});
+
+		it('does not fetch or emit diagnostics without an API key across an enrichment run', async () => {
+			let fetchCallCount = 0;
+			const plugin = createTmdbPlugin({
+				fetch: createPinAwareFetch(async () => {
+					fetchCallCount += 1;
+					return new Response('', { status: 401 });
+				}),
+			});
+			const engine = createEnrichmentEngine({ plugins: [plugin] });
+
+			const result = await engine.enrich(
+				createMockRequest({
+					input: createMockAtomInput({
+						hints: { url: 'https://www.themoviedb.org/movie/284-the-apartment' },
+					}),
+				})
+			);
+
+			expect(fetchCallCount).toBe(0);
+			expect(result.artifacts).toEqual([]);
+			expect(result.errors).toEqual([]);
+			expect(result.skipped).toEqual([{ pluginId: 'tmdb', reason: 'not_applicable' }]);
+		});
+
+		it('does not fetch when enrich is invoked directly with a whitespace-only API key', async () => {
+			let fetchCallCount = 0;
+			const plugin = createTmdbPlugin({
+				apiKey: '  ',
+				fetch: createPinAwareFetch(async () => {
+					fetchCallCount += 1;
+					return new Response('', { status: 401 });
+				}),
+			});
+			const request = createMockRequest({
+				input: createMockAtomInput({
+					hints: { url: 'https://www.themoviedb.org/movie/284-the-apartment' },
+				}),
+			});
+
+			const artifacts = await plugin.enrich(request, {
+				now: () => '2026-01-01T00:00:00.000Z',
+				signal: new AbortController().signal,
+			});
+
+			expect(fetchCallCount).toBe(0);
+			expect(artifacts).toEqual([]);
+		});
+
+		it('consumes a TMDB movie fixture when credentials are supplied', async () => {
 			const response = await readFixture(
 				'../../src/plugins/providers/tmdb/__fixtures__/movie.json'
 			);
 			const plugin = createTmdbPlugin({
-				fetch: createFetchMock([
-					{ body: response, headers: { 'content-type': 'application/json' } },
-				]),
+				apiKey: 'test-key',
+				fetch: createPinAwareFetch(
+					createFetchMock([{ body: response, headers: { 'content-type': 'application/json' } }])
+				),
 			});
 
 			const request = createMockRequest({
@@ -1129,18 +1278,17 @@ describe('v1 provider plugins conformance', () => {
 				signal: new AbortController().signal,
 			});
 
-			expect(artifacts[0]?.artifact_type).toBe('tmdb');
-			expect(artifacts[0]?.data).toMatchObject({
-				tmdbId: 550,
-				mediaType: 'movie',
-				title: 'Acme Origins',
+			expect(artifacts[0]).toMatchObject({
+				artifact_type: 'tmdb',
+				data: { mediaType: 'movie', title: 'Acme Origins', tmdbId: 550 },
 			});
 		});
 
-		it('normalizes tmdb tv URLs into structured artifacts', async () => {
+		it('fetches TMDB TV URLs and emits structured artifacts', async () => {
 			let requestedUrl = '';
 			const plugin = createTmdbPlugin({
-				fetch: async (url) => {
+				apiKey: 'test-key',
+				fetch: createPinAwareFetch(async (url) => {
 					requestedUrl = String(url);
 					return new Response(
 						JSON.stringify({
@@ -1152,7 +1300,7 @@ describe('v1 provider plugins conformance', () => {
 						}),
 						{ headers: { 'content-type': 'application/json' } }
 					);
-				},
+				}),
 			});
 
 			const request = createMockRequest({
@@ -1165,40 +1313,39 @@ describe('v1 provider plugins conformance', () => {
 				signal: new AbortController().signal,
 			});
 
-			expect(requestedUrl).toContain('/3/tv/1396?');
+			expect(new URL(requestedUrl).pathname).toBe('/3/tv/1396');
 			expect(artifacts[0]).toMatchObject({
 				artifact_type: 'tmdb',
-				data: {
-					tmdbId: 1396,
-					mediaType: 'tv',
-					title: 'Breaking Bad',
-					releaseDate: '2008-01-20',
-					runtime: 47,
-				},
-				meta: {
-					pluginId: 'tmdb',
-					provider: 'tmdb',
-					sourceUrl: 'https://www.themoviedb.org/tv/1396',
-				},
+				data: { mediaType: 'tv', releaseDate: '2008-01-20', runtime: 47, tmdbId: 1396 },
 			});
 		});
 
 		runPluginConformanceSuite(
 			createTmdbPlugin({
-				fetch: createFetchMock([
-					{
-						body: JSON.stringify({
-							id: 550,
-							title: 'Acme Origins',
-							genres: [{ name: 'Drama' }],
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-				]),
+				apiKey: 'test-key',
+				fetch: createPinAwareFetch(async (url) => {
+					const isTv = new URL(url).pathname.includes('/tv/');
+					return new Response(
+						JSON.stringify(
+							isTv
+								? {
+										episode_run_time: [47],
+										id: 1396,
+										name: 'Breaking Bad',
+									}
+								: {
+										id: 550,
+										title: 'Acme Origins',
+										genres: [{ name: 'Drama' }],
+									}
+						),
+						{ headers: { 'content-type': 'application/json' } }
+					);
+				}),
 			}),
 			[
 				{
-					name: 'supports tmdb movie url',
+					name: 'supports a tmdb movie url',
 					request: createMockRequest({
 						input: createMockAtomInput({
 							hints: { url: 'https://www.themoviedb.org/movie/550', name: 'Acme Origins' },
@@ -1208,7 +1355,7 @@ describe('v1 provider plugins conformance', () => {
 					expectedClassifications: ['tmdb'],
 				},
 				{
-					name: 'supports tmdb tv url',
+					name: 'supports a tmdb tv url',
 					request: createMockRequest({
 						input: createMockAtomInput({
 							hints: { url: 'https://www.themoviedb.org/tv/1396-breaking-bad' },
@@ -1229,15 +1376,340 @@ describe('v1 provider plugins conformance', () => {
 		);
 	});
 
+	describe('steam', () => {
+		it('normalizes Steam Store appdetails payloads into structured artifacts', async () => {
+			let requestedUrl = '';
+			const plugin = createSteamPlugin({
+				fetch: createPinAwareFetch(async (url) => {
+					requestedUrl = String(url);
+					return new Response(
+						JSON.stringify({
+							620: {
+								success: true,
+								data: {
+									steam_appid: 620,
+									type: 'game',
+									name: 'Portal 2',
+									short_description: '<p>Portal 2 draws from the award-winning formula.</p>',
+									header_image: 'https://cdn.akamai.steamstatic.com/steam/apps/620/header.jpg',
+									developers: ['Valve'],
+									publishers: ['Valve'],
+									release_date: { coming_soon: false, date: 'Apr 18, 2011' },
+									genres: [{ description: 'Puzzle' }, { description: 'Adventure' }],
+									categories: [{ description: 'Single-player' }],
+									platforms: { windows: true, mac: true, linux: true },
+									metacritic: { score: 95 },
+									recommendations: { total: 321_000 },
+									is_free: false,
+									price_overview: {
+										currency: 'USD',
+										initial: 999,
+										final: 999,
+										discount_percent: 0,
+										final_formatted: '$9.99',
+									},
+								},
+							},
+						}),
+						{ headers: { 'content-type': 'application/json' } }
+					);
+				}),
+			});
+
+			const request = createMockRequest({
+				input: createMockAtomInput({
+					hints: { url: 'https://store.steampowered.com/app/620/Portal_2/' },
+				}),
+			});
+			const artifacts = await plugin.enrich(request, {
+				now: () => '2026-01-01T00:00:00.000Z',
+				signal: new AbortController().signal,
+			});
+
+			expect(requestedUrl).toContain('appdetails?appids=620');
+			expect(artifacts[0]).toMatchObject({
+				artifact_type: 'steam-app',
+				data: {
+					appId: 620,
+					name: 'Portal 2',
+					type: 'game',
+					shortDescription: 'Portal 2 draws from the award-winning formula.',
+					developers: ['Valve'],
+					genres: ['Puzzle', 'Adventure'],
+					platforms: ['windows', 'mac', 'linux'],
+					metacriticScore: 95,
+					recommendationsTotal: 321_000,
+				},
+				meta: {
+					pluginId: 'steam',
+					provider: 'steam',
+					sourceUrl: 'https://store.steampowered.com/app/620/',
+				},
+			});
+		});
+
+		runPluginConformanceSuite(
+			createSteamPlugin({
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{
+							body: JSON.stringify({
+								620: {
+									success: true,
+									data: { name: 'Portal 2', type: 'game' },
+								},
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+					])
+				),
+			}),
+			[
+				{
+					name: 'supports Steam app URLs',
+					request: createMockRequest({
+						input: createMockAtomInput({
+							hints: { url: 'https://store.steampowered.com/app/620/Portal_2/' },
+						}),
+					}),
+					expectedSupports: true,
+					expectedClassifications: ['steam-app'],
+				},
+				{
+					name: 'supports explicit Steam AppIDs',
+					request: createMockRequest({
+						input: createMockAtomInput({ hints: { identifiers: { steamAppId: '620' } } }),
+					}),
+					expectedSupports: true,
+					expectedClassifications: ['steam-app'],
+				},
+				{
+					name: 'does not support without Steam app reference',
+					request: createMockRequest({
+						input: createNoNameNoUrlInput(),
+					}),
+					expectedSupports: false,
+				},
+				{
+					name: 'does not support deceptive Steam-like hosts',
+					request: createMockRequest({
+						input: createMockAtomInput({
+							hints: { url: 'https://evilsteampowered.com/app/620/Portal_2/' },
+						}),
+					}),
+					expectedSupports: false,
+				},
+			],
+			registry
+		);
+	});
+
+	describe('openlibrary', () => {
+		it('normalizes OpenLibrary edition payloads into structured book artifacts', async () => {
+			const work = await readFixture(
+				'../../src/plugins/providers/openlibrary/__fixtures__/work.json'
+			);
+			const edition = await readFixture(
+				'../../src/plugins/providers/openlibrary/__fixtures__/edition.json'
+			);
+			const author = await readFixture(
+				'../../src/plugins/providers/openlibrary/__fixtures__/author.json'
+			);
+			const requests: Array<{ headers: Headers; url: string }> = [];
+			const plugin = createOpenLibraryPlugin({
+				fetch: createPinAwareFetch(
+					createOpenLibraryFetchMock({
+						author,
+						edition,
+						work,
+						onRequest: (url, init) => {
+							requests.push({ headers: new Headers(init?.headers), url });
+						},
+					})
+				),
+				requestSpacingMs: 0,
+			});
+
+			const request = createMockRequest({
+				input: createMockAtomInput({
+					hints: { url: 'https://openlibrary.org/books/OL7353617M/Fantastic_Mr._Fox' },
+				}),
+			});
+			const artifacts = await plugin.enrich(request, {
+				now: () => '2026-01-01T00:00:00.000Z',
+				signal: new AbortController().signal,
+			});
+
+			expect(requests.map((entry) => entry.url)).toEqual([
+				'https://openlibrary.org/books/OL7353617M.json',
+				'https://openlibrary.org/works/OL45804W.json',
+				'https://openlibrary.org/authors/OL34184A.json',
+			]);
+			expect(requests[0]?.headers.get('User-Agent')).toContain('IntuitionAtomEnrichment');
+			expect(artifacts[0]).toMatchObject({
+				artifact_type: 'openlibrary',
+				data: {
+					entityType: 'edition',
+					sourceKind: 'edition',
+					openLibraryUrl: 'https://openlibrary.org/books/OL7353617M',
+					workOlid: 'OL45804W',
+					editionOlid: 'OL7353617M',
+					title: 'Fantastic Mr. Fox',
+					description: 'The main character of Fantastic Mr. Fox is an extremely clever fox.',
+					authors: [
+						{
+							olid: 'OL34184A',
+							name: 'Roald Dahl',
+							url: 'https://openlibrary.org/authors/OL34184A',
+						},
+					],
+					firstPublishDate: '1970',
+					publishDate: 'October 1, 1988',
+					publishers: ['Puffin'],
+					isbn10: ['0140328726'],
+					isbn13: ['9780140328721'],
+					oclc: ['18352925'],
+					lccn: ['88012345'],
+					schemaOrg: {
+						'@type': 'Book',
+						name: 'Fantastic Mr. Fox',
+						isbn: ['9780140328721', '0140328726'],
+					},
+				},
+				meta: {
+					pluginId: 'openlibrary',
+					provider: 'openlibrary',
+					sourceUrl: 'https://openlibrary.org/books/OL7353617M',
+				},
+			});
+		});
+
+		it('parses OpenLibrary URL target shapes without accepting deceptive hosts', () => {
+			expect(parseOpenLibraryTargetFromUrl('https://openlibrary.org/works/OL45804W/Foo')).toEqual({
+				kind: 'work',
+				workOlid: 'OL45804W',
+			});
+			expect(parseOpenLibraryTargetFromUrl('https://openlibrary.org/books/OL7353617M/Foo')).toEqual(
+				{
+					editionOlid: 'OL7353617M',
+					kind: 'edition',
+				}
+			);
+			expect(parseOpenLibraryTargetFromUrl('https://openlibrary.org/authors/OL34184A/Foo')).toEqual(
+				{
+					authorOlid: 'OL34184A',
+					kind: 'author',
+				}
+			);
+			expect(parseOpenLibraryTargetFromUrl('https://openlibrary.org/isbn/9780140328721')).toEqual({
+				isbn: '9780140328721',
+				kind: 'isbn',
+			});
+			expect(
+				parseOpenLibraryTargetFromUrl('https://evilopenlibrary.org/works/OL45804W/Foo')
+			).toBeUndefined();
+		});
+
+		runPluginConformanceSuite(
+			createOpenLibraryPlugin({
+				fetch: createPinAwareFetch(
+					createOpenLibraryFetchMock({
+						author: JSON.stringify({ key: '/authors/OL34184A', name: 'Roald Dahl' }),
+						edition: JSON.stringify({
+							authors: [{ key: '/authors/OL34184A' }],
+							isbn_13: ['9780140328721'],
+							key: '/books/OL7353617M',
+							title: 'Fantastic Mr. Fox',
+							works: [{ key: '/works/OL45804W' }],
+						}),
+						work: JSON.stringify({
+							authors: [{ author: { key: '/authors/OL34184A' } }],
+							key: '/works/OL45804W',
+							title: 'Fantastic Mr Fox',
+						}),
+					})
+				),
+				requestSpacingMs: 0,
+			}),
+			[
+				{
+					name: 'supports OpenLibrary work URLs',
+					request: createMockRequest({
+						input: createMockAtomInput({
+							hints: { url: 'https://openlibrary.org/works/OL45804W/Fantastic_Mr_Fox' },
+						}),
+					}),
+					expectedSupports: true,
+					expectedClassifications: ['openlibrary'],
+				},
+				{
+					name: 'supports OpenLibrary edition URLs',
+					request: createMockRequest({
+						input: createMockAtomInput({
+							hints: { url: 'https://openlibrary.org/books/OL7353617M/Fantastic_Mr._Fox' },
+						}),
+					}),
+					expectedSupports: true,
+					expectedClassifications: ['openlibrary'],
+				},
+				{
+					name: 'supports OpenLibrary ISBN URLs',
+					request: createMockRequest({
+						input: createMockAtomInput({
+							hints: { url: 'https://openlibrary.org/isbn/9780140328721' },
+						}),
+					}),
+					expectedSupports: true,
+					expectedClassifications: ['openlibrary'],
+				},
+				{
+					name: 'supports explicit ISBN identifiers',
+					request: createMockRequest({
+						input: createMockAtomInput({ hints: { identifiers: { isbn: '978-0-14-032872-1' } } }),
+					}),
+					expectedSupports: true,
+					expectedClassifications: ['openlibrary'],
+				},
+				{
+					name: 'does not enrich author URLs as primary Person atoms in wave 1',
+					request: createMockRequest({
+						input: createMockAtomInput({
+							hints: { url: 'https://openlibrary.org/authors/OL34184A/Roald_Dahl' },
+						}),
+					}),
+					expectedSupports: false,
+				},
+				{
+					name: 'does not support without OpenLibrary book reference',
+					request: createMockRequest({
+						input: createNoNameNoUrlInput(),
+					}),
+					expectedSupports: false,
+				},
+				{
+					name: 'does not support deceptive OpenLibrary-like hosts',
+					request: createMockRequest({
+						input: createMockAtomInput({
+							hints: { url: 'https://evilopenlibrary.org/works/OL45804W/Foo' },
+						}),
+					}),
+					expectedSupports: false,
+				},
+			],
+			registry
+		);
+	});
+
 	describe('youtube', () => {
 		it('normalizes youtube video fixture', async () => {
 			const response = await readFixture(
 				'../../src/plugins/providers/youtube/__fixtures__/video.json'
 			);
 			const plugin = createYouTubePlugin({
-				fetch: createFetchMock([
-					{ body: response, headers: { 'content-type': 'application/json' } },
-				]),
+				apiKey: 'FAKE-YOUTUBE-KEY-NOT-REAL',
+				fetch: createPinAwareFetch(
+					createFetchMock([{ body: response, headers: { 'content-type': 'application/json' } }])
+				),
 			});
 
 			const request = createMockRequest({
@@ -1260,19 +1732,22 @@ describe('v1 provider plugins conformance', () => {
 
 		runPluginConformanceSuite(
 			createYouTubePlugin({
-				fetch: createFetchMock([
-					{
-						body: JSON.stringify({
-							items: [
-								{
-									id: 'abc123xyz89',
-									snippet: { title: 'Acme Demo' },
-								},
-							],
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-				]),
+				apiKey: 'FAKE-YOUTUBE-KEY-NOT-REAL',
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{
+							body: JSON.stringify({
+								items: [
+									{
+										id: 'abc123xyz89',
+										snippet: { title: 'Acme Demo' },
+									},
+								],
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+					])
+				),
 			}),
 			[
 				{
@@ -1303,9 +1778,9 @@ describe('v1 provider plugins conformance', () => {
 				'../../src/plugins/providers/brand/__fixtures__/brand.json'
 			);
 			const plugin = createBrandPlugin({
-				fetch: createFetchMock([
-					{ body: response, headers: { 'content-type': 'application/json' } },
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([{ body: response, headers: { 'content-type': 'application/json' } }])
+				),
 			});
 
 			const request = createMockRequest({
@@ -1326,7 +1801,9 @@ describe('v1 provider plugins conformance', () => {
 
 		it('does not emit an unauthenticated Logo.dev fallback when Brandfetch is unavailable', async () => {
 			const plugin = createBrandPlugin({
-				fetch: createFetchMock([{ body: '{"message":"unauthorized"}', status: 401 }]),
+				fetch: createPinAwareFetch(
+					createFetchMock([{ body: '{"message":"unauthorized"}', status: 401 }])
+				),
 			});
 
 			const request = createMockRequest({
@@ -1346,15 +1823,17 @@ describe('v1 provider plugins conformance', () => {
 
 		runPluginConformanceSuite(
 			createBrandPlugin({
-				fetch: createFetchMock([
-					{
-						body: JSON.stringify({
-							domain: 'acme.example',
-							logos: [{ formats: [{ src: 'https://cdn.brandfetch.io/acme.example/logo.svg' }] }],
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{
+							body: JSON.stringify({
+								domain: 'acme.example',
+								logos: [{ formats: [{ src: 'https://cdn.brandfetch.io/acme.example/logo.svg' }] }],
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+					])
+				),
 			}),
 			[
 				{
@@ -1423,9 +1902,9 @@ describe('v1 provider plugins conformance', () => {
 				'../../src/plugins/providers/coingecko/__fixtures__/coin.json'
 			);
 			const plugin = createCoinGeckoPlugin({
-				fetch: createFetchMock([
-					{ body: response, headers: { 'content-type': 'application/json' } },
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([{ body: response, headers: { 'content-type': 'application/json' } }])
+				),
 			});
 
 			const request = createMockRequest({
@@ -1456,9 +1935,9 @@ describe('v1 provider plugins conformance', () => {
 				'../../src/plugins/providers/coingecko/__fixtures__/coin.json'
 			);
 			const plugin = createCoinGeckoPlugin({
-				fetch: createFetchMock([
-					{ body: response, headers: { 'content-type': 'application/json' } },
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([{ body: response, headers: { 'content-type': 'application/json' } }])
+				),
 			});
 			const address = '0x1111111111111111111111111111111111111111';
 			const request = createMockRequest({
@@ -1486,9 +1965,11 @@ describe('v1 provider plugins conformance', () => {
 
 		it('returns not_found token-metadata artifact when contract lookup is missing upstream', async () => {
 			const plugin = createCoinGeckoPlugin({
-				fetch: createFetchMock([
-					{ body: JSON.stringify({ status: { error_message: 'not found' } }), status: 404 },
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{ body: JSON.stringify({ status: { error_message: 'not found' } }), status: 404 },
+					])
+				),
 			});
 			const address = '0x1111111111111111111111111111111111111111';
 			const request = createMockRequest({
@@ -1516,9 +1997,14 @@ describe('v1 provider plugins conformance', () => {
 
 		it('returns error token-metadata artifact when upstream returns non-404 error', async () => {
 			const plugin = createCoinGeckoPlugin({
-				fetch: createFetchMock([
-					{ body: JSON.stringify({ status: { error_message: 'upstream failure' } }), status: 500 },
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{
+							body: JSON.stringify({ status: { error_message: 'upstream failure' } }),
+							status: 500,
+						},
+					])
+				),
 			});
 			const address = '0x1111111111111111111111111111111111111111';
 			const request = createMockRequest({
@@ -1546,22 +2032,24 @@ describe('v1 provider plugins conformance', () => {
 
 		runPluginConformanceSuite(
 			createCoinGeckoPlugin({
-				fetch: createFetchMock([
-					{
-						body: JSON.stringify({
-							id: 'acme-token',
-							symbol: 'acme',
-							name: 'Acme Token',
-							detail_platforms: {
-								ethereum: {
-									decimal_place: 18,
-									contract_address: '0x1111111111111111111111111111111111111111',
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{
+							body: JSON.stringify({
+								id: 'acme-token',
+								symbol: 'acme',
+								name: 'Acme Token',
+								detail_platforms: {
+									ethereum: {
+										decimal_place: 18,
+										contract_address: '0x1111111111111111111111111111111111111111',
+									},
 								},
-							},
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-				]),
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+					])
+				),
 			}),
 			[
 				{
@@ -1589,7 +2077,7 @@ describe('v1 provider plugins conformance', () => {
 			const requestedUrls: string[] = [];
 			const plugin = createEtherscanPlugin({
 				apiKey: 'etherscan-key',
-				fetch: async (url) => {
+				fetch: createPinAwareFetch(async (url) => {
 					requestedUrls.push(String(url));
 
 					if (String(url).includes('action=balance')) {
@@ -1620,7 +2108,7 @@ describe('v1 provider plugins conformance', () => {
 							headers: { 'content-type': 'application/json' },
 						}
 					);
-				},
+				}),
 			});
 
 			const request = createMockRequest({
@@ -1655,11 +2143,13 @@ describe('v1 provider plugins conformance', () => {
 				'../../src/plugins/providers/etherscan/__fixtures__/contract.json'
 			);
 			const plugin = createEtherscanPlugin({
-				fetch: createFetchMock([
-					{ body: balanceResponse, headers: { 'content-type': 'application/json' } },
-					{ body: txCountResponse, headers: { 'content-type': 'application/json' } },
-					{ body: contractResponse, headers: { 'content-type': 'application/json' } },
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{ body: balanceResponse, headers: { 'content-type': 'application/json' } },
+						{ body: txCountResponse, headers: { 'content-type': 'application/json' } },
+						{ body: contractResponse, headers: { 'content-type': 'application/json' } },
+					])
+				),
 			});
 
 			const request = createMockRequest({
@@ -1687,52 +2177,54 @@ describe('v1 provider plugins conformance', () => {
 
 		runPluginConformanceSuite(
 			createEtherscanPlugin({
-				fetch: createFetchMock([
-					{
-						body: JSON.stringify({ status: '1', result: '1200000000000000000' }),
-						headers: { 'content-type': 'application/json' },
-					},
-					{
-						body: JSON.stringify({ result: '0x1a' }),
-						headers: { 'content-type': 'application/json' },
-					},
-					{
-						body: JSON.stringify({
-							status: '1',
-							result: [
-								{
-									ContractName: 'AcmeToken',
-									ABI: '[{}]',
-									TokenName: 'Acme Token',
-									TokenSymbol: 'ACME',
-								},
-							],
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-					{
-						body: JSON.stringify({ status: '1', result: '1200000000000000000' }),
-						headers: { 'content-type': 'application/json' },
-					},
-					{
-						body: JSON.stringify({ result: '0x1a' }),
-						headers: { 'content-type': 'application/json' },
-					},
-					{
-						body: JSON.stringify({
-							status: '1',
-							result: [
-								{
-									ContractName: 'AcmeToken',
-									ABI: '[{}]',
-									TokenName: 'Acme Token',
-									TokenSymbol: 'ACME',
-								},
-							],
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{
+							body: JSON.stringify({ status: '1', result: '1200000000000000000' }),
+							headers: { 'content-type': 'application/json' },
+						},
+						{
+							body: JSON.stringify({ result: '0x1a' }),
+							headers: { 'content-type': 'application/json' },
+						},
+						{
+							body: JSON.stringify({
+								status: '1',
+								result: [
+									{
+										ContractName: 'AcmeToken',
+										ABI: '[{}]',
+										TokenName: 'Acme Token',
+										TokenSymbol: 'ACME',
+									},
+								],
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+						{
+							body: JSON.stringify({ status: '1', result: '1200000000000000000' }),
+							headers: { 'content-type': 'application/json' },
+						},
+						{
+							body: JSON.stringify({ result: '0x1a' }),
+							headers: { 'content-type': 'application/json' },
+						},
+						{
+							body: JSON.stringify({
+								status: '1',
+								result: [
+									{
+										ContractName: 'AcmeToken',
+										ABI: '[{}]',
+										TokenName: 'Acme Token',
+										TokenSymbol: 'ACME',
+									},
+								],
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+					])
+				),
 			}),
 			[
 				{
@@ -1763,9 +2255,9 @@ describe('v1 provider plugins conformance', () => {
 				'../../src/plugins/providers/crossref/__fixtures__/work.json'
 			);
 			const plugin = createCrossrefPlugin({
-				fetch: createFetchMock([
-					{ body: response, headers: { 'content-type': 'application/json' } },
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([{ body: response, headers: { 'content-type': 'application/json' } }])
+				),
 			});
 
 			const request = createMockRequest({
@@ -1793,18 +2285,20 @@ describe('v1 provider plugins conformance', () => {
 
 		runPluginConformanceSuite(
 			createCrossrefPlugin({
-				fetch: createFetchMock([
-					{
-						body: JSON.stringify({
-							message: {
-								DOI: '10.1234/acme.1',
-								title: ['Acme Work'],
-								URL: 'https://doi.org/10.1234/acme.1',
-							},
-						}),
-						headers: { 'content-type': 'application/json' },
-					},
-				]),
+				fetch: createPinAwareFetch(
+					createFetchMock([
+						{
+							body: JSON.stringify({
+								message: {
+									DOI: '10.1234/acme.1',
+									title: ['Acme Work'],
+									URL: 'https://doi.org/10.1234/acme.1',
+								},
+							}),
+							headers: { 'content-type': 'application/json' },
+						},
+					])
+				),
 			}),
 			[
 				{
@@ -1843,9 +2337,9 @@ function assertRegistryCoverage(registryToCheck: ClassificationRegistry): void {
 	expect(registryToCheck.has('github-user')).toBe(true);
 	expect(registryToCheck.has('npm-package')).toBe(true);
 	expect(registryToCheck.has('musicbrainz')).toBe(true);
-	expect(registryToCheck.has('openlibrary')).toBe(true);
 	expect(registryToCheck.has('spotify')).toBe(true);
 	expect(registryToCheck.has('tmdb')).toBe(true);
+	expect(registryToCheck.has('openlibrary')).toBe(true);
 	expect(registryToCheck.has('youtube')).toBe(true);
 	expect(registryToCheck.has('brand')).toBe(true);
 	expect(registryToCheck.has('favicon')).toBe(true);

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import { harvestChainIdentifiers } from '../src/extraction/chaining';
 import { suggestClassifications } from '../src/extraction/suggest';
-import type { EnrichmentArtifact } from '../src/types';
+import type { ClassifiedAtomInput, EnrichmentArtifact } from '../src/types';
 
 function artifact(artifactType: string, data: Record<string, unknown>): EnrichmentArtifact {
 	return {
@@ -32,6 +32,46 @@ describe('harvestChainIdentifiers', () => {
 		]);
 		expect(harvest.identifiers.wikidata).toBe('Q25188');
 		expect(harvest.pluginSlugs).toEqual(['wikidata']);
+	});
+
+	it('uses one bare-QID harvest key for typed and bare wd forms', () => {
+		const harvest = harvestChainIdentifiers([
+			artifact('wikipedia', {
+				title: 'Inception',
+				wikibaseItem: 'Q25188',
+			}),
+			artifact('wikipedia', {
+				title: 'Inception',
+				wikibaseItem: 'int:wd:film:Q25188',
+			}),
+		]);
+
+		expect(harvest.identifiers).toEqual({ wikidata: 'Q25188' });
+		expect(harvest.pluginSlugs).toEqual(['wikidata']);
+		expect(harvest.collisions).toEqual([]);
+	});
+
+	it('surfaces conflicting typed wd slugs for one QID as a collision', () => {
+		const harvest = harvestChainIdentifiers([
+			artifact('wikipedia', {
+				title: 'Shared QID as film',
+				wikibaseItem: 'film:Q25188',
+			}),
+			artifact('wikipedia', {
+				title: 'Shared QID as television series',
+				wikibaseItem: 'int:wd:television-series:Q25188',
+			}),
+		]);
+
+		expect(harvest.identifiers).toEqual({ wikidata: 'Q25188' });
+		expect(harvest.pluginSlugs).toEqual(['wikidata']);
+		expect(harvest.collisions).toEqual([
+			{
+				kind: 'wikidata-slug-conflict',
+				qid: 'Q25188',
+				slugs: ['film', 'television-series'],
+			},
+		]);
 	});
 
 	it('fans wikidata external ids out to tmdb, youtube, brand, and places', () => {
@@ -84,6 +124,46 @@ describe('harvestChainIdentifiers', () => {
 			}),
 		]);
 		expect(harvest.identifiers.spotifyTrackId).toBe('3n3Ppam7vgaVa1iaRUc9Lp');
+		expect(harvest.pluginSlugs).toEqual(['spotify']);
+	});
+
+	it('composes harvested identifiers onto an identifier-first input', () => {
+		const identifierFirstInput: ClassifiedAtomInput = {
+			atomType: 'song',
+			identifier: {
+				iid: 'int:isrc:USUM71703861',
+				scheme: 'isrc',
+				value: 'USUM71703861',
+			},
+			source: {
+				classificationEngine: 'iid-fixture',
+				classifiedAt: '2026-08-07T12:00:00.000Z',
+			},
+			hints: { identifiers: { isrc: 'USUM71703861' } },
+		};
+		const harvest = harvestChainIdentifiers([
+			artifact('wikidata', {
+				entityId: 'Q1',
+				label: 'Some Song',
+				claims: { P2207: stringClaim('3n3Ppam7vgaVa1iaRUc9Lp') },
+			}),
+		]);
+		const chainedInput: ClassifiedAtomInput = {
+			...identifierFirstInput,
+			hints: {
+				...(identifierFirstInput.hints ?? {}),
+				identifiers: {
+					...(identifierFirstInput.hints?.identifiers ?? {}),
+					...harvest.identifiers,
+				},
+			},
+		};
+
+		expect(chainedInput.identifier).toEqual(identifierFirstInput.identifier);
+		expect(chainedInput.hints?.identifiers).toEqual({
+			isrc: 'USUM71703861',
+			spotifyTrackId: '3n3Ppam7vgaVa1iaRUc9Lp',
+		});
 		expect(harvest.pluginSlugs).toEqual(['spotify']);
 	});
 

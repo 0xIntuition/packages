@@ -1,20 +1,28 @@
-import {
-	slugify,
-	toCategory,
-	toStringMaybe,
-	tryParseUrl,
-	withPlatformMetadata,
-} from '../shared/helpers';
+import { toStringMaybe, tryParseUrl } from '../shared/helpers';
 import {
 	createPlatformPlugin,
 	type PlatformV0PluginOptions,
 	type PlatformV0Profile,
 } from '../shared/platform';
+import {
+	createWikipediaDomainApiAdapter,
+	type WikipediaDomainApiAdapterOptions,
+} from './domain-api-adapter';
+import { buildWikipediaAtomFromEvidence, inferWikipediaTypeFromEvidence } from './typing';
 
-export type WikipediaPluginOptions = PlatformV0PluginOptions;
+export type WikipediaPluginOptions = PlatformV0PluginOptions &
+	WikipediaDomainApiAdapterOptions & {
+		useDefaultDomainApiAdapter?: boolean;
+	};
 
 export const wikipediaProfile: PlatformV0Profile = {
 	domain: 'wikipedia',
+	display: {
+		classificationSlugs: ['*'],
+		exampleUrl: 'https://en.wikipedia.org/wiki/Ethereum',
+		host: 'wikipedia.org',
+		label: 'Wikipedia',
+	},
 	supportsOEmbed: true,
 	classifier: {
 		id: 'wikipedia-url-classifier',
@@ -33,7 +41,7 @@ export const wikipediaProfile: PlatformV0Profile = {
 
 			const articleTitle = decodeURIComponent(segments.slice(1).join('/'));
 			const normalizedTitle = articleTitle.replace(/_/g, ' ');
-			const inferred = inferWikipediaType(normalizedTitle);
+			const inferred = inferWikipediaTypeFromEvidence({ title: normalizedTitle });
 
 			return {
 				type: 'url' as const,
@@ -50,66 +58,62 @@ export const wikipediaProfile: PlatformV0Profile = {
 		},
 	},
 	resolveGeneric({ classification, canonicalUrl, now }) {
-		const inferredSchema = toStringMaybe(classification.meta.inferredSchemaType) ?? 'Thing';
-		const inferredCategory = toStringMaybe(classification.meta.inferredCategory) ?? 'thing';
 		const articleTitle = toStringMaybe(classification.meta.articleTitle) ?? 'Wikipedia Article';
+		const atom = buildWikipediaAtomFromEvidence({
+			canonicalUrl,
+			classificationConfidence: classification.confidence,
+			title: articleTitle,
+		});
 
-		return withPlatformMetadata(
-			{
-				schemaType: inferredSchema,
-				category: toCategory(inferredCategory),
-				title: articleTitle,
-				canonicalId: `wikipedia:${slugify(articleTitle || canonicalUrl)}`,
-				sameAs: [canonicalUrl],
-				data: {
-					'@context': 'https://schema.org/',
-					'@type': inferredSchema,
-					name: articleTitle,
-					sameAs: [canonicalUrl],
-				},
-			},
-			'wikipedia',
-			classification.subtype,
-			{
-				pluginId: 'wikipedia',
-				provider: 'wikipedia',
+		return {
+			...atom,
+			metadata: {
+				...(atom.metadata ?? {}),
 				fetchedAt: now,
-				sourceUrl: canonicalUrl,
-				confidence: classification.confidence,
-			}
-		);
+			},
+		};
 	},
 };
 
 export function createWikipediaPlugin(options: WikipediaPluginOptions = {}) {
+	const {
+		fetch,
+		language,
+		userAgent,
+		useDefaultDomainApiAdapter = true,
+		...platformOptions
+	} = options;
+	const domainApiAdapter =
+		platformOptions.adapters?.domainApi ??
+		(useDefaultDomainApiAdapter
+			? createWikipediaDomainApiAdapter({ fetch, language, userAgent })
+			: undefined);
+	const profile = domainApiAdapter
+		? { ...wikipediaProfile, allowDomainApiWithoutCredentials: true }
+		: wikipediaProfile;
+
 	return createPlatformPlugin({
 		pluginId: 'wikipedia',
 		resolverId: 'wikipedia-resolver',
-		profile: wikipediaProfile,
-		options,
+		profile,
+		options: {
+			...platformOptions,
+			adapters: {
+				...platformOptions.adapters,
+				domainApi: domainApiAdapter,
+			},
+		},
 	});
 }
 
-function inferWikipediaType(title: string): {
-	schemaType: string;
-	category: 'person' | 'place' | 'thing' | 'company' | 'product' | 'song' | 'software';
-} {
-	const lowered = title.toLowerCase();
-	if (lowered.includes('(software)')) {
-		return { schemaType: 'SoftwareApplication', category: 'software' };
-	}
-
-	if (lowered.includes('(company)') || lowered.includes('(organization)')) {
-		return { schemaType: 'Organization', category: 'company' };
-	}
-
-	if (lowered.includes('(city)') || lowered.includes('(country)') || lowered.includes('(place)')) {
-		return { schemaType: 'Place', category: 'place' };
-	}
-
-	if (lowered.includes('(person)')) {
-		return { schemaType: 'Person', category: 'person' };
-	}
-
-	return { schemaType: 'Thing', category: 'thing' };
-}
+export type {
+	WikipediaDomainApiAdapter,
+	WikipediaDomainApiAdapterOptions,
+} from './domain-api-adapter';
+export { createWikipediaDomainApiAdapter } from './domain-api-adapter';
+export type {
+	WikipediaSchemaType,
+	WikipediaTypeInference,
+	WikipediaTypingEvidence,
+} from './typing';
+export { inferWikipediaTypeFromEvidence, WIKIPEDIA_DESCRIPTION_KEYWORD_RULES } from './typing';

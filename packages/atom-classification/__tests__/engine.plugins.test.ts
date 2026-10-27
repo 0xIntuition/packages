@@ -46,7 +46,11 @@ function appendTrace(metadata: Readonly<Record<string, unknown>>, label: string)
 
 describe('engine plugin runtime contract', () => {
 	it('orders plugins deterministically with dependencies', async () => {
-		const engine = createClassificationEngine({ runtime: 'server', autoInit: false });
+		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
+			runtime: 'server',
+			autoInit: false,
+		});
 
 		engine.registerPlugin(createPlugin('foundation', { priority: 50 }));
 		engine.registerPlugin(
@@ -69,7 +73,11 @@ describe('engine plugin runtime contract', () => {
 	});
 
 	it('rejects plugin dependency cycles', async () => {
-		const engine = createClassificationEngine({ runtime: 'server', autoInit: false });
+		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
+			runtime: 'server',
+			autoInit: false,
+		});
 
 		engine.registerPlugin(createPlugin('alpha', { dependsOn: ['beta'] }));
 		engine.registerPlugin(createPlugin('beta', { dependsOn: ['alpha'] }));
@@ -78,14 +86,22 @@ describe('engine plugin runtime contract', () => {
 	});
 
 	it('rejects missing dependencies', async () => {
-		const engine = createClassificationEngine({ runtime: 'server', autoInit: false });
+		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
+			runtime: 'server',
+			autoInit: false,
+		});
 		engine.registerPlugin(createPlugin('alpha', { dependsOn: ['missing-plugin'] }));
 
 		await expect(engine.init()).rejects.toThrow(/missing plugin/i);
 	});
 
 	it('enforces runtime and engineRange compatibility at registration time', () => {
-		const clientEngine = createClassificationEngine({ runtime: 'client', autoInit: false });
+		const clientEngine = createClassificationEngine({
+			onClassifierError: () => undefined,
+			runtime: 'client',
+			autoInit: false,
+		});
 
 		expect(() =>
 			clientEngine.registerPlugin(
@@ -107,6 +123,7 @@ describe('engine plugin runtime contract', () => {
 	it('executes hooks deterministically with timeout and failure isolation', async () => {
 		const onErrorEvents: string[] = [];
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			autoInit: false,
 			hookTimeoutMs: 10,
@@ -224,7 +241,11 @@ describe('engine plugin runtime contract', () => {
 	});
 
 	it('registers types via plugins and enforces duplicate collision policy', async () => {
-		const engine = createClassificationEngine({ runtime: 'server', autoInit: false });
+		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
+			runtime: 'server',
+			autoInit: false,
+		});
 
 		engine.registerPlugin(
 			createPlugin('person-type-plugin', {
@@ -259,7 +280,11 @@ describe('engine plugin runtime contract', () => {
 
 		await expect(engine.init()).rejects.toThrow(/already registered/i);
 
-		const overrideEngine = createClassificationEngine({ runtime: 'server', autoInit: false });
+		const overrideEngine = createClassificationEngine({
+			onClassifierError: () => undefined,
+			runtime: 'server',
+			autoInit: false,
+		});
 		overrideEngine.registerPlugin(
 			createPlugin('person-type-plugin', {
 				registerTypes: (registry) => {

@@ -1,14 +1,23 @@
 import { describe, expect, it } from 'bun:test';
 import { extractClassificationFields } from '../src/extraction/extract';
+import type { ExtractionContext } from '../src/extraction/types';
 import {
 	readEntityIdClaimValues,
 	readTimeClaimValue,
 	resolveWikidataEntityLabels,
 } from '../src/extraction/wikidata-claims';
 import type { FetchLike } from '../src/plugins/providers/__shared__/http';
+import { createPinAwareFetch } from '../src/plugins/providers/__shared__/http';
 import type { EnrichmentArtifact } from '../src/types';
 
+type IsOptionalKey<T, K extends keyof T> = Record<string, never> extends Pick<T, K> ? true : false;
+
 const WIKIPEDIA_URL = 'https://en.wikipedia.org/wiki/Vitalik_Buterin';
+
+it('keeps the extraction context url optional for identifier-only inputs', () => {
+	const contextUrlIsOptional: IsOptionalKey<ExtractionContext, 'url'> = true;
+	expect(contextUrlIsOptional).toBe(true);
+});
 
 function artifact(
 	artifactType: string,
@@ -163,7 +172,7 @@ describe('wikidata claim readers', () => {
 
 	it('resolves labels with en -> mul fallback', async () => {
 		const labels = await resolveWikidataEntityLabels(
-			labelsFetcher(VITALIK_LABELS),
+			createPinAwareFetch(labelsFetcher(VITALIK_LABELS)),
 			['Q653298', 'Q106248757'],
 			{ language: 'en' }
 		);
@@ -178,7 +187,7 @@ describe('extractClassificationFields', () => {
 			classification: 'person',
 			url: WIKIPEDIA_URL,
 			artifacts: [WIKIPEDIA_ARTIFACT, WIKIDATA_ARTIFACT, OPENGRAPH_ARTIFACT],
-			fetcher: labelsFetcher(VITALIK_LABELS),
+			fetcher: createPinAwareFetch(labelsFetcher(VITALIK_LABELS)),
 		});
 
 		expect(result.values.givenName).toBe('Vitaly');
@@ -194,11 +203,12 @@ describe('extractClassificationFields', () => {
 			classification: 'person',
 			url: WIKIPEDIA_URL,
 			artifacts: [WIKIPEDIA_ARTIFACT, OPENGRAPH_ARTIFACT],
-			fetcher: labelsFetcher({}),
+			fetcher: createPinAwareFetch(labelsFetcher({})),
 		});
 
 		expect(result.values.givenName).toBeUndefined();
 		expect(result.values.familyName).toBeUndefined();
+		// familyName is optional since IID decision D25 (mononym support).
 		expect(result.missingRequired).toEqual(['givenName']);
 	});
 
@@ -207,7 +217,7 @@ describe('extractClassificationFields', () => {
 			classification: 'thing',
 			url: WIKIPEDIA_URL,
 			artifacts: [WIKIPEDIA_ARTIFACT, WIKIDATA_ARTIFACT, OPENGRAPH_ARTIFACT],
-			fetcher: labelsFetcher(VITALIK_LABELS),
+			fetcher: createPinAwareFetch(labelsFetcher(VITALIK_LABELS)),
 		});
 
 		expect(result.values.name).toBe('Vitalik Buterin');
@@ -221,7 +231,7 @@ describe('extractClassificationFields', () => {
 			classification: 'thing',
 			url: WIKIPEDIA_URL,
 			artifacts: [OPENGRAPH_ARTIFACT, WIKIPEDIA_ARTIFACT],
-			fetcher: labelsFetcher({}),
+			fetcher: createPinAwareFetch(labelsFetcher({})),
 		});
 
 		expect(result.values.name).toBe('Vitalik Buterin');
@@ -239,7 +249,7 @@ describe('extractClassificationFields', () => {
 					'https://example.com/'
 				),
 			],
-			fetcher: labelsFetcher({}),
+			fetcher: createPinAwareFetch(labelsFetcher({})),
 		});
 
 		expect(result.values.url).toBe('https://example.com/');
@@ -247,12 +257,28 @@ describe('extractClassificationFields', () => {
 		expect(result.fields.url?.source).toBe('input-url');
 	});
 
+	it('tolerates an identifier-only metadata tier without emitting url fields', async () => {
+		const result = await extractClassificationFields({
+			classification: 'company',
+			url: undefined as never,
+			artifacts: [artifact('opengraph', { title: 'Identifier Fixture' })],
+			fetcher: createPinAwareFetch(labelsFetcher({})),
+		});
+
+		expect(result.values.name).toBe('Identifier Fixture');
+		expect(result.values).not.toHaveProperty('url');
+		expect(result.values).not.toHaveProperty('sameAs');
+		expect(result.fields).not.toHaveProperty('url');
+		expect(result.fields).not.toHaveProperty('sameAs');
+		expect(result.droppedFields).toEqual([]);
+	});
+
 	it('drops values that fail spec validation instead of returning them', async () => {
 		const result = await extractClassificationFields({
 			classification: 'web-site',
 			url: 'not-a-url',
 			artifacts: [],
-			fetcher: labelsFetcher({}),
+			fetcher: createPinAwareFetch(labelsFetcher({})),
 		});
 
 		expect(result.values.url).toBeUndefined();
@@ -265,7 +291,7 @@ describe('extractClassificationFields', () => {
 				classification: 'not-a-spec',
 				url: WIKIPEDIA_URL,
 				artifacts: [],
-				fetcher: labelsFetcher({}),
+				fetcher: createPinAwareFetch(labelsFetcher({})),
 			})
 		).rejects.toThrow('Unknown classification');
 	});
@@ -324,7 +350,7 @@ describe('wave 1 entity mappers', () => {
 				),
 				OPENAI_WIKIDATA,
 			],
-			fetcher: labelsFetcher({}),
+			fetcher: createPinAwareFetch(labelsFetcher({})),
 		});
 
 		expect(result.values.name).toBe('OpenAI');
@@ -358,7 +384,7 @@ describe('wave 1 entity mappers', () => {
 					'https://en.wikipedia.org/wiki/Inception'
 				),
 			],
-			fetcher: labelsFetcher({}),
+			fetcher: createPinAwareFetch(labelsFetcher({})),
 		});
 
 		expect(result.values.name).toBe('Inception');
@@ -386,7 +412,7 @@ describe('wave 1 entity mappers', () => {
 					'https://en.wikipedia.org/wiki/Breaking_Bad'
 				),
 			],
-			fetcher: labelsFetcher({}),
+			fetcher: createPinAwareFetch(labelsFetcher({})),
 		});
 
 		expect(result.values.startDate).toBe('2008-01-20');
@@ -408,7 +434,7 @@ describe('wave 1 entity mappers', () => {
 					'https://en.wikipedia.org/wiki/The_Great_Gatsby'
 				),
 			],
-			fetcher: labelsFetcher({ Q40908: { en: 'F. Scott Fitzgerald' } }),
+			fetcher: createPinAwareFetch(labelsFetcher({ Q40908: { en: 'F. Scott Fitzgerald' } })),
 		});
 
 		expect(result.values.name).toBe('The Great Gatsby');
@@ -433,7 +459,7 @@ describe('wave 1 entity mappers', () => {
 					'https://en.wikipedia.org/wiki/Woodstock'
 				),
 			],
-			fetcher: labelsFetcher({ Q748044: { en: 'Bethel' } }),
+			fetcher: createPinAwareFetch(labelsFetcher({ Q748044: { en: 'Bethel' } })),
 		});
 
 		expect(result.values.startDate).toBe('1969-08-15');
@@ -458,7 +484,7 @@ describe('wave 1 entity mappers', () => {
 					'https://en.wikipedia.org/wiki/Eiffel_Tower'
 				),
 			],
-			fetcher: labelsFetcher({ Q90: { en: 'Paris' }, Q142: { en: 'France' } }),
+			fetcher: createPinAwareFetch(labelsFetcher({ Q90: { en: 'Paris' }, Q142: { en: 'France' } })),
 		});
 
 		expect(result.values.name).toBe('Eiffel Tower');
@@ -481,7 +507,7 @@ describe('wave 1 entity mappers', () => {
 					'https://en.wikipedia.org/wiki/Some_Film'
 				),
 			],
-			fetcher: labelsFetcher({}),
+			fetcher: createPinAwareFetch(labelsFetcher({})),
 		});
 
 		expect(result.values.datePublished).toBeUndefined();

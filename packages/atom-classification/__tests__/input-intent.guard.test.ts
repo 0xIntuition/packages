@@ -5,6 +5,7 @@ import { createDefaultTestPlugins } from './helpers/default-plugins';
 describe('inputIntent guard', () => {
 	it('returns a placeholder for random text in url-first mode', async () => {
 		const engine = createServerEngine({
+			onClassifierError: () => undefined,
 			plugins: createDefaultTestPlugins(),
 		});
 
@@ -23,6 +24,7 @@ describe('inputIntent guard', () => {
 
 	it('keeps plain-text fallback for generic text classification', async () => {
 		const engine = createServerEngine({
+			onClassifierError: () => undefined,
 			plugins: createDefaultTestPlugins(),
 		});
 

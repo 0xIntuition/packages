@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test';
+import { beforeEach, describe, expect, it } from 'bun:test';
 
 import { createClassificationEngine } from '../src/engine';
 import {
@@ -11,7 +11,9 @@ import {
 	extractAmazonAsinFromUrl,
 	isAmazonShortLinkUrl,
 	resolveAmazonMarketplace,
+	resolveAmazonShortLink,
 } from '../src/plugins/amazon/url';
+import { resetDomainHtmlHostCircuitBreakersForTests } from '../src/plugins/shared/domain-html/fetch';
 
 describe('amazon url helpers', () => {
 	it('extracts ASINs from the common product path shapes', () => {
@@ -96,9 +98,85 @@ describe('amazon classifier url coverage', () => {
 });
 
 describe('amazon domain-api adapter short links', () => {
+	beforeEach(() => {
+		resetDomainHtmlHostCircuitBreakersForTests();
+	});
+
+	it('names the open short-link host and breaker state in the classify diagnostic', async () => {
+		let fetchCallCount = 0;
+		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
+			runtime: 'server',
+			plugins: [
+				createV0TypeProfilesPlugin(),
+				createAmazonPlugin({
+					credentials: { amazon: { apiKey: 'test-key' } },
+					useDefaultDomainHtmlAdapter: false,
+					adapters: {
+						domainApi: createAmazonDomainApiAdapter({
+							apiKey: 'test-key',
+							resolveHostname: async () => [{ address: '93.184.216.34', family: 4 }],
+							fetch: async () => {
+								fetchCallCount += 1;
+								return new Response('', { status: 503 });
+							},
+						}),
+					},
+				}),
+			],
+		});
+
+		let finalResult: Awaited<ReturnType<typeof engine.classify>> | undefined;
+		for (let index = 0; index < 4; index += 1) {
+			finalResult = await engine.classify({
+				input: `https://a.co/d/open-host-${index}`,
+				mode: 'progressive',
+				classificationSessionId: `amazon-short-link-open-${index}`,
+			});
+		}
+
+		expect(fetchCallCount).toBe(3);
+		expect(finalResult?.resolverErrors?.map((error) => error.message).join('\n')).toMatch(
+			/domain-api:circuit_open: Host a\.co circuit is open \(failures=3, openForMs=\d+, resetAfterMs=300000\)/
+		);
+	});
+
+	it('rejects every unsafe short-link redirect destination before requesting it', async () => {
+		const fetchedUrls: string[] = [];
+		const redirectModes: Array<string | undefined> = [];
+		const resolution = resolveAmazonShortLink(
+			async (input, init) => {
+				fetchedUrls.push(input);
+				redirectModes.push(init?.redirect);
+				return {
+					ok: false,
+					status: 302,
+					headers: {
+						get: (name: string) =>
+							name.toLowerCase() === 'location' ? 'http://169.254.169.254/latest/meta-data' : null,
+					},
+					text: async () => '',
+				};
+			},
+			'https://a.co/d/4DUuJRf',
+			{
+				resolveHostname: async () => [{ address: '93.184.216.34', family: 4 }],
+			}
+		);
+
+		await expect(resolution).rejects.toMatchObject({
+			kind: 'ssrf_rejected',
+			reason: 'ssrf_rejected',
+		});
+		expect(redirectModes).toEqual(['manual']);
+		expect(fetchedUrls).toEqual(['https://a.co/d/4DUuJRf']);
+	});
+
 	it('resolves the shortener redirect before calling Canopy', async () => {
 		const fetchedUrls: string[] = [];
+		const resolvedHostnames: string[] = [];
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [
 				createV0TypeProfilesPlugin(),
@@ -111,13 +189,22 @@ describe('amazon domain-api adapter short links', () => {
 					adapters: {
 						domainApi: createAmazonDomainApiAdapter({
 							apiKey: 'test-key',
+							resolveHostname: async (hostname) => {
+								resolvedHostnames.push(hostname);
+								return [{ address: '93.184.216.34', family: 4 }];
+							},
 							fetch: async (input) => {
 								fetchedUrls.push(input);
 								if (input.startsWith('https://a.co/')) {
 									return {
-										ok: true,
-										status: 200,
-										url: 'https://www.amazon.com/Carepod-Humidifier/dp/B0916J478T/ref=share',
+										ok: false,
+										status: 302,
+										headers: {
+											get: (name: string) =>
+												name.toLowerCase() === 'location'
+													? 'https://www.amazon.com/Carepod-Humidifier/dp/B0916J478T/ref=share'
+													: null,
+										},
 										json: async () => ({}),
 										text: async () => '',
 									};
@@ -161,5 +248,101 @@ describe('amazon domain-api adapter short links', () => {
 		expect(fetchedUrls[1]).toContain('rest.canopyapi.co');
 		expect(fetchedUrls[1]).toContain('asin=B0916J478T');
 		expect(fetchedUrls[1]).toContain('domain=US');
+		expect(resolvedHostnames).toEqual(['a.co', 'www.amazon.com']);
+	});
+
+	it('preserves ssrf_rejected when a short-link redirect targets a private address', async () => {
+		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
+			runtime: 'server',
+			plugins: [
+				createV0TypeProfilesPlugin(),
+				createAmazonPlugin({
+					credentials: { amazon: { apiKey: 'test-key' } },
+					useDefaultDomainHtmlAdapter: false,
+					adapters: {
+						domainApi: createAmazonDomainApiAdapter({
+							apiKey: 'test-key',
+							resolveHostname: async () => [{ address: '93.184.216.34', family: 4 }],
+							fetch: async () => ({
+								ok: false,
+								status: 302,
+								headers: {
+									get: (name: string) =>
+										name.toLowerCase() === 'location' ? 'http://127.0.0.1/private' : null,
+								},
+								json: async () => ({}),
+								text: async () => '',
+							}),
+						}),
+					},
+				}),
+			],
+		});
+
+		const result = await engine.classify({
+			input: 'https://a.co/d/private-target',
+			mode: 'progressive',
+			classificationSessionId: 'amazon-short-link-ssrf',
+		});
+
+		expect(result.status).toBe('complete');
+		expect(result.resolved?.atoms[0]?.source).toBe('platform-v0:generic');
+		expect(result.resolverErrors?.map((error) => error.message)).toEqual([
+			'domain-api:ssrf_rejected',
+		]);
+	});
+
+	it('treats a valid non-product short-link destination as a clean miss', async () => {
+		const fetchedUrls: string[] = [];
+		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
+			runtime: 'server',
+			plugins: [
+				createV0TypeProfilesPlugin(),
+				createAmazonPlugin({
+					credentials: { amazon: { apiKey: 'test-key' } },
+					useDefaultDomainHtmlAdapter: false,
+					adapters: {
+						domainApi: createAmazonDomainApiAdapter({
+							apiKey: 'test-key',
+							resolveHostname: async () => [{ address: '93.184.216.34', family: 4 }],
+							fetch: async (input) => {
+								fetchedUrls.push(input);
+								if (input.startsWith('https://a.co/')) {
+									return {
+										ok: false,
+										status: 302,
+										headers: {
+											get: (name: string) =>
+												name.toLowerCase() === 'location' ? 'https://example.com/about' : null,
+										},
+										json: async () => ({}),
+										text: async () => '',
+									};
+								}
+								return {
+									ok: true,
+									status: 200,
+									json: async () => ({}),
+									text: async () => '',
+								};
+							},
+						}),
+					},
+				}),
+			],
+		});
+
+		const result = await engine.classify({
+			input: 'https://a.co/d/non-product',
+			mode: 'progressive',
+			classificationSessionId: 'amazon-short-link-clean-miss',
+		});
+
+		expect(result.status).toBe('complete');
+		expect(result.resolved?.atoms[0]?.source).toBe('platform-v0:generic');
+		expect(result.resolverErrors ?? []).toEqual([]);
+		expect(fetchedUrls).toEqual(['https://a.co/d/non-product', 'https://example.com/about']);
 	});
 });

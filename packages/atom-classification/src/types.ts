@@ -1,3 +1,4 @@
+import { IDENTITY_CATEGORIES } from '@0xintuition/iid-ladder';
 import { z } from 'zod/v4';
 
 export const classificationModeSchema = z.enum(['client-only', 'progressive', 'server-only']);
@@ -47,6 +48,7 @@ export const classificationClientClassificationHintSchema = z
 	.strict();
 
 export const classificationEntityCategorySchema = z.enum([
+	...IDENTITY_CATEGORIES,
 	'person',
 	'place',
 	'thing',
@@ -54,8 +56,6 @@ export const classificationEntityCategorySchema = z.enum([
 	'product',
 	'podcast',
 	'song',
-	'music-album',
-	'artist',
 	'software',
 ]);
 
@@ -159,11 +159,16 @@ export const classificationResolvedPayloadSchema = z
 
 export const classificationResolverErrorSchema = z
 	.object({
+		kind: z.string().min(1).max(64).optional(),
 		resolverId: z.string().min(1).max(128),
 		message: z.string().min(1).max(512),
+		reason: z.string().min(1).max(64).optional(),
+		status: z.number().int().min(100).max(599).optional(),
 		timestamp: z.iso.datetime(),
 	})
 	.strict();
+
+export const MAX_CLASSIFICATION_RESOLVER_ERRORS = 10;
 
 export const classificationClientHintsSchema = z
 	.object({
@@ -234,7 +239,10 @@ export const classificationResultSchema = z
 		receivedAt: z.iso.datetime(),
 		classification: classificationClientClassificationHintSchema.optional(),
 		resolved: classificationResolvedPayloadSchema.optional(),
-		resolverErrors: z.array(classificationResolverErrorSchema).optional(),
+		resolverErrors: z
+			.array(classificationResolverErrorSchema)
+			.max(MAX_CLASSIFICATION_RESOLVER_ERRORS)
+			.optional(),
 		provenance: classificationFieldProvenanceMapSchema.optional(),
 		debug: z.object({
 			inputPreview: z.string(),

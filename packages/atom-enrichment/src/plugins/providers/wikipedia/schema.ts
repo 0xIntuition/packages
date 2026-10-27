@@ -2,6 +2,7 @@ import { z } from 'zod/v4';
 
 export const wikipediaDataSchema = z.object({
 	title: z.string(),
+	description: z.string().optional(),
 	extract: z.string(),
 	extractHtml: z.string().optional(),
 	thumbnailUrl: z.string().url().optional(),

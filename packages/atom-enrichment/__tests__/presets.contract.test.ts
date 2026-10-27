@@ -1,12 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 
-import {
-	academicPreset,
-	companyPreset,
-	cryptoPreset,
-	musicPreset,
-	serverDefaultPreset,
-} from '../src/presets';
+import { academicPreset, companyPreset, cryptoPreset, musicPreset } from '../src/presets';
 
 function pluginIds(plugins: Array<{ id: string }>): string[] {
 	return plugins.map((plugin) => plugin.id);
@@ -31,12 +25,6 @@ describe('preset bundles', () => {
 	it('academicPreset composes crossref and wikipedia', () => {
 		const plugins = academicPreset();
 		expect(pluginIds(plugins)).toEqual(['crossref', 'wikipedia']);
-	});
-
-	it('serverDefaultPreset registers OpenLibrary for identifier-first ISBN and OLID plans', () => {
-		const ids = pluginIds(serverDefaultPreset());
-		expect(ids).toContain('openlibrary');
-		expect(ids.indexOf('openlibrary')).toBe(ids.indexOf('musicbrainz') + 1);
 	});
 
 	it('propagates options to underlying plugin manifests', () => {

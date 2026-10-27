@@ -1,11 +1,33 @@
 import type { AtomClassificationPlugin } from '../../plugins';
 import { TYPE_PROFILES_PLUGIN_ID } from '../shared/constants';
+import type { DomainHtmlFetchLike, DomainHtmlResolveHostname } from '../shared/domain-html/fetch';
+import { isSafePublicHttpUrl, resolveDomainHtmlFetch } from '../shared/domain-html/fetch';
+import { toStringMaybe } from '../shared/helpers';
+import { fetchOpenGraphMetadata, type OpenGraphMetadata } from '../shared/opengraph';
+import { formatPlatformStageError } from '../shared/platform';
 
 const DEFAULT_URL_PLUGIN_ID = 'default-url';
 const DEFAULT_URL_DOMAIN = 'web';
 const DEFAULT_URL_SUBTYPE = 'website';
 
-export function createDefaultUrlPlugin(): AtomClassificationPlugin {
+const DEFAULT_OG_FETCH_TIMEOUT_MS = 5000;
+
+export type DefaultUrlPluginOptions = {
+	fetch?: DomainHtmlFetchLike;
+	resolveHostname?: DomainHtmlResolveHostname;
+	// Bounds how long the opportunistic OpenGraph fetch (ENG-13195) may run
+	// before falling back to the deterministic host-derived name. This is a
+	// catch-all resolver for arbitrary, caller-supplied hosts with no reason
+	// to trust their responsiveness — an unbounded fetch here could hang
+	// server-side classification indefinitely.
+	ogFetchTimeoutMs?: number;
+};
+
+export function createDefaultUrlPlugin(
+	options: DefaultUrlPluginOptions = {}
+): AtomClassificationPlugin {
+	const fetcher = resolveDomainHtmlFetch(options.fetch);
+	const ogFetchTimeoutMs = options.ogFetchTimeoutMs ?? DEFAULT_OG_FETCH_TIMEOUT_MS;
 	return {
 		manifest: {
 			id: DEFAULT_URL_PLUGIN_ID,
@@ -49,17 +71,35 @@ export function createDefaultUrlPlugin(): AtomClassificationPlugin {
 					classification.type === 'url' &&
 					classification.domain === DEFAULT_URL_DOMAIN &&
 					classification.subtype === DEFAULT_URL_SUBTYPE,
-				resolve: ({ classification, request, now }) => {
+				resolve: async ({ classification, request, now, runtime }) => {
 					const canonicalUrl =
 						toStringMaybe(classification.meta.canonicalUrl) ??
 						normalizeHttpUrl(request.input) ??
 						request.input.trim();
 					const parsed = tryParseHttpUrl(canonicalUrl);
 					const displayHost = parsed?.hostname.replace(/^www\./i, '') ?? canonicalUrl;
-					const name = `Website ${displayHost}`;
+					const fallbackName = `Website ${displayHost}`;
+					const openGraphResult = await resolveOpenGraphMetadata({
+						runtime,
+						fetcher,
+						canonicalUrl,
+						// Re-confirm http/https right at the fetch boundary,
+						// independent of how canonicalUrl was derived above (its
+						// final fallback — request.input.trim() — is unvalidated,
+						// reachable via a client-hint-injected classification with
+						// no meta.canonicalUrl).
+						isHttpUrl: !!parsed,
+						resolveHostname: options.resolveHostname,
+						timeoutMs: ogFetchTimeoutMs,
+					});
+					const openGraph = openGraphResult.metadata;
+					const name = fallbackName;
+					const description = toStringMaybe(openGraph?.description);
+					const image = toStringMaybe(openGraph?.image);
 
 					return {
 						fallbackUsed: true,
+						errors: openGraphResult.error ? [openGraphResult.error] : [],
 						atoms: [
 							{
 								schemaType: 'WebSite',
@@ -73,6 +113,8 @@ export function createDefaultUrlPlugin(): AtomClassificationPlugin {
 									name,
 									url: canonicalUrl,
 									sameAs: [canonicalUrl],
+									...(description ? { description } : {}),
+									...(image ? { image } : {}),
 								},
 								metadata: {
 									pluginId: DEFAULT_URL_PLUGIN_ID,
@@ -80,6 +122,7 @@ export function createDefaultUrlPlugin(): AtomClassificationPlugin {
 									fetchedAt: now,
 									sourceUrl: canonicalUrl,
 									confidence: classification.confidence,
+									...(openGraph ? { sourceFamily: 'opengraph' as const } : {}),
 								},
 							},
 						],
@@ -90,6 +133,33 @@ export function createDefaultUrlPlugin(): AtomClassificationPlugin {
 	};
 }
 
+// Best-effort OpenGraph data may enrich a generic website with descriptive
+// fields, but title/name/canonical identity always come from the normalized URL.
+// A network outcome therefore cannot fork the identity of the same input.
+async function resolveOpenGraphMetadata(input: {
+	runtime: string;
+	fetcher: DomainHtmlFetchLike;
+	canonicalUrl: string;
+	isHttpUrl: boolean;
+	resolveHostname?: DomainHtmlResolveHostname;
+	timeoutMs: number;
+}): Promise<{ metadata?: OpenGraphMetadata; error?: string }> {
+	if (input.runtime !== 'server' || !input.isHttpUrl) {
+		return {};
+	}
+
+	try {
+		const metadata = await fetchOpenGraphMetadata(input.fetcher, {
+			url: input.canonicalUrl,
+			resolveHostname: input.resolveHostname,
+			timeoutMs: input.timeoutMs,
+		});
+		return { metadata };
+	} catch (error) {
+		return { error: formatPlatformStageError('opengraph', error) };
+	}
+}
+
 function normalizeHttpUrl(input: string): string | undefined {
 	const candidate = sanitizeUrlLikeInput(input);
 	if (!candidate) {
@@ -98,6 +168,9 @@ function normalizeHttpUrl(input: string): string | undefined {
 
 	const parsed = tryParseHttpUrl(candidate) ?? tryParseBareHttpUrl(candidate);
 	if (!parsed) {
+		return undefined;
+	}
+	if (!isSafePublicHttpUrl(parsed.toString())) {
 		return undefined;
 	}
 
@@ -242,10 +315,6 @@ function countCharacter(value: string, character: string): number {
 	}
 
 	return count;
-}
-
-function toStringMaybe(value: unknown): string | undefined {
-	return typeof value === 'string' && value.trim().length > 0 ? value.trim() : undefined;
 }
 
 const TRAILING_SENTENCE_PUNCTUATION = new Set(['.', ',', '!', '?', ';', ':']);

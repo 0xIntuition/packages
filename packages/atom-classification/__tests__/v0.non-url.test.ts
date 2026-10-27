@@ -6,6 +6,7 @@ import { createDefaultTestPlugins } from './helpers/default-plugins';
 describe('v0 non-url coverage', () => {
 	it('resolves ethereum addresses deterministically', async () => {
 		const engine = createServerEngine({
+			onClassifierError: () => undefined,
 			plugins: createDefaultTestPlugins(),
 		});
 		const result = await engine.classify({
@@ -27,6 +28,7 @@ describe('v0 non-url coverage', () => {
 
 	it('resolves isbn identifiers deterministically', async () => {
 		const engine = createServerEngine({
+			onClassifierError: () => undefined,
 			plugins: createDefaultTestPlugins(),
 		});
 		const result = await engine.classify({
@@ -45,6 +47,7 @@ describe('v0 non-url coverage', () => {
 
 	it('resolves offline-verified single words to generic things by default', async () => {
 		const engine = createServerEngine({
+			onClassifierError: () => undefined,
 			plugins: createDefaultTestPlugins(),
 		});
 		const result = await engine.classify({
@@ -62,6 +65,7 @@ describe('v0 non-url coverage', () => {
 
 	it('resolves unverified single words to generic things deterministically', async () => {
 		const engine = createServerEngine({
+			onClassifierError: () => undefined,
 			plugins: createDefaultTestPlugins(),
 		});
 		const result = await engine.classify({
@@ -79,6 +83,7 @@ describe('v0 non-url coverage', () => {
 
 	it('resolves multi-word phrases to generic things deterministically', async () => {
 		const engine = createServerEngine({
+			onClassifierError: () => undefined,
 			plugins: createDefaultTestPlugins(),
 		});
 		const result = await engine.classify({
@@ -96,6 +101,7 @@ describe('v0 non-url coverage', () => {
 
 	it('returns a placeholder when lexical is explicitly requested for an unverified word', async () => {
 		const engine = createServerEngine({
+			onClassifierError: () => undefined,
 			plugins: createDefaultTestPlugins(),
 		});
 		const result = await engine.classify({
@@ -112,6 +118,7 @@ describe('v0 non-url coverage', () => {
 
 	it('keeps lexical available as an explicit opt-in plugin for verified words', async () => {
 		const engine = createServerEngine({
+			onClassifierError: () => undefined,
 			plugins: [...createDefaultTestPlugins(), createLexicalPlugin()],
 		});
 		const result = await engine.classify({
@@ -130,6 +137,7 @@ describe('v0 non-url coverage', () => {
 
 	it('returns a placeholder for json-like text instead of fabricating a lexical fallback', async () => {
 		const engine = createServerEngine({
+			onClassifierError: () => undefined,
 			plugins: createDefaultTestPlugins(),
 		});
 		const result = await engine.classify({
@@ -145,6 +153,7 @@ describe('v0 non-url coverage', () => {
 
 	it('keeps common file-like dotted identifiers on the plain-text path', async () => {
 		const engine = createServerEngine({
+			onClassifierError: () => undefined,
 			plugins: createDefaultTestPlugins(),
 		});
 		const cases = ['config.json', 'my.component.tsx', 'package-lock.json', 'docker-compose.yml'];
@@ -166,6 +175,7 @@ describe('v0 non-url coverage', () => {
 
 	it('returns stable dedupe keys for identical non-url inputs', async () => {
 		const engine = createServerEngine({
+			onClassifierError: () => undefined,
 			plugins: createDefaultTestPlugins(),
 		});
 		const first = await engine.classify({

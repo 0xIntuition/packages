@@ -1,7 +1,19 @@
+import {
+	isAdmissibleMaterializedImageWithDns,
+	isAllowedOpenGraphPageSource,
+	type ResolvePublicHostname,
+} from '../../../image-policy';
 import { defineEnrichmentPlugin, type EnrichmentPlugin } from '../../../plugins';
 import type { EnrichmentRequest } from '../../../types';
-import { BROWSER_FETCH_HEADERS, type FetchLike, fetchText } from '../__shared__/http';
+import type { FetchLike } from '../__shared__/http';
+import { pageRefusal } from '../__shared__/page-observer';
 import { getRequestUrl } from '../__shared__/request';
+import { loadSharedPage } from '../__shared__/shared-page';
+import {
+	createHeadSizeLimitError,
+	DEFAULT_OPENGRAPH_TIMEOUT_MS,
+	normalizeFetchError,
+} from './fetch';
 
 // Google Maps pages serve the product's own boilerplate OpenGraph ("Google
 // Maps — Find local businesses…"), never metadata about the place itself —
@@ -24,6 +36,9 @@ function isGoogleMapsUrl(url: string): boolean {
 type CreateOpenGraphPluginOptions = {
 	fetch?: FetchLike;
 	priority?: number;
+	resolveHostname?: ResolvePublicHostname;
+	/** This plugin's own timer on the page fetch; defaults to 10 s. */
+	timeoutMs?: number;
 	TTL?: number;
 };
 
@@ -42,7 +57,11 @@ export function createOpenGraphPlugin(
 
 		supports(request: EnrichmentRequest) {
 			const url = getRequestUrl(request);
-			return !!url && !isGoogleMapsUrl(url);
+			return (
+				!!url &&
+				!isGoogleMapsUrl(url) &&
+				isAllowedOpenGraphPageSource(url, { genericUserPasted: true })
+			);
 		},
 
 		async enrich(request, ctx) {
@@ -51,12 +70,34 @@ export function createOpenGraphPlugin(
 				return [];
 			}
 
-			const html = await fetchText(fetcher, url, {
+			// Shared with the other plugins of this run (microdata); see `loadSharedPage`.
+			const { result, page } = await loadSharedPage({
+				url,
+				pages: ctx.pages,
+				fetch: fetcher,
+				resolveHostname: options.resolveHostname,
 				signal: ctx.signal,
-				headers: BROWSER_FETCH_HEADERS,
+				deadlineAtMs: ctx.deadlineAtMs,
+				allowLoopbackFixtures: ctx.network?.allowLoopbackFixtures,
+				consumer: 'opengraph',
+				timeoutMs: options.timeoutMs ?? DEFAULT_OPENGRAPH_TIMEOUT_MS,
+				mapError: normalizeFetchError,
 			});
-
-			const metadata = readOpenGraphMetadata(html);
+			if (result.headCapExceeded) {
+				// The shared request kept the page for microdata; the head is still opengraph's cap.
+				page.finish({ usable: false, headCapExceeded: true });
+				throw createHeadSizeLimitError();
+			}
+			page.finish({
+				usable: result.status === 'fetched',
+				refusal: pageRefusal(result),
+				deadUrl: result.status === 'dead_url',
+			});
+			if (result.status !== 'fetched') {
+				return [];
+			}
+			const metadata = result.metadata;
+			const allTags = metadata.allTags ?? {};
 			const audioUrl = readFirstMetadataValue(metadata, [
 				'og:audio:secure_url',
 				'og:audio:url',
@@ -70,18 +111,26 @@ export function createOpenGraphPlugin(
 				'twitter:player:stream:content_type',
 				'music:preview_url:type',
 			]);
+			const imageIsAdmissible = await isAdmissibleMaterializedImageWithDns(
+				{
+					imageUrl: metadata.image,
+					pageAuthorization: result.pageAuthorization,
+					pageSourceUrl: result.finalUrl,
+				},
+				options.resolveHostname
+			);
 
 			return [
 				{
 					artifact_type: 'opengraph',
 					data: {
-						title: metadata['og:title'] ?? readTitleTag(html),
-						description: metadata['og:description'],
-						image: metadata['og:image'],
-						url: metadata['og:url'] ?? url,
-						siteName: metadata['og:site_name'],
-						type: metadata['og:type'],
-						locale: metadata['og:locale'],
+						title: metadata.title,
+						description: metadata.description,
+						...(imageIsAdmissible ? { image: metadata.image } : {}),
+						url: metadata.url || result.finalUrl,
+						siteName: allTags['og:site_name'],
+						type: metadata.type,
+						locale: allTags['og:locale'],
 						audio: audioUrl,
 						audioUrl,
 						audioType,
@@ -90,7 +139,8 @@ export function createOpenGraphPlugin(
 						pluginId: 'opengraph',
 						provider: 'website',
 						fetchedAt: ctx.now(),
-						sourceUrl: url,
+						sourceUrl: result.finalUrl,
+						imagePolicy: result.pageAuthorization,
 					},
 				},
 			];
@@ -98,48 +148,13 @@ export function createOpenGraphPlugin(
 	});
 }
 
-function readOpenGraphMetadata(html: string): Record<string, string> {
-	const metaMap: Record<string, string> = {};
-	const metaTagPattern = /<meta\s+[^>]*>/gi;
-	const attributePattern = /([:\w-]+)\s*=\s*["']([^"']*)["']/g;
-
-	const tags = html.match(metaTagPattern) ?? [];
-	for (const tag of tags) {
-		const attributes: Record<string, string> = {};
-		for (const match of tag.matchAll(attributePattern)) {
-			const key = match[1]?.toLowerCase();
-			const value = match[2] ?? '';
-			if (key) {
-				attributes[key] = value;
-			}
-		}
-
-		const key = attributes.property?.toLowerCase() ?? attributes.name?.toLowerCase();
-		const content = attributes.content;
-		if (key && content) {
-			metaMap[key] = content;
-		}
-	}
-
-	return metaMap;
-}
-
-function readTitleTag(html: string): string | undefined {
-	const match = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-	if (!match?.[1]) {
-		return undefined;
-	}
-
-	const title = match[1].trim();
-	return title.length > 0 ? title : undefined;
-}
-
 function readFirstMetadataValue(
-	metadata: Record<string, string>,
+	metadata: { allTags?: Record<string, string> },
 	keys: readonly string[]
 ): string | undefined {
+	const tags = metadata.allTags ?? {};
 	for (const key of keys) {
-		const value = metadata[key];
+		const value = tags[key];
 		if (value && value.trim().length > 0) {
 			return value.trim();
 		}

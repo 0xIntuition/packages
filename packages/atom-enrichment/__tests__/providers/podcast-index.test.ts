@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import type { FetchLike } from '../../src/plugins/providers/__shared__/http';
+import { createPinAwareFetch, type FetchLike } from '../../src/plugins/providers/__shared__/http';
 import {
 	buildAuthHeaders,
 	createPodcastIndexPlugin,
@@ -111,7 +111,7 @@ describe('createPodcastIndexPlugin', () => {
 		const plugin = createPodcastIndexPlugin({
 			apiKey: 'test-key',
 			apiSecret: 'test-secret',
-			fetch: fetcherFor('podcasts/byfeedurl', FEED_RESPONSE, seen),
+			fetch: createPinAwareFetch(fetcherFor('podcasts/byfeedurl', FEED_RESPONSE, seen)),
 		});
 		const req = request({ feedUrl: 'https://feeds.megaphone.fm/GLT1412515089' });
 		expect(plugin.supports(req)).toBe(true);
@@ -135,7 +135,7 @@ describe('createPodcastIndexPlugin', () => {
 		const plugin = createPodcastIndexPlugin({
 			apiKey: 'test-key',
 			apiSecret: 'test-secret',
-			fetch: fetcherFor('podcasts/byitunesid', { status: 'true', feed: [] }),
+			fetch: createPinAwareFetch(fetcherFor('podcasts/byitunesid', { status: 'true', feed: [] })),
 		});
 		const artifacts = await plugin.enrich(request({ itunesId: '360084272' }), ctx);
 		expect(artifacts).toEqual([]);

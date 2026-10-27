@@ -1,0 +1,32 @@
+{
+	"single": {
+		"id": "trackFixture1234567890",
+		"name": "Fixture Track",
+		"preview_url": "https://p.scdn.co/track.mp3",
+		"duration_ms": 213000,
+		"popularity": 77,
+		"external_urls": { "spotify": "https://open.spotify.com/track/trackFixture1234567890" },
+		"external_ids": { "isrc": "USFIX2600001" },
+		"artists": [{ "id": "artistFixture123456789", "name": "Fixture Artist" }],
+		"album": {
+			"name": "Fixture Album",
+			"release_date": "2026-01-02",
+			"images": [{ "url": "https://i.scdn.co/track.jpg" }]
+		}
+	},
+	"batchItem": {
+		"id": "trackFixture1234567890",
+		"name": "Fixture Track",
+		"preview_url": "https://p.scdn.co/track.mp3",
+		"duration_ms": 213000,
+		"popularity": 77,
+		"external_urls": { "spotify": "https://open.spotify.com/track/trackFixture1234567890" },
+		"external_ids": { "isrc": "USFIX2600001" },
+		"artists": [{ "id": "artistFixture123456789", "name": "Fixture Artist" }],
+		"album": {
+			"name": "Fixture Album",
+			"release_date": "2026-01-02",
+			"images": [{ "url": "https://i.scdn.co/track.jpg" }]
+		}
+	}
+}

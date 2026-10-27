@@ -32,6 +32,25 @@ const COMPANY_SAME_AS_TEMPLATES: WikidataSameAsTemplate[] = [
 ];
 
 export const WIKIDATA_CLASSIFICATION_MAPS: Record<string, WikidataClassificationMap> = {
+	'music-group': {
+		fields: [
+			{ field: 'isni', property: 'P213', kind: 'string' },
+			{ field: 'musicBrainzArtistId', property: 'P434', kind: 'string' },
+		],
+		sameAsTemplates: [{ property: 'P434', template: 'https://musicbrainz.org/artist/{value}' }],
+	},
+	'music-album': {
+		fields: [{ field: 'musicBrainzReleaseGroupId', property: 'P436', kind: 'string' }],
+		sameAsTemplates: [
+			{ property: 'P436', template: 'https://musicbrainz.org/release-group/{value}' },
+		],
+	},
+	'podcast-series': {
+		fields: [
+			{ field: 'feedUrl', property: 'P1019', kind: 'string' },
+			{ field: 'itunesId', property: 'P5842', kind: 'string' },
+		],
+	},
 	person: {
 		fields: [
 			{ field: 'givenName', property: 'P735', kind: 'entity-label' },

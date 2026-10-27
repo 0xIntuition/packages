@@ -1,5 +1,11 @@
 import type { EnrichmentPlugin, EnrichmentPluginContext } from '../plugins';
-import type { ClassifiedAtomInput, EnrichmentArtifact, EnrichmentRequest } from '../types';
+import {
+	type ClassifiedAtomInput,
+	type EnrichmentArtifact,
+	type EnrichmentRequest,
+	type EnrichmentRequestInput,
+	enrichmentRequestSchema,
+} from '../types';
 
 export function createMockAtomInput(
 	overrides: Partial<ClassifiedAtomInput> = {}
@@ -23,14 +29,16 @@ export function createMockAtomInput(
 	};
 }
 
-export function createMockRequest(overrides: Partial<EnrichmentRequest> = {}): EnrichmentRequest {
-	return {
+export function createMockRequest(
+	overrides: Partial<EnrichmentRequestInput> = {}
+): EnrichmentRequest {
+	return enrichmentRequestSchema.parse({
 		input: createMockAtomInput(overrides.input as Partial<ClassifiedAtomInput>),
 		runtime: 'server',
 		concurrency: 5,
 		timeoutMs: 10_000,
 		...overrides,
-	};
+	});
 }
 
 export function createMockPluginContext(

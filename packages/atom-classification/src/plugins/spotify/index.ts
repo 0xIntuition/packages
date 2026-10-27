@@ -1,18 +1,36 @@
+import { projectIdentifierLadder } from '@0xintuition/iid-ladder';
+import type { ResolverAtom } from '../../plugins';
 import { slugify, toStringMaybe, tryParseUrl, withPlatformMetadata } from '../shared/helpers';
 import {
 	createPlatformPlugin,
+	createPlatformStageOutcome,
+	isPlatformStageMiss,
+	isPlatformStageOutcome,
+	type PlatformStageAdapter,
 	type PlatformV0PluginOptions,
 	type PlatformV0Profile,
 } from '../shared/platform';
 
 export type SpotifyPluginOptions = PlatformV0PluginOptions;
 const SPOTIFY_PLUGIN_ID = 'spotify';
-const SPOTIFY_RESOURCE_TYPES = ['track', 'album', 'artist', 'show', 'episode'] as const;
+const SPOTIFY_RESOURCE_TYPES = ['track', 'album', 'artist', 'playlist', 'show', 'episode'] as const;
 const SPOTIFY_LOCALE_PREFIX = /^intl-[a-z]{2}(?:-[a-z]{2})?$/i;
 type SpotifyResourceType = (typeof SPOTIFY_RESOURCE_TYPES)[number];
 
 export const spotifyProfile: PlatformV0Profile = {
 	domain: 'spotify',
+	display: {
+		classificationSlugs: [
+			'music-recording',
+			'music-album',
+			'music-group',
+			'podcast-episode',
+			'podcast-series',
+		],
+		exampleUrl: 'https://open.spotify.com/track/3n3Ppam7vgaVa1iaRUc9Lp',
+		host: 'open.spotify.com',
+		label: 'Spotify',
+	},
 	supportsOEmbed: true,
 	classifier: {
 		id: 'spotify-url-classifier',
@@ -34,12 +52,6 @@ export const spotifyProfile: PlatformV0Profile = {
 			const resourceType = segments[0];
 			const resourceId = segments[1];
 			if (!resourceType || !resourceId) {
-				return null;
-			}
-			// A locale segment is only ever the first segment; one in the type or id
-			// position is a malformed link, not a resource. Later segments are ignored
-			// as before.
-			if (SPOTIFY_LOCALE_PREFIX.test(resourceType) || SPOTIFY_LOCALE_PREFIX.test(resourceId)) {
 				return null;
 			}
 
@@ -169,6 +181,38 @@ export const spotifyProfile: PlatformV0Profile = {
 			);
 		}
 
+		if (classification.subtype === 'playlist') {
+			const resourceId = toStringMaybe(classification.meta.resourceId) ?? '';
+			const name =
+				toStringMaybe(classification.meta.playlistName) ?? `Spotify Playlist ${resourceId}`.trim();
+			return withPlatformMetadata(
+				{
+					schemaType: 'MusicPlaylist',
+					category: 'song',
+					title: name,
+					canonicalId: `spotify:playlist:${resourceId || slugify(canonicalUrl)}`,
+					sameAs: [canonicalUrl],
+					data: {
+						'@context': 'https://schema.org/',
+						'@type': 'MusicPlaylist',
+						name,
+						url: canonicalUrl,
+						sameAs: [canonicalUrl],
+					},
+				},
+				'spotify',
+				classification.subtype,
+				{
+					pluginId: SPOTIFY_PLUGIN_ID,
+					provider: 'spotify',
+					fetchedAt: now,
+					sourceUrl: canonicalUrl,
+					confidence: classification.confidence,
+					resolutionMode: 'identity-only',
+				}
+			);
+		}
+
 		if (classification.subtype === 'show') {
 			const resourceId = toStringMaybe(classification.meta.resourceId) ?? '';
 			const name =
@@ -240,8 +284,149 @@ export function createSpotifyPlugin(options: SpotifyPluginOptions = {}) {
 		pluginId: 'spotify',
 		resolverId: 'spotify-resolver',
 		profile: spotifyProfile,
-		options,
+		options: {
+			...options,
+			adapters: {
+				...options.adapters,
+				domainApi: wrapSpotifyMediaAdapter(options.adapters?.domainApi, true),
+				domainHtml: wrapSpotifyMediaAdapter(options.adapters?.domainHtml),
+				publicMetadata: wrapSpotifyMediaAdapter(options.adapters?.publicMetadata),
+				oEmbed: wrapSpotifyMediaAdapter(options.adapters?.oEmbed),
+				openGraph: wrapSpotifyMediaAdapter(options.adapters?.openGraph),
+			},
+		},
 	});
+}
+
+const SPOTIFY_MEDIA_IDENTITY = {
+	track: {
+		schemaType: 'MusicRecording',
+	},
+	album: {
+		schemaType: 'MusicAlbum',
+	},
+	playlist: {
+		schemaType: 'MusicPlaylist',
+	},
+} as const;
+
+const ISRC_PATTERN = /^[A-Z]{2}[A-Z0-9]{3}\d{7}$/;
+
+type SpotifyMediaSubtype = keyof typeof SPOTIFY_MEDIA_IDENTITY;
+
+function wrapSpotifyMediaAdapter(
+	adapter: PlatformStageAdapter | undefined,
+	allowStrongIsrc = false
+): PlatformStageAdapter | undefined {
+	if (!adapter) {
+		return undefined;
+	}
+
+	return async (input) => {
+		const atom = await Promise.resolve(adapter(input));
+		if (isPlatformStageOutcome(atom)) {
+			if (!atom.atom || !isSpotifyMediaSubtype(input.classification.subtype)) {
+				return atom;
+			}
+
+			return createPlatformStageOutcome(
+				normalizeSpotifyMediaIdentity(atom.atom, {
+					allowStrongIsrc,
+					subtype: input.classification.subtype,
+					canonicalUrl: input.canonicalUrl,
+					resourceId: toStringMaybe(input.classification.meta.resourceId),
+				}),
+				atom.diagnostics
+			);
+		}
+		if (
+			!atom ||
+			isPlatformStageMiss(atom) ||
+			!isSpotifyMediaSubtype(input.classification.subtype)
+		) {
+			return atom;
+		}
+
+		return normalizeSpotifyMediaIdentity(atom, {
+			allowStrongIsrc,
+			subtype: input.classification.subtype,
+			canonicalUrl: input.canonicalUrl,
+			resourceId: toStringMaybe(input.classification.meta.resourceId),
+		});
+	};
+}
+
+function isSpotifyMediaSubtype(value: string): value is SpotifyMediaSubtype {
+	return value in SPOTIFY_MEDIA_IDENTITY;
+}
+
+function normalizeSpotifyMediaIdentity(
+	atom: ResolverAtom,
+	input: {
+		allowStrongIsrc: boolean;
+		subtype: SpotifyMediaSubtype;
+		canonicalUrl: string;
+		resourceId?: string;
+	}
+): ResolverAtom {
+	const resourceId = input.resourceId ?? slugify(input.canonicalUrl);
+	const name = toStringMaybe(atom.data?.name) ?? atom.title;
+	const schemaType = SPOTIFY_MEDIA_IDENTITY[input.subtype].schemaType;
+	const providerCanonicalId = `spotify:${input.subtype}:${resourceId}`;
+	const isrcCode =
+		input.allowStrongIsrc && input.subtype === 'track'
+			? canonicalizeIsrc(toStringMaybe(atom.data?.isrcCode))
+			: undefined;
+	const strongIdentity = isrcCode
+		? projectIdentifierLadder({
+				strongIdentifiers: { isrc: isrcCode },
+				strongIdentifierOrder: ['isrc'],
+			})
+		: undefined;
+	const canonicalId = strongIdentity?.iid ?? providerCanonicalId;
+
+	return {
+		...atom,
+		schemaType,
+		category: input.subtype === 'album' ? 'music-album' : 'song',
+		title: name,
+		canonicalId,
+		sameAs: [input.canonicalUrl],
+		hints: {
+			...(atom.hints ?? {}),
+			providerCanonicalIds: [providerCanonicalId],
+			...(isrcCode
+				? {
+						identifiers: {
+							...((atom.hints?.identifiers as Record<string, unknown> | undefined) ?? {}),
+							isrc: isrcCode,
+							spotifyTrackId: resourceId,
+						},
+					}
+				: {}),
+		},
+		data: {
+			...(atom.data ?? {}),
+			'@context': 'https://schema.org/',
+			'@type': schemaType,
+			name,
+			...(isrcCode ? { isrcCode } : {}),
+			...(strongIdentity?.iid ? { identifier: strongIdentity.iid } : {}),
+			sameAs: [input.canonicalUrl],
+			...(input.subtype === 'playlist' ? { url: input.canonicalUrl } : {}),
+		},
+	};
+}
+
+function canonicalizeIsrc(value: string | undefined): string | undefined {
+	if (!value) {
+		return undefined;
+	}
+	const canonical = value
+		.trim()
+		.replace(/[\s-]+/g, '')
+		.toUpperCase();
+	return ISRC_PATTERN.test(canonical) ? canonical : undefined;
 }
 
 export type { SpotifyDomainApiAdapter, SpotifyDomainApiAdapterOptions } from './domain-api-adapter';

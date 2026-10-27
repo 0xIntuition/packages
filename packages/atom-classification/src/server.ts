@@ -5,10 +5,10 @@ export type CreateServerEngineOptions = Omit<CreateClassificationEngineOptions, 
 	plugins?: AtomClassificationPlugin[];
 };
 
-export function createServerEngine(options: CreateServerEngineOptions = {}) {
+export function createServerEngine(options: CreateServerEngineOptions) {
 	return createClassificationEngine({
 		...options,
 		runtime: 'server',
-		plugins: options.plugins ?? [],
+		plugins: options?.plugins ?? [],
 	});
 }

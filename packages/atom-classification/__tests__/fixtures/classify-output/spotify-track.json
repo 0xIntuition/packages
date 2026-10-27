@@ -1,0 +1,36 @@
+{
+	"name": "spotify-track",
+	"url": "https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC",
+	"atom": {
+		"schemaType": "MusicRecording",
+		"category": "thing",
+		"title": "Fixture spotify-track",
+		"canonicalId": "spotify:track:4uLU6hMCjMI75M1A2tKUQC",
+		"sameAs": ["https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC"],
+		"hints": {
+			"identifiers": {
+				"isrc": "USRC17607839",
+				"spotifyId": "track:4uLU6hMCjMI75M1A2tKUQC"
+			}
+		},
+		"metadata": {},
+		"data": {
+			"@type": "MusicRecording",
+			"identifier": "int:isrc:USRC17607839",
+			"name": "Fixture spotify-track"
+		}
+	},
+	"identifierRung": [
+		{
+			"rung": "isrc",
+			"value": "USRC17607839"
+		},
+		{
+			"rung": "spotify:track",
+			"value": "4uLU6hMCjMI75M1A2tKUQC"
+		}
+	],
+	"aliases": ["int:spotify:track:4uLU6hMCjMI75M1A2tKUQC"],
+	"identifierSet": ["int:isrc:USRC17607839", "int:spotify:track:4uLU6hMCjMI75M1A2tKUQC"],
+	"appAliases": ["int:isrc:USRC17607839", "int:spotify:track:4uLU6hMCjMI75M1A2tKUQC"]
+}

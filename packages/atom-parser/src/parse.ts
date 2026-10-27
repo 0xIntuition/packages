@@ -9,10 +9,13 @@ import {
 	type ResolvedFetchPolicy,
 } from './types.js';
 
+const ASCII_EDGE_WHITESPACE = /^[\t-\r ]+|[\t-\r ]+$/g;
+
 export async function parseAtom(input: string, options?: ParseOptions): Promise<ParseResult> {
 	const maxInputBytes = options?.maxInputBytes ?? DEFAULT_MAX_INPUT_BYTES;
+	const normalizedInput = input.replace(ASCII_EDGE_WHITESPACE, '');
 
-	if (input.trim().length === 0) {
+	if (normalizedInput.length === 0) {
 		throw new ParseError('EMPTY_INPUT', 'input must not be empty');
 	}
 
@@ -24,9 +27,11 @@ export async function parseAtom(input: string, options?: ParseOptions): Promise<
 		);
 	}
 
-	const normalizedInput = input.trim();
 	const ipfsGatewayBaseUrl = options?.ipfsGatewayBaseUrl;
 	const result = detectLocal(input, normalizedInput, ipfsGatewayBaseUrl);
+	if (result.kind === 'iid') {
+		return result;
+	}
 
 	const remoteFetch = options?.remoteFetch !== false;
 

@@ -1,6 +1,10 @@
 import type { ResolverAtom } from '../../plugins';
 import { toRecordMaybe, toStringMaybe } from '../shared/helpers';
-import type { PlatformStageAdapter } from '../shared/platform';
+import {
+	createPlatformStageDiagnostic,
+	PLATFORM_STAGE_MISS,
+	type PlatformStageAdapter,
+} from '../shared/platform';
 
 type FetchLike = (
 	input: string,
@@ -72,6 +76,7 @@ export type GitHubDomainApiAdapter = PlatformStageAdapter;
 
 const GITHUB_API_BASE_URL = 'https://api.github.com';
 const GITHUB_ACCEPT_HEADER = 'application/vnd.github+json';
+const GITHUB_NO_RECORD_STATUS = 404;
 
 export function createGitHubDomainApiAdapter(
 	options: GitHubDomainApiAdapterOptions = {}
@@ -80,7 +85,7 @@ export function createGitHubDomainApiAdapter(
 
 	return async ({ domain, classification, credential }) => {
 		if (domain !== 'github' || !fetcher) {
-			return null;
+			return PLATFORM_STAGE_MISS;
 		}
 
 		const token =
@@ -89,20 +94,28 @@ export function createGitHubDomainApiAdapter(
 			toStringMaybe(credential?.apiKey);
 		const headers = buildGitHubHeaders(token);
 
+		let atom: ResolverAtom | null;
 		switch (classification.subtype) {
 			case 'repo':
-				return resolveGitHubRepo(fetcher, headers, classification.meta);
+				atom = await resolveGitHubRepo(fetcher, headers, classification.meta);
+				break;
 			case 'profile':
-				return resolveGitHubProfile(fetcher, headers, classification.meta);
+				atom = await resolveGitHubProfile(fetcher, headers, classification.meta);
+				break;
 			case 'issue':
-				return resolveGitHubIssue(fetcher, headers, classification.meta);
+				atom = await resolveGitHubIssue(fetcher, headers, classification.meta);
+				break;
 			case 'pull':
-				return resolveGitHubPull(fetcher, headers, classification.meta);
+				atom = await resolveGitHubPull(fetcher, headers, classification.meta);
+				break;
 			case 'commit':
-				return resolveGitHubCommit(fetcher, headers, classification.meta);
+				atom = await resolveGitHubCommit(fetcher, headers, classification.meta);
+				break;
 			default:
-				return null;
+				return PLATFORM_STAGE_MISS;
 		}
+
+		return atom ?? PLATFORM_STAGE_MISS;
 	};
 }
 
@@ -370,7 +383,11 @@ async function fetchGitHubJson<TPayload>(
 ): Promise<TPayload | undefined> {
 	const response = await fetcher(url, { headers });
 	if (!response.ok) {
-		return undefined;
+		if (response.status === GITHUB_NO_RECORD_STATUS) {
+			return undefined;
+		}
+
+		throw createPlatformStageDiagnostic('non_ok_status', `HTTP ${response.status}`);
 	}
 
 	const payload = await response.json();

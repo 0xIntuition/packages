@@ -1,0 +1,43 @@
+{
+	"name": "imdb-tmdb-tv",
+	"url": "https://www.themoviedb.org/tv/1399",
+	"atom": {
+		"schemaType": "TVSeries",
+		"category": "thing",
+		"title": "Fixture imdb-tmdb-tv",
+		"canonicalId": "tmdb:tv:1399",
+		"sameAs": ["https://www.themoviedb.org/tv/1399"],
+		"hints": {
+			"identifiers": {
+				"tmdbId": "1399",
+				"mediaType": "tv",
+				"imdbId": "tt0944947"
+			},
+			"providerCanonicalIds": ["imdb:title:tt0944947"]
+		},
+		"metadata": {
+			"identityBridgeEligible": true
+		},
+		"data": {
+			"@type": "TVSeries",
+			"identifier": "int:tmdb:tv:1399",
+			"name": "Fixture imdb-tmdb-tv",
+			"tmdbId": "1399",
+			"mediaType": "tv",
+			"sameAs": ["https://www.imdb.com/title/tt0944947/", "https://www.themoviedb.org/tv/1399"]
+		}
+	},
+	"identifierRung": [
+		{
+			"rung": "tmdb:tv",
+			"value": "1399"
+		},
+		{
+			"rung": "imdb:title",
+			"value": "tt0944947"
+		}
+	],
+	"aliases": ["int:imdb:tt0944947"],
+	"identifierSet": ["int:tmdb:tv:1399", "int:imdb:tt0944947"],
+	"appAliases": ["int:imdb:tt0944947", "int:tmdb:tv:1399"]
+}

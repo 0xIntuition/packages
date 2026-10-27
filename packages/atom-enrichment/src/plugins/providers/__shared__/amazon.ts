@@ -4,8 +4,6 @@
 // product data from the Canopy API — parsing breadth here directly determines
 // how many pasted Amazon URLs reach Canopy at all.
 
-import type { FetchLike } from './http';
-
 export const AMAZON_MARKETPLACE_BY_HOST_SUFFIX = new Map<string, string>([
 	['amazon.ca', 'CA'],
 	['amazon.co.uk', 'GB'],
@@ -146,29 +144,5 @@ export function normalizeAmazonCanonicalUrl(value: string, asin: string): string
 		return `https://${parsed.hostname}/dp/${asin}`;
 	} catch {
 		return value;
-	}
-}
-
-// Follows the shortener redirect and returns the destination product URL.
-// Returns undefined when the redirect does not land on an Amazon host, so a
-// hijacked or expired short link can never inject a foreign URL downstream.
-export async function resolveAmazonShortLink(
-	fetcher: FetchLike,
-	url: string,
-	signal?: AbortSignal
-): Promise<string | undefined> {
-	try {
-		const response = await fetcher(url, {
-			method: 'GET',
-			redirect: 'follow',
-			...(signal ? { signal } : {}),
-		});
-		const destination = response.url || undefined;
-		if (!destination) {
-			return undefined;
-		}
-		return isAmazonHostname(new URL(destination).hostname) ? destination : undefined;
-	} catch {
-		return undefined;
 	}
 }

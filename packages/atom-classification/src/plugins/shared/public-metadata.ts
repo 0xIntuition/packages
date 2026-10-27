@@ -3,7 +3,14 @@ import type {
 	ClassificationCanonicalFieldPolicyMap,
 	ClassificationSourceFamily,
 } from '../../types';
-import type { PlatformDomain, PlatformStageAdapter, PlatformStageInput } from './platform';
+import {
+	isPlatformStageMiss,
+	PLATFORM_STAGE_MISS,
+	type PlatformDomain,
+	type PlatformStageAdapter,
+	type PlatformStageInput,
+	type PlatformStageMiss,
+} from './platform';
 
 export type PublicMetadataSourceResult = {
 	atom: ResolverAtom;
@@ -14,8 +21,12 @@ export type PublicMetadataSource = {
 	id: string;
 	family: ClassificationSourceFamily;
 	resolve:
-		| ((input: PlatformStageInput) => PublicMetadataSourceResult | null | undefined)
-		| ((input: PlatformStageInput) => Promise<PublicMetadataSourceResult | null | undefined>);
+		| ((
+				input: PlatformStageInput
+		  ) => PublicMetadataSourceResult | PlatformStageMiss | null | undefined)
+		| ((
+				input: PlatformStageInput
+		  ) => Promise<PublicMetadataSourceResult | PlatformStageMiss | null | undefined>);
 };
 
 export type PublicMetadataPlatformAdapterOptions = {
@@ -30,16 +41,16 @@ export function createPublicMetadataPlatformAdapter(
 ): PublicMetadataPlatformAdapter {
 	return async (input) => {
 		if (input.runtime !== 'server') {
-			return null;
+			return PLATFORM_STAGE_MISS;
 		}
 
 		if (options.domains && !options.domains.includes(input.domain)) {
-			return null;
+			return PLATFORM_STAGE_MISS;
 		}
 
 		for (const source of options.sources) {
 			const result = await Promise.resolve(source.resolve(input));
-			if (!result?.atom) {
+			if (isPlatformStageMiss(result) || !result?.atom) {
 				continue;
 			}
 
@@ -54,6 +65,6 @@ export function createPublicMetadataPlatformAdapter(
 			};
 		}
 
-		return null;
+		return PLATFORM_STAGE_MISS;
 	};
 }

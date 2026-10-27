@@ -7,6 +7,7 @@ import { createV0TypeProfilesPlugin } from '../src/plugins/index';
 describe('optional ai fallback plugin', () => {
 	it('is inert by default when no adapter is configured', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [createV0TypeProfilesPlugin(), createOptionalAiFallbackPlugin()],
 		});
@@ -22,6 +23,7 @@ describe('optional ai fallback plugin', () => {
 
 	it('resolves ambiguous inputs with adapter when enabled', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [
 				createV0TypeProfilesPlugin(),
@@ -57,6 +59,7 @@ describe('optional ai fallback plugin', () => {
 
 	it('does not run when confidence is above configured threshold', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [
 				createV0TypeProfilesPlugin(),
@@ -113,6 +116,7 @@ describe('optional ai fallback plugin', () => {
 
 	it('cannot be registered in client runtime', () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'client',
 			autoInit: false,
 		});

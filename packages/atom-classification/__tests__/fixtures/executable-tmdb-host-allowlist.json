@@ -1,0 +1,447 @@
+[
+	{
+		"path": "apps/experimental/src/features/atoms/item-detail-banner/brand-assets.ts",
+		"pattern": "domain: 'themoviedb.org',",
+		"reason": "Map an identity domain to a local brand asset."
+	},
+	{
+		"path": "apps/experimental/src/features/atoms/item-detail-banner/utils.ts",
+		"pattern": "return !!url && url.includes('themoviedb.org');",
+		"reason": "Recognize a historical identity alias for display."
+	},
+	{
+		"path": "apps/experimental/src/features/atoms/utils/artifact-promotion-correlation.ts",
+		"pattern": "if (hostname === 'themoviedb.org' && tmdbUrlMatch?.[1] && tmdbUrlMatch[2]) {",
+		"reason": "Correlate a historical identity alias with non-TMDB artifacts."
+	},
+	{
+		"path": "apps/experimental/src/features/atoms/utils/resolve-atom-display.ts",
+		"pattern": "matchesLegacyLabel: (label) => label.includes('imdb.com') || label.includes('themoviedb.org'),",
+		"reason": "Recognize a historical identity label for display cleanup."
+	},
+	{
+		"path": "lab/intuition-id-playground/src/model/registry.ts",
+		"pattern": "canon: '`<type>:<numeric-id>` with type in movie / tv / person; themoviedb.org URLs accepted',",
+		"reason": "Document accepted identity input syntax."
+	},
+	{
+		"path": "lab/intuition-id-playground/src/model/registry.ts",
+		"pattern": "samples: ['movie/27205', 'movie:27205', 'https://www.themoviedb.org/movie/27205-inception'],",
+		"reason": "Identity-only playground example."
+	},
+	{
+		"path": "lab/intuition-id-playground/src/model/scenarios.ts",
+		"pattern": "'https://www.themoviedb.org/movie/27205-inception',",
+		"reason": "Identity-only playground example."
+	},
+	{
+		"path": "packages/atom-classification/src/identity-bridge.ts",
+		"pattern": "return `https://www.themoviedb.org/${match[1]}/${match[2]}`;",
+		"reason": "Retain the canonical TMDB URL as an identity alias after Wikidata promotion."
+	},
+	{
+		"path": "packages/atom-classification/src/plugins/shared/domain-html/fetch.ts",
+		"pattern": "hostname === 'themoviedb.org' ||",
+		"reason": "Reject TMDB request destinations at the shared runtime boundary before network I/O."
+	},
+	{
+		"path": "packages/atom-classification/src/plugins/shared/domain-html/fetch.ts",
+		"pattern": "hostname === 'tmdb.org' ||",
+		"reason": "Reject TMDB request destinations at the shared runtime boundary before network I/O."
+	},
+	{
+		"path": "packages/atom-classification/src/plugins/shared/domain-html/fetch.ts",
+		"pattern": "hostname.endsWith('.themoviedb.org') ||",
+		"reason": "Reject TMDB request destinations at the shared runtime boundary before network I/O."
+	},
+	{
+		"path": "packages/atom-classification/src/plugins/shared/domain-html/fetch.ts",
+		"pattern": "hostname.endsWith('.tmdb.org')",
+		"reason": "Reject TMDB request destinations at the shared runtime boundary before network I/O."
+	},
+	{
+		"path": "packages/atom-classification/src/plugins/tmdb/index.ts",
+		"pattern": "canonicalUrl: `https://www.themoviedb.org/${mediaType}/${tmdbId}`,",
+		"reason": "Emit the canonical identity alias without fetching it."
+	},
+	{
+		"path": "packages/atom-classification/src/plugins/tmdb/index.ts",
+		"pattern": "exampleUrl: 'https://www.themoviedb.org/movie/27205',",
+		"reason": "Identity-only platform example."
+	},
+	{
+		"path": "packages/atom-classification/src/plugins/tmdb/index.ts",
+		"pattern": "host: 'themoviedb.org',",
+		"reason": "Identity-only platform host metadata."
+	},
+	{
+		"path": "packages/atom-classification/src/plugins/tmdb/index.ts",
+		"pattern": "if (host !== 'themoviedb.org') {",
+		"reason": "Structural identity URL parser."
+	},
+	{
+		"path": "packages/atom-enrichment/src/extraction/suggest.ts",
+		"pattern": "hostSuffixes: ['themoviedb.org'],",
+		"reason": "Recognize identity aliases for non-fetching extraction suggestions."
+	},
+	{
+		"path": "packages/atom-enrichment/src/extraction/wikidata-claim-maps.ts",
+		"pattern": "{ property: 'P4947', template: 'https://www.themoviedb.org/movie/{value}' },",
+		"reason": "Project a Wikidata P4947 claim as an identity alias."
+	},
+	{
+		"path": "packages/atom-enrichment/src/extraction/wikidata-claim-maps.ts",
+		"pattern": "{ property: 'P4983', template: 'https://www.themoviedb.org/tv/{value}' },",
+		"reason": "Project a Wikidata P4983 claim as an identity alias."
+	},
+	{
+		"path": "packages/atom-enrichment/src/plugins/providers/__shared__/http.ts",
+		"pattern": "hostname === 'themoviedb.org' ||",
+		"reason": "Reject TMDB request destinations at the shared runtime boundary before network I/O."
+	},
+	{
+		"path": "packages/atom-enrichment/src/plugins/providers/__shared__/http.ts",
+		"pattern": "hostname === 'tmdb.org' ||",
+		"reason": "Reject TMDB request destinations at the shared runtime boundary before network I/O."
+	},
+	{
+		"path": "packages/atom-enrichment/src/plugins/providers/__shared__/http.ts",
+		"pattern": "hostname.endsWith('.themoviedb.org') ||",
+		"reason": "Reject TMDB request destinations at the shared runtime boundary before network I/O."
+	},
+	{
+		"path": "packages/atom-enrichment/src/plugins/providers/__shared__/http.ts",
+		"pattern": "hostname.endsWith('.tmdb.org')",
+		"reason": "Reject TMDB request destinations at the shared runtime boundary before network I/O."
+	},
+	{
+		"path": "packages/atom-enrichment/src/plugins/providers/__shared__/request.ts",
+		"pattern": "host: 'themoviedb.org',",
+		"reason": "Explicitly deny TMDB request hosts."
+	},
+	{
+		"path": "packages/atom-enrichment/src/plugins/providers/__shared__/request.ts",
+		"pattern": "return hostname.endsWith('themoviedb.org') || hostname.endsWith('tmdb.org');",
+		"reason": "Explicitly deny TMDB request hosts."
+	},
+	{
+		"path": "packages/atom-enrichment/src/plugins/providers/brand/index.ts",
+		"pattern": "'themoviedb.org',",
+		"reason": "Recognize a brand identity domain without fetching it."
+	},
+	{
+		"path": "packages/atom-rules-engine/src/catalog/groups.ts",
+		"pattern": "urlSignals: ['https://www.themoviedb.org/movie/<id>'],",
+		"reason": "Identity URL signal metadata."
+	},
+	{
+		"path": "packages/atom-rules-engine/src/context-utils.ts",
+		"pattern": "return hasHost(value, 'themoviedb.org');",
+		"reason": "Parse a TMDB identity alias for display rules."
+	},
+	{
+		"path": "packages/database-seed-control-plane/src/candidate-iid-revert.ts",
+		"pattern": "const TMDB_TV_URL_IID_PREFIX = 'int:url:https://themoviedb.org/tv/';",
+		"reason": "Recognize historical stored identity IIDs for safe revert planning."
+	},
+	{
+		"path": "packages/database-seed-control-plane/src/cli.ts",
+		"pattern": "// (themoviedb.org must never be fetched \u2014 TMDB embargo).",
+		"reason": "Document the executable fetch embargo beside its guard."
+	},
+	{
+		"path": "packages/database-seed-control-plane/src/cli.ts",
+		"pattern": "and e.new_iid like 'int:url:https://themoviedb.org/tv/%'",
+		"reason": "Match historical stored identity IIDs for reporting."
+	},
+	{
+		"path": "packages/database-seed-control-plane/src/movie-identity-rung.ts",
+		"pattern": "!url.hostname.toLowerCase().endsWith('.themoviedb.org'))",
+		"reason": "Reject non-TMDB hosts while parsing identity evidence."
+	},
+	{
+		"path": "packages/database-seed-control-plane/src/movie-identity-rung.ts",
+		"pattern": "(hostname === 'themoviedb.org' || hostname.endsWith('.themoviedb.org')) &&",
+		"reason": "Parse a canonical TMDB identity alias."
+	},
+	{
+		"path": "packages/database-seed-control-plane/src/movie-identity-rung.ts",
+		"pattern": "(url.hostname.toLowerCase() !== 'themoviedb.org' &&",
+		"reason": "Reject non-TMDB hosts while parsing identity evidence."
+	},
+	{
+		"path": "packages/database-seed-control-plane/src/movie-identity-rung.ts",
+		"pattern": "const tmdbUrl = tmdbId ? `https://www.themoviedb.org/movie/${tmdbId}` : '';",
+		"reason": "Emit a canonical TMDB identity alias."
+	},
+	{
+		"path": "packages/database-seed-control-plane/src/movie-identity-rung.ts",
+		"pattern": "if ((hostname === 'themoviedb.org' || hostname.endsWith('.themoviedb.org')) && tmdb?.[1]) {",
+		"reason": "Parse a canonical TMDB identity alias."
+	},
+	{
+		"path": "packages/database-seed-control-plane/src/movie-identity-rung.ts",
+		"pattern": "return `https://www.themoviedb.org/movie/${tmdb[1]}`;",
+		"reason": "Emit a canonical TMDB identity alias."
+	},
+	{
+		"path": "packages/database-seed-control-plane/src/staged-enrichment.ts",
+		"pattern": "host.endsWith('themoviedb.org') ||",
+		"reason": "Block TMDB hosts from staged enrichment."
+	},
+	{
+		"path": "packages/database-seed-control-plane/src/staged-enrichment.ts",
+		"pattern": "if (normalizedHost.endsWith('themoviedb.org') || normalizedHost.endsWith('imdb.com')) {",
+		"reason": "Recognize historical identity aliases without fetching them."
+	},
+	{
+		"path": "packages/pipeline-runtime/src/letterboxd-page.ts",
+		"pattern": "? `https://www.themoviedb.org/${input.tmdbKind}/${input.tmdbId}`",
+		"reason": "Emit the canonical TMDB identity alias in the Letterboxd sameAs bundle; never fetched."
+	},
+	{
+		"path": "packages/pipeline-runtime/src/letterboxd-page.ts",
+		"pattern": "if (url.protocol !== 'https:' || hostname !== 'themoviedb.org') {",
+		"reason": "Parse a TMDB identity URL found in Letterboxd JSON-LD sameAs; never fetched."
+	},
+	{
+		"path": "scripts/import-data/og-backfill-tmdb.ts",
+		"pattern": "if (hostname !== 'themoviedb.org' && !hostname.endsWith('.themoviedb.org')) {",
+		"reason": "Parse an identity URL before using non-TMDB enrichment sources."
+	},
+	{
+		"path": "scripts/import-data/og-backfill-tv.ts",
+		"pattern": "if (hostname !== 'themoviedb.org' && !hostname.endsWith('.themoviedb.org')) return null;",
+		"reason": "Parse an identity URL before using non-TMDB enrichment sources."
+	},
+	{
+		"path": "scripts/import-data/prepare-data-seed-enrichment.ts",
+		"pattern": "if (hostname !== 'themoviedb.org' && !hostname.endsWith('.themoviedb.org')) {",
+		"reason": "Recognize historical TMDB identity URLs during seed preparation."
+	},
+	{
+		"path": "apps/experimental/src/features/atoms/create/url-match/canonical-url.ts",
+		"pattern": "if (hostname === 'themoviedb.org') {",
+		"reason": "Normalize a pasted TMDB identity URL to its canonical /movie|tv/<id> path for dedupe; never fetched."
+	},
+	{
+		"path": "apps/experimental/src/features/atoms/create/url-match/canonical-url.ts",
+		"pattern": "if (url.hostname === 'themoviedb.org') return /^\\/(movie|tv)\\/\\d+$/i.test(path);",
+		"reason": "Recognize a TMDB identity path shape for canonical-URL matching; never fetched."
+	},
+	{
+		"path": "packages/database-kg/src/actions/canonical-url.ts",
+		"pattern": "if (hostname === 'themoviedb.org') {",
+		"reason": "Normalize a pasted TMDB identity URL to its canonical /movie|tv/<id> path for dedupe; never fetched."
+	},
+	{
+		"path": "packages/database-kg/src/actions/canonical-url.ts",
+		"pattern": "if (url.hostname === 'themoviedb.org') return /^\\/(movie|tv)\\/\\d+$/i.test(path);",
+		"reason": "Recognize a TMDB identity path shape for canonical-URL matching; never fetched."
+	},
+	{
+		"path": "packages/atom-enrichment/src/image-policy.ts",
+		"pattern": "host: 'themoviedb.org',",
+		"reason": "Image-policy page-source denylist entry; the host is named only to reject it as a source."
+	},
+	{
+		"path": "apps/intuition-app/src/features/create/creation-loading.tsx",
+		"pattern": "['themoviedb.org', 'TMDB'],",
+		"reason": "Map a TMDB identity host to its creation-loading display label."
+	},
+	{
+		"path": "apps/intuition-app/src/features/create/url.ts",
+		"pattern": "'themoviedb.org',",
+		"reason": "Recognize TMDB provider identity URLs in create URL handling."
+	},
+	{
+		"path": "apps/intuition-app/src/features/legal/data.tsx",
+		"pattern": "// (https://www.themoviedb.org/api-terms-of-use): their logo plus this exact",
+		"reason": "Document the TMDB attribution terms URL without requesting it."
+	},
+	{
+		"path": "apps/intuition-app/src/features/legal/data.tsx",
+		"pattern": "export const TMDB_SITE = 'https://www.themoviedb.org/';",
+		"reason": "Define the TMDB attribution link for display without an API request."
+	},
+	{
+		"path": "apps/intuition-app/src/features/items/explorer-metadata.tsx",
+		"pattern": ": host === 'themoviedb.org' || host.endsWith('.themoviedb.org')",
+		"reason": "Recognize a TMDB identity host for its display label without requesting it."
+	},
+	{
+		"path": "apps/intuition-app/src/features/account/onboarding-artwork.ts",
+		"pattern": "image: 'https://image.tmdb.org/t/p/w780/x2FJsf1ElAgr63Y3PNPtJrcmpoe.jpg',",
+		"reason": "Existing licensed TMDB image URL projection or display fixture, permitted by the 2026-09-01 licence and image embargo lift; no new image behavior in this lane."
+	},
+	{
+		"path": "apps/intuition-app/src/features/account/onboarding-artwork.ts",
+		"pattern": "image: 'https://image.tmdb.org/t/p/w780/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg',",
+		"reason": "Existing licensed TMDB image URL projection or display fixture, permitted by the 2026-09-01 licence and image embargo lift; no new image behavior in this lane."
+	},
+	{
+		"path": "apps/intuition-app/src/features/account/onboarding-artwork.ts",
+		"pattern": "image: 'https://image.tmdb.org/t/p/w780/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg',",
+		"reason": "Existing licensed TMDB image URL projection or display fixture, permitted by the 2026-09-01 licence and image embargo lift; no new image behavior in this lane."
+	},
+	{
+		"path": "apps/intuition-app/src/features/account/artwork.ts",
+		"pattern": "image: 'https://image.tmdb.org/t/p/w780/x2FJsf1ElAgr63Y3PNPtJrcmpoe.jpg',",
+		"reason": "Existing licensed TMDB image URL projection or display fixture, permitted by the 2026-09-01 licence and image embargo lift; no new image behavior in this lane."
+	},
+	{
+		"path": "apps/intuition-app/src/features/library/reviews-sample.ts",
+		"pattern": "const PARASITE = 'https://image.tmdb.org/t/p/w780/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg';",
+		"reason": "Existing licensed TMDB image URL projection or display fixture, permitted by the 2026-09-01 licence and image embargo lift; no new image behavior in this lane."
+	},
+	{
+		"path": "apps/intuition-app/src/features/library/reviews-sample.ts",
+		"pattern": "const ARRIVAL = 'https://image.tmdb.org/t/p/w780/x2FJsf1ElAgr63Y3PNPtJrcmpoe.jpg';",
+		"reason": "Existing licensed TMDB image URL projection or display fixture, permitted by the 2026-09-01 licence and image embargo lift; no new image behavior in this lane."
+	},
+	{
+		"path": "apps/intuition-app/src/features/library/reviews-sample.ts",
+		"pattern": "const SPIRITED = 'https://image.tmdb.org/t/p/w780/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg';",
+		"reason": "Existing licensed TMDB image URL projection or display fixture, permitted by the 2026-09-01 licence and image embargo lift; no new image behavior in this lane."
+	},
+	{
+		"path": "apps/intuition-app/src/features/library/stacks-sample.ts",
+		"pattern": "parasite: 'https://image.tmdb.org/t/p/w780/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg',",
+		"reason": "Existing licensed TMDB image URL projection or display fixture, permitted by the 2026-09-01 licence and image embargo lift; no new image behavior in this lane."
+	},
+	{
+		"path": "apps/intuition-app/src/features/library/stacks-sample.ts",
+		"pattern": "arrival: 'https://image.tmdb.org/t/p/w780/x2FJsf1ElAgr63Y3PNPtJrcmpoe.jpg',",
+		"reason": "Existing licensed TMDB image URL projection or display fixture, permitted by the 2026-09-01 licence and image embargo lift; no new image behavior in this lane."
+	},
+	{
+		"path": "apps/intuition-app/src/features/library/stacks-sample.ts",
+		"pattern": "spirited: 'https://image.tmdb.org/t/p/w780/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg',",
+		"reason": "Existing licensed TMDB image URL projection or display fixture, permitted by the 2026-09-01 licence and image embargo lift; no new image behavior in this lane."
+	},
+	{
+		"path": "apps/intuition-app/src/features/library/stack-suggestion-catalog.ts",
+		"pattern": "image: 'https://image.tmdb.org/t/p/w780/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg',",
+		"reason": "Existing licensed TMDB image URL projection or display fixture, permitted by the 2026-09-01 licence and image embargo lift; no new image behavior in this lane."
+	},
+	{
+		"path": "apps/intuition-app/scripts/library-add-browser.ts",
+		"pattern": "image: 'https://image.tmdb.org/t/p/w500/x2FJsf1ElAgr63Y3PNPtJrcmpoe.jpg',",
+		"reason": "Existing licensed TMDB image URL projection or display fixture, permitted by the 2026-09-01 licence and image embargo lift; no new image behavior in this lane."
+	},
+	{
+		"path": "apps/experimental/src/features/atoms/utils/artifact-helpers.ts",
+		"pattern": "return TMDB_POSTER_PATH.test(path) ? `https://image.tmdb.org/t/p/original${path}` : undefined;",
+		"reason": "Existing licensed TMDB image URL projection or display fixture, permitted by the 2026-09-01 licence and image embargo lift; no new image behavior in this lane."
+	},
+	{
+		"path": "apps/experimental/src/features/atoms/utils/image-precedence.test-fixtures.ts",
+		"pattern": "'https://image.tmdb.org/t/p/original/7PRddO7z7mcPi21nZTCMGShAyy1.jpg';",
+		"reason": "Existing licensed TMDB image URL projection or display fixture, permitted by the 2026-09-01 licence and image embargo lift; no new image behavior in this lane."
+	},
+	{
+		"path": "apps/experimental/src/features/atoms/utils/image-precedence.test-fixtures.ts",
+		"pattern": "targetUrl: 'https://www.themoviedb.org/tv/42009',",
+		"reason": "Supply a TMDB identity target URL in an image-precedence display fixture."
+	},
+	{
+		"path": "apps/experimental/src/features/atoms/utils/image-precedence.test-fixtures.ts",
+		"pattern": "'https://www.themoviedb.org/tv/42009'",
+		"reason": "Supply a TMDB artifact source alias in an image-precedence display fixture."
+	},
+	{
+		"path": "apps/experimental/src/features/atoms/utils/image-precedence.test-fixtures.ts",
+		"pattern": "beforeImageUrl: 'https://image.tmdb.org/t/p/original/missing-black-mirror-poster.jpg',",
+		"reason": "Existing licensed TMDB image URL projection or display fixture, permitted by the 2026-09-01 licence and image embargo lift; no new image behavior in this lane."
+	},
+	{
+		"path": "packages/database-seed-control-plane/src/cli.ts",
+		"pattern": "if (hostname !== 'themoviedb.org' && !hostname.endsWith('.themoviedb.org')) {",
+		"reason": "Reject other hosts while parsing a TMDB identity URL without requesting it."
+	},
+	{
+		"path": "packages/database-seed-control-plane/src/cli.ts",
+		"pattern": "((hostname === 'themoviedb.org' || hostname.endsWith('.themoviedb.org')) &&",
+		"reason": "Recognize a TMDB movie identity URL while classifying seed source families."
+	},
+	{
+		"path": "packages/database-seed-control-plane/src/cli.ts",
+		"pattern": "if (!qid || !tmdbId || plan.sourceUrl !== `https://www.themoviedb.org/movie/${tmdbId}`)",
+		"reason": "Validate a canonical TMDB identity alias before accepting a Wikidata-promoted movie plan."
+	},
+	{
+		"path": "packages/database-kg/src/lib/entity-image.ts",
+		"pattern": "? readImageValue(`https://image.tmdb.org/t/p/w500${path}`, accept)",
+		"reason": "Existing licensed TMDB image URL projection or display fixture, permitted by the 2026-09-01 licence and image embargo lift; no new image behavior in this lane."
+	},
+	{
+		"path": "packages/database-kg/src/actions/user-item-state.ts",
+		"pattern": "if (host === 'themoviedb.org') return 'tmdb';",
+		"reason": "Map a TMDB identity URL host to its provider name without requesting it."
+	},
+	{
+		"path": "packages/atom-enrichment/src/materialize-node-data-resolved.ts",
+		"pattern": "? `https://image.tmdb.org/t/p/original${path}`",
+		"reason": "Existing licensed TMDB image URL projection or display fixture, permitted by the 2026-09-01 licence and image embargo lift; no new image behavior in this lane."
+	},
+	{
+		"path": "packages/atom-enrichment/src/plugins/providers/tmdb/index.ts",
+		"pattern": "const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/original';",
+		"reason": "Existing licensed TMDB image URL projection or display fixture, permitted by the 2026-09-01 licence and image embargo lift; no new image behavior in this lane."
+	},
+	{
+		"path": "packages/atom-enrichment/src/plugins/providers/tmdb/index.ts",
+		"pattern": "if (hostname !== 'themoviedb.org' && hostname !== 'www.themoviedb.org') {",
+		"reason": "Reject other hosts while parsing a TMDB identity URL without requesting it."
+	},
+	{
+		"path": "packages/atom-enrichment/src/plugins/providers/tmdb/index.ts",
+		"pattern": "return `https://www.themoviedb.org/${kind}/${id}`;",
+		"reason": "Construct the canonical TMDB identity alias without requesting it."
+	},
+	{
+		"path": "scripts/import-data/promote-sidecar-images-to-kg.ts",
+		"pattern": "? `https://image.tmdb.org/t/p/w500${value}`",
+		"reason": "Existing licensed TMDB image URL projection or display fixture, permitted by the 2026-09-01 licence and image embargo lift; no new image behavior in this lane."
+	},
+	{
+		"path": "scripts/import-data/promote-sidecar-images-to-kg.ts",
+		"pattern": "'https://image.tmdb.org/t/p/w500/'",
+		"reason": "Existing licensed TMDB image URL projection or display fixture, permitted by the 2026-09-01 licence and image embargo lift; no new image behavior in this lane."
+	},
+	{
+		"path": "scripts/import-data/prepare-data-seed-enrichment.ts",
+		"pattern": "return normalized.includes('tmdb:') || normalized.includes('themoviedb.org');",
+		"reason": "Recognize explicit stored TMDB identity text during seed preparation."
+	},
+	{
+		"path": "scripts/import-data/tmdb-drain/drain-tmdb-videos.ts",
+		"pattern": "const endpoint = new URL(`https://api.themoviedb.org/3/${input.kind}/${input.tmdbId}`);",
+		"reason": "Endpoint construction feeds the request at scripts/import-data/tmdb-drain/drain-tmdb-videos.ts:193; seed pipeline catalog fetch, TMDB licence 2026-09-01."
+	},
+	{
+		"path": "scripts/import-data/tmdb-drain/load-tmdb-video-artifacts.ts",
+		"pattern": "const endpoint = new URL(`https://api.themoviedb.org/3/${kind}/${tmdbId}`);",
+		"reason": "sidecar provenance URL construction, not a request."
+	},
+	{
+		"path": "scripts/import-data/tmdb-drain/drain-tmdb-titles.ts",
+		"pattern": "const endpoint = new URL(`https://api.themoviedb.org/3/${input.kind}/${input.tmdbId}`);",
+		"reason": "Endpoint construction feeds the request at scripts/import-data/tmdb-drain/drain-tmdb-titles.ts:252; seed pipeline catalog fetch, TMDB licence 2026-09-01."
+	},
+	{
+		"path": "scripts/import-data/tmdb-drain/drain-tmdb-collections.ts",
+		"pattern": "const endpoint = new URL(`https://api.themoviedb.org/3/collection/${input.collectionId}`);",
+		"reason": "Endpoint construction feeds the request at scripts/import-data/tmdb-drain/drain-tmdb-collections.ts:189 (the dispatch cites :190, now the response-status check); seed pipeline catalog fetch, TMDB licence 2026-09-01."
+	},
+	{
+		"path": "packages/atom-classification/src/plugins/imdb/domain-html-adapter.ts",
+		"pattern": "const sameAs = [canonicalUrl, `https://www.themoviedb.org/${mediaType}/${tmdbId}`];",
+		"reason": "2026-09-01 licence, identity-only: no images, no page source; this line records the identity alias, while executable-tmdb-host-guard.test.ts structurally binds the request itself to the verbatim /find builder and forbids other classifier TMDB imports."
+	},
+	{
+		"path": "packages/pipeline-runtime/src/tmdb.ts",
+		"pattern": "export const TMDB_API_BASE_URL = 'https://api.themoviedb.org/3';",
+		"reason": "2026-09-01 licence: shared API origin for the enrichment provider's licensed details/credits request and the classifier's identity-only /find bridge (no images, no page source in classification)."
+	}
+]

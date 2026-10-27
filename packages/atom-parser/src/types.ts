@@ -3,6 +3,7 @@ export type ParsedKind =
 	| 'ethereum_address'
 	| 'ens_name'
 	| 'json'
+	| 'iid'
 	| 'url'
 	| 'isbn'
 	| 'plain_string';
@@ -110,6 +111,21 @@ export interface JsonParseResult extends ParseResultBase {
 	arrayLength: number | undefined;
 }
 
+export type IidInvalidReason =
+	| 'unknown_or_malformed_iid'
+	| 'invalid_iid_value'
+	| 'canonicalization_failed';
+
+export interface IidParseResult extends ParseResultBase {
+	kind: 'iid';
+	valid: boolean;
+	scheme: string;
+	value: string;
+	canonicalIid: string | null;
+	anchorEligible: boolean;
+	reason?: IidInvalidReason;
+}
+
 export interface IsbnParseResult extends ParseResultBase {
 	kind: 'isbn';
 	canonical: string;
@@ -129,6 +145,7 @@ export type ParseResult =
 	| EthereumAddressParseResult
 	| EnsNameParseResult
 	| JsonParseResult
+	| IidParseResult
 	| IsbnParseResult
 	| PlainStringParseResult;
 

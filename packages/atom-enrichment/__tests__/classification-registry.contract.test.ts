@@ -128,11 +128,11 @@ describe('classification registry contract', () => {
 		expect(result.success).toBe(false);
 	});
 
-	it('ships all 37 built-in classifications', () => {
-		expect(builtinClassificationDefinitions).toHaveLength(37);
+	it('ships all 39 built-in classifications', () => {
+		expect(builtinClassificationDefinitions).toHaveLength(39);
 
 		const defaultRegistry = createDefaultClassificationRegistry();
-		expect(defaultRegistry.list()).toHaveLength(37);
+		expect(defaultRegistry.list()).toHaveLength(39);
 		expect(defaultRegistry.has('opengraph')).toBe(true);
 		expect(defaultRegistry.has('openlibrary')).toBe(true);
 		expect(defaultRegistry.has('ai-entities')).toBe(true);

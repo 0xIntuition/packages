@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import type { FetchLike } from '../../src/plugins/providers/__shared__/http';
+import { createPinAwareFetch, type FetchLike } from '../../src/plugins/providers/__shared__/http';
 import { createGitHubPlugin } from '../../src/plugins/providers/github';
 import type { EnrichmentRequest } from '../../src/types';
 
@@ -46,7 +46,10 @@ describe('createGitHubPlugin token fallback', () => {
 			);
 		};
 
-		const plugin = createGitHubPlugin({ token: 'expired-token', fetch: fetcher });
+		const plugin = createGitHubPlugin({
+			token: 'expired-token',
+			fetch: createPinAwareFetch(fetcher),
+		});
 		const artifacts = await plugin.enrich(
 			request('https://github.com/0xIntuition/intuition-ts'),
 			ctx
@@ -65,7 +68,10 @@ describe('createGitHubPlugin token fallback', () => {
 			calls += 1;
 			return Promise.resolve(new Response('{}', { status: 500 }));
 		};
-		const plugin = createGitHubPlugin({ token: 'valid-token', fetch: fetcher });
+		const plugin = createGitHubPlugin({
+			token: 'valid-token',
+			fetch: createPinAwareFetch(fetcher),
+		});
 		await expect(
 			plugin.enrich(request('https://github.com/0xIntuition/intuition-ts'), ctx)
 		).rejects.toThrow('HTTP 500');
@@ -78,7 +84,7 @@ describe('createGitHubPlugin token fallback', () => {
 			calls += 1;
 			return Promise.resolve(new Response('{}', { status: 403 }));
 		};
-		const plugin = createGitHubPlugin({ fetch: fetcher });
+		const plugin = createGitHubPlugin({ fetch: createPinAwareFetch(fetcher) });
 		await expect(
 			plugin.enrich(request('https://github.com/0xIntuition/intuition-ts'), ctx)
 		).rejects.toThrow('HTTP 403');

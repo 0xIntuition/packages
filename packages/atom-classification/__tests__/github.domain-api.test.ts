@@ -10,6 +10,7 @@ import {
 describe('github domain-api adapter', () => {
 	it('resolves repository identity via the github rest api without credentials', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [
 				createV0TypeProfilesPlugin(),
@@ -66,6 +67,7 @@ describe('github domain-api adapter', () => {
 
 	it('resolves profile urls into Person identity when github returns a user', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [
 				createV0TypeProfilesPlugin(),
@@ -109,6 +111,7 @@ describe('github domain-api adapter', () => {
 
 	it('resolves issue urls into identity-safe Thing output', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [
 				createV0TypeProfilesPlugin(),
@@ -152,6 +155,47 @@ describe('github domain-api adapter', () => {
 			identifier: 'openai/openai-node#123',
 		});
 	});
+
+	for (const fixture of [
+		{ status: 503, diagnostic: 'domain-api:non_ok_status: HTTP 503' },
+		{ status: 404, diagnostic: undefined },
+	] as const) {
+		it(`preserves generic fallback with status-aware handling for HTTP ${fixture.status}`, async () => {
+			const engine = createClassificationEngine({
+				onClassifierError: () => undefined,
+				runtime: 'server',
+				plugins: [
+					createV0TypeProfilesPlugin(),
+					createGitHubPlugin({
+						adapters: {
+							domainApi: createGitHubDomainApiAdapter({
+								fetch: async () => ({
+									ok: false,
+									status: fixture.status,
+									json: async () => {
+										throw new Error('non-OK response body must not be read');
+									},
+								}),
+							}),
+						},
+					}),
+				],
+			});
+
+			const result = await engine.classify({
+				input: 'https://github.com/openai/openai-node',
+				mode: 'progressive',
+				classificationSessionId: `github-domain-api-http-${fixture.status}`,
+			});
+
+			expect(result.status).toBe('complete');
+			expect(result.resolved?.atoms[0]?.source).toBe('platform-v0:generic');
+			expect(result.resolved?.atoms[0]?.title).toBe('openai/openai-node');
+			expect(result.resolverErrors?.map((error) => error.message) ?? []).toEqual(
+				fixture.diagnostic ? [fixture.diagnostic] : []
+			);
+		});
+	}
 });
 
 const GITHUB_REPO_PAYLOAD = {

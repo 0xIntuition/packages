@@ -53,6 +53,7 @@ Prefer extending the package that owns the concept:
 | `@0xintuition/cli` | Side-effect-free calldata encoders, deprecated SDK action plan aliases, and the `intuition` executable |
 | `@0xintuition/react` | React providers and hooks |
 | `@0xintuition/atom-parser` | Input detection, normalization, optional remote inspection, parser types; apps own configured fetch policy and worker integration |
+| `@0xintuition/atom-runtime` | Shared engine composition, injected configuration, cache adapters and fingerprints; apps own persistence, queues, and Effect integration |
 | `@0xintuition/atom-classification` | Classification engine, plugin contracts, reusable classifiers/resolvers, configurable presets; apps own enabled plugins, fallback policy, injected identity capabilities and service wiring |
 | `@0xintuition/atom-enrichment` | Enrichment engine, provider adapters, extraction, artifact validation, cache interfaces and reusable adapters; apps own credentials, cache provisioning/configuration, queue scheduling, retries, persistence and service wiring |
 

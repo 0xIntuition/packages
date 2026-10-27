@@ -1,6 +1,7 @@
 import { z } from 'zod/v4';
 
-const numericResponseSchema = z.union([z.number(), z.string()]);
+// Twitter answers `height: null` for a tweet (observed live): a null dimension is simply absent.
+const numericResponseSchema = z.union([z.number(), z.string()]).nullish();
 
 export const oembedResponseSchema = z
 	.object({
@@ -11,11 +12,11 @@ export const oembedResponseSchema = z
 		provider_name: z.string().optional(),
 		provider_url: z.string().optional(),
 		thumbnail_url: z.string().optional(),
-		thumbnail_width: numericResponseSchema.optional(),
-		thumbnail_height: numericResponseSchema.optional(),
+		thumbnail_width: numericResponseSchema,
+		thumbnail_height: numericResponseSchema,
 		html: z.string().optional(),
-		width: numericResponseSchema.optional(),
-		height: numericResponseSchema.optional(),
+		width: numericResponseSchema,
+		height: numericResponseSchema,
 		url: z.string().optional(),
 	})
 	.passthrough();

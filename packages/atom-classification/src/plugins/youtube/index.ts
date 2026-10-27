@@ -1,12 +1,11 @@
-import { slugify, toStringMaybe, tryParseUrl, withPlatformMetadata } from '../shared/helpers';
+import { slugify, toStringMaybe, withPlatformMetadata } from '../shared/helpers';
 import {
 	createPlatformPlugin,
 	type PlatformV0PluginOptions,
 	type PlatformV0Profile,
 } from '../shared/platform';
 import { createYouTubeOEmbedAdapter } from './oembed-adapter';
-
-const YOUTUBE_VIDEO_ID_PATTERN = /^[A-Za-z0-9_-]{11}$/;
+import { canonicalYouTubeVideoId } from './video-id';
 
 export type YouTubePluginOptions = PlatformV0PluginOptions & {
 	useDefaultOEmbedAdapter?: boolean;
@@ -14,17 +13,18 @@ export type YouTubePluginOptions = PlatformV0PluginOptions & {
 
 export const youtubeProfile: PlatformV0Profile = {
 	domain: 'youtube',
+	display: {
+		classificationSlugs: ['video-object'],
+		exampleUrl: 'https://www.youtube.com/watch?v=bewVnEugEqE',
+		host: 'youtube.com',
+		label: 'YouTube',
+	},
 	supportsOEmbed: true,
 	classifier: {
 		id: 'youtube-url-classifier',
 		priority: 10,
 		classify(input: string) {
-			const parsed = tryParseUrl(input);
-			if (!parsed) {
-				return null;
-			}
-
-			const videoId = parseYouTubeVideoId(parsed);
+			const videoId = canonicalYouTubeVideoId(input);
 			if (!videoId) {
 				return null;
 			}
@@ -95,48 +95,8 @@ export function createYouTubePlugin(options: YouTubePluginOptions = {}) {
 
 export type { YouTubeOEmbedAdapter, YouTubeOEmbedAdapterOptions } from './oembed-adapter';
 export { createYouTubeOEmbedAdapter } from './oembed-adapter';
-
-function parseYouTubeVideoId(parsed: URL): string | undefined {
-	const host = parsed.hostname.toLowerCase();
-	const normalizedHost = host.replace(/^www\./, '');
-
-	if (normalizedHost === 'youtu.be') {
-		const candidate = parsed.pathname.split('/').filter(Boolean)[0];
-		if (candidate && YOUTUBE_VIDEO_ID_PATTERN.test(candidate)) {
-			return candidate;
-		}
-
-		return undefined;
-	}
-
-	if (
-		normalizedHost !== 'youtube.com' &&
-		normalizedHost !== 'm.youtube.com' &&
-		normalizedHost !== 'youtube-nocookie.com'
-	) {
-		return undefined;
-	}
-
-	const fromQuery = parsed.searchParams.get('v');
-	if (fromQuery && YOUTUBE_VIDEO_ID_PATTERN.test(fromQuery)) {
-		return fromQuery;
-	}
-
-	const segments = parsed.pathname.split('/').filter(Boolean);
-	const firstSegment = segments[0];
-	const secondSegment = segments[1];
-	if (!firstSegment || !secondSegment) {
-		return undefined;
-	}
-
-	const hasVideoSegment = firstSegment === 'shorts' || firstSegment === 'embed';
-	if (!hasVideoSegment) {
-		return undefined;
-	}
-
-	if (YOUTUBE_VIDEO_ID_PATTERN.test(secondSegment)) {
-		return secondSegment;
-	}
-
-	return undefined;
-}
+export {
+	canonicalYouTubeVideoId,
+	parseYouTubeVideoId,
+	YOUTUBE_VIDEO_ID_PATTERN,
+} from './video-id';

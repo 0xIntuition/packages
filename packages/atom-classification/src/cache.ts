@@ -1,7 +1,9 @@
+import type { CancellableCacheAdapter } from '@0xintuition/pipeline-runtime/cache';
 import type {
 	ClassificationClientClassificationHint,
 	ClassificationRequest,
 	ClassificationResolvedAtom,
+	ClassificationResolverError,
 	ClassificationRuntime,
 } from './types';
 
@@ -11,10 +13,30 @@ export interface ClassificationCacheAdapter {
 	delete(key: string): Promise<void>;
 }
 
+type ClassificationCacheOperationOptions = {
+	signal?: AbortSignal;
+};
+
+export type SignalAwareClassificationCacheAdapter = {
+	readonly signalAware: true;
+	get(
+		key: string,
+		options?: ClassificationCacheOperationOptions
+	): Promise<ClassificationResolverCachedEntry | null>;
+	set(
+		key: string,
+		entry: ClassificationResolverCachedEntry,
+		ttlMs: number,
+		options?: ClassificationCacheOperationOptions
+	): Promise<void>;
+	delete(key: string, options?: ClassificationCacheOperationOptions): Promise<void>;
+};
+
 export interface ClassificationResolverCachedEntry {
 	atoms: ClassificationResolvedAtom[];
 	fallbackUsed: boolean;
 	metadata?: Record<string, unknown>;
+	errors?: ClassificationResolverError[];
 	cachedAt: string;
 	ttlMs: number;
 }
@@ -43,6 +65,11 @@ type CreateUpstashClassificationCacheAdapterFromEnvOptions = {
 	httpTimeoutMs?: number;
 };
 
+type CreateUpstashClassificationCacheAdapterFromInjectedEnvOptions = Omit<
+	CreateUpstashClassificationCacheAdapterFromEnvOptions,
+	'env'
+>;
+
 const DEFAULT_UPSTASH_HTTP_TIMEOUT_MS = 1_500;
 
 export function createMemoryClassificationCacheAdapter(
@@ -51,8 +78,10 @@ export function createMemoryClassificationCacheAdapter(
 	const storage = new Map<string, StoredEntry>();
 	const getNow = options.now ?? (() => Date.now());
 
-	return {
-		async get(key) {
+	const adapter = {
+		signalAware: true as const,
+		async get(key: string, operationOptions?: ClassificationCacheOperationOptions) {
+			throwIfAborted(operationOptions?.signal);
 			const stored = storage.get(key);
 			if (!stored) {
 				return null;
@@ -68,7 +97,13 @@ export function createMemoryClassificationCacheAdapter(
 			return cloneCachedEntry(stored.entry);
 		},
 
-		async set(key, entry, ttlMs) {
+		async set(
+			key: string,
+			entry: ClassificationResolverCachedEntry,
+			ttlMs: number,
+			operationOptions?: ClassificationCacheOperationOptions
+		) {
+			throwIfAborted(operationOptions?.signal);
 			const now = getNow();
 			storage.set(key, {
 				entry: cloneCachedEntry(entry),
@@ -81,18 +116,37 @@ export function createMemoryClassificationCacheAdapter(
 			}
 		},
 
-		async delete(key) {
+		async delete(key: string, operationOptions?: ClassificationCacheOperationOptions) {
+			throwIfAborted(operationOptions?.signal);
 			storage.delete(key);
 		},
-	};
+	} satisfies SignalAwareClassificationCacheAdapter;
+
+	return adapter;
 }
 
 export function createUpstashClassificationCacheAdapterFromEnv(
-	options: CreateUpstashClassificationCacheAdapterFromEnvOptions = {}
+	env?: Record<string, string | undefined>,
+	options?: CreateUpstashClassificationCacheAdapterFromInjectedEnvOptions
+): ClassificationCacheAdapter | undefined;
+export function createUpstashClassificationCacheAdapterFromEnv(
+	options?: CreateUpstashClassificationCacheAdapterFromEnvOptions
+): ClassificationCacheAdapter | undefined;
+export function createUpstashClassificationCacheAdapterFromEnv(
+	env:
+		| Record<string, string | undefined>
+		| CreateUpstashClassificationCacheAdapterFromEnvOptions = process.env,
+	injectedOptions: CreateUpstashClassificationCacheAdapterFromInjectedEnvOptions = {}
 ): ClassificationCacheAdapter | undefined {
-	const env = options.env ?? process.env;
-	const baseUrl = env.UPSTASH_REDIS_REST_URL?.trim();
-	const token = env.UPSTASH_REDIS_REST_TOKEN?.trim();
+	const legacyOptions = isFromEnvOptions(env) ? env : undefined;
+	const injectedEnv: Record<string, string | undefined> = legacyOptions
+		? (legacyOptions.env ?? process.env)
+		: isEnvRecord(env)
+			? env
+			: process.env;
+	const options = legacyOptions ?? injectedOptions;
+	const baseUrl = injectedEnv.UPSTASH_REDIS_REST_URL?.trim();
+	const token = injectedEnv.UPSTASH_REDIS_REST_TOKEN?.trim();
 
 	if (!baseUrl || !token) {
 		return undefined;
@@ -106,6 +160,37 @@ export function createUpstashClassificationCacheAdapterFromEnv(
 	});
 }
 
+function isFromEnvOptions(
+	value: Record<string, string | undefined> | CreateUpstashClassificationCacheAdapterFromEnvOptions
+): value is CreateUpstashClassificationCacheAdapterFromEnvOptions {
+	if (!isPlainObject(value)) {
+		return false;
+	}
+
+	const keys = Object.keys(value);
+	return (
+		keys.length === 0 ||
+		keys.some((key) => key === 'env' || key === 'fetcher' || key === 'httpTimeoutMs')
+	);
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+	if (!value || typeof value !== 'object' || Array.isArray(value)) {
+		return false;
+	}
+
+	const prototype = Object.getPrototypeOf(value);
+	return prototype === Object.prototype || prototype === null;
+}
+
+function isEnvRecord(value: unknown): value is Record<string, string | undefined> {
+	return (
+		isPlainObject(value) &&
+		!('env' in value || 'fetcher' in value || 'httpTimeoutMs' in value) &&
+		Object.values(value).every((entry) => typeof entry === 'string' || entry === undefined)
+	);
+}
+
 export function createUpstashClassificationCacheAdapter(
 	options: CreateUpstashClassificationCacheAdapterOptions
 ): ClassificationCacheAdapter {
@@ -117,8 +202,9 @@ export function createUpstashClassificationCacheAdapter(
 		Authorization: `Bearer ${token}`,
 	};
 
-	return {
-		async get(key) {
+	const adapter = {
+		signalAware: true as const,
+		async get(key: string, operationOptions?: ClassificationCacheOperationOptions) {
 			const payload = await callUpstashCommand({
 				baseUrl,
 				fetcher,
@@ -126,6 +212,7 @@ export function createUpstashClassificationCacheAdapter(
 				args: [key],
 				headers,
 				httpTimeoutMs,
+				signal: operationOptions?.signal,
 			});
 			const result = payload?.result;
 			if (typeof result !== 'string') {
@@ -140,7 +227,12 @@ export function createUpstashClassificationCacheAdapter(
 			}
 		},
 
-		async set(key, entry, ttlMs) {
+		async set(
+			key: string,
+			entry: ClassificationResolverCachedEntry,
+			ttlMs: number,
+			operationOptions?: ClassificationCacheOperationOptions
+		) {
 			await callUpstashCommand({
 				baseUrl,
 				fetcher,
@@ -151,10 +243,11 @@ export function createUpstashClassificationCacheAdapter(
 				},
 				headers,
 				httpTimeoutMs,
+				signal: operationOptions?.signal,
 			});
 		},
 
-		async delete(key) {
+		async delete(key: string, operationOptions?: ClassificationCacheOperationOptions) {
 			await callUpstashCommand({
 				baseUrl,
 				fetcher,
@@ -162,9 +255,41 @@ export function createUpstashClassificationCacheAdapter(
 				args: [key],
 				headers,
 				httpTimeoutMs,
+				signal: operationOptions?.signal,
 			});
 		},
-	};
+	} satisfies SignalAwareClassificationCacheAdapter;
+
+	return adapter;
+}
+
+/** @internal Passes cancellation to signal-aware adapters without widening the public contract. */
+export function getClassificationCacheEntry(
+	cache: ClassificationCacheAdapter,
+	key: string,
+	signal?: AbortSignal
+): Promise<ClassificationResolverCachedEntry | null> {
+	return toCancellableClassificationCacheAdapter(cache).get(key, { signal });
+}
+
+/** @internal Passes cancellation to signal-aware adapters without widening the public contract. */
+export function setClassificationCacheEntry(
+	cache: ClassificationCacheAdapter,
+	key: string,
+	entry: ClassificationResolverCachedEntry,
+	ttlMs: number,
+	signal?: AbortSignal
+): Promise<void> {
+	return toCancellableClassificationCacheAdapter(cache).set(key, entry, ttlMs, { signal });
+}
+
+/** @internal Passes cancellation to signal-aware adapters without widening the public contract. */
+export function deleteClassificationCacheEntry(
+	cache: ClassificationCacheAdapter,
+	key: string,
+	signal?: AbortSignal
+): Promise<void> {
+	return toCancellableClassificationCacheAdapter(cache).remove(key, { signal });
 }
 
 export function buildClassificationResolverCacheKey(input: {
@@ -237,9 +362,17 @@ async function callUpstashCommand(params: {
 	query?: Record<string, string>;
 	headers: Record<string, string>;
 	httpTimeoutMs: number;
+	signal?: AbortSignal;
 }): Promise<{ result?: unknown }> {
 	const controller = new AbortController();
 	const timeout = setTimeout(() => controller.abort(), params.httpTimeoutMs);
+	const onAbort = () => controller.abort(params.signal?.reason);
+
+	if (params.signal?.aborted) {
+		onAbort();
+	} else {
+		params.signal?.addEventListener('abort', onAbort, { once: true });
+	}
 
 	try {
 		const response = await params.fetcher(
@@ -263,7 +396,22 @@ async function callUpstashCommand(params: {
 		return payload;
 	} finally {
 		clearTimeout(timeout);
+		params.signal?.removeEventListener('abort', onAbort);
 	}
+}
+
+function throwIfAborted(signal?: AbortSignal): void {
+	if (!signal?.aborted) {
+		return;
+	}
+
+	if (signal.reason !== undefined) {
+		throw signal.reason;
+	}
+
+	const error = new Error('Classification cache operation aborted.');
+	error.name = 'AbortError';
+	throw error;
 }
 
 function buildUpstashCommandUrl(
@@ -320,6 +468,7 @@ function cloneCachedEntry(
 	return {
 		atoms: entry.atoms.map((atom) => cloneAtom(atom)),
 		fallbackUsed: entry.fallbackUsed,
+		errors: entry.errors?.map((error) => ({ ...error })),
 		metadata: entry.metadata ? cloneMetadata(entry.metadata) : undefined,
 		cachedAt: entry.cachedAt,
 		ttlMs: entry.ttlMs,
@@ -356,4 +505,28 @@ function evictLeastRecentlyUsed(storage: Map<string, StoredEntry>): void {
 	if (oldestKey) {
 		storage.delete(oldestKey);
 	}
+}
+
+export type UpstashClassificationCacheAdapterOptions =
+	CreateUpstashClassificationCacheAdapterOptions;
+export type UpstashClassificationCacheEnvOptions =
+	CreateUpstashClassificationCacheAdapterFromEnvOptions;
+
+/** Preserve legacy argument lists unless an adapter explicitly opts into cancellation. */
+export function toCancellableClassificationCacheAdapter(
+	cache: ClassificationCacheAdapter
+): CancellableCacheAdapter<ClassificationResolverCachedEntry> {
+	if ((cache as Partial<SignalAwareClassificationCacheAdapter>).signalAware === true) {
+		const adapter = cache as SignalAwareClassificationCacheAdapter;
+		return {
+			get: (key, options) => adapter.get(key, options),
+			set: (key, entry, ttlMs, options) => adapter.set(key, entry, ttlMs, options),
+			remove: (key, options) => adapter.delete(key, options),
+		};
+	}
+	return {
+		get: (key) => cache.get(key),
+		set: (key, entry, ttlMs) => cache.set(key, entry, ttlMs),
+		remove: (key) => cache.delete(key),
+	};
 }

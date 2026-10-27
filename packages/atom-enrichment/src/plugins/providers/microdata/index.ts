@@ -1,12 +1,26 @@
+import type { ResolvePublicHostname } from '../../../image-policy';
 import { defineEnrichmentPlugin, type EnrichmentPlugin } from '../../../plugins';
 import type { EnrichmentRequest } from '../../../types';
-import { BROWSER_FETCH_HEADERS, type FetchLike, fetchText } from '../__shared__/http';
+import { runWithHostPolicy } from '../__shared__/host-policy';
+import {
+	BROWSER_FETCH_HEADERS,
+	type FetchLike,
+	fetchText,
+	isEmbargoedHost,
+	ProviderHttpError,
+	parseRetryAfterMs,
+} from '../__shared__/http';
+import { isOpenGraphHttpError, OpenGraphFetchError } from '../__shared__/page-fetch-error';
+import { startPageFetch } from '../__shared__/page-observer';
 import { getRequestUrl } from '../__shared__/request';
+import { isSharedPageUrl, type LoadedSharedPage, loadSharedPage } from '../__shared__/shared-page';
 import { microdataDataSchema } from './schema';
 
 type CreateMicrodataPluginOptions = {
 	fetch?: FetchLike;
 	priority?: number;
+	/** Test seam for the DNS check of the page fetch (opengraph has the same). */
+	resolveHostname?: ResolvePublicHostname;
 	TTL?: number;
 };
 
@@ -131,6 +145,70 @@ function readImageValue(value: unknown): string | undefined {
 	return undefined;
 }
 
+// What the shared fetch (opengraph's, normalized) reports as the error this plugin's own
+// fetch always threw: provider HTTP errors keep status, retry-after and class, and a
+// transport error is the original one. No `errorClass`: the parity tests pin microdata's error
+// (message and class) byte for byte as it was before the fetch was shared.
+function toMicrodataError(error: unknown): unknown {
+	if (!(error instanceof OpenGraphFetchError)) return error;
+	if (isOpenGraphHttpError(error)) {
+		return new ProviderHttpError({
+			status: error.httpStatus,
+			retryAfterMs: error.retryAfterMs,
+		});
+	}
+	if (error.code === 'redirect_limit') {
+		return new ProviderHttpError({
+			status: error.httpStatus ?? 310,
+			errorClass: 'redirect_exhausted',
+		});
+	}
+	return error.originalError ?? error;
+}
+
+const TARGET_REJECTED_REASON =
+	/(^|_)(private_address|lookup_not_found|lookup_failed|invalid_scheme|invalid_url)$/;
+
+// The page body of a fetch shared with the opengraph plugin. A page that did not
+// load fails like the plugin's own fetch always did: a ProviderHttpError.
+function readSharedHtml({ result, hops }: Pick<LoadedSharedPage, 'result' | 'hops'>): string {
+	// Never read a page that went through an embargoed host (TMDB, IMDb), also behind a redirect.
+	if (
+		isEmbargoedHost(result.finalUrl) ||
+		hops.some((hop) => isEmbargoedHost(hop.url)) ||
+		result.reason.endsWith('refused_host')
+	) {
+		throw new ProviderHttpError({ status: 451, errorClass: 'embargoed_host' });
+	}
+	if (result.reason === 'redirect_page_source_denied') {
+		// A redirect to a page the opengraph policy denies. Its only deny rule is IMDb, which the
+		// embargo above already refused; any rule added later is refused here rather than followed.
+		throw new ProviderHttpError({ status: 451, errorClass: 'page_source_denied' });
+	}
+	if (result.status === 'fetched' || result.status === 'no_metadata') {
+		if (result.fullBody?.status === 'fetched') return result.fullBody.html;
+		throw new ProviderHttpError({ status: 413, errorClass: 'response_too_large' });
+	}
+	if (TARGET_REJECTED_REASON.test(result.reason)) {
+		throw new ProviderHttpError({ status: 400, errorClass: 'target_rejected' });
+	}
+	const last = hops.at(-1);
+	if (result.reason === 'redirect_missing_location') {
+		throw new ProviderHttpError({
+			status: last?.status ?? result.httpStatus ?? 310,
+			errorClass: 'redirect_rejected',
+		});
+	}
+	if (!last && result.httpStatus === null) {
+		// No response at all: the host does not resolve.
+		throw Object.assign(new Error('Host not found'), { code: 'dns_not_found' });
+	}
+	throw new ProviderHttpError({
+		status: last?.status ?? result.httpStatus ?? 502,
+		retryAfterMs: last ? parseRetryAfterMs(last.headers.get('retry-after')) : undefined,
+	});
+}
+
 // Extracts the page's embedded schema.org JSON-LD — the page-native tier.
 // Sites mark up events, articles, job postings, products, recipes, and more
 // for search engines; that markup is deterministic field data for us.
@@ -158,10 +236,49 @@ export function createMicrodataPlugin(
 				return [];
 			}
 
-			const html = (
-				await fetchText(fetcher, url, { signal: ctx.signal, headers: BROWSER_FETCH_HEADERS })
-			).slice(0, MAX_HTML_LENGTH);
-			const jsonLd = parseJsonLdBlocks(html);
+			const shared = isSharedPageUrl(url)
+				? await loadSharedPage({
+						url,
+						pages: ctx.pages,
+						consumer: 'microdata',
+						fetch: fetcher,
+						resolveHostname: options.resolveHostname,
+						mapError: toMicrodataError,
+						signal: ctx.signal,
+						deadlineAtMs: ctx.deadlineAtMs,
+						allowLoopbackFixtures: ctx.network?.allowLoopbackFixtures,
+					})
+				: undefined;
+			// A URL the opengraph page-source policy denies keeps this plugin's own fetch.
+			const page =
+				shared?.page ?? startPageFetch(url, { signal: ctx.signal, deadlineAtMs: ctx.deadlineAtMs });
+			let jsonLd: ReturnType<typeof parseJsonLdBlocks>;
+			let html: string;
+			if (!shared) page.sink?.queued?.();
+			try {
+				html = (
+					shared
+						? readSharedHtml(shared)
+						: // Paced per host like the shared fetch, and observed (WAF detection included).
+							await runWithHostPolicy(new URL(url).hostname, { signal: ctx.signal }, () => {
+								page.sink?.dialing?.();
+								return fetchText(
+									fetcher,
+									url,
+									{ signal: ctx.signal, headers: BROWSER_FETCH_HEADERS },
+									{
+										hopSink: page.sink,
+										allowLoopbackFixtures: ctx.network?.allowLoopbackFixtures,
+									}
+								);
+							})
+				).slice(0, MAX_HTML_LENGTH);
+				jsonLd = parseJsonLdBlocks(html);
+			} catch (error) {
+				page.fail(error);
+				throw error;
+			}
+			page.finish({ usable: jsonLd.length > 0 });
 			if (jsonLd.length === 0) {
 				return [];
 			}

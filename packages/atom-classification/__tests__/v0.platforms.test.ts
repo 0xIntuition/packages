@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'bun:test';
+import { createPinAwareFetch } from '@0xintuition/atom-enrichment/providers';
+import { useStubbedPublicDns } from '@0xintuition/atom-enrichment/testing';
 import { createClassificationEngine } from '../src/engine';
 import {
 	createGitHubDomainApiAdapter,
@@ -12,6 +14,10 @@ import {
 import { defaultClassificationPreset } from '../src/presets/default';
 import { createServerEngine } from '../src/server';
 import { createDefaultTestPlugins } from './helpers/default-plugins';
+import { legacySpotifyFetch } from './helpers/legacy-spotify-fetch';
+
+// The shared provider hop resolves every target before it dials; no network is used.
+useStubbedPublicDns();
 
 describe('v0 platform coverage', () => {
 	const fixtures = [
@@ -81,11 +87,48 @@ describe('v0 platform coverage', () => {
 			schemaType: 'TVSeries',
 			category: 'thing',
 		},
+		{
+			input: 'https://openlibrary.org/works/OL45804W/The_Lord_of_the_Rings',
+			domain: 'openlibrary',
+			schemaType: 'Book',
+			category: 'thing',
+		},
+		{
+			input: 'https://store.steampowered.com/app/570/Dota_2/',
+			domain: 'steam',
+			schemaType: 'VideoGame',
+			category: 'thing',
+		},
+		{
+			input: 'https://coingecko.com/en/coins/bitcoin',
+			domain: 'coingecko',
+			schemaType: 'Cryptocurrency',
+			category: 'thing',
+		},
+		{
+			input: 'https://coinmarketcap.com/currencies/bitcoin/',
+			domain: 'coinmarketcap',
+			schemaType: 'Cryptocurrency',
+			category: 'thing',
+		},
+		{
+			input: 'https://www.etsy.com/listing/1234567890/handmade-blue-mug',
+			domain: 'etsy',
+			schemaType: 'Product',
+			category: 'product',
+		},
+		{
+			input: 'https://acme-store.myshopify.com/products/handmade-blue-mug',
+			domain: 'shopify',
+			schemaType: 'Product',
+			category: 'product',
+		},
 	] as const;
 
 	for (const fixture of fixtures) {
 		it(`classifies and resolves ${fixture.domain} URLs`, async () => {
 			const engine = createServerEngine({
+				onClassifierError: () => undefined,
 				plugins: createDefaultTestPlugins(),
 			});
 			const result = await engine.classify({
@@ -94,8 +137,12 @@ describe('v0 platform coverage', () => {
 				classificationSessionId: `fixture-${fixture.domain}`,
 			});
 
-			expect(result.status).toBe('complete');
+			expect(result.status).toBe(fixture.domain === 'imdb' ? 'partial' : 'complete');
 			expect(result.classification?.domain).toBe(fixture.domain);
+			if (fixture.domain === 'imdb') {
+				expect(result.resolved?.atoms ?? []).toHaveLength(0);
+				return;
+			}
 			expect(result.resolved?.resolverId).toBe(`${fixture.domain}-resolver`);
 			expect(result.resolved?.atoms[0]?.schemaType).toBe(fixture.schemaType);
 			expect(result.resolved?.atoms[0]?.category).toBe(fixture.category);
@@ -109,12 +156,13 @@ describe('v0 platform coverage', () => {
 
 	it('covers all required v0 taxonomy buckets with deterministic fixtures', async () => {
 		const engine = createServerEngine({
+			onClassifierError: () => undefined,
 			plugins: createDefaultTestPlugins(),
 		});
 		const taxonomyFixtures = [
 			'https://x.com/intuition',
 			'https://en.wikipedia.org/wiki/Paris_(city)',
-			'https://www.imdb.com/title/tt0133093/',
+			'https://www.themoviedb.org/movie/603',
 			'https://en.wikipedia.org/wiki/OpenAI_(company)',
 			'erc20:0x1111111111111111111111111111111111111111',
 			'https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh',
@@ -139,6 +187,7 @@ describe('v0 platform coverage', () => {
 
 	it('uses domain-api stage when credentials are configured', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [
 				createV0TypeProfilesPlugin(),
@@ -185,6 +234,7 @@ describe('v0 platform coverage', () => {
 
 	it('uses domain-api stage without credentials when the platform allows public api access', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [
 				createV0TypeProfilesPlugin(),
@@ -228,6 +278,7 @@ describe('v0 platform coverage', () => {
 
 	it('falls back to oembed when domain api fails', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [
 				createV0TypeProfilesPlugin(),
@@ -250,6 +301,7 @@ describe('v0 platform coverage', () => {
 								title: 'Spotify oEmbed Result',
 								canonicalId: 'spotify:track:oembed',
 								sameAs: [canonicalUrl],
+								data: { isrcCode: 'USQX91300108' },
 							};
 						},
 					},
@@ -264,7 +316,8 @@ describe('v0 platform coverage', () => {
 		});
 
 		expect(result.resolved?.atoms[0]?.source).toBe('platform-v0:oembed');
-		expect(result.resolved?.atoms[0]?.canonicalId).toBe('spotify:track:oembed');
+		expect(result.resolved?.atoms[0]?.canonicalId).toBe('spotify:track:4iV5W9uYEdYUVa79Axb7Rh');
+		expect(result.resolved?.atoms[0]?.canonicalId).not.toBe('int:isrc:USQX91300108');
 		expect(result.resolved?.fallbackUsed).toBe(true);
 		const metadata = engine.getLastMetadata();
 		const platformMetadata = metadata.platformResolver as {
@@ -274,11 +327,14 @@ describe('v0 platform coverage', () => {
 		};
 		expect(platformMetadata.fallbackStage).toBe('oembed');
 		expect(platformMetadata.attemptedStages).toEqual(['domain-api', 'oembed']);
-		expect(platformMetadata.stageErrors?.[0]).toContain('domain-api:domain api unavailable');
+		expect(platformMetadata.stageErrors?.[0]).toContain(
+			'domain-api:adapter_error: domain api unavailable'
+		);
 	});
 
 	it('uses public-metadata before oembed when a structured public source resolves', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [
 				createV0TypeProfilesPlugin(),
@@ -326,7 +382,7 @@ describe('v0 platform coverage', () => {
 		});
 
 		expect(result.resolved?.atoms[0]?.source).toBe('platform-v0:public-metadata');
-		expect(result.resolved?.atoms[0]?.canonicalId).toBe('spotify:track:public-metadata');
+		expect(result.resolved?.atoms[0]?.canonicalId).toBe('spotify:track:4iV5W9uYEdYUVa79Axb7Rh');
 		expect(result.resolved?.fallbackUsed).toBe(true);
 		const metadata = engine.getLastMetadata();
 		const platformMetadata = metadata.platformResolver as {
@@ -339,6 +395,7 @@ describe('v0 platform coverage', () => {
 
 	it('keeps spotify and x domain-api adapters isolated in the default preset', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: defaultClassificationPreset({
 				includeDefaultUrlPlugin: false,
@@ -395,6 +452,7 @@ describe('v0 platform coverage', () => {
 
 	it('falls back to generic when credentials are missing and intermediate stages produce no data', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [
 				createV0TypeProfilesPlugin(),
@@ -414,6 +472,9 @@ describe('v0 platform coverage', () => {
 		});
 
 		expect(result.resolved?.atoms[0]?.source).toBe('platform-v0:generic');
+		expect(result.resolved?.atoms[0]?.metadata?.skippedStages).toContain(
+			'domain-api:no-credentials'
+		);
 		expect(result.resolved?.fallbackUsed).toBe(true);
 		const metadata = engine.getLastMetadata();
 		const platformMetadata = metadata.platformResolver as {
@@ -424,6 +485,123 @@ describe('v0 platform coverage', () => {
 		expect(platformMetadata.fallbackStage).toBe('generic');
 		expect(platformMetadata.skippedStages).toContain('domain-api:no-credentials');
 		expect(platformMetadata.attemptedStages).toEqual(['oembed', 'opengraph', 'generic']);
+	});
+
+	for (const fixture of [
+		{
+			name: 'a configured adapter throws',
+			reason: 'adapter_error',
+			adapter: () => {
+				throw new Error('fixture adapter failure');
+			},
+		},
+		{
+			name: 'a configured adapter returns null',
+			reason: 'adapter_null',
+			adapter: () => null,
+		},
+	] as const) {
+		it(`surfaces ${fixture.reason} while preserving fallback when ${fixture.name}`, async () => {
+			const engine = createClassificationEngine({
+				onClassifierError: () => undefined,
+				runtime: 'server',
+				plugins: [
+					createV0TypeProfilesPlugin(),
+					createSpotifyPlugin({
+						adapters: { openGraph: fixture.adapter },
+					}),
+				],
+			});
+
+			const result = await engine.classify({
+				input: 'https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh',
+				mode: 'progressive',
+				classificationSessionId: `stage-${fixture.reason}`,
+			});
+
+			expect(result.status).toBe('complete');
+			expect(result.resolved?.atoms[0]?.source).toBe('platform-v0:generic');
+			expect(result.resolverErrors).toHaveLength(1);
+			expect(result.resolverErrors?.[0]?.message).toContain(`opengraph:${fixture.reason}`);
+			expect(engine.getLastMetadata()).toMatchObject({
+				platformResolver: {
+					stageErrors: [expect.stringContaining(`opengraph:${fixture.reason}`)],
+				},
+			});
+		});
+	}
+
+	for (const fixture of [
+		{
+			name: 'a forged miss',
+			shape: 'platform_stage_miss',
+			adapter: () => ({ kind: 'platform_stage_miss' }) as never,
+		},
+		{
+			name: 'a forged miss with attached data',
+			shape: 'platform_stage_miss',
+			adapter: () =>
+				({
+					kind: 'platform_stage_miss',
+					atom: { title: 'partial should not vanish' },
+					diagnostics: [new Error('attached diagnostic')],
+				}) as never,
+		},
+		{
+			name: 'a forged outcome',
+			shape: 'platform_stage_outcome',
+			adapter: () => ({ kind: 'platform_stage_outcome', atom: null, diagnostics: [] }) as never,
+		},
+	] as const) {
+		it(`fails closed with adapter_error when ${fixture.name} is returned`, async () => {
+			const engine = createClassificationEngine({
+				onClassifierError: () => undefined,
+				runtime: 'server',
+				plugins: [
+					createV0TypeProfilesPlugin(),
+					createSpotifyPlugin({
+						adapters: { openGraph: fixture.adapter },
+					}),
+				],
+			});
+
+			const result = await engine.classify({
+				input: 'https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh',
+				mode: 'progressive',
+				classificationSessionId: `stage-forged-${fixture.shape}`,
+			});
+
+			expect(result.status).toBe('complete');
+			expect(result.resolved?.atoms[0]?.source).toBe('platform-v0:generic');
+			expect(result.resolverErrors?.map((error) => error.message)).toEqual([
+				expect.stringMatching(new RegExp(`^opengraph:adapter_error: .*${fixture.shape}`)),
+			]);
+		});
+	}
+
+	it('fails closed with adapter_error when a derived object inherits a genuine outcome brand', async () => {
+		const { createPlatformStageOutcome } = await import('../src/plugins/shared/platform');
+		const genuine = createPlatformStageOutcome(null, []);
+		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
+			runtime: 'server',
+			plugins: [
+				createV0TypeProfilesPlugin(),
+				createSpotifyPlugin({
+					adapters: { openGraph: () => Object.create(genuine) as never },
+				}),
+			],
+		});
+
+		const result = await engine.classify({
+			input: 'https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh',
+			mode: 'progressive',
+			classificationSessionId: 'stage-inherited-outcome-brand',
+		});
+
+		expect(result.status).toBe('complete');
+		expect(result.resolverErrors).toHaveLength(1);
+		expect(result.resolverErrors?.[0]?.message).toContain('expected string');
 	});
 
 	it('resolves Spotify track name/artist/album via domain API adapter in createServerEngine', async () => {
@@ -448,6 +626,7 @@ describe('v0 platform coverage', () => {
 				json: async () => ({
 					id: '4iV5W9uYEdYUVa79Axb7Rh',
 					name: 'Never Gonna Give You Up',
+					external_ids: { isrc: '  us-qx9-13-00108  ' },
 					external_urls: {
 						spotify: 'https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh',
 					},
@@ -464,6 +643,7 @@ describe('v0 platform coverage', () => {
 		};
 
 		const engine = createServerEngine({
+			onClassifierError: () => undefined,
 			plugins: createDefaultTestPlugins({
 				spotifyPluginOptions: {
 					credentials: {
@@ -477,7 +657,7 @@ describe('v0 platform coverage', () => {
 							clientId: 'spotify-client-id',
 							clientSecret: 'spotify-client-secret',
 							market: 'US',
-							fetch,
+							fetch: legacySpotifyFetch(fetch),
 						}),
 					},
 				},
@@ -493,18 +673,24 @@ describe('v0 platform coverage', () => {
 		expect(callCount).toBe(2);
 		expect(result.resolved?.atoms[0]?.source).toBe('platform-v0:domain-api');
 		expect(result.resolved?.atoms[0]?.title).toBe('Never Gonna Give You Up');
+		expect(result.resolved?.atoms[0]?.canonicalId).toBe('int:isrc:USQX91300108');
+		expect(result.resolved?.atoms[0]?.hints).toMatchObject({
+			providerCanonicalIds: ['spotify:track:4iV5W9uYEdYUVa79Axb7Rh'],
+		});
 		expect(result.resolved?.atoms[0]?.data).toMatchObject({
 			'@context': 'https://schema.org/',
 			'@type': 'MusicRecording',
 			name: 'Never Gonna Give You Up',
 			byArtist: 'Rick Astley',
 			inAlbum: 'Whenever You Need Somebody',
+			isrcCode: 'USQX91300108',
 			sameAs: ['https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh'],
 		});
 
 		const data = result.resolved?.classifications[0]?.data as Record<string, unknown>;
 		expect(data.sameAs).toEqual(['https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh']);
-		expect(data.identifier).toBeUndefined();
+		expect(data.isrcCode).toBe('USQX91300108');
+		expect(data.identifier).toBe('int:isrc:USQX91300108');
 	});
 
 	it('resolves Spotify podcast shows and episodes via domain API adapter in createServerEngine', async () => {
@@ -563,6 +749,7 @@ describe('v0 platform coverage', () => {
 		};
 
 		const engine = createServerEngine({
+			onClassifierError: () => undefined,
 			plugins: createDefaultTestPlugins({
 				spotifyPluginOptions: {
 					credentials: {
@@ -576,7 +763,7 @@ describe('v0 platform coverage', () => {
 							clientId: 'spotify-client-id',
 							clientSecret: 'spotify-client-secret',
 							market: 'US',
-							fetch,
+							fetch: legacySpotifyFetch(fetch),
 						}),
 					},
 				},
@@ -625,23 +812,18 @@ describe('v0 platform coverage', () => {
 	});
 
 	it('resolves YouTube video title via oEmbed adapter in createServerEngine', async () => {
-		const fetch: NonNullable<Parameters<typeof createYouTubeOEmbedAdapter>[0]>['fetch'] = async (
-			input: string
-		) => {
+		const fetch = createPinAwareFetch(async (input: string) => {
 			expect(input).toContain('https://www.youtube.com/oembed');
 			expect(input).toContain('url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ');
-			return {
-				ok: true,
-				status: 200,
-				json: async () => ({
-					title: 'Rick Astley - Never Gonna Give You Up (Official Video)',
-					author_name: 'Rick Astley',
-					thumbnail_url: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
-				}),
-			};
-		};
+			return Response.json({
+				title: 'Rick Astley - Never Gonna Give You Up (Official Video)',
+				author_name: 'Rick Astley',
+				thumbnail_url: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+			});
+		});
 
 		const engine = createServerEngine({
+			onClassifierError: () => undefined,
 			plugins: createDefaultTestPlugins({
 				platformV0PluginOptions: {
 					adapters: {

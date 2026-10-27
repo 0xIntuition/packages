@@ -37,6 +37,7 @@ describe('plugin security policy contract', () => {
 
 	it('blocks ai-capable plugins in client runtime', () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'client',
 			autoInit: false,
 		});
@@ -55,6 +56,7 @@ describe('plugin security policy contract', () => {
 
 	it('allows ai-capable plugins in server runtime when permission is present', () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			autoInit: false,
 		});

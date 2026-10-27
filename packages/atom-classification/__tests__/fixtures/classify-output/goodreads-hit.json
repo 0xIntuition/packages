@@ -1,0 +1,41 @@
+{
+	"name": "goodreads-hit",
+	"url": "https://www.goodreads.com/book/show/4671",
+	"atom": {
+		"schemaType": "Book",
+		"category": "thing",
+		"title": "Fixture goodreads-hit",
+		"canonicalId": "openlibrary:work:OL468431W",
+		"sameAs": ["https://www.goodreads.com/book/show/4671"],
+		"hints": {
+			"identifiers": {
+				"goodreadsBookId": "4671",
+				"olid": "OL468431W",
+				"isbn": "9780743273565"
+			},
+			"providerCanonicalIds": ["goodreads:book:4671"]
+		},
+		"metadata": {},
+		"data": {
+			"@type": "Book",
+			"identifier": "int:olid:OL468431W",
+			"name": "Fixture goodreads-hit"
+		}
+	},
+	"identifierRung": [
+		{
+			"rung": "olid",
+			"value": "OL468431W"
+		},
+		{
+			"rung": "isbn",
+			"value": "9780743273565"
+		},
+		{
+			"rung": "goodreads:book",
+			"value": "4671"
+		}
+	],
+	"aliases": ["int:goodreads:book:4671", "int:isbn:9780743273565"],
+	"identifierSet": ["int:olid:OL468431W", "int:isbn:9780743273565", "int:goodreads:book:4671"]
+}

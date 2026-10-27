@@ -1,0 +1,35 @@
+{
+	"name": "openlibrary-work",
+	"url": "https://openlibrary.org/works/OL468431W",
+	"atom": {
+		"schemaType": "Book",
+		"category": "thing",
+		"title": "Fixture openlibrary-work",
+		"canonicalId": "openlibrary:work:OL468431W",
+		"sameAs": ["https://openlibrary.org/works/OL468431W"],
+		"hints": {
+			"identifiers": {
+				"workOlid": "OL468431W",
+				"goodreadsBookId": "4671"
+			}
+		},
+		"metadata": {},
+		"data": {
+			"@type": "Book",
+			"identifier": "int:olid:OL468431W",
+			"name": "Fixture openlibrary-work"
+		}
+	},
+	"identifierRung": [
+		{
+			"rung": "olid",
+			"value": "OL468431W"
+		},
+		{
+			"rung": "goodreads:book",
+			"value": "4671"
+		}
+	],
+	"aliases": ["int:goodreads:book:4671"],
+	"identifierSet": ["int:olid:OL468431W", "int:goodreads:book:4671"]
+}

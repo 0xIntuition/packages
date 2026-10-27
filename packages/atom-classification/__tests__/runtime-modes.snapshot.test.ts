@@ -12,6 +12,7 @@ describe('runtime mode output snapshots', () => {
 	for (const mode of modes) {
 		it(`matches deterministic snapshot for ${mode}`, async () => {
 			const engine = createServerEngine({
+				onClassifierError: () => undefined,
 				now: () => new Date(SNAPSHOT_TIME),
 				plugins: createDefaultTestPlugins(),
 			});

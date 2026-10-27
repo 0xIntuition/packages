@@ -1,3 +1,9 @@
+import type {
+	CacheOperationOptions,
+	CancellableCacheAdapter,
+} from '@0xintuition/pipeline-runtime/cache';
+
+import { resolveCanonicalIid } from './identifier';
 import type { EnrichmentArtifact } from './types';
 
 export interface CacheAdapter {
@@ -10,6 +16,46 @@ export interface CachedEntry {
 	artifacts: EnrichmentArtifact[];
 	cachedAt: string;
 	ttlMs: number;
+}
+
+export type SignalAwareCacheAdapter = CacheAdapter & {
+	readonly signalAware: true;
+	get(key: string, options?: CacheOperationOptions): Promise<CachedEntry | null>;
+	set(
+		key: string,
+		entry: CachedEntry,
+		ttlMs: number,
+		options?: CacheOperationOptions
+	): Promise<void>;
+	delete(key: string, options?: CacheOperationOptions): Promise<void>;
+};
+
+/**
+ * @internal Additive bridge to the pipeline-runtime cancellation contract.
+ * Adapters opt in with `signalAware: true`; unmarked adapters keep their exact
+ * legacy argument lists. An explicit marker avoids unreliable function-arity
+ * detection when optional arguments use default parameters.
+ */
+export function toCancellableCacheAdapter(
+	cache: CacheAdapter
+): CancellableCacheAdapter<CachedEntry> {
+	if (!isSignalAwareCacheAdapter(cache)) {
+		return {
+			get: (key) => cache.get(key),
+			set: (key, entry, ttlMs) => cache.set(key, entry, ttlMs),
+			remove: (key) => cache.delete(key),
+		};
+	}
+
+	return {
+		get: (key, options) => cache.get(key, options),
+		set: (key, entry, ttlMs, options) => cache.set(key, entry, ttlMs, options),
+		remove: (key, options) => cache.delete(key, options),
+	};
+}
+
+function isSignalAwareCacheAdapter(cache: CacheAdapter): cache is SignalAwareCacheAdapter {
+	return (cache as { signalAware?: unknown }).signalAware === true;
 }
 
 type CreateMemoryCacheAdapterOptions = {
@@ -36,8 +82,12 @@ type CreateUpstashCacheAdapterFromEnvOptions = {
 	httpTimeoutMs?: number;
 };
 
+type CreateUpstashCacheAdapterFromInjectedEnvOptions = Omit<
+	CreateUpstashCacheAdapterFromEnvOptions,
+	'env'
+>;
+
 const DEFAULT_UPSTASH_HTTP_TIMEOUT_MS = 1_500;
-export const NO_IDENTITY_POLICY_MARKER = 'no-identity';
 
 export function createMemoryCacheAdapter(
 	options: CreateMemoryCacheAdapterOptions = {}
@@ -45,8 +95,10 @@ export function createMemoryCacheAdapter(
 	const storage = new Map<string, StoredEntry>();
 	const getNow = options.now ?? (() => Date.now());
 
-	return {
-		async get(key) {
+	const adapter: SignalAwareCacheAdapter = {
+		signalAware: true,
+		async get(key, operationOptions: CacheOperationOptions = {}) {
+			throwIfCacheOperationAborted(operationOptions.signal);
 			const stored = storage.get(key);
 			if (!stored) {
 				return null;
@@ -62,7 +114,8 @@ export function createMemoryCacheAdapter(
 			return cloneCachedEntry(stored.entry);
 		},
 
-		async set(key, entry, ttlMs) {
+		async set(key, entry, ttlMs, operationOptions: CacheOperationOptions = {}) {
+			throwIfCacheOperationAborted(operationOptions.signal);
 			const now = getNow();
 			storage.set(key, {
 				entry: cloneCachedEntry(entry),
@@ -75,18 +128,35 @@ export function createMemoryCacheAdapter(
 			}
 		},
 
-		async delete(key) {
+		async delete(key, operationOptions: CacheOperationOptions = {}) {
+			throwIfCacheOperationAborted(operationOptions.signal);
 			storage.delete(key);
 		},
 	};
+
+	return adapter;
 }
 
 export function createUpstashCacheAdapterFromEnv(
-	options: CreateUpstashCacheAdapterFromEnvOptions = {}
+	env?: Record<string, string | undefined>,
+	options?: CreateUpstashCacheAdapterFromInjectedEnvOptions
+): CacheAdapter | undefined;
+export function createUpstashCacheAdapterFromEnv(
+	options?: CreateUpstashCacheAdapterFromEnvOptions
+): CacheAdapter | undefined;
+export function createUpstashCacheAdapterFromEnv(
+	env: Record<string, string | undefined> | CreateUpstashCacheAdapterFromEnvOptions = process.env,
+	injectedOptions: CreateUpstashCacheAdapterFromInjectedEnvOptions = {}
 ): CacheAdapter | undefined {
-	const env = options.env ?? process.env;
-	const baseUrl = env.UPSTASH_REDIS_REST_URL?.trim();
-	const token = env.UPSTASH_REDIS_REST_TOKEN?.trim();
+	const legacyOptions = isFromEnvOptions(env) ? env : undefined;
+	const injectedEnv: Record<string, string | undefined> = legacyOptions
+		? (legacyOptions.env ?? process.env)
+		: isEnvRecord(env)
+			? env
+			: process.env;
+	const options = legacyOptions ?? injectedOptions;
+	const baseUrl = injectedEnv.UPSTASH_REDIS_REST_URL?.trim();
+	const token = injectedEnv.UPSTASH_REDIS_REST_TOKEN?.trim();
 
 	if (!baseUrl || !token) {
 		return undefined;
@@ -100,6 +170,37 @@ export function createUpstashCacheAdapterFromEnv(
 	});
 }
 
+function isFromEnvOptions(
+	value: Record<string, string | undefined> | CreateUpstashCacheAdapterFromEnvOptions
+): value is CreateUpstashCacheAdapterFromEnvOptions {
+	if (!isPlainObject(value)) {
+		return false;
+	}
+
+	const keys = Object.keys(value);
+	return (
+		keys.length === 0 ||
+		keys.some((key) => key === 'env' || key === 'fetcher' || key === 'httpTimeoutMs')
+	);
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+	if (!value || typeof value !== 'object' || Array.isArray(value)) {
+		return false;
+	}
+
+	const prototype = Object.getPrototypeOf(value);
+	return prototype === Object.prototype || prototype === null;
+}
+
+function isEnvRecord(value: unknown): value is Record<string, string | undefined> {
+	return (
+		isPlainObject(value) &&
+		!('env' in value || 'fetcher' in value || 'httpTimeoutMs' in value) &&
+		Object.values(value).every((entry) => typeof entry === 'string' || entry === undefined)
+	);
+}
+
 export function createUpstashCacheAdapter(options: CreateUpstashCacheAdapterOptions): CacheAdapter {
 	const baseUrl = options.baseUrl.endsWith('/') ? options.baseUrl.slice(0, -1) : options.baseUrl;
 	const token = options.token;
@@ -109,8 +210,9 @@ export function createUpstashCacheAdapter(options: CreateUpstashCacheAdapterOpti
 		Authorization: `Bearer ${token}`,
 	};
 
-	return {
-		async get(key) {
+	const adapter: SignalAwareCacheAdapter = {
+		signalAware: true,
+		async get(key, operationOptions: CacheOperationOptions = {}) {
 			const payload = await callUpstashCommand({
 				baseUrl,
 				fetcher,
@@ -118,6 +220,7 @@ export function createUpstashCacheAdapter(options: CreateUpstashCacheAdapterOpti
 				args: [key],
 				headers,
 				httpTimeoutMs,
+				signal: operationOptions.signal,
 			});
 			const result = payload?.result;
 			if (typeof result !== 'string') {
@@ -132,7 +235,7 @@ export function createUpstashCacheAdapter(options: CreateUpstashCacheAdapterOpti
 			}
 		},
 
-		async set(key, entry, ttlMs) {
+		async set(key, entry, ttlMs, operationOptions: CacheOperationOptions = {}) {
 			await callUpstashCommand({
 				baseUrl,
 				fetcher,
@@ -143,10 +246,11 @@ export function createUpstashCacheAdapter(options: CreateUpstashCacheAdapterOpti
 				},
 				headers,
 				httpTimeoutMs,
+				signal: operationOptions.signal,
 			});
 		},
 
-		async delete(key) {
+		async delete(key, operationOptions: CacheOperationOptions = {}) {
 			await callUpstashCommand({
 				baseUrl,
 				fetcher,
@@ -154,15 +258,25 @@ export function createUpstashCacheAdapter(options: CreateUpstashCacheAdapterOpti
 				args: [key],
 				headers,
 				httpTimeoutMs,
+				signal: operationOptions.signal,
 			});
 		},
 	};
+
+	return adapter;
 }
+
+export const NO_IDENTITY_POLICY_MARKER = 'no-identity';
 
 export function buildCacheKey(
 	pluginId: string,
 	input: {
 		atomType: string;
+		identifier?: {
+			iid: string;
+			scheme?: string;
+			value?: string;
+		};
 		hints?: {
 			url?: string;
 			name?: string;
@@ -172,8 +286,17 @@ export function buildCacheKey(
 		};
 		jsonLd?: Record<string, unknown>;
 	},
-	policy?: { identity?: string }
+	pluginVersionOrPolicy?: string | { identity?: string; version?: string }
 ): string {
+	const policy = typeof pluginVersionOrPolicy === 'object' ? pluginVersionOrPolicy : undefined;
+	const pluginVersion =
+		typeof pluginVersionOrPolicy === 'string' ? pluginVersionOrPolicy : policy?.version;
+	const prefix = `enrichment:${normalizePluginId(pluginId)}${pluginVersion === undefined ? '' : `:v:${encodeURIComponent(pluginVersion)}`}`;
+	const canonicalIid = resolveCanonicalIid(input);
+	if (canonicalIid) {
+		return `${prefix}:iid:${encodeURIComponent(canonicalIid)}${policy?.identity ? `:policy:${encodeURIComponent(policy.identity)}` : ''}`;
+	}
+
 	const normalizedIdentifiers = normalizeIdentifiers(input.hints?.identifiers);
 	const normalizedName = normalizeName(
 		input.hints?.name ?? (typeof input.jsonLd?.name === 'string' ? input.jsonLd.name : undefined)
@@ -189,10 +312,12 @@ export function buildCacheKey(
 		input.hints?.locale ??
 			(typeof input.jsonLd?.inLanguage === 'string' ? input.jsonLd.inLanguage : undefined)
 	);
-	const normalizedJsonLd = normalizeStructuredValue(input.jsonLd ?? {});
+	const normalizedJsonLd = normalizeStructuredValue(
+		withoutDescriptiveIdentifierRungs(input.jsonLd)
+	);
 
 	const fingerprint = stableStringify({
-		policy: { identity: policy?.identity ?? NO_IDENTITY_POLICY_MARKER },
+		...(policy ? { policy: { identity: policy.identity ?? NO_IDENTITY_POLICY_MARKER } } : {}),
 		atomType: input.atomType,
 		hints: {
 			name: normalizedName,
@@ -204,7 +329,16 @@ export function buildCacheKey(
 		jsonLd: normalizedJsonLd,
 	});
 
-	return `enrichment:${normalizePluginId(pluginId)}:${hashString(fingerprint)}`;
+	return `${prefix}:${hashString(fingerprint)}`;
+}
+
+/** Descriptive identifier rungs are additive metadata, never cache identity. */
+function withoutDescriptiveIdentifierRungs(
+	jsonLd: Record<string, unknown> | undefined
+): Record<string, unknown> {
+	const fingerprinted = { ...jsonLd };
+	delete fingerprinted.identifierRung;
+	return fingerprinted;
 }
 
 export function isCachedEntryFresh(entry: CachedEntry, now = Date.now()): boolean {
@@ -347,9 +481,19 @@ async function callUpstashCommand(params: {
 	query?: Record<string, string>;
 	headers: Record<string, string>;
 	httpTimeoutMs: number;
+	signal?: AbortSignal;
 }): Promise<{ result?: unknown }> {
 	const controller = new AbortController();
 	const timeout = setTimeout(() => controller.abort(), params.httpTimeoutMs);
+	const onParentAbort = () => abortWithReason(controller, params.signal?.reason);
+	let removeParentListener: (() => void) | undefined;
+
+	if (params.signal?.aborted) {
+		onParentAbort();
+	} else if (params.signal) {
+		params.signal.addEventListener('abort', onParentAbort, { once: true });
+		removeParentListener = () => params.signal?.removeEventListener('abort', onParentAbort);
+	}
 
 	try {
 		const response = await params.fetcher(
@@ -373,7 +517,35 @@ async function callUpstashCommand(params: {
 		return payload;
 	} finally {
 		clearTimeout(timeout);
+		removeParentListener?.();
 	}
+}
+
+function abortWithReason(controller: AbortController, reason: unknown): void {
+	if (controller.signal.aborted) {
+		return;
+	}
+
+	if (reason === undefined) {
+		controller.abort();
+		return;
+	}
+
+	controller.abort(reason);
+}
+
+function throwIfCacheOperationAborted(signal: AbortSignal | undefined): void {
+	if (!signal?.aborted) {
+		return;
+	}
+
+	if (signal.reason !== undefined) {
+		throw signal.reason;
+	}
+
+	const error = new Error('Cache operation aborted.');
+	error.name = 'AbortError';
+	throw error;
 }
 
 function buildUpstashCommandUrl(

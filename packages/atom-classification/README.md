@@ -113,3 +113,16 @@ opt into the lexical plugin.
 
 See the private [external plugin example](../../examples/atom-classification-plugin).
 It consumes the public package API and is not published to npm.
+
+## Promise execution and public helpers
+
+`createServerEngine({ plugins })` and `createClientEngine({ plugins })` work without an error
+observer. Optional `onClassifierError` observers may be asynchronous; their failures do not alter
+classification results. `engine.classify(input, { signal })` supports caller cancellation and bounds
+each resolver, including its cache operations, by its configured deadline. `classifyOutcome` captures
+result or boundary validation failures using the shared pipeline outcome vocabulary.
+
+Public compatibility paths include `artifact-types`, `plugin-api`, `outcome`, `engine`,
+`identifier-rung-projection`, `url-hygiene`, `ssrf`, `ssrf-guard`, `provider-metrics-contract`, and
+`adapters/upstash`. The package has no Effect dependency. FromEnv cache helpers read credentials
+only when explicitly called; importing the package does not read the environment.

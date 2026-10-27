@@ -1,4 +1,4 @@
-import { slugify, toStringMaybe, tryParseUrl, withPlatformMetadata } from '../shared/helpers';
+import { toStringMaybe, tryParseUrl, withPlatformMetadata } from '../shared/helpers';
 import {
 	createPlatformPlugin,
 	type PlatformV0PluginOptions,
@@ -13,10 +13,23 @@ type TmdbTarget = {
 	canonicalUrl: string;
 };
 
-export type TmdbPluginOptions = PlatformV0PluginOptions;
+export const TMDB_UNAVAILABLE_COPY =
+	"We can't source this title from TMDB; try the Letterboxd or Wikipedia link";
+
+type TmdbPlatformAdapters = Omit<NonNullable<PlatformV0PluginOptions['adapters']>, 'openGraph'>;
+
+export type TmdbPluginOptions = Omit<PlatformV0PluginOptions, 'adapters'> & {
+	adapters?: TmdbPlatformAdapters & { openGraph?: never };
+};
 
 export const tmdbProfile: PlatformV0Profile = {
 	domain: 'tmdb',
+	display: {
+		classificationSlugs: ['movie', 'tv-series'],
+		exampleUrl: 'https://www.themoviedb.org/movie/27205',
+		host: 'themoviedb.org',
+		label: 'TMDB',
+	},
 	supportsOEmbed: false,
 	classifier: {
 		id: 'tmdb-url-classifier',
@@ -43,21 +56,23 @@ export const tmdbProfile: PlatformV0Profile = {
 	resolveGeneric({ classification, canonicalUrl, now }) {
 		const mediaType = toTmdbMediaType(toStringMaybe(classification.meta.mediaType)) ?? 'movie';
 		const schemaType = mediaType === 'tv' ? 'TVSeries' : 'Movie';
-		const tmdbId = toStringMaybe(classification.meta.tmdbId) ?? slugify(canonicalUrl);
-		const label = mediaType === 'tv' ? 'TMDB TV Series' : 'TMDB Movie';
-		const name = `${label} ${tmdbId}`.trim();
+		const tmdbId = toStringMaybe(classification.meta.tmdbId);
+		if (!tmdbId) {
+			return null;
+		}
 
 		return withPlatformMetadata(
 			{
 				schemaType,
 				category: 'thing',
-				title: name,
+				// Ruling R1b: this is operational copy, never TMDB-derived title data.
+				title: TMDB_UNAVAILABLE_COPY,
 				canonicalId: `tmdb:${mediaType}:${tmdbId}`,
 				sameAs: [canonicalUrl],
+				metadata: { identityBridgeEligible: true, resolutionMode: 'identity-only' },
 				data: {
 					'@context': 'https://schema.org/',
 					'@type': schemaType,
-					name,
 					identifier: `tmdb:${mediaType}:${tmdbId}`,
 					sameAs: [canonicalUrl],
 				},
@@ -70,17 +85,25 @@ export const tmdbProfile: PlatformV0Profile = {
 				fetchedAt: now,
 				sourceUrl: canonicalUrl,
 				confidence: classification.confidence,
+				resolutionMode: 'identity-only',
 			}
 		);
 	},
 };
 
 export function createTmdbPlugin(options: TmdbPluginOptions = {}) {
+	const rawAdapters = (options as PlatformV0PluginOptions).adapters;
+	const { openGraph: _forbiddenOpenGraphAdapter, ...adapters } = rawAdapters ?? {};
 	return createPlatformPlugin({
 		pluginId: 'tmdb',
 		resolverId: 'tmdb-resolver',
 		profile: tmdbProfile,
-		options,
+		// JP ruling R1b: "TMDB is never a source in any form — bulk or in-app."
+		// Strip the slot at runtime too, so untyped/legacy callers cannot restore it.
+		options: {
+			...options,
+			adapters: Object.keys(adapters).length > 0 ? adapters : undefined,
+		},
 	});
 }
 
@@ -96,6 +119,9 @@ function parseTmdbUrl(input: string): TmdbTarget | undefined {
 	}
 
 	const segments = parsed.pathname.split('/').filter(Boolean);
+	if (segments.length !== 2) {
+		return undefined;
+	}
 	const mediaType = toTmdbMediaType(segments[0]);
 	const tmdbId = parseTmdbId(segments[1]);
 	if (!mediaType || !tmdbId) {
@@ -118,6 +144,6 @@ function toTmdbMediaType(value: string | undefined): TmdbMediaType | undefined {
 }
 
 function parseTmdbId(value: string | undefined): string | undefined {
-	const match = value?.match(/^(\d+)/);
+	const match = value?.match(/^([1-9]\d*)(?:[-_][^/]+)?$/);
 	return match?.[1];
 }

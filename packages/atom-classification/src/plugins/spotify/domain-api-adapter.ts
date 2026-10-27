@@ -1,24 +1,21 @@
+import {
+	buildSpotifyItemUrl,
+	type FetchLike,
+	spotifyApiGetJson,
+	spotifyLooseObjectSchema,
+} from '@0xintuition/atom-enrichment/spotify-client';
 import type { ResolverAtom } from '../../plugins';
-import type { PlatformStageAdapter } from '../shared/platform';
+import { PLATFORM_STAGE_MISS, type PlatformStageAdapter } from '../shared/platform';
+import { toProviderStageDiagnostic } from '../shared/provider-stage-diagnostic';
 
-type SpotifyTargetType = 'track' | 'album' | 'artist' | 'show' | 'episode';
-
-type FetchLike = (
-	input: string,
-	init?: {
-		method?: string;
-		headers?: Record<string, string>;
-		body?: string;
-	}
-) => Promise<{
-	ok: boolean;
-	status: number;
-	json(): Promise<unknown>;
-}>;
+type SpotifyTargetType = 'track' | 'album' | 'artist' | 'playlist' | 'show' | 'episode';
 
 type SpotifyTrackPayload = {
 	id?: string;
 	name?: string;
+	external_ids?: {
+		isrc?: string;
+	};
 	external_urls?: {
 		spotify?: string;
 	};
@@ -29,6 +26,7 @@ type SpotifyTrackPayload = {
 };
 
 type SpotifyAlbumPayload = {
+	external_ids?: { upc?: string; ean?: string };
 	id?: string;
 	name?: string;
 	external_urls?: {
@@ -42,6 +40,22 @@ type SpotifyArtistPayload = {
 	name?: string;
 	external_urls?: {
 		spotify?: string;
+	};
+};
+
+type SpotifyPlaylistPayload = {
+	id?: string;
+	name?: string;
+	description?: string;
+	external_urls?: {
+		spotify?: string;
+	};
+	images?: Array<{ url?: string }>;
+	owner?: {
+		display_name?: string;
+	};
+	tracks?: {
+		total?: number;
 	};
 };
 
@@ -80,10 +94,23 @@ type SpotifyEpisodePayload = {
 	};
 };
 
+type SpotifyPayload =
+	| SpotifyTrackPayload
+	| SpotifyAlbumPayload
+	| SpotifyArtistPayload
+	| SpotifyPlaylistPayload
+	| SpotifyShowPayload
+	| SpotifyEpisodePayload;
+
 export type SpotifyDomainApiAdapterOptions = {
 	clientId?: string;
 	clientSecret?: string;
+	/** Defaults to `US` for shows and episodes, which Spotify answers 404 without a market. */
 	market?: string;
+	/**
+	 * Transport seam for fixtures: a pin-aware fetch (`createPinAwareFetch`). Any other fetcher,
+	 * including the default `globalThis.fetch`, is ignored and the shared pinned transport dials.
+	 */
 	fetch?: FetchLike;
 };
 
@@ -92,27 +119,23 @@ export type SpotifyDomainApiAdapter = PlatformStageAdapter;
 export function createSpotifyDomainApiAdapter(
 	options: SpotifyDomainApiAdapterOptions = {}
 ): SpotifyDomainApiAdapter {
-	const fetcher = options.fetch ?? resolveGlobalFetch();
+	const fetcher = options.fetch ?? (globalThis.fetch as FetchLike);
 
-	return async ({ domain, classification, canonicalUrl, credential }) => {
+	return async ({ domain, classification, canonicalUrl, credential, signal, deadlineAtMs }) => {
 		if (domain !== 'spotify') {
-			return null;
-		}
-
-		if (!fetcher) {
-			return null;
+			return PLATFORM_STAGE_MISS;
 		}
 
 		const targetType = normalizeSpotifyTargetType(classification.subtype);
 		if (!targetType) {
-			return null;
+			return PLATFORM_STAGE_MISS;
 		}
 
 		const resourceId =
 			toStringMaybe(classification.meta.resourceId) ??
 			extractSpotifyResourceIdFromUrl(canonicalUrl, targetType);
 		if (!resourceId) {
-			return null;
+			return PLATFORM_STAGE_MISS;
 		}
 
 		const clientId =
@@ -120,33 +143,37 @@ export function createSpotifyDomainApiAdapter(
 		const clientSecret =
 			toStringMaybe(options.clientSecret) ?? toStringMaybe(credential?.clientSecret) ?? undefined;
 		if (!clientId || !clientSecret) {
-			return null;
+			return PLATFORM_STAGE_MISS;
 		}
 
-		const accessToken = await fetchSpotifyAccessToken(fetcher, clientId, clientSecret);
-		const payload = await fetchSpotifyPayload(fetcher, {
-			targetType,
-			resourceId,
-			accessToken,
-			market: options.market,
-		});
+		// The shared client owns the token (cached across classification and enrichment), the
+		// single 401 refresh, the pinned transport, the body cap and the `spotify` request metrics.
+		// Its failures are structured `ProviderHttpError`s the stage runner turns into stage errors.
+		const payload = await spotifyApiGetJson({
+			fetch: fetcher,
+			clientId,
+			clientSecret,
+			url: buildSpotifyItemUrl({ type: targetType, id: resourceId, market: options.market }),
+			schema: spotifyLooseObjectSchema,
+			operation: 'classify_item',
+			signal,
+			deadlineAtMs,
+		}).then(
+			(value) => value as SpotifyPayload,
+			(error: unknown) => {
+				throw toProviderStageDiagnostic(error, 'Spotify', { signal, deadlineAtMs });
+			}
+		);
 
-		return mapSpotifyPayloadToResolverAtom({
-			targetType,
-			resourceId,
-			canonicalUrl,
-			payload,
-		});
+		return (
+			mapSpotifyPayloadToResolverAtom({
+				targetType,
+				resourceId,
+				canonicalUrl,
+				payload,
+			}) ?? PLATFORM_STAGE_MISS
+		);
 	};
-}
-
-function resolveGlobalFetch(): FetchLike | undefined {
-	const globalFetch = (globalThis as { fetch?: FetchLike }).fetch;
-	if (typeof globalFetch !== 'function') {
-		return undefined;
-	}
-
-	return globalFetch;
 }
 
 function normalizeSpotifyTargetType(value: string): SpotifyTargetType | undefined {
@@ -154,6 +181,7 @@ function normalizeSpotifyTargetType(value: string): SpotifyTargetType | undefine
 		value === 'track' ||
 		value === 'album' ||
 		value === 'artist' ||
+		value === 'playlist' ||
 		value === 'show' ||
 		value === 'episode'
 	) {
@@ -199,77 +227,6 @@ function extractSpotifyResourceIdFromUrl(
 	}
 }
 
-async function fetchSpotifyAccessToken(
-	fetcher: FetchLike,
-	clientId: string,
-	clientSecret: string
-): Promise<string> {
-	const response = await fetcher('https://accounts.spotify.com/api/token', {
-		method: 'POST',
-		headers: {
-			authorization: `Basic ${base64Encode(`${clientId}:${clientSecret}`)}`,
-			'content-type': 'application/x-www-form-urlencoded',
-		},
-		body: 'grant_type=client_credentials',
-	});
-
-	if (!response.ok) {
-		throw new Error(`HTTP ${response.status} from Spotify token endpoint.`);
-	}
-
-	const payload = toRecordMaybe(await response.json()) ?? {};
-	const accessToken = toStringMaybe(payload.access_token);
-	if (!accessToken) {
-		throw new Error('Spotify token response did not include access_token.');
-	}
-
-	return accessToken;
-}
-
-async function fetchSpotifyPayload(
-	fetcher: FetchLike,
-	input: {
-		targetType: SpotifyTargetType;
-		resourceId: string;
-		accessToken: string;
-		market?: string;
-	}
-): Promise<
-	| SpotifyTrackPayload
-	| SpotifyAlbumPayload
-	| SpotifyArtistPayload
-	| SpotifyShowPayload
-	| SpotifyEpisodePayload
-> {
-	const endpoint = new URL(
-		`https://api.spotify.com/v1/${encodeURIComponent(input.targetType)}s/${encodeURIComponent(
-			input.resourceId
-		)}`
-	);
-	const market = toStringMaybe(input.market);
-	if (market) {
-		endpoint.searchParams.set('market', market);
-	}
-
-	const response = await fetcher(endpoint.toString(), {
-		headers: {
-			authorization: `Bearer ${input.accessToken}`,
-		},
-	});
-
-	if (!response.ok) {
-		throw new Error(`HTTP ${response.status} from Spotify ${input.targetType} endpoint.`);
-	}
-
-	const payload = toRecordMaybe(await response.json()) ?? {};
-	return payload as
-		| SpotifyTrackPayload
-		| SpotifyAlbumPayload
-		| SpotifyArtistPayload
-		| SpotifyShowPayload
-		| SpotifyEpisodePayload;
-}
-
 function mapSpotifyPayloadToResolverAtom(input: {
 	targetType: SpotifyTargetType;
 	resourceId: string;
@@ -278,6 +235,7 @@ function mapSpotifyPayloadToResolverAtom(input: {
 		| SpotifyTrackPayload
 		| SpotifyAlbumPayload
 		| SpotifyArtistPayload
+		| SpotifyPlaylistPayload
 		| SpotifyShowPayload
 		| SpotifyEpisodePayload;
 }): ResolverAtom {
@@ -286,6 +244,7 @@ function mapSpotifyPayloadToResolverAtom(input: {
 		const artistNames = extractArtistNames(payload.artists);
 		const byArtist = artistNames.length > 0 ? artistNames.join(', ') : undefined;
 		const inAlbum = toStringMaybe(payload.album?.name);
+		const isrcCode = toStringMaybe(payload.external_ids?.isrc);
 		const name = toStringMaybe(payload.name) ?? `Spotify Track ${input.resourceId}`;
 		const spotifyUrl = toStringMaybe(payload.external_urls?.spotify) ?? input.canonicalUrl;
 		const spotifyId = toStringMaybe(payload.id) ?? input.resourceId;
@@ -301,6 +260,7 @@ function mapSpotifyPayloadToResolverAtom(input: {
 				'@type': 'MusicRecording',
 				name,
 				sameAs: [spotifyUrl],
+				...(isrcCode ? { isrcCode } : {}),
 				...(byArtist
 					? {
 							byArtist,
@@ -331,11 +291,13 @@ function mapSpotifyPayloadToResolverAtom(input: {
 
 		return {
 			schemaType: 'MusicAlbum',
-			category: 'music-album',
+			category: 'song',
 			title: name,
 			canonicalId: `spotify:album:${spotifyId}`,
 			sameAs: [spotifyUrl],
 			data: {
+				...(payload.external_ids?.upc ? { upc: payload.external_ids.upc } : {}),
+				...(payload.external_ids?.ean ? { ean: payload.external_ids.ean } : {}),
 				'@context': 'https://schema.org/',
 				'@type': 'MusicAlbum',
 				name,
@@ -363,7 +325,7 @@ function mapSpotifyPayloadToResolverAtom(input: {
 
 		return {
 			schemaType: 'MusicGroup',
-			category: 'artist',
+			category: 'song',
 			title: name,
 			canonicalId: `spotify:artist:${spotifyId}`,
 			sameAs: [spotifyUrl],
@@ -378,6 +340,45 @@ function mapSpotifyPayloadToResolverAtom(input: {
 				provider: 'spotify-web-api',
 				sourceUrl: spotifyUrl,
 				sourceFamily: 'domain-api',
+			},
+		};
+	}
+
+	if (input.targetType === 'playlist') {
+		const payload = input.payload as SpotifyPlaylistPayload;
+		const name = toStringMaybe(payload.name) ?? `Spotify Playlist ${input.resourceId}`;
+		const description = toStringMaybe(payload.description);
+		const image = toStringMaybe(payload.images?.[0]?.url);
+		const author = toStringMaybe(payload.owner?.display_name);
+		const numTracks =
+			typeof payload.tracks?.total === 'number' && Number.isFinite(payload.tracks.total)
+				? payload.tracks.total
+				: undefined;
+
+		return {
+			schemaType: 'MusicPlaylist',
+			category: 'song',
+			title: name,
+			description,
+			canonicalId: `spotify:playlist:${input.resourceId}`,
+			sameAs: [input.canonicalUrl],
+			data: {
+				'@context': 'https://schema.org/',
+				'@type': 'MusicPlaylist',
+				name,
+				url: input.canonicalUrl,
+				sameAs: [input.canonicalUrl],
+				...(description ? { description } : {}),
+				...(image ? { image } : {}),
+				...(author ? { author } : {}),
+				...(numTracks === undefined ? {} : { numTracks }),
+			},
+			metadata: {
+				pluginId: 'spotify',
+				provider: 'spotify-web-api',
+				sourceUrl: input.canonicalUrl,
+				sourceFamily: 'domain-api',
+				resolutionMode: 'enriched',
 			},
 		};
 	}
@@ -466,35 +467,4 @@ function extractArtistNames(artists: Array<{ name?: string }> | undefined): stri
 
 function toStringMaybe(value: unknown): string | undefined {
 	return typeof value === 'string' && value.trim().length > 0 ? value.trim() : undefined;
-}
-
-function toRecordMaybe(value: unknown): Record<string, unknown> | undefined {
-	if (!value || typeof value !== 'object' || Array.isArray(value)) {
-		return undefined;
-	}
-
-	return value as Record<string, unknown>;
-}
-
-function base64Encode(value: string): string {
-	const globalBuffer = (
-		globalThis as { Buffer?: { from(value: string): { toString(encoding: string): string } } }
-	).Buffer;
-	if (globalBuffer && typeof globalBuffer.from === 'function') {
-		return globalBuffer.from(value).toString('base64');
-	}
-
-	const textEncoder = new TextEncoder();
-	const bytes = textEncoder.encode(value);
-	let binary = '';
-	for (const byte of bytes) {
-		binary += String.fromCharCode(byte);
-	}
-
-	const globalBtoa = (globalThis as { btoa?: (input: string) => string }).btoa;
-	if (typeof globalBtoa === 'function') {
-		return globalBtoa(binary);
-	}
-
-	throw new Error('No base64 encoder available in runtime.');
 }

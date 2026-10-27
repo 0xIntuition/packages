@@ -7,6 +7,8 @@ import {
 } from '../shared/helpers';
 import {
 	createPlatformPlugin,
+	isPlatformStageMiss,
+	PLATFORM_STAGE_MISS,
 	type PlatformCredential,
 	type PlatformStageInput,
 	type PlatformV0PluginOptions,
@@ -81,12 +83,18 @@ const X_RESERVED_SEGMENTS = new Set([
 
 export const xProfile: PlatformV0Profile = {
 	domain: 'x',
+	display: {
+		classificationSlugs: ['social-media-account', 'social-media-posting'],
+		exampleUrl: 'https://x.com/VitalikButerin',
+		host: 'x.com',
+		label: 'X',
+	},
 	supportsOEmbed: true,
 	classifier: {
 		id: 'x-url-classifier',
 		priority: 10,
 		classify(input: string) {
-			const parsed = tryParseUrl(input);
+			const parsed = tryParseUrl(input, { allowBareHost: true });
 			if (!parsed) {
 				return null;
 			}
@@ -243,12 +251,12 @@ function composeXDomainApiAdapters(
 	return async (input) => {
 		for (const adapter of activeAdapters) {
 			const result = await Promise.resolve(adapter(input));
-			if (result) {
+			if (result && !isPlatformStageMiss(result)) {
 				return result;
 			}
 		}
 
-		return null;
+		return PLATFORM_STAGE_MISS;
 	};
 }
 
@@ -257,7 +265,7 @@ function createXEnrichmentDomainApiAdapter(
 ): NonNullable<PlatformV0PluginOptions['adapters']>['domainApi'] {
 	return async ({ runtime, canonicalUrl, classification, credential }) => {
 		if (classification.subtype !== 'post') {
-			return null;
+			return PLATFORM_STAGE_MISS;
 		}
 
 		const payload = await Promise.resolve(
@@ -271,7 +279,7 @@ function createXEnrichmentDomainApiAdapter(
 		);
 		const record = toRecordMaybe(payload);
 		if (!record) {
-			return null;
+			return PLATFORM_STAGE_MISS;
 		}
 
 		return buildEnrichedXPostAtom({

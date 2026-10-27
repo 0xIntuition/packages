@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import { parseSocialAccountUrl, resolveExplorerChainId } from '../src/extraction/direct-providers';
 import { extractClassificationFields } from '../src/extraction/extract';
+import { createPinAwareFetch } from '../src/plugins/providers/__shared__/http';
 import type { EnrichmentArtifact } from '../src/types';
 
 function artifact(
@@ -55,7 +56,7 @@ describe('music mappers', () => {
 			classification: 'music-recording',
 			url: 'https://open.spotify.com/track/3n3Ppam7vgaVa1iaRUc9Lp',
 			artifacts: [SPOTIFY_TRACK],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 		expect(result.values.name).toBe('Mr. Brightside');
 		expect(result.values.byArtist).toBe('The Killers');
@@ -69,7 +70,7 @@ describe('music mappers', () => {
 			classification: 'music-recording',
 			url: 'https://music.apple.com/us/album/better-together/1440857781?i=1440857786',
 			artifacts: [APPLE_SONG],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 		expect(result.values.name).toBe('Better Together');
 		expect(result.values.byArtist).toBe('Jack Johnson');
@@ -89,7 +90,7 @@ describe('music mappers', () => {
 				}),
 				APPLE_SONG,
 			],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 		expect(result.values.name).toBe('Better Together');
 	});
@@ -107,7 +108,7 @@ describe('software mappers', () => {
 					'https://github.com/ethereum/go-ethereum'
 				),
 			],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 		expect(result.values.name).toBe('go-ethereum');
 		expect(result.values.codeRepository).toBe('https://github.com/ethereum/go-ethereum');
@@ -125,7 +126,7 @@ describe('software mappers', () => {
 					homepage: 'https://react.dev/',
 				}),
 			],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 		expect(result.values.name).toBe('react');
 		expect(result.values.url).toBe('https://react.dev/');
@@ -144,7 +145,7 @@ describe('video-object mapper', () => {
 					description: 'Official trailer.',
 				}),
 			],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 		expect(result.values.name).toBe('Inception Trailer');
 		expect(result.values.description).toBe('Official trailer.');
@@ -184,7 +185,7 @@ describe('social-media-account mapper', () => {
 			classification: 'social-media-account',
 			url: 'https://x.com/VitalikButerin',
 			artifacts: [],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 		expect(result.values.username).toBe('VitalikButerin');
 		expect(result.values.platform).toBe('X');
@@ -196,7 +197,7 @@ describe('social-media-account mapper', () => {
 			classification: 'social-media-account',
 			url: 'https://x.com/VitalikButerin',
 			artifacts: [artifact('x-profile', { username: 'VitalikButerin', name: 'vitalik.eth' })],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 		expect(result.fields.username?.source).toBe('x-profile');
 	});
@@ -219,7 +220,7 @@ describe('ethereum mappers', () => {
 			classification: 'ethereum-account',
 			url: `https://etherscan.io/address/${ADDRESS}`,
 			artifacts: [],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 		expect(result.values.address).toBe(ADDRESS);
 		expect(result.missingRequired).toEqual([]);
@@ -238,7 +239,7 @@ describe('ethereum mappers', () => {
 					decimals: 6,
 				}),
 			],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 		expect(result.values.chainId).toBe(1);
 		expect(result.values.address).toBe(usdc);
@@ -267,7 +268,7 @@ describe('places-backed mappers', () => {
 			classification: 'local-business',
 			url: 'https://www.google.com/maps/place/Blue+Bottle+Coffee/@37.7822,-122.4076,17z',
 			artifacts: [PLACES_ARTIFACT],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 		expect(result.values.name).toBe('Blue Bottle Coffee');
 		expect(result.values.address).toBe('66 Mint St, San Francisco, CA 94103, USA');
@@ -282,7 +283,7 @@ describe('places-backed mappers', () => {
 			classification: 'location',
 			url: 'https://www.google.com/maps/place/Blue+Bottle+Coffee/@37.7822,-122.4076,17z',
 			artifacts: [PLACES_ARTIFACT],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 		expect(result.values.name).toBe('Blue Bottle Coffee');
 		expect(result.values.address).toBe('66 Mint St, San Francisco, CA 94103, USA');
@@ -306,7 +307,7 @@ describe('company via google maps', () => {
 					'https://maps.app.goo.gl/example123'
 				),
 			],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 		expect(result.values.name).toBe('Blue Bottle Coffee');
 		expect(result.values.url).toBe('https://bluebottlecoffee.com/');
@@ -333,7 +334,7 @@ describe('company via google maps', () => {
 					'https://en.wikipedia.org/wiki/OpenAI'
 				),
 			],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 		expect(result.values.name).toBe('OpenAI');
 		expect(result.values.url).toBe('https://openai.com/');
@@ -359,7 +360,7 @@ describe('podcast mappers', () => {
 			classification: 'podcast-series',
 			url: 'https://open.spotify.com/show/4rOoJ6Egrf8K2IrywzwOMk?si=16aac2face304f5f',
 			artifacts: [SHOW_ARTIFACT],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 		expect(result.values.name).toBe('Bankless');
 		expect(result.values.url).toBe('https://open.spotify.com/show/4rOoJ6Egrf8K2IrywzwOMk');
@@ -383,7 +384,7 @@ describe('podcast mappers', () => {
 					previewUrl: 'https://p.scdn.co/mp3-preview/episode',
 				}),
 			],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 		expect(result.values.name).toBe('The Rollup Roadmap');
 		expect(result.values.partOfSeries).toBe('Bankless');
@@ -396,7 +397,7 @@ describe('podcast mappers', () => {
 			classification: 'podcast-episode',
 			url: 'https://open.spotify.com/show/4rOoJ6Egrf8K2IrywzwOMk',
 			artifacts: [SHOW_ARTIFACT],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 		expect(result.values.name).toBeUndefined();
 		expect(result.missingRequired).toEqual(['name']);
@@ -414,7 +415,7 @@ describe('podcast mappers', () => {
 					spotifyUrl: 'https://open.spotify.com/show/4rOoJ6Egrf8K2IrywzwOMk',
 				}),
 			],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 		expect(result.values.name).toBeUndefined();
 		expect(result.missingRequired).toEqual(['name']);
@@ -432,7 +433,7 @@ describe('software url fallback (github api unavailable)', () => {
 					url: 'https://github.com/0xIntuition/intuition-ts',
 				}),
 			],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 		// The OG page title must never win over the URL-derived repo identity.
 		expect(result.values.name).toBe('intuition-ts');
@@ -451,7 +452,7 @@ describe('software url fallback (github api unavailable)', () => {
 					fullName: '0xIntuition/intuition-ts',
 				}),
 			],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 		expect(result.values.name).toBe('intuition-ts');
 		expect(result.fields.name?.source).toBe('github');
@@ -462,7 +463,7 @@ describe('software url fallback (github api unavailable)', () => {
 			classification: 'software',
 			url: 'https://github.com/0xIntuition/intuition-ts/issues/42',
 			artifacts: [],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 		expect(result.values.codeRepository).toBeUndefined();
 	});

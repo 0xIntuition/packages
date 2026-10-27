@@ -7,14 +7,20 @@ import {
 	extractMetaContent,
 	normalizeWhitespace,
 } from '../shared/domain-html/document';
-import { type DomainHtmlFetchLike, fetchHtmlDocument } from '../shared/domain-html/fetch';
+import {
+	DomainHtmlFetchError,
+	type DomainHtmlFetchLike,
+	type DomainHtmlResolveHostname,
+	fetchHtmlDocumentResult,
+} from '../shared/domain-html/fetch';
 import { buildIdentityResolverAtom } from '../shared/domain-html/identity';
 import { toStringMaybe } from '../shared/helpers';
-import type { PlatformStageAdapter } from '../shared/platform';
+import { PLATFORM_STAGE_MISS, type PlatformStageAdapter } from '../shared/platform';
 import { extractAmazonAsinFromUrl } from './url';
 
 export type AmazonDomainHtmlAdapterOptions = {
 	fetch?: DomainHtmlFetchLike;
+	resolveHostname?: DomainHtmlResolveHostname;
 };
 
 export type AmazonDomainHtmlAdapter = PlatformStageAdapter;
@@ -30,12 +36,14 @@ export function createAmazonDomainHtmlAdapter(
 			{
 				id: 'amazon-html',
 				resolve: async ({ canonicalUrl, classificationMeta, fetcher }) => {
-					const html = await fetchHtmlDocument(fetcher, {
+					const htmlResult = await fetchHtmlDocumentResult(fetcher, {
 						url: canonicalUrl,
+						resolveHostname: options.resolveHostname,
 					});
-					if (!html) {
-						return null;
+					if (htmlResult.ok === false) {
+						throw new DomainHtmlFetchError(htmlResult.failure);
 					}
+					const html = htmlResult.value;
 
 					const resolvedCanonicalUrl = extractCanonicalUrl(html) ?? canonicalUrl;
 					// Short-link inputs carry no ASIN; the page's canonical URL does.
@@ -51,7 +59,7 @@ export function createAmazonDomainHtmlAdapter(
 						normalizeAmazonProductTitle(extractMetaContent(html, 'title')) ??
 						normalizeAmazonProductTitle(extractDocumentTitle(html));
 					if (!name) {
-						return null;
+						return PLATFORM_STAGE_MISS;
 					}
 
 					const brand =

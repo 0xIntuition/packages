@@ -1,0 +1,40 @@
+{
+	"name": "spotify-album-bridge-miss",
+	"url": "https://open.spotify.com/album/4uLU6hMCjMI75M1A2tKUQC",
+	"atom": {
+		"schemaType": "MusicAlbum",
+		"category": "music-album",
+		"title": "Fixture spotify-album",
+		"canonicalId": "spotify:album:4uLU6hMCjMI75M1A2tKUQC",
+		"sameAs": ["https://open.spotify.com/album/4uLU6hMCjMI75M1A2tKUQC"],
+		"hints": {
+			"identifiers": {
+				"spotifyAlbumId": "4uLU6hMCjMI75M1A2tKUQC"
+			},
+			"identifierSet": ["int:spotify:album:4uLU6hMCjMI75M1A2tKUQC"]
+		},
+		"metadata": {
+			"identityBridge": {
+				"property": "P2205",
+				"providerCanonicalId": "spotify:album:4uLU6hMCjMI75M1A2tKUQC",
+				"outcome": "miss",
+				"promotionPending": true
+			}
+		},
+		"data": {
+			"@type": "MusicAlbum",
+			"identifier": "int:spotify:album:4uLU6hMCjMI75M1A2tKUQC",
+			"name": "Fixture spotify-album"
+		}
+	},
+	"identifierSet": ["int:spotify:album:4uLU6hMCjMI75M1A2tKUQC"],
+	"primaryIid": "int:spotify:album:4uLU6hMCjMI75M1A2tKUQC",
+	"identifierRung": [
+		{
+			"rung": "spotify:album",
+			"value": "4uLU6hMCjMI75M1A2tKUQC"
+		}
+	],
+	"aliases": [],
+	"appAliases": ["int:spotify:album:4uLU6hMCjMI75M1A2tKUQC"]
+}

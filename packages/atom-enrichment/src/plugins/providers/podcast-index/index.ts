@@ -177,11 +177,12 @@ export function resolvePodcastIndexTarget(
 		return { kind: 'itunesId', value: itunesId };
 	}
 
-	const url = getRequestUrl(request);
 	const feedId = getIdentifier(request, 'podcastIndexFeedId');
 	if (feedId && NUMERIC_ID_PATTERN.test(feedId)) {
 		return { kind: 'feedId', value: feedId };
 	}
+
+	const url = getRequestUrl(request);
 	if (!url) {
 		return undefined;
 	}

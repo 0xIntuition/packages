@@ -63,6 +63,7 @@ describe('default preset audit', () => {
 		expect(createNonUrlV0Profiles().map((profile) => profile.id)).toEqual([
 			'ethereum',
 			'isbn',
+			'int',
 			'lexical',
 			'plain-text',
 		]);
@@ -70,51 +71,83 @@ describe('default preset audit', () => {
 			'spotify',
 			'amazon',
 			'github',
+			'goodreads',
+			'letterboxd',
+			'places',
 			'npm',
 			'x',
 			'instagram',
 			'tiktok',
 			'youtube',
 			'wikipedia',
+			'wikidata',
 			'imdb',
 			'tmdb',
+			'openlibrary',
+			'steam',
+			'coingecko',
+			'coinmarketcap',
+			'etsy',
+			'shopify',
 		]);
 		expect(activePluginIds).toEqual([
 			'type-profiles',
 			'etherscan',
 			'isbn',
+			'int',
 			'plain-text',
 			'spotify',
 			'amazon',
 			'github',
+			'goodreads',
+			'letterboxd',
+			'places',
 			'npm',
 			'x',
 			'instagram',
 			'tiktok',
 			'youtube',
 			'wikipedia',
+			'wikidata',
 			'imdb',
 			'tmdb',
+			'openlibrary',
+			'steam',
+			'coingecko',
+			'coinmarketcap',
+			'etsy',
+			'shopify',
 			'default-url',
 		]);
 		expect(activePlatformPluginIds).toEqual([
 			'spotify',
 			'amazon',
 			'github',
+			'goodreads',
+			'letterboxd',
+			'places',
 			'npm',
 			'x',
 			'instagram',
 			'tiktok',
 			'youtube',
 			'wikipedia',
+			'wikidata',
 			'imdb',
 			'tmdb',
+			'openlibrary',
+			'steam',
+			'coingecko',
+			'coinmarketcap',
+			'etsy',
+			'shopify',
 		]);
 	});
 
 	it('covers every active default preset path plus degraded provider cases with deterministic audit fixtures', async () => {
 		for (const fixture of auditFixtures) {
 			const engine = createServerEngine({
+				onClassifierError: () => undefined,
 				now: () => new Date(AUDIT_NOW),
 				plugins: createAuditPlugins(fixture.options),
 			});
@@ -544,11 +577,47 @@ const auditFixtures: AuditFixture[] = [
 		},
 	},
 	{
-		id: 'imdb-title-tmdb-find',
-		input: 'https://www.imdb.com/title/tt0133093/',
-		options: createImdbFindFixtureOptions(),
+		id: 'wikidata-entity-generic',
+		input: 'https://www.wikidata.org/wiki/Q751921',
 		expected: {
-			fixtureId: 'imdb-title-tmdb-find',
+			fixtureId: 'wikidata-entity-generic',
+			input: 'https://www.wikidata.org/wiki/Q751921',
+			classification: {
+				domain: 'wikidata',
+				subtype: 'entity',
+				confidence: 1,
+			},
+			resolverId: 'wikidata-resolver',
+			fallbackUsed: true,
+			platformResolver: {
+				fallbackStage: 'generic',
+				attemptedStages: ['opengraph', 'generic'],
+				skippedStages: ['oembed:unsupported'],
+				stageErrors: [],
+			},
+			atom: {
+				schemaType: 'Thing',
+				category: 'thing',
+				canonicalId: 'wd:Q751921',
+				source: 'platform-v0:generic',
+				metadata: {
+					pluginId: 'wikidata',
+					provider: 'wikidata',
+					platform: 'wikidata',
+					subtype: 'entity',
+					fallbackStage: 'generic',
+				},
+			},
+			failureMode: 'none',
+			disposition: 'keep',
+		},
+	},
+	{
+		id: 'imdb-title-domain-html',
+		input: 'https://www.imdb.com/title/tt0133093/',
+		options: createImdbDomainHtmlFixtureOptions(),
+		expected: {
+			fixtureId: 'imdb-title-domain-html',
 			input: 'https://www.imdb.com/title/tt0133093/',
 			classification: {
 				domain: 'imdb',
@@ -558,22 +627,22 @@ const auditFixtures: AuditFixture[] = [
 			resolverId: 'imdb-resolver',
 			fallbackUsed: false,
 			platformResolver: {
-				fallbackStage: 'domain-api',
-				attemptedStages: ['domain-api'],
-				skippedStages: [],
+				fallbackStage: 'domain-html',
+				attemptedStages: ['domain-html'],
+				skippedStages: ['domain-api:no-credentials'],
 				stageErrors: [],
 			},
 			atom: {
 				schemaType: 'Movie',
 				category: 'thing',
 				canonicalId: 'imdb:title:tt0133093',
-				source: 'platform-v0:domain-api',
+				source: 'platform-v0:domain-html',
 				metadata: {
 					pluginId: 'imdb',
-					provider: 'imdb-tmdb',
+					provider: 'imdb-suggestion',
 					platform: 'imdb',
 					subtype: undefined,
-					fallbackStage: 'domain-api',
+					fallbackStage: 'domain-html',
 				},
 			},
 			failureMode: 'none',
@@ -609,6 +678,259 @@ const auditFixtures: AuditFixture[] = [
 					provider: 'tmdb',
 					platform: 'tmdb',
 					subtype: 'tv',
+					fallbackStage: 'generic',
+					resolutionMode: 'identity-only',
+				},
+			},
+			failureMode: 'none',
+			disposition: 'keep',
+		},
+	},
+	{
+		id: 'openlibrary-work',
+		input: 'https://openlibrary.org/works/OL45804W/The_Lord_of_the_Rings',
+		expected: {
+			fixtureId: 'openlibrary-work',
+			input: 'https://openlibrary.org/works/OL45804W/The_Lord_of_the_Rings',
+			classification: {
+				domain: 'openlibrary',
+				subtype: 'work',
+				confidence: 0.99,
+			},
+			resolverId: 'openlibrary-resolver',
+			fallbackUsed: true,
+			platformResolver: {
+				fallbackStage: 'generic',
+				attemptedStages: ['opengraph', 'generic'],
+				skippedStages: ['domain-api:no-credentials', 'oembed:unsupported'],
+				stageErrors: [],
+			},
+			atom: {
+				schemaType: 'Book',
+				category: 'thing',
+				canonicalId: 'openlibrary:work:OL45804W',
+				source: 'platform-v0:generic',
+				metadata: {
+					pluginId: 'openlibrary',
+					provider: 'openlibrary',
+					platform: 'openlibrary',
+					subtype: 'work',
+					fallbackStage: 'generic',
+				},
+			},
+			failureMode: 'none',
+			disposition: 'keep',
+		},
+	},
+	{
+		id: 'steam-app',
+		input: 'https://store.steampowered.com/app/570/Dota_2/',
+		expected: {
+			fixtureId: 'steam-app',
+			input: 'https://store.steampowered.com/app/570/Dota_2/',
+			classification: {
+				domain: 'steam',
+				subtype: 'app',
+				confidence: 0.99,
+			},
+			resolverId: 'steam-resolver',
+			fallbackUsed: true,
+			platformResolver: {
+				fallbackStage: 'generic',
+				attemptedStages: ['opengraph', 'generic'],
+				skippedStages: ['domain-api:no-credentials', 'oembed:unsupported'],
+				stageErrors: [],
+			},
+			atom: {
+				schemaType: 'VideoGame',
+				category: 'thing',
+				canonicalId: 'steam:app:570',
+				source: 'platform-v0:generic',
+				metadata: {
+					pluginId: 'steam',
+					provider: 'steam',
+					platform: 'steam',
+					subtype: 'app',
+					fallbackStage: 'generic',
+				},
+			},
+			failureMode: 'none',
+			disposition: 'keep',
+		},
+	},
+	{
+		id: 'coingecko-coin',
+		input: 'https://coingecko.com/en/coins/bitcoin',
+		expected: {
+			fixtureId: 'coingecko-coin',
+			input: 'https://coingecko.com/en/coins/bitcoin',
+			classification: {
+				domain: 'coingecko',
+				subtype: 'coin',
+				confidence: 0.99,
+			},
+			resolverId: 'coingecko-resolver',
+			fallbackUsed: true,
+			platformResolver: {
+				fallbackStage: 'generic',
+				attemptedStages: ['opengraph', 'generic'],
+				skippedStages: ['domain-api:no-credentials', 'oembed:unsupported'],
+				stageErrors: [],
+			},
+			atom: {
+				schemaType: 'Cryptocurrency',
+				category: 'thing',
+				canonicalId: 'coingecko:bitcoin',
+				source: 'platform-v0:generic',
+				metadata: {
+					pluginId: 'coingecko',
+					provider: 'coingecko',
+					platform: 'coingecko',
+					subtype: 'coin',
+					fallbackStage: 'generic',
+				},
+			},
+			failureMode: 'none',
+			disposition: 'keep',
+		},
+	},
+	{
+		id: 'coinmarketcap-currency',
+		input: 'https://coinmarketcap.com/currencies/bitcoin/',
+		expected: {
+			fixtureId: 'coinmarketcap-currency',
+			input: 'https://coinmarketcap.com/currencies/bitcoin/',
+			classification: {
+				domain: 'coinmarketcap',
+				subtype: 'currency',
+				confidence: 0.99,
+			},
+			resolverId: 'coinmarketcap-resolver',
+			fallbackUsed: true,
+			platformResolver: {
+				fallbackStage: 'generic',
+				attemptedStages: ['opengraph', 'generic'],
+				skippedStages: ['domain-api:no-credentials', 'oembed:unsupported'],
+				stageErrors: [],
+			},
+			atom: {
+				schemaType: 'Cryptocurrency',
+				category: 'thing',
+				canonicalId: 'coinmarketcap:bitcoin',
+				source: 'platform-v0:generic',
+				metadata: {
+					pluginId: 'coinmarketcap',
+					provider: 'coinmarketcap',
+					platform: 'coinmarketcap',
+					subtype: 'currency',
+					fallbackStage: 'generic',
+				},
+			},
+			failureMode: 'none',
+			disposition: 'keep',
+		},
+	},
+	{
+		id: 'etsy-listing',
+		input: 'https://www.etsy.com/listing/1234567890/handmade-blue-mug',
+		expected: {
+			fixtureId: 'etsy-listing',
+			input: 'https://www.etsy.com/listing/1234567890/handmade-blue-mug',
+			classification: {
+				domain: 'etsy',
+				subtype: 'listing',
+				confidence: 0.99,
+			},
+			resolverId: 'etsy-resolver',
+			fallbackUsed: true,
+			platformResolver: {
+				fallbackStage: 'generic',
+				attemptedStages: ['opengraph', 'generic'],
+				skippedStages: ['domain-api:no-credentials', 'oembed:unsupported'],
+				stageErrors: [],
+			},
+			atom: {
+				schemaType: 'Product',
+				category: 'product',
+				canonicalId: 'etsy:listing:1234567890',
+				source: 'platform-v0:generic',
+				metadata: {
+					pluginId: 'etsy',
+					provider: 'etsy',
+					platform: 'etsy',
+					subtype: 'listing',
+					fallbackStage: 'generic',
+				},
+			},
+			failureMode: 'none',
+			disposition: 'keep',
+		},
+	},
+	{
+		id: 'shopify-product',
+		input: 'https://acme-store.myshopify.com/products/handmade-blue-mug',
+		expected: {
+			fixtureId: 'shopify-product',
+			input: 'https://acme-store.myshopify.com/products/handmade-blue-mug',
+			classification: {
+				domain: 'shopify',
+				subtype: 'product',
+				confidence: 0.99,
+			},
+			resolverId: 'shopify-resolver',
+			fallbackUsed: true,
+			platformResolver: {
+				fallbackStage: 'generic',
+				attemptedStages: ['opengraph', 'generic'],
+				skippedStages: ['domain-api:no-credentials', 'oembed:unsupported'],
+				stageErrors: [],
+			},
+			atom: {
+				schemaType: 'Product',
+				category: 'product',
+				canonicalId: 'shopify:product:acme-store.myshopify.com:handmade-blue-mug',
+				source: 'platform-v0:generic',
+				metadata: {
+					pluginId: 'shopify',
+					provider: 'shopify',
+					platform: 'shopify',
+					subtype: 'product',
+					fallbackStage: 'generic',
+				},
+			},
+			failureMode: 'none',
+			disposition: 'keep',
+		},
+	},
+	{
+		id: 'letterboxd-film',
+		input: 'https://letterboxd.com/film/moonlight/',
+		expected: {
+			fixtureId: 'letterboxd-film',
+			input: 'https://letterboxd.com/film/moonlight/',
+			classification: {
+				domain: 'letterboxd',
+				subtype: 'film',
+				confidence: 0.99,
+			},
+			resolverId: 'letterboxd-resolver',
+			fallbackUsed: true,
+			platformResolver: {
+				fallbackStage: 'generic',
+				attemptedStages: ['opengraph', 'generic'],
+				skippedStages: ['domain-api:no-credentials', 'oembed:unsupported'],
+				stageErrors: [],
+			},
+			atom: {
+				schemaType: 'Movie',
+				category: 'thing',
+				canonicalId: 'letterboxd:film:moonlight',
+				source: 'platform-v0:generic',
+				metadata: {
+					pluginId: 'letterboxd',
+					provider: 'letterboxd',
+					platform: 'letterboxd',
+					subtype: 'film',
 					fallbackStage: 'generic',
 				},
 			},
@@ -732,7 +1054,7 @@ const auditFixtures: AuditFixture[] = [
 				fallbackStage: 'generic',
 				attemptedStages: ['domain-api', 'oembed', 'opengraph', 'generic'],
 				skippedStages: [],
-				stageErrors: ['domain-api:spotify domain api blocked'],
+				stageErrors: ['domain-api:adapter_error: spotify domain api blocked'],
 			},
 			atom: {
 				schemaType: 'MusicRecording',
@@ -769,7 +1091,7 @@ const auditFixtures: AuditFixture[] = [
 				fallbackStage: 'generic',
 				attemptedStages: ['oembed', 'opengraph', 'generic'],
 				skippedStages: ['domain-api:no-credentials'],
-				stageErrors: ['oembed:youtube oembed blocked'],
+				stageErrors: ['oembed:adapter_error: youtube oembed blocked'],
 			},
 			atom: {
 				schemaType: 'VideoObject',
@@ -827,9 +1149,17 @@ const auditFixtures: AuditFixture[] = [
 	},
 ];
 
+const NO_NETWORK_FETCH = async () => ({ ok: false, status: 404, text: async () => '' });
+
 function createAuditPlugins(options: DefaultClassificationPresetOptions = {}) {
 	return defaultClassificationPreset({
 		...options,
+		defaultUrlPluginOptions: {
+			// default-url now optionally fetches OpenGraph metadata (ENG-13195);
+			// keep it off here so audit fixtures never make a live network call.
+			fetch: NO_NETWORK_FETCH,
+			...(options.defaultUrlPluginOptions ?? {}),
+		},
 		xPluginOptions: {
 			useDefaultDomainApiAdapter: false,
 			useDefaultPublicMetadataAdapter: false,
@@ -839,6 +1169,38 @@ function createAuditPlugins(options: DefaultClassificationPresetOptions = {}) {
 		youtubePluginOptions: {
 			useDefaultOEmbedAdapter: false,
 			...(options.youtubePluginOptions ?? {}),
+		},
+		wikipediaPluginOptions: {
+			useDefaultDomainApiAdapter: false,
+			...(options.wikipediaPluginOptions ?? {}),
+		},
+		wikidataPluginOptions: {
+			useDefaultDomainApiAdapter: false,
+			...(options.wikidataPluginOptions ?? {}),
+		},
+		tmdbPluginOptions: options.tmdbPluginOptions,
+		instagramPluginOptions: {
+			// Falls back to global fetch when no fetcher is injected — keep it
+			// off so audit fixtures never make a live network call.
+			useDefaultOpenGraphAdapter: false,
+			...(options.instagramPluginOptions ?? {}),
+		},
+		goodreadsPluginOptions: {
+			useDefaultOpenLibraryAdapter: false,
+			...(options.goodreadsPluginOptions ?? {}),
+		},
+		letterboxdPluginOptions: {
+			useDefaultDomainHtmlAdapter: false,
+			useDefaultOpenGraphAdapter: false,
+			...(options.letterboxdPluginOptions ?? {}),
+		},
+		isbnPluginOptions: {
+			openLibrary: false,
+			...(options.isbnPluginOptions ?? {}),
+		},
+		placesPluginOptions: {
+			useDefaultOpenGraphAdapter: false,
+			...(options.placesPluginOptions ?? {}),
 		},
 	});
 }
@@ -968,19 +1330,16 @@ function createYouTubeBlockedFixtureOptions(): DefaultClassificationPresetOption
 	};
 }
 
-function createImdbFindFixtureOptions(): DefaultClassificationPresetOptions {
+function createImdbDomainHtmlFixtureOptions(): DefaultClassificationPresetOptions {
 	return {
 		imdbPluginOptions: {
-			credentials: { tmdb: { apiKey: 'fixture-key' } },
-			fetch: async () => ({
-				ok: true,
-				status: 200,
-				text: async () =>
-					JSON.stringify({
-						movie_results: [{ id: 603, title: 'The Matrix', release_date: '1999-03-30' }],
-						tv_results: [],
-					}),
-			}),
+			useDefaultDomainHtmlAdapter: true,
+			apiKey: 'fixture-key',
+			resolveHostname: async () => [{ address: '93.184.216.34', family: 4 }],
+			fetch: async (url) =>
+				url.includes('/find/')
+					? Response.json({ movie_results: [], tv_results: [] })
+					: Response.json({ d: [{ id: 'tt0133093', l: 'The Matrix', qid: 'movie' }] }),
 		},
 	};
 }

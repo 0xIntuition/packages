@@ -1,9 +1,10 @@
+import { resolveWikidataP31Identity } from '@0xintuition/iid-ladder';
+import type { ObservedRequestContext } from '@0xintuition/pipeline-runtime/provider-request-observation';
 import { readEntityIdClaimValues } from '../../../extraction/wikidata-claims';
-import type { EnrichmentIdentityCapability, EnrichmentPluginLogger } from '../../../plugins';
 import { wikidataEntityLookupResponseSchema } from '../wikidata/external';
-import { type FetchLike, fetchJsonWithSchema } from './http';
+import { isWikimediaMiss } from './provider-fetch';
+import { type WikimediaClient, wikimediaJson } from './wikimedia';
 
-// Schema.org vocabulary families, independent of the module's P31 identity policy.
 const TYPE_FAMILIES = [
 	['TVSeries', 'TVSeason', 'TVEpisode'],
 	['MusicAlbum', 'MusicRecording'],
@@ -25,43 +26,41 @@ export function schemaTypesAgree(expected: unknown, actual: string): boolean {
 
 export function wikidataTypeAgreement(
 	claims: unknown,
-	expected: unknown,
-	identity?: EnrichmentIdentityCapability,
-	logger?: EnrichmentPluginLogger,
-	signal?: AbortSignal
+	expected: unknown
 ): 'agree' | 'mismatch' | 'unknown' {
+	const { schemaType } = resolveWikidataP31Identity(readEntityIdClaimValues(claims, 'P31'));
 	const expectedTypes = Array.isArray(expected) ? expected : [expected];
 	if (
-		!identity ||
-		!expectedTypes.some((type) => typeof type === 'string' && type.length > 0 && type !== 'Thing')
-	) {
+		!expectedTypes.some((type) => typeof type === 'string' && type !== 'Thing') ||
+		schemaType === 'Thing'
+	)
 		return 'unknown';
-	}
-	let schemaType: string | undefined;
-	try {
-		schemaType = identity.resolveWikidataSchemaType(readEntityIdClaimValues(claims, 'P31'));
-	} catch (error) {
-		if (signal?.aborted) throw error;
-		logger?.warn('Wikidata type resolver failed.', {
-			error: error instanceof Error ? error.message : String(error),
-		});
-		return 'unknown';
-	}
-	if (!schemaType || schemaType === 'Thing') return 'unknown';
 	return schemaTypesAgree(expected, schemaType) ? 'agree' : 'mismatch';
 }
 
-/** Reuse the providers' injected, schema-validated Wikidata entity-data path. */
+/**
+ * The one EntityData fetch of both title providers (`wikidata|entity`, ENG-17015): paced, carrying
+ * the Wikimedia User-Agent, observed. A 404 or an absent entity is a miss and returns `undefined`;
+ * any other failure throws, already recorded.
+ */
 export async function fetchWikidataEntity(
-	fetcher: FetchLike,
+	client: WikimediaClient,
 	entityId: string,
-	signal: AbortSignal
+	context: ObservedRequestContext
 ) {
-	const payload = await fetchJsonWithSchema(
-		fetcher,
-		`https://www.wikidata.org/wiki/Special:EntityData/${encodeURIComponent(entityId)}.json`,
-		wikidataEntityLookupResponseSchema,
-		{ signal }
-	);
-	return payload.entities?.[entityId];
+	try {
+		const payload = await wikimediaJson({
+			client,
+			provider: 'wikidata',
+			operation: 'entity',
+			url: `https://www.wikidata.org/wiki/Special:EntityData/${encodeURIComponent(entityId)}.json`,
+			schema: wikidataEntityLookupResponseSchema,
+			context,
+			classifyResult: (value) => (value.entities?.[entityId] ? 'hit' : 'miss'),
+		});
+		return payload.entities?.[entityId];
+	} catch (error) {
+		if (isWikimediaMiss(error)) return undefined;
+		throw error;
+	}
 }

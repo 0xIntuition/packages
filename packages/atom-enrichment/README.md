@@ -3,7 +3,7 @@
 Composable enrichment engine, provider adapters, field extraction, and cache contracts for classified atoms. Published as typed ESM for Node.js 20+ and Bun.
 
 ```sh
-npm install @0xintuition/atom-enrichment@0.1.0-alpha.0
+npm install @0xintuition/atom-enrichment@0.1.0-alpha.1
 ```
 
 ```ts
@@ -46,6 +46,7 @@ The extraction preserves Core's existing plugin and artifact contracts, includin
 
 - Root: engine, registries, providers, presets, handoff helpers, and public types.
 - `engine`, `plugins`, `plugin-registry`, `providers`, `presets`, `cache`: runtime composition.
+- `plugin-api`, `outcome`, `adapters/upstash`, `ssrf`: plugin authoring, Promise outcomes, HTTP caching, and pinned transport helpers.
 - `types`, `handoff`, `provider-data`, `provider-external-data`, `provider-plan`, `slug-aliases`: integration contracts.
 - `classifications`, `classifications/defaults`, `classifications/registry`, `classifications/schemas`: provider artifact validation.
 - `extraction`: structured metadata extraction using canonical classification specifications.

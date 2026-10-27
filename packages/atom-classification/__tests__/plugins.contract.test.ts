@@ -5,6 +5,7 @@ import {
 	isRuntimeCompatible,
 	validatePluginManifest,
 } from '../src/plugins';
+import { createOpenLibraryPlugin, createSteamPlugin } from '../src/plugins/index';
 
 describe('plugin manifest contract', () => {
 	it('applies manifest defaults', () => {
@@ -20,6 +21,17 @@ describe('plugin manifest contract', () => {
 		expect(manifest.dependsOn).toEqual([]);
 		expect(manifest.provides).toEqual([]);
 		expect(manifest.priority).toBe(100);
+	});
+
+	it('ships valid OpenLibrary and Steam platform plugin manifests', () => {
+		for (const plugin of [createOpenLibraryPlugin(), createSteamPlugin()]) {
+			const manifest = validatePluginManifest(plugin.manifest);
+
+			expect(manifest.runtime).toBe('universal');
+			expect(manifest.dependsOn).toEqual(['type-profiles']);
+			expect(manifest.capabilities).toContain(`classify:url:${manifest.id}`);
+			expect(manifest.provides).toContain(`platform:v0:${manifest.id}`);
+		}
 	});
 
 	it('rejects invalid manifest ids', () => {

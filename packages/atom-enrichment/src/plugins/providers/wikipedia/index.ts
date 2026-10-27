@@ -1,6 +1,11 @@
-import { defineEnrichmentPlugin, type EnrichmentPlugin } from '../../../plugins';
+import {
+	defineEnrichmentPlugin,
+	type EnrichmentPlugin,
+	type EnrichmentPluginContext,
+} from '../../../plugins';
 import type { EnrichmentRequest } from '../../../types';
-import { type FetchLike, fetchJsonWithSchema } from '../__shared__/http';
+import type { PinAwareFetch } from '../__shared__/http';
+import { isWikimediaMiss } from '../__shared__/provider-fetch';
 import {
 	getRequestName,
 	getRequestUrl,
@@ -8,83 +13,96 @@ import {
 	parseWikipediaTitleFromUrl,
 } from '../__shared__/request';
 import { fetchWikidataEntity, wikidataTypeAgreement } from '../__shared__/wikidata-type';
-import { wikipediaSummaryResponseSchema } from './external';
+import {
+	createWikimediaClient,
+	type WikimediaClientOptions,
+	wikimediaJson,
+} from '../__shared__/wikimedia';
+import { type WikipediaSummaryResponse, wikipediaSummaryResponseSchema } from './external';
 import { wikipediaDataSchema } from './schema';
 
-type CreateWikipediaPluginOptions = {
-	fetch?: FetchLike;
+type CreateWikipediaPluginOptions = WikimediaClientOptions & {
+	fetch?: PinAwareFetch;
 	priority?: number;
 	TTL?: number;
 	language?: string;
 };
 
-type WikipediaSummaryResponse = {
-	title?: string;
-	extract?: string;
-	extract_html?: string;
-	thumbnail?: { source?: string };
-	content_urls?: {
-		desktop?: { page?: string };
-		mobile?: { page?: string };
-	};
-	pageid?: number;
-	lang?: string;
-	timestamp?: string;
-	wikibase_item?: string;
-};
-
 export function createWikipediaPlugin(
 	options: CreateWikipediaPluginOptions = {}
 ): EnrichmentPlugin {
-	const fetcher = options.fetch ?? (globalThis.fetch as FetchLike);
+	const client = createWikimediaClient(options.fetch, options);
 	const language = options.language ?? 'en';
+
+	/**
+	 * The type-agreement lookup is optional enrichment: when it fails (already recorded as
+	 * `wikidata|entity`), the summary artifact is kept with title-only identity strength. Only the
+	 * run ending (abort or deadline) is not swallowed.
+	 */
+	async function fetchOptionalEntity(entityId: string, ctx: EnrichmentPluginContext) {
+		try {
+			return await fetchWikidataEntity(client, entityId, ctx);
+		} catch (error) {
+			ctx.signal.throwIfAborted();
+			ctx.logger?.warn('Wikipedia secondary Wikidata lookup failed', {
+				entityId,
+				errorClass: error instanceof Error ? error.name : 'unknown',
+			});
+			return undefined;
+		}
+	}
 
 	return defineEnrichmentPlugin({
 		id: 'wikipedia',
-		version: '1.0.0',
+		version: '1.1.0',
 		runtime: 'universal',
 		artifactTypes: ['wikipedia'],
 		priority: options.priority ?? 30,
 		TTL: options.TTL ?? 43_200,
 
-		supports(request: EnrichmentRequest) {
-			return !!resolveWikipediaTitle(request);
+		observability: {
+			provider: 'wikipedia',
+			// A cached run stands in for the summary lookup its request selects.
+			cacheOperations: (request) => (supportsRequest(request) ? ['summary'] : []),
 		},
+
+		supports: supportsRequest,
 
 		async enrich(request, ctx) {
 			const title = resolveWikipediaTitle(request);
-			if (!title) {
+			if (!title || isSynthesizedProviderPlaceholderTitle(request, title)) {
 				return [];
 			}
 
 			const endpoint = `https://${language}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`;
-			const payload = await fetchJsonWithSchema(fetcher, endpoint, wikipediaSummaryResponseSchema, {
-				signal: ctx.signal,
-			});
+			let payload: WikipediaSummaryResponse;
+			try {
+				payload = await wikimediaJson({
+					client,
+					provider: 'wikipedia',
+					operation: 'summary',
+					url: endpoint,
+					schema: wikipediaSummaryResponseSchema,
+					context: ctx,
+				});
+			} catch (error) {
+				// A 404 was recorded as a miss; the engine must see "no page", not a provider error.
+				if (isWikimediaMiss(error)) return [];
+				throw error;
+			}
+
 			const requestUrl = getRequestUrl(request);
 			const titleFromUrl = requestUrl ? parseWikipediaTitleFromUrl(requestUrl) : undefined;
-			let agreement: 'agree' | 'mismatch' | 'unknown' = 'unknown';
-			if (!titleFromUrl && ctx.identity) {
+			let titleOnly = false;
+			if (!titleFromUrl) {
 				const qid = payload.wikibase_item;
-				try {
-					const entity =
-						qid && /^Q\d+$/i.test(qid)
-							? await fetchWikidataEntity(fetcher, qid.toUpperCase(), ctx.signal)
-							: undefined;
-					agreement = wikidataTypeAgreement(
-						entity?.claims,
-						request.input.jsonLd['@type'],
-						ctx.identity,
-						ctx.logger,
-						ctx.signal
-					);
-				} catch (error) {
-					if (ctx.signal.aborted) throw error;
-					ctx.logger?.warn('Wikidata P31 fetch failed.', {
-						error: error instanceof Error ? error.message : String(error),
-					});
-				}
+				const entity =
+					qid && /^Q\d+$/i.test(qid)
+						? await fetchOptionalEntity(qid.toUpperCase(), ctx)
+						: undefined;
+				const agreement = wikidataTypeAgreement(entity?.claims, request.input.jsonLd['@type']);
 				if (agreement === 'mismatch') return [];
+				titleOnly = agreement === 'unknown';
 			}
 
 			const pageUrl =
@@ -97,6 +115,7 @@ export function createWikipediaPlugin(
 					artifact_type: 'wikipedia',
 					data: wikipediaDataSchema.parse({
 						title: payload.title ?? title,
+						description: toOptionalString(payload.description),
 						extract: payload.extract ?? '',
 						extractHtml: toOptionalString(payload.extract_html),
 						thumbnailUrl: payload.thumbnail?.source,
@@ -108,11 +127,7 @@ export function createWikipediaPlugin(
 					}),
 					meta: {
 						pluginId: 'wikipedia',
-						...(titleFromUrl
-							? { identityStrength: 'url' as const }
-							: agreement === 'unknown'
-								? { identityStrength: 'title' as const }
-								: {}),
+						...(titleOnly ? { identityStrength: 'title' as const } : {}),
 						provider: 'wikipedia',
 						fetchedAt: ctx.now(),
 						sourceUrl: pageUrl,
@@ -121,6 +136,11 @@ export function createWikipediaPlugin(
 			];
 		},
 	});
+}
+
+function supportsRequest(request: EnrichmentRequest): boolean {
+	const title = resolveWikipediaTitle(request);
+	return !!title && !isSynthesizedProviderPlaceholderTitle(request, title);
 }
 
 function resolveWikipediaTitle(request: EnrichmentRequest): string | undefined {
@@ -132,7 +152,7 @@ function resolveWikipediaTitle(request: EnrichmentRequest): string | undefined {
 		}
 	}
 
-	return isSynthesizedProviderPlaceholderTitle(request) ? undefined : getRequestName(request);
+	return getRequestName(request);
 }
 
 function toOptionalString(value: string | null | undefined): string | undefined {

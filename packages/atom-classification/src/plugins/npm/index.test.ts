@@ -8,6 +8,7 @@ import { createNpmPlugin } from './index';
 describe('npm plugin', () => {
 	it('classifies npm package URLs into software instead of generic websites', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [createTypeProfilesPlugin(), createNpmPlugin(), createDefaultUrlPlugin()],
 		});
@@ -37,6 +38,7 @@ describe('npm plugin', () => {
 
 	it('normalizes scoped npm package URLs', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [createTypeProfilesPlugin(), createNpmPlugin()],
 		});

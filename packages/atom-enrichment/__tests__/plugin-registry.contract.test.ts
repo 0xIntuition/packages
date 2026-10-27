@@ -68,6 +68,46 @@ describe('plugin registry contract', () => {
 		});
 	});
 
+	it('resolve() selects a plugin registered under an alias source id for every alias spelling (steam regression)', () => {
+		const registry = createEnrichmentPluginRegistry();
+		// Mirrors the real steam plugin: registered id 'steam' while the
+		// canonical slug alias target is 'steam-app'.
+		registry.register(
+			createMockPlugin({
+				id: 'steam',
+				artifactTypes: ['steam-app'],
+			})
+		);
+
+		// 'steam_app' is also an alias but the request schema only admits
+		// hyphenated slugs, so it cannot appear in a request allow list.
+		for (const spelling of ['steam', 'steam-app', 'steam-game']) {
+			const resolved = registry.resolve(createMockRequest({ plugins: [spelling] }));
+			expect(resolved.plugins.map((plugin) => plugin.id)).toEqual(['steam']);
+			expect(resolved.skipped).toEqual([]);
+		}
+
+		const byArtifactType = registry.resolve(
+			createMockRequest({ artifactTypes: ['steam', 'steam-game'] })
+		);
+		expect(byArtifactType.plugins.map((plugin) => plugin.id)).toEqual(['steam']);
+
+		expect(registry.has('steam')).toBe(true);
+		expect(registry.has('steam-app')).toBe(true);
+		expect(registry.get('steam')?.id).toBe('steam');
+		expect(registry.get('steam-app')?.id).toBe('steam');
+	});
+
+	it('rejects duplicate registrations across alias spellings of the same plugin', () => {
+		const registry = createEnrichmentPluginRegistry();
+		registry.register(createMockPlugin({ id: 'steam' }));
+
+		expect(() => registry.register(createMockPlugin({ id: 'steam-app' }))).toThrow();
+
+		registry.register(createMockPlugin({ id: 'steam-app', priority: 1 }), { override: true });
+		expect(registry.get('steam')?.priority).toBe(1);
+	});
+
 	it('resolve() accepts legacy twitter-profile request filters for the canonical x-profile plugin', () => {
 		const registry = createEnrichmentPluginRegistry();
 		registry.register(

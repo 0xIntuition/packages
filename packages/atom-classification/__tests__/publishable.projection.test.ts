@@ -7,6 +7,7 @@ import type { AtomClassificationPlugin } from '../src/plugins';
 describe('publishable projection', () => {
 	it('keeps identity-focused fields and strips volatile commerce fields', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [createV0TypeProfilesPlugin(), createExampleProductPlugin()],
 		});
@@ -60,6 +61,7 @@ describe('publishable projection', () => {
 
 	it('keeps media fields out of publishable data even when policies mark them as identity', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [createV0TypeProfilesPlugin(), createExampleProductPlugin()],
 		});

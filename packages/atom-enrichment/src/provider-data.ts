@@ -78,6 +78,7 @@ export {
 	screenshotDataSchema,
 } from './plugins/providers/screenshot/schema';
 export { type SpotifyData, spotifyDataSchema } from './plugins/providers/spotify/schema';
+export { type SteamAppData, steamAppDataSchema } from './plugins/providers/steam/schema';
 export { type TmdbData, tmdbDataSchema } from './plugins/providers/tmdb/schema';
 export { type VimeoData, vimeoDataSchema } from './plugins/providers/vimeo/schema';
 export { type WikidataData, wikidataDataSchema } from './plugins/providers/wikidata/schema';

@@ -1,9 +1,74 @@
 import { describe, expect, it } from 'bun:test';
 
 import { createEnrichmentEngine } from '../src/engine';
+import { getIdentifier } from '../src/plugins/providers/__shared__/request';
 import { createMockArtifact, createMockPlugin, createMockRequest } from '../src/testing';
 
 describe('enrichment engine integration', () => {
+	it('runs the identifier-first golden path without JSON-LD or a URL', async () => {
+		let resolvedHints: Record<string, string> | undefined;
+		const engine = createEnrichmentEngine({
+			plugins: [
+				createMockPlugin({
+					id: 'identifier-fixture',
+					supports: (request) => {
+						resolvedHints = request.input.hints?.identifiers;
+						return getIdentifier(request, 'isrc') === 'USUM71703861';
+					},
+				}),
+			],
+		});
+
+		const result = await engine.enrich({
+			input: {
+				atomType: 'song',
+				identifier: {
+					iid: 'int:isrc:USUM71703861',
+					scheme: 'isrc',
+					value: 'USUM71703861',
+				},
+				source: {
+					classificationEngine: 'iid-fixture',
+					classifiedAt: '2026-08-07T12:00:00.000Z',
+				},
+			},
+			runtime: 'server',
+		});
+
+		expect(result.skipped).toEqual([]);
+		expect(resolvedHints).toEqual({ isrc: 'USUM71703861' });
+	});
+
+	it('emits a debug signal and ignores an invalid embedded IID', async () => {
+		const debugEvents: { message: string; meta?: Record<string, unknown> }[] = [];
+		const engine = createEnrichmentEngine({
+			logger: {
+				debug: (message, meta) => debugEvents.push({ message, meta }),
+				warn: () => {},
+				error: () => {},
+			},
+		});
+
+		await engine.enrich({
+			input: {
+				atomType: 'song',
+				jsonLd: { identifier: 'int:isrc:not-valid' },
+				source: {
+					classificationEngine: 'iid-fixture',
+					classifiedAt: '2026-08-07T12:00:00.000Z',
+				},
+			},
+			runtime: 'server',
+		});
+
+		expect(debugEvents).toEqual([
+			{
+				message: 'Ignoring invalid embedded IID for enrichment hints.',
+				meta: { source: 'jsonLd.identifier' },
+			},
+		]);
+	});
+
 	it('executes multiple applicable plugins and merges artifacts', async () => {
 		const engine = createEnrichmentEngine();
 		engine.registerPlugin(

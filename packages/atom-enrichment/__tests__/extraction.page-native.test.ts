@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import { extractClassificationFields } from '../src/extraction/extract';
 import { suggestClassifications } from '../src/extraction/suggest';
+import { createPinAwareFetch } from '../src/plugins/providers/__shared__/http';
 import { createMicrodataPlugin, parseJsonLdBlocks } from '../src/plugins/providers/microdata';
 import type { EnrichmentArtifact, EnrichmentRequest } from '../src/types';
 
@@ -87,8 +88,10 @@ describe('microdata plugin', () => {
 
 	it('emits a microdata artifact with the page json-ld', async () => {
 		const plugin = createMicrodataPlugin({
-			fetch: htmlFetcher(
-				`<html><head><title>Kickoff</title><script type="application/ld+json">${JSON.stringify(EVENT_NODE)}</script></head></html>`
+			fetch: createPinAwareFetch(
+				htmlFetcher(
+					`<html><head><title>Kickoff</title><script type="application/ld+json">${JSON.stringify(EVENT_NODE)}</script></head></html>`
+				)
 			),
 		});
 		const artifacts = await plugin.enrich(request('https://www.eventbrite.com/e/abc-123'), ctx);
@@ -98,7 +101,9 @@ describe('microdata plugin', () => {
 	});
 
 	it('emits nothing for pages without json-ld and skips maps urls', async () => {
-		const plugin = createMicrodataPlugin({ fetch: htmlFetcher('<html><body>hi</body></html>') });
+		const plugin = createMicrodataPlugin({
+			fetch: createPinAwareFetch(htmlFetcher('<html><body>hi</body></html>')),
+		});
 		expect(await plugin.enrich(request('https://example.com/'), ctx)).toHaveLength(0);
 		expect(plugin.supports(request('https://maps.app.goo.gl/abc'))).toBe(false);
 		expect(plugin.supports(request('https://www.eventbrite.com/e/abc'))).toBe(true);
@@ -112,7 +117,7 @@ describe('page-native field extraction', () => {
 			classification: 'event',
 			url,
 			artifacts: [microdataArtifact([EVENT_NODE], url)],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 
 		expect(result.values.name).toBe('ETHDenver 2027 Kickoff Concert');
@@ -140,7 +145,7 @@ describe('page-native field extraction', () => {
 					url
 				),
 			],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 
 		expect(result.values.headline).toBe('Protocol Ships URL-First Creation');
@@ -174,7 +179,7 @@ describe('page-native field extraction', () => {
 					url
 				),
 			],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 
 		expect(result.values.title).toBe('Senior Protocol Engineer');
@@ -203,7 +208,7 @@ describe('page-native field extraction', () => {
 					url
 				),
 			],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 
 		expect(result.values.name).toBe('Acme Widget Pro');
@@ -229,7 +234,7 @@ describe('page-native field extraction', () => {
 					},
 				},
 			],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 
 		expect(result.values.name).toBe('OpenAI');
@@ -267,13 +272,14 @@ describe('json-ld image extraction', () => {
 			],
 		};
 		const plugin = createMicrodataPlugin({
-			fetch: () =>
+			fetch: createPinAwareFetch(() =>
 				Promise.resolve(
 					new Response(
 						`<html><head><script type="application/ld+json">${JSON.stringify(eventWithImages)}</script></head></html>`,
 						{ headers: { 'content-type': 'text/html' } }
 					)
-				),
+				)
+			),
 		});
 		const artifacts = await plugin.enrich(
 			{
@@ -300,7 +306,7 @@ describe('apple podcasts pages (CreativeWorkSeries)', () => {
 			artifacts: [
 				microdataArtifact([{ '@type': 'CreativeWorkSeries', name: 'The Daily', url }], url),
 			],
-			fetcher: noFetch,
+			fetcher: createPinAwareFetch(noFetch),
 		});
 		expect(result.values.name).toBe('The Daily');
 		expect(result.missingRequired).toEqual([]);

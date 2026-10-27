@@ -1,9 +1,23 @@
 import { toRecordMaybe, toStringMaybe } from '../helpers';
+import { HTML5_NAMED_CHARACTER_REFERENCES } from './html5-named-character-references';
+
+const HTML_ENTITY_PATTERN = /&(?:[A-Za-z][A-Za-z0-9]+|#\d+|#[xX][0-9a-fA-F]+);/g;
+
+// A double-quoted attribute value may legitimately contain a literal
+// apostrophe (business/company names: "Joe's Pizza", "McDonald's"), and vice
+// versa for single-quoted values containing a double quote. Matching either
+// quote character generically (["'][^"']+["']) truncates at the FIRST quote
+// of either kind found inside the value. Requiring the closing delimiter to
+// match the opening one (via backreference) fixes this without otherwise
+// changing behavior for the common no-embedded-quote case.
+function quotedValuePattern(groupName: string): string {
+	return `(["'])(?<${groupName}>(?:(?!\\1)[\\s\\S])*?)\\1`;
+}
 
 export function extractCanonicalUrl(html: string): string | undefined {
 	return extractAttributeValue(
 		html,
-		/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["'][^>]*>/i
+		new RegExp(`<link[^>]+rel=["']canonical["'][^>]+href=${quotedValuePattern('value')}[^>]*>`, 'i')
 	);
 }
 
@@ -12,28 +26,35 @@ export function extractMetaContent(html: string, name: string): string | undefin
 	const content =
 		extractAttributeValue(
 			html,
-			new RegExp(`<meta[^>]+name=["']${escapedName}["'][^>]+content=["']([^"']+)["'][^>]*>`, 'i')
-		) ??
-		extractAttributeValue(
-			html,
-			new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+name=["']${escapedName}["'][^>]*>`, 'i')
-		) ??
-		extractAttributeValue(
-			html,
 			new RegExp(
-				`<meta[^>]+property=["']${escapedName}["'][^>]+content=["']([^"']+)["'][^>]*>`,
+				`<meta[^>]+name=["']${escapedName}["'][^>]+content=${quotedValuePattern('value')}[^>]*>`,
 				'i'
 			)
 		) ??
 		extractAttributeValue(
 			html,
 			new RegExp(
-				`<meta[^>]+content=["']([^"']+)["'][^>]+property=["']${escapedName}["'][^>]*>`,
+				`<meta[^>]+content=${quotedValuePattern('value')}[^>]+name=["']${escapedName}["'][^>]*>`,
+				'i'
+			)
+		) ??
+		extractAttributeValue(
+			html,
+			new RegExp(
+				`<meta[^>]+property=["']${escapedName}["'][^>]+content=${quotedValuePattern('value')}[^>]*>`,
+				'i'
+			)
+		) ??
+		extractAttributeValue(
+			html,
+			new RegExp(
+				`<meta[^>]+content=${quotedValuePattern('value')}[^>]+property=["']${escapedName}["'][^>]*>`,
 				'i'
 			)
 		);
 
-	return decodeHtmlEntities(content);
+	// extractAttributeValue already decodes the captured value exactly once.
+	return content;
 }
 
 export function extractDocumentTitle(html: string): string | undefined {
@@ -55,7 +76,9 @@ export function extractElementTextById(html: string, id: string): string | undef
 
 export function extractAttributeValue(html: string, pattern: RegExp): string | undefined {
 	const match = html.match(pattern);
-	return decodeHtmlEntities(match?.[1]);
+	// Patterns built via quotedValuePattern() capture into a named "value"
+	// group; other callers' inline patterns still rely on numbered group 1.
+	return decodeHtmlEntities(match?.groups?.value ?? match?.[1]);
 }
 
 export function extractPrimaryJsonLd(html: string): Record<string, unknown> | undefined {
@@ -91,6 +114,50 @@ export function extractPrimaryJsonLd(html: string): Record<string, unknown> | un
 	return undefined;
 }
 
+export function extractJsonLdByType(
+	html: string,
+	expectedType: string
+): Record<string, unknown> | undefined {
+	return extractJsonLdRecordsByType(html, expectedType)[0];
+}
+
+export function extractJsonLdRecordsByType(
+	html: string,
+	expectedType: string
+): Record<string, unknown>[] {
+	const matches = html.matchAll(
+		/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi
+	);
+	const records: Record<string, unknown>[] = [];
+	const visited = new Set<object>();
+
+	for (const match of matches) {
+		const raw = match[1]?.trim();
+		if (!raw) continue;
+		try {
+			const pending: unknown[] = [JSON.parse(raw) as unknown];
+			while (pending.length > 0) {
+				const value = pending.shift();
+				if (Array.isArray(value)) {
+					pending.unshift(...value);
+					continue;
+				}
+				const record = toRecordMaybe(value);
+				if (!record || visited.has(record)) continue;
+				visited.add(record);
+				const rawType = record['@type'];
+				const types = Array.isArray(rawType) ? rawType : [rawType];
+				if (types.some((type) => type === expectedType)) {
+					records.push(record);
+				}
+				pending.unshift(...Object.values(record));
+			}
+		} catch {}
+	}
+
+	return records;
+}
+
 export function stripHtml(value: string | undefined): string {
 	return (value ?? '').replace(/<[^>]+>/g, ' ');
 }
@@ -100,23 +167,19 @@ export function decodeHtmlEntities(value: string | undefined): string | undefine
 		return undefined;
 	}
 
-	return (
-		value
-			// Numeric entities — hex (&#xHH;) and decimal (&#NN;). These cover
-			// the common cases scrapers leak (e.g. &#x27; for apostrophe).
-			.replace(/&#x([0-9a-fA-F]+);/g, (_, hex: string) =>
-				String.fromCodePoint(Number.parseInt(hex, 16))
-			)
-			.replace(/&#(\d+);/g, (_, dec: string) => String.fromCodePoint(Number.parseInt(dec, 10)))
-			// Named entities
-			.replace(/&amp;/g, '&')
-			.replace(/&quot;/g, '"')
-			.replace(/&apos;/g, "'")
-			.replace(/&lt;/g, '<')
-			.replace(/&gt;/g, '>')
-			.replace(/&nbsp;/g, ' ')
-			.trim()
-	);
+	return value
+		.replace(HTML_ENTITY_PATTERN, (entity) => {
+			if (entity.startsWith('&#')) {
+				const isHex = entity[2] === 'x' || entity[2] === 'X';
+				const codePoint = Number.parseInt(entity.slice(isHex ? 3 : 2, -1), isHex ? 16 : 10);
+				const isValidCodePoint =
+					codePoint > 0 && codePoint <= 0x10ffff && (codePoint < 0xd800 || codePoint > 0xdfff);
+
+				return isValidCodePoint ? String.fromCodePoint(codePoint) : entity;
+			}
+			return HTML5_NAMED_CHARACTER_REFERENCES[entity.slice(1)] ?? entity;
+		})
+		.trim();
 }
 
 export function normalizeWhitespace(value: string | undefined): string | undefined {

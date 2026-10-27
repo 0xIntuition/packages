@@ -128,6 +128,16 @@ export type ResolverResult = {
 	classifications?: ResolverClassification[];
 	fallbackUsed?: boolean;
 	metadata?: Record<string, unknown>;
+	errors?: string[];
+	/** Suppress deterministic resolver fallback after a terminal acquisition outcome. */
+	terminal?: boolean;
+	classificationMetaPatch?: Record<string, unknown>;
+};
+
+export type ClassificationLogger = {
+	debug(message: string, meta?: Record<string, unknown>): void;
+	warn(message: string, meta?: Record<string, unknown>): void;
+	error(message: string, meta?: Record<string, unknown>): void;
 };
 
 export type ResolverContext = {
@@ -135,6 +145,14 @@ export type ResolverContext = {
 	request: Readonly<ClassificationRequest>;
 	classification: Readonly<ClassificationClientClassificationHint>;
 	now: string;
+	signal?: AbortSignal;
+	/**
+	 * Epoch ms at which the engine's resolver timeout aborts `signal`. Lets a resolver tell a
+	 * timeout from a caller cancel, which both abort the same signal.
+	 */
+	deadlineAtMs?: number;
+	logger?: ClassificationLogger;
+	secrets?: Readonly<Record<string, string>>;
 };
 
 export type AtomResolver = {
@@ -143,6 +161,7 @@ export type AtomResolver = {
 	runtime?: RuntimeTarget;
 	executionMode?: ResolverExecutionMode;
 	cacheTtlSeconds?: number;
+	timeoutMs?: number;
 	canResolve: (
 		classification: Readonly<ClassificationClientClassificationHint>,
 		request: Readonly<ClassificationRequest>

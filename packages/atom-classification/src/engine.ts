@@ -1,15 +1,28 @@
 import {
+	type Outcome,
+	type PromiseTask,
+	runWithSignal,
+	withTimeout,
+} from '@0xintuition/pipeline-runtime/outcome';
+import {
 	buildClassificationResolverCacheKey,
 	type ClassificationCacheAdapter,
 	type ClassificationResolverCachedEntry,
+	deleteClassificationCacheEntry,
+	getClassificationCacheEntry,
 	isClassificationResolverCachedEntryFresh,
+	setClassificationCacheEntry,
 } from './cache';
+import { normalizeClassificationIdentifiers } from './collect-atom-identifiers';
 import {
 	type AtomClassificationPlugin,
 	type AtomClassifier,
 	type AtomResolver,
+	type ClassificationLogger,
 	ENGINE_VERSION,
 	getPluginSecurityViolations,
+	type HookContext,
+	type HookErrorContext,
 	type HookExecutionError,
 	type HookPatch,
 	type HookStage,
@@ -18,6 +31,7 @@ import {
 	type PluginManifest,
 	type ResolverAtom,
 	type ResolverClassification,
+	type ResolverResult,
 	type RuntimeTarget,
 	validatePluginManifest,
 } from './plugins';
@@ -53,14 +67,18 @@ import {
 	classificationRequestSchema,
 	classificationResolvedAtomSchema,
 	classificationResolvedPayloadSchema,
+	classificationResolverErrorSchema,
 	classificationResultSchema,
+	MAX_CLASSIFICATION_RESOLVER_ERRORS,
 	resolveEnhancementPolicy,
 } from './types';
 
-const DEFAULT_HOOK_TIMEOUT_MS = 150;
+export const DEFAULT_CLASSIFICATION_HOOK_TIMEOUT_MS = 150;
 const DEFAULT_CLASSIFIER_PRIORITY = 100;
 const DEFAULT_RESOLVER_PRIORITY = 100;
-const DEFAULT_RESOLVER_CACHE_TTL_MS = 300_000;
+export const DEFAULT_CLASSIFICATION_RESOLVER_CACHE_TTL_MS = 300_000;
+export const DEFAULT_CLASSIFICATION_RESOLVER_TIMEOUT_MS = 10_000;
+const MAX_RESOLVER_ERROR_MESSAGE_LENGTH = 512;
 
 const RUNTIME_TO_PROVENANCE_SOURCE: Record<ClassificationRuntime, 'client' | 'server'> = {
 	client: 'client',
@@ -77,53 +95,36 @@ type ClientResultHint = NonNullable<
 
 type ProvenanceSource = 'client' | 'server' | 'merged' | 'user';
 
-type RegisteredPlugin = AtomClassificationPlugin & {
-	manifest: PluginManifest;
-	registrationOrder: number;
-};
-
-type RegisteredClassifier = AtomClassifier & {
+export type ClassificationClassifierError = {
+	classifierId: string;
 	pluginId: string;
-	priority: number;
-	runtime: RuntimeTarget;
-	registrationOrder: number;
+	message: string;
+	cause: unknown;
 };
 
-type RegisteredResolver = AtomResolver & {
-	pluginId: string;
-	priority: number;
-	runtime: RuntimeTarget;
-	registrationOrder: number;
-};
-
-type HookPipelineState = {
-	request: ClassificationRequest;
-	classification?: ClassificationClientClassificationHint;
-	resolved?: ClassificationResolvedPayload;
-	resolverErrors: ClassificationResolverError[];
-	result?: ClassificationResult;
-	metadata: Record<string, unknown>;
-};
-
-type ResolverAtomCandidate = {
+export type ClassificationResolverExecutionError = {
 	resolverId: string;
 	pluginId: string;
-	resolverPriority: number;
-	registrationOrder: number;
-	fallbackUsed: boolean;
-	atoms: ClassificationResolvedAtom[];
-	classifications: ClassificationCanonicalEnvelope[];
-	metadata?: Record<string, unknown>;
+	message: string;
+	cause: unknown;
 };
 
 export type CreateClassificationEngineOptions = {
 	runtime: ClassificationRuntime;
 	hookTimeoutMs?: number;
+	/** Single-attempt resolver deadline in milliseconds. Defaults to 10,000ms. */
+	resolverTimeoutMs?: number;
 	autoInit?: boolean;
 	now?: () => Date;
+	random?: () => number;
 	plugins?: AtomClassificationPlugin[];
 	cache?: ClassificationCacheAdapter;
 	resolverCacheTtlMs?: number;
+	logger?: ClassificationLogger;
+	secrets?: Readonly<Record<string, string>>;
+	/** Optional observer; failures never change classification. */
+	onClassifierError?: (error: ClassificationClassifierError) => unknown | PromiseLike<unknown>;
+	onResolverError?: (error: ClassificationResolverExecutionError) => void;
 };
 
 export type ClassificationEngineInitResult = {
@@ -152,7 +153,10 @@ export type ClassificationEngine = {
 	getLastHookErrors(): HookExecutionError[];
 	getLastMetadata(): Record<string, unknown>;
 	init(): Promise<ClassificationEngineInitResult>;
-	classify(input: ClassificationRequestInput): Promise<ClassificationResult>;
+	classify(
+		input: ClassificationRequestInput,
+		options?: ClassifyOptions
+	): Promise<ClassificationResult>;
 };
 
 export type { ClassificationRuntime } from './types';
@@ -167,10 +171,17 @@ class DefaultClassificationEngine implements ClassificationEngine {
 	readonly runtime: ClassificationRuntime;
 
 	private readonly hookTimeoutMs: number;
+	private readonly resolverTimeoutMs: number;
 	private readonly autoInit: boolean;
 	private readonly now: () => Date;
 	private readonly cache: ClassificationCacheAdapter | undefined;
 	private readonly resolverCacheTtlMs: number | undefined;
+	private readonly logger: ClassificationLogger | undefined;
+	private readonly secrets: Readonly<Record<string, string>> | undefined;
+	private readonly onClassifierError: NonNullable<
+		CreateClassificationEngineOptions['onClassifierError']
+	>;
+	private readonly onResolverError: CreateClassificationEngineOptions['onResolverError'];
 	private readonly pluginsById = new Map<string, RegisteredPlugin>();
 	private readonly classifiersById = new Map<string, RegisteredClassifier>();
 	private readonly resolversById = new Map<string, RegisteredResolver>();
@@ -187,12 +198,23 @@ class DefaultClassificationEngine implements ClassificationEngine {
 
 	constructor(options: CreateClassificationEngineOptions) {
 		this.runtime = options.runtime;
-		this.hookTimeoutMs = Math.max(0, options.hookTimeoutMs ?? DEFAULT_HOOK_TIMEOUT_MS);
+		this.hookTimeoutMs = Math.max(
+			0,
+			options.hookTimeoutMs ?? DEFAULT_CLASSIFICATION_HOOK_TIMEOUT_MS
+		);
+		this.resolverTimeoutMs = assertPositiveTimeoutMs(
+			options.resolverTimeoutMs ?? DEFAULT_CLASSIFICATION_RESOLVER_TIMEOUT_MS,
+			'resolverTimeoutMs'
+		);
 		this.autoInit = options.autoInit ?? true;
 		this.now = options.now ?? (() => new Date());
 		this.cache = options.cache;
+		this.logger = options.logger;
+		this.secrets = options.secrets ? Object.freeze({ ...options.secrets }) : undefined;
+		this.onClassifierError = options.onClassifierError ?? (() => {});
+		this.onResolverError = options.onResolverError;
 		this.resolverCacheTtlMs = normalizeResolverCacheTtlMs(
-			options.resolverCacheTtlMs ?? DEFAULT_RESOLVER_CACHE_TTL_MS
+			options.resolverCacheTtlMs ?? DEFAULT_CLASSIFICATION_RESOLVER_CACHE_TTL_MS
 		);
 
 		for (const plugin of options.plugins ?? []) {
@@ -316,6 +338,10 @@ class DefaultClassificationEngine implements ClassificationEngine {
 	}
 
 	async init(): Promise<ClassificationEngineInitResult> {
+		return this.initialize();
+	}
+
+	private initialize(): ClassificationEngineInitResult {
 		if (this.initialized) {
 			return {
 				ok: true,
@@ -362,100 +388,84 @@ class DefaultClassificationEngine implements ClassificationEngine {
 		};
 	}
 
-	async classify(input: ClassificationRequestInput): Promise<ClassificationResult> {
+	async classify(
+		input: ClassificationRequestInput,
+		options: ClassifyOptions = {}
+	): Promise<ClassificationResult> {
+		const outcome = await runWithSignal(
+			(signal) => buildClassificationProgram(this.createProgramHost(), input, signal),
+			{
+				signal: options.signal,
+			}
+		);
+
+		return unwrapClassificationOutcome(outcome, options.signal);
+	}
+
+	private createProgramHost(): ClassificationProgramHost {
+		return {
+			runtime: this.runtime,
+			hookTimeoutMs: this.hookTimeoutMs,
+			resolverTimeoutMs: this.resolverTimeoutMs,
+			cache: this.cache,
+			logger: this.logger,
+			secrets: this.secrets,
+			prepareRun: (input) => this.prepareRun(input),
+			ensureSessionId: (request) => this.ensureSessionId(request),
+			setLastMetadata: (metadata) => {
+				this.lastMetadata = cloneRecord(metadata);
+			},
+			selectClassifiers: (request) => this.selectClassifiers(request),
+			selectResolvers: (request) => this.selectResolvers(request),
+			fallbackClassification: (request) => this.fallbackClassification(request),
+			buildNoOpMessage: (request) => buildClassificationNoOpMessage(request),
+			createBaseResult: (request, classification) => this.createBaseResult(request, classification),
+			createPlaceholderResult: (request, message) => this.createPlaceholderResult(request, message),
+			mergeResultWithResolution: (result, request, classification, resolved, errors) =>
+				this.mergeResultWithResolution(result, request, classification, resolved, errors),
+			syncResultWithRequest: (result, request) => this.syncResultWithRequest(result, request),
+			mergeMetadata,
+			cloneRequest,
+			cloneClassification,
+			nowIso: () => this.now().toISOString(),
+			shouldRunResolver: shouldRunResolverForPolicy,
+			resolveResolverCacheTtlMs: (resolver) => this.resolveResolverCacheTtlMs(resolver),
+			createResolverStep: (input) => this.createResolverStep(input),
+			readCachedResolverStep: (entry, resolver) => this.readCachedResolverStep(entry, resolver),
+			createResolverCacheEntry: (input) => this.createResolverCacheEntry(input),
+			buildResolution: (input) => this.buildResolution(input),
+			buildFallbackResolution: (input) => this.buildFallbackResolution(input),
+			reportClassifierError: (classifier, cause) => this.reportClassifierError(classifier, cause),
+			reportResolverError: (resolver, cause, message) =>
+				this.reportResolverError(resolver, cause, message),
+			warnResolverCacheWrite: (resolver, kind, cause) =>
+				this.warnResolverCacheWrite(resolver, kind, cause),
+			getOrderedPlugins: () => this.getOrderedPlugins(),
+			createHookContext: (stage, state) => this.createHookContext(stage, state),
+			createHookErrorContext: (stage, state, error, pluginId) =>
+				this.createHookErrorContext(stage, state, error, pluginId),
+			applyPatch: (state, patch) => this.applyPatch(state, patch),
+			recordHookError: (pluginId, stage, error) => this.recordHookError(pluginId, stage, error),
+			normalizeError,
+		};
+	}
+
+	private prepareRun(input: ClassificationRequestInput): HookPipelineState {
 		if (!this.initialized) {
 			if (!this.autoInit) {
 				throw new Error('Engine is not initialized. Call init() before classify().');
 			}
 
-			await this.init();
+			this.initialize();
 		}
 
 		this.lastHookErrors = [];
 		this.lastMetadata = {};
-
-		let state: HookPipelineState = {
+		return {
 			request: this.ensureSessionId(classificationRequestSchema.parse(input)),
 			resolverErrors: [],
 			metadata: {},
 		};
-
-		state = await this.executeHookStage('beforeClassify', state);
-		state.request = this.ensureSessionId(state.request);
-
-		if (!state.classification) {
-			state.classification = await this.classifyInput(state.request);
-		}
-
-		state.result = state.classification
-			? this.createBaseResult(state.request, state.classification)
-			: this.createPlaceholderResult(state.request, buildClassificationNoOpMessage(state.request));
-		state = await this.executeHookStage('afterClassify', state);
-		state = await this.executeHookStage('beforeResolve', state);
-		if (!state.result) {
-			if (!state.classification) {
-				state.classification = await this.classifyInput(state.request);
-			}
-			state.result = state.classification
-				? this.createBaseResult(state.request, state.classification)
-				: this.createPlaceholderResult(
-						state.request,
-						buildClassificationNoOpMessage(state.request)
-					);
-		}
-
-		if (!state.resolved && state.classification) {
-			const resolution = await this.resolveInput(
-				state.request,
-				state.classification,
-				state.result.policy
-			);
-			state.resolved = resolution.resolved;
-			state.resolverErrors = [...state.resolverErrors, ...resolution.errors];
-
-			if (resolution.metadata) {
-				state.metadata = mergeMetadata(state.metadata, resolution.metadata);
-			}
-		}
-
-		if (state.result) {
-			state.result = this.mergeResultWithResolution(
-				state.result,
-				state.request,
-				state.classification,
-				state.resolved,
-				state.resolverErrors
-			);
-		}
-
-		state = await this.executeHookStage('afterResolve', state);
-		state = await this.executeHookStage('beforeMerge', state);
-
-		if (state.result) {
-			state.result = classificationResultSchema.parse(
-				this.syncResultWithRequest(state.result, state.request)
-			);
-		}
-
-		state = await this.executeHookStage('afterMerge', state);
-
-		const finalRequest = this.ensureSessionId(state.request);
-		const fallbackClassification = state.classification ?? (await this.classifyInput(finalRequest));
-		const finalResult = classificationResultSchema.parse(
-			this.syncResultWithRequest(
-				state.result ??
-					(fallbackClassification
-						? this.createBaseResult(finalRequest, fallbackClassification)
-						: this.createPlaceholderResult(
-								finalRequest,
-								buildClassificationNoOpMessage(finalRequest)
-							)),
-				finalRequest
-			)
-		);
-
-		this.lastMetadata = cloneRecord(state.metadata);
-		return finalResult;
 	}
 
 	private registerClassifier(manifest: PluginManifest, classifier: AtomClassifier): void {
@@ -498,6 +508,9 @@ class DefaultClassificationEngine implements ClassificationEngine {
 				`Resolver "${resolver.id}" in plugin "${manifest.id}" targets runtime "${runtime}" and cannot run in "${this.runtime}".`
 			);
 		}
+		if (resolver.timeoutMs !== undefined) {
+			assertPositiveTimeoutMs(resolver.timeoutMs, `Resolver "${resolver.id}" timeoutMs`);
+		}
 
 		this.resolversById.set(resolver.id, {
 			...resolver,
@@ -516,256 +529,174 @@ class DefaultClassificationEngine implements ClassificationEngine {
 		this.resolverOrder.length = 0;
 	}
 
-	private async classifyInput(
-		request: ClassificationRequest
-	): Promise<ClassificationClientClassificationHint | undefined> {
+	private selectClassifiers(request: ClassificationRequest) {
 		const requestedPluginIds = resolveRequestedPluginIds(request.pluginIds, this.pluginsById);
-		const orderedClassifiers = filterClassifiersForInputIntent(
-			this.getOrderedClassifiers(requestedPluginIds),
-			request
-		);
-		const input = request.input.trim();
-		const candidates: Array<{
-			classification: ClassificationClientClassificationHint;
-			classifier: RegisteredClassifier;
-		}> = [];
+		return {
+			classifiers: filterClassifiersForInputIntent(
+				this.getOrderedClassifiers(requestedPluginIds),
+				request
+			),
+			explicitlyRequested: requestedPluginIds !== undefined,
+		};
+	}
 
-		for (const classifier of orderedClassifiers) {
-			try {
-				const candidate = await Promise.resolve(classifier.classify(input, cloneRequest(request)));
-				if (!candidate) {
-					continue;
-				}
-
-				const parsed = classificationClientClassificationHintSchema.parse(candidate);
-				candidates.push({
-					classification: parsed,
-					classifier,
-				});
-			} catch {
-				// Classifier failures are intentionally isolated.
-			}
-		}
-
-		if (candidates.length > 0) {
-			const [best] = [...candidates].sort((left, right) => {
-				if (left.classification.confidence !== right.classification.confidence) {
-					return right.classification.confidence - left.classification.confidence;
-				}
-				if (left.classifier.priority !== right.classifier.priority) {
-					return left.classifier.priority - right.classifier.priority;
-				}
-				return left.classifier.registrationOrder - right.classifier.registrationOrder;
-			});
-
-			if (best) {
-				return best.classification;
-			}
-		}
-
-		if (request.clientHints?.clientClassification) {
-			return classificationClientClassificationHintSchema.parse(
-				request.clientHints.clientClassification
-			);
-		}
-
-		// An explicit plugin selection is a hard boundary. If none of the requested
-		// classifiers match, return no classification instead of fabricating the
-		// engine's generic fallback under the requested domain.
-		if (requestedPluginIds !== undefined) {
-			return undefined;
-		}
-
+	private fallbackClassification(
+		request: ClassificationRequest
+	): ClassificationClientClassificationHint | undefined {
 		if (shouldShortCircuitUrlFirstFallback(request)) {
 			return undefined;
 		}
 
-		const fallback = inferGenericClassification(input);
-		if (!fallback) {
-			return undefined;
-		}
-
-		return classificationClientClassificationHintSchema.parse(fallback);
+		const fallback = inferGenericClassification(request.input.trim());
+		return fallback ? classificationClientClassificationHintSchema.parse(fallback) : undefined;
 	}
 
-	private async resolveInput(
-		request: ClassificationRequest,
-		classification: ClassificationClientClassificationHint,
-		policy: ClassificationResult['policy']
-	): Promise<{
-		resolved: ClassificationResolvedPayload;
-		errors: ClassificationResolverError[];
-		metadata?: Record<string, unknown>;
-	}> {
+	private selectResolvers(request: ClassificationRequest) {
 		const requestedPluginIds = resolveRequestedPluginIds(request.pluginIds, this.pluginsById);
-		const orderedResolvers = this.getOrderedResolvers(requestedPluginIds);
-		const attemptedResolvers: string[] = [];
-		const errors: ClassificationResolverError[] = [];
-		const resolverCandidates: ResolverAtomCandidate[] = [];
+		return { resolvers: this.getOrderedResolvers(requestedPluginIds) };
+	}
 
-		for (const resolver of orderedResolvers) {
-			if (!shouldRunResolverForPolicy(policy, resolver)) {
-				continue;
-			}
-
-			if (!resolver.canResolve(classification, cloneRequest(request))) {
-				continue;
-			}
-
-			attemptedResolvers.push(resolver.id);
-			const resolverCacheTtlMs = this.resolveResolverCacheTtlMs(resolver);
-			const resolverCacheKey =
-				this.cache && resolverCacheTtlMs
-					? buildClassificationResolverCacheKey({
-							pluginId: resolver.pluginId,
-							resolverId: resolver.id,
-							runtime: this.runtime,
-							request,
-							classification,
-						})
-					: undefined;
-
-			const cachedCandidate =
-				this.cache && resolverCacheKey && resolverCacheTtlMs
-					? await this.readResolverCandidateFromCache({
-							resolver,
-							cacheKey: resolverCacheKey,
-						})
-					: undefined;
-			if (cachedCandidate) {
-				resolverCandidates.push(cachedCandidate);
-				continue;
-			}
-
-			try {
-				const output = await Promise.resolve(
-					resolver.resolve({
-						runtime: this.runtime,
-						request: cloneRequest(request),
-						classification: cloneClassification(classification),
-						now: this.now().toISOString(),
-					})
-				);
-
-				if (
-					!output ||
-					((!output.atoms || output.atoms.length === 0) &&
-						(!output.classifications || output.classifications.length === 0))
-				) {
-					continue;
-				}
-
-				const normalizedOutput = normalizeResolverOutput({
-					output,
-					resolverId: resolver.id,
-					pluginId: resolver.pluginId,
-					classificationConfidence: classification.confidence,
-					fetchedAt: this.now().toISOString(),
-				});
-				const normalizedAtoms = normalizedOutput.atoms;
-				if (normalizedAtoms.length === 0) {
-					continue;
-				}
-				const normalizedClassifications =
-					normalizedOutput.classifications.length > 0
-						? normalizedOutput.classifications
-						: normalizedAtoms.map((atom) =>
-								toCanonicalClassification({
-									atom,
-									fetchedAt: this.now().toISOString(),
-									defaultPluginId: resolver.pluginId,
-									defaultProvider: resolver.id,
-								})
-							);
-				if (normalizedClassifications.length === 0) {
-					continue;
-				}
-				if (normalizedOutput.metaMismatches.length > 0) {
-					output.metadata = {
-						...(output.metadata ?? {}),
-						migrationMismatches: normalizedOutput.metaMismatches,
-					};
-				}
-				this.validateCanonicalClassifications(normalizedClassifications, resolver.id);
-				this.validateCompatibilityProjection(
-					normalizedClassifications,
-					normalizedAtoms,
-					resolver.id
-				);
-				this.validateResolvedAtomsAgainstRegistry(normalizedAtoms, resolver.id);
-				const resolverCandidate: ResolverAtomCandidate = {
-					resolverId: resolver.id,
-					pluginId: resolver.pluginId,
-					resolverPriority: resolver.priority,
-					registrationOrder: resolver.registrationOrder,
-					fallbackUsed: output.fallbackUsed ?? false,
-					atoms: normalizedAtoms,
-					classifications: normalizedClassifications,
-					metadata: output.metadata,
-				};
-				resolverCandidates.push(resolverCandidate);
-				if (this.cache && resolverCacheKey && resolverCacheTtlMs) {
-					await this.writeResolverCandidateToCache({
-						cacheKey: resolverCacheKey,
-						candidate: resolverCandidate,
-						ttlMs: resolverCacheTtlMs,
-					});
-				}
-			} catch (error) {
-				errors.push({
-					resolverId: resolver.id,
-					message: normalizeError(error).message,
-					timestamp: this.now().toISOString(),
-				});
-			}
+	private buildResolution(input: {
+		classification: ClassificationClientClassificationHint;
+		request: ClassificationRequest;
+		attemptedResolvers: string[];
+		errors: ClassificationResolverError[];
+		candidates: ResolverAtomCandidate[];
+	}) {
+		const rankedAtoms = rankResolverCandidates(input.candidates);
+		const firstCandidate = input.candidates[0];
+		if (!firstCandidate) {
+			throw new Error('Resolver candidate collection was unexpectedly empty.');
 		}
+		const metadata = mergeResolverCandidateMetadata(input.candidates);
+		const rankedClassifications = rankedAtoms.map((candidate) =>
+			toCanonicalClassification({
+				atom: candidate.atom,
+				fetchedAt: this.now().toISOString(),
+				defaultPluginId: candidate.atom.pluginId ?? candidate.resolverId,
+				defaultProvider: candidate.resolverId,
+			})
+		);
 
-		if (resolverCandidates.length > 0) {
-			const rankedAtoms = rankResolverCandidates(resolverCandidates);
-			const firstCandidate = resolverCandidates[0];
-			if (!firstCandidate) {
-				throw new Error('Resolver candidate collection was unexpectedly empty.');
-			}
-			const metadata = mergeResolverCandidateMetadata(resolverCandidates);
-			const rankedClassifications = rankedAtoms.map((candidate) =>
-				toCanonicalClassification({
-					atom: candidate.atom,
-					fetchedAt: this.now().toISOString(),
-					defaultPluginId: candidate.atom.pluginId ?? candidate.resolverId,
-					defaultProvider: candidate.resolverId,
-				})
-			);
-			return {
-				resolved: buildResolvedPayload({
-					classification,
-					resolverId: firstCandidate.resolverId,
-					resolverChain: attemptedResolvers,
-					atoms: rankedAtoms.map((candidate) => candidate.atom),
-					classifications: rankedClassifications,
-					fetchedAt: this.now().toISOString(),
-					fallbackUsed: firstCandidate.fallbackUsed,
-				}),
-				errors,
-				metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
-			};
-		}
+		return {
+			resolved: buildResolvedPayload({
+				classification: input.classification,
+				resolverId: firstCandidate.resolverId,
+				resolverChain: input.attemptedResolvers,
+				atoms: rankedAtoms.map((candidate) => candidate.atom),
+				classifications: rankedClassifications,
+				fetchedAt: this.now().toISOString(),
+				fallbackUsed: firstCandidate.fallbackUsed,
+			}),
+			errors: input.errors,
+			metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
+		};
+	}
 
+	private buildFallbackResolution(input: {
+		classification: ClassificationClientClassificationHint;
+		request: ClassificationRequest;
+		policy: ClassificationResult['policy'];
+		attemptedResolvers: string[];
+		errors: ClassificationResolverError[];
+	}) {
 		const fallbackAtom = createFallbackAtom(
-			classification,
-			request.input,
-			policy.runServerEnrichment ? 'resolver-fallback' : 'policy-fallback'
+			input.classification,
+			input.request.input,
+			input.policy.runServerEnrichment ? 'resolver-fallback' : 'policy-fallback'
 		);
 		this.validateResolvedAtomsAgainstRegistry([fallbackAtom], 'deterministic-fallback');
 		return {
 			resolved: buildResolvedPayload({
-				classification,
+				classification: input.classification,
 				resolverId: 'deterministic-fallback',
-				resolverChain: attemptedResolvers,
+				resolverChain: input.attemptedResolvers,
 				atoms: [fallbackAtom],
 				fetchedAt: this.now().toISOString(),
 				fallbackUsed: true,
 			}),
+			errors: input.errors,
+		};
+	}
+
+	private createResolverStep(input: {
+		output: ResolverResult;
+		resolver: RegisteredResolver;
+		classification: ClassificationClientClassificationHint;
+		cacheKey?: string;
+		cacheTtlMs?: number;
+	}): ResolverStepResult | undefined {
+		const { output, resolver, classification } = input;
+		const errors = (output.errors ?? [])
+			.slice(0, MAX_CLASSIFICATION_RESOLVER_ERRORS)
+			.map((message) => message.trim())
+			.filter(Boolean)
+			.map((message) => this.reportResolverError(resolver, new Error(message), message));
+		if (
+			(!output.atoms || output.atoms.length === 0) &&
+			(!output.classifications || output.classifications.length === 0)
+		) {
+			return output.terminal
+				? {
+						errors,
+						terminal: true,
+						classificationMetaPatch: output.classificationMetaPatch,
+					}
+				: undefined;
+		}
+
+		const fetchedAt = this.now().toISOString();
+		const normalizedOutput = normalizeResolverOutput({
+			output,
+			resolverId: resolver.id,
+			pluginId: resolver.pluginId,
+			classificationConfidence: classification.confidence,
+			fetchedAt,
+		});
+		const normalizedAtoms = normalizedOutput.atoms;
+		if (normalizedAtoms.length === 0) {
+			return undefined;
+		}
+		const normalizedClassifications =
+			normalizedOutput.classifications.length > 0
+				? normalizedOutput.classifications
+				: normalizedAtoms.map((atom) =>
+						toCanonicalClassification({
+							atom,
+							fetchedAt,
+							defaultPluginId: resolver.pluginId,
+							defaultProvider: resolver.id,
+						})
+					);
+		if (normalizedClassifications.length === 0) {
+			return undefined;
+		}
+		if (normalizedOutput.metaMismatches.length > 0) {
+			output.metadata = {
+				...(output.metadata ?? {}),
+				migrationMismatches: normalizedOutput.metaMismatches,
+			};
+		}
+		this.validateCanonicalClassifications(normalizedClassifications, resolver.id);
+		this.validateCompatibilityProjection(normalizedClassifications, normalizedAtoms, resolver.id);
+		this.validateResolvedAtomsAgainstRegistry(normalizedAtoms, resolver.id);
+		const candidate: ResolverAtomCandidate = {
+			resolverId: resolver.id,
+			pluginId: resolver.pluginId,
+			resolverPriority: resolver.priority,
+			registrationOrder: resolver.registrationOrder,
+			fallbackUsed: output.fallbackUsed ?? false,
+			atoms: normalizedAtoms,
+			classifications: normalizedClassifications,
+			metadata: output.metadata,
+		};
+		return {
+			candidate,
 			errors,
+			cacheWrite:
+				this.cache && input.cacheKey && input.cacheTtlMs
+					? { cacheKey: input.cacheKey, ttlMs: input.cacheTtlMs }
+					: undefined,
 		};
 	}
 
@@ -781,80 +712,56 @@ class DefaultClassificationEngine implements ClassificationEngine {
 		return this.resolverCacheTtlMs;
 	}
 
-	private async readResolverCandidateFromCache(input: {
-		resolver: RegisteredResolver;
-		cacheKey: string;
-	}): Promise<ResolverAtomCandidate | undefined> {
-		if (!this.cache) {
-			return undefined;
-		}
-
+	private readCachedResolverStep(
+		entry: ClassificationResolverCachedEntry,
+		resolver: RegisteredResolver
+	): ResolverStepResult | undefined {
 		try {
-			const cachedEntry = await this.cache.get(input.cacheKey);
-			if (!cachedEntry) {
-				return undefined;
-			}
-
-			if (!isClassificationResolverCachedEntryFresh(cachedEntry)) {
-				try {
-					await this.cache.delete(input.cacheKey);
-				} catch {
-					// non-fatal cache cleanup failure
-				}
-				return undefined;
-			}
-
-			this.validateResolvedAtomsAgainstRegistry(cachedEntry.atoms, input.resolver.id);
-			const classifications = cachedEntry.atoms.map((atom) =>
+			this.validateResolvedAtomsAgainstRegistry(entry.atoms, resolver.id);
+			const classifications = entry.atoms.map((atom) =>
 				toCanonicalClassification({
 					atom,
 					fetchedAt: this.now().toISOString(),
-					defaultPluginId: atom.pluginId ?? input.resolver.pluginId,
-					defaultProvider: input.resolver.id,
+					defaultPluginId: atom.pluginId ?? resolver.pluginId,
+					defaultProvider: resolver.id,
 				})
 			);
-			this.validateCanonicalClassifications(classifications, input.resolver.id);
-			this.validateCompatibilityProjection(classifications, cachedEntry.atoms, input.resolver.id);
+			this.validateCanonicalClassifications(classifications, resolver.id);
+			this.validateCompatibilityProjection(classifications, entry.atoms, resolver.id);
 
 			return {
-				resolverId: input.resolver.id,
-				pluginId: input.resolver.pluginId,
-				resolverPriority: input.resolver.priority,
-				registrationOrder: input.resolver.registrationOrder,
-				fallbackUsed: cachedEntry.fallbackUsed,
-				atoms: cachedEntry.atoms.map((atom) => structuredCloneSafe(atom)),
-				classifications,
-				metadata: cachedEntry.metadata ? structuredCloneSafe(cachedEntry.metadata) : undefined,
+				candidate: {
+					resolverId: resolver.id,
+					pluginId: resolver.pluginId,
+					resolverPriority: resolver.priority,
+					registrationOrder: resolver.registrationOrder,
+					fallbackUsed: entry.fallbackUsed,
+					atoms: entry.atoms.map((atom) => structuredCloneSafe(atom)),
+					classifications,
+					metadata: entry.metadata ? structuredCloneSafe(entry.metadata) : undefined,
+				},
+				errors: normalizeCachedResolverErrors(entry.errors),
 			};
 		} catch {
 			return undefined;
 		}
 	}
 
-	private async writeResolverCandidateToCache(input: {
-		cacheKey: string;
+	private createResolverCacheEntry(input: {
 		candidate: ResolverAtomCandidate;
+		errors: ClassificationResolverError[];
 		ttlMs: number;
-	}): Promise<void> {
-		if (!this.cache) {
-			return;
-		}
-
-		const cacheEntry: ClassificationResolverCachedEntry = {
+	}): ClassificationResolverCachedEntry {
+		return {
 			atoms: input.candidate.atoms.map((atom) => structuredCloneSafe(atom)),
 			fallbackUsed: input.candidate.fallbackUsed,
+			errors: limitResolverErrors(input.errors).map((error) => structuredCloneSafe(error)),
 			metadata: input.candidate.metadata
 				? structuredCloneSafe(input.candidate.metadata)
 				: undefined,
 			cachedAt: this.now().toISOString(),
 			ttlMs: input.ttlMs,
 		};
-
-		try {
-			await this.cache.set(input.cacheKey, cacheEntry, input.ttlMs);
-		} catch {
-			// cache writes are intentionally best-effort
-		}
 	}
 
 	private createBaseResult(
@@ -941,7 +848,9 @@ class DefaultClassificationEngine implements ClassificationEngine {
 
 			const validationPayload =
 				Object.keys(atom.data).length > 0
-					? atom.data
+					? atom.metadata.resolutionMode === 'identity-only'
+						? { ...atom.data, name: atom.title }
+						: atom.data
 					: {
 							'@context': 'https://schema.org',
 							'@type': atom.schemaType,
@@ -976,7 +885,11 @@ class DefaultClassificationEngine implements ClassificationEngine {
 				);
 			}
 
-			const validation = definition.schema.safeParse(classification.data);
+			const validationData =
+				classification.meta.resolutionMode === 'identity-only'
+					? { ...classification.data, name: 'Identity bridge pending' }
+					: classification.data;
+			const validation = definition.schema.safeParse(validationData);
 			if (!validation.success) {
 				throw new Error(
 					`Resolver "${resolverId}" emitted invalid canonical data for type "${classification.type}".`
@@ -1064,7 +977,7 @@ class DefaultClassificationEngine implements ClassificationEngine {
 			message,
 			classification,
 			resolved: mergedResolved,
-			resolverErrors: resolverErrors.length > 0 ? resolverErrors : undefined,
+			resolverErrors: resolverErrors.length > 0 ? limitResolverErrors(resolverErrors) : undefined,
 			provenance:
 				result.policy.includeProvenance && progressiveProvenance
 					? {
@@ -1109,41 +1022,6 @@ class DefaultClassificationEngine implements ClassificationEngine {
 		return `${this.runtime}-${this.now().getTime().toString(36)}-${this.sessionCount.toString(36)}`;
 	}
 
-	private async executeHookStage(
-		stage: HookStage,
-		state: HookPipelineState
-	): Promise<HookPipelineState> {
-		let nextState = state;
-		const orderedPlugins = this.getOrderedPlugins();
-
-		for (const plugin of orderedPlugins) {
-			const handler = plugin.hooks?.[stage];
-			if (!handler) {
-				continue;
-			}
-
-			const context = this.createHookContext(stage, nextState);
-
-			try {
-				const patch = await this.withTimeout(
-					Promise.resolve(handler(context)),
-					plugin.manifest.id,
-					stage
-				);
-
-				if (patch) {
-					nextState = this.applyPatch(nextState, patch);
-				}
-			} catch (error) {
-				const normalizedError = normalizeError(error);
-				this.recordHookError(plugin.manifest.id, stage, normalizedError);
-				await this.runOnErrorHandler(plugin, stage, nextState, normalizedError);
-			}
-		}
-
-		return nextState;
-	}
-
 	private createHookContext(stage: HookStage, state: HookPipelineState) {
 		return deepFreeze({
 			stage,
@@ -1154,28 +1032,17 @@ class DefaultClassificationEngine implements ClassificationEngine {
 		});
 	}
 
-	private async runOnErrorHandler(
-		plugin: RegisteredPlugin,
+	private createHookErrorContext(
 		stage: HookStage,
 		state: HookPipelineState,
-		error: Error
-	): Promise<void> {
-		const onError = plugin.hooks?.onError;
-		if (!onError) {
-			return;
-		}
-
-		const context = deepFreeze({
+		error: Error,
+		pluginId: string
+	): HookErrorContext {
+		return deepFreeze({
 			...this.createHookContext(stage, state),
 			error,
-			pluginId: plugin.manifest.id,
+			pluginId,
 		});
-
-		try {
-			await this.withTimeout(Promise.resolve(onError(context)), plugin.manifest.id, stage);
-		} catch {
-			// Secondary onError failures are intentionally isolated.
-		}
 	}
 
 	private applyPatch(state: HookPipelineState, patch: HookPatch): HookPipelineState {
@@ -1247,38 +1114,7 @@ class DefaultClassificationEngine implements ClassificationEngine {
 			},
 		};
 
-		return classificationResultSchema.parse(synced);
-	}
-
-	private async withTimeout<T>(
-		promise: Promise<T>,
-		pluginId: string,
-		stage: HookStage
-	): Promise<T> {
-		if (this.hookTimeoutMs === 0) {
-			return promise;
-		}
-
-		let timer: ReturnType<typeof setTimeout> | undefined;
-
-		try {
-			return await Promise.race([
-				promise,
-				new Promise<T>((_, reject) => {
-					timer = setTimeout(() => {
-						reject(
-							new Error(
-								`Hook timed out after ${this.hookTimeoutMs}ms for plugin "${pluginId}" at stage "${stage}".`
-							)
-						);
-					}, this.hookTimeoutMs);
-				}),
-			]);
-		} finally {
-			if (timer) {
-				clearTimeout(timer);
-			}
-		}
+		return classificationResultSchema.parse(normalizeClassificationIdentifiers(synced));
 	}
 
 	private getOrderedPlugins(): RegisteredPlugin[] {
@@ -1327,6 +1163,67 @@ class DefaultClassificationEngine implements ClassificationEngine {
 			: ordered;
 	}
 
+	private reportClassifierError(classifier: RegisteredClassifier, cause: unknown): void {
+		const error = normalizeError(cause);
+		invokeVoidObserver(() =>
+			this.onClassifierError({
+				classifierId: classifier.id,
+				pluginId: classifier.pluginId,
+				message: error.message,
+				cause,
+			})
+		);
+	}
+
+	private reportResolverError(
+		resolver: RegisteredResolver,
+		cause: unknown,
+		message = normalizeError(cause).message
+	): ClassificationResolverError {
+		const boundedMessage = boundResolverErrorMessage(message);
+		if (this.onResolverError) {
+			invokeVoidObserver(() =>
+				this.onResolverError?.({
+					resolverId: resolver.id,
+					pluginId: resolver.pluginId,
+					message: boundedMessage,
+					cause,
+				})
+			);
+		}
+
+		return {
+			resolverId: resolver.id,
+			message: boundedMessage,
+			timestamp: this.now().toISOString(),
+		};
+	}
+
+	private warnResolverCacheWrite(
+		resolver: RegisteredResolver,
+		kind: 'failure' | 'timeout',
+		cause?: unknown
+	): void {
+		if (!this.logger) {
+			return;
+		}
+
+		const logger = this.logger;
+		const message =
+			kind === 'timeout'
+				? 'Classification resolver cache write timed out.'
+				: 'Classification resolver cache write failed.';
+		const meta: Record<string, unknown> = {
+			resolverId: resolver.id,
+			pluginId: resolver.pluginId,
+		};
+		if (kind === 'failure') {
+			meta.error = normalizeError(cause).message;
+		}
+
+		invokeVoidObserver(() => logger.warn(message, meta));
+	}
+
 	private recordHookError(pluginId: string, stage: HookStage, error: Error): void {
 		this.lastHookErrors.push({
 			pluginId,
@@ -1335,6 +1232,33 @@ class DefaultClassificationEngine implements ClassificationEngine {
 			timestamp: this.now().toISOString(),
 		});
 	}
+}
+
+function invokeVoidObserver(run: () => unknown): void {
+	try {
+		const result = run();
+		if (isThenable(result)) {
+			result.then(undefined, () => undefined);
+		}
+	} catch {
+		// Observers are best-effort and cannot change classification behavior.
+	}
+}
+
+function isThenable(value: unknown): value is PromiseLike<unknown> {
+	if ((typeof value !== 'object' || value === null) && typeof value !== 'function') {
+		return false;
+	}
+
+	return typeof (value as { then?: unknown }).then === 'function';
+}
+
+function assertPositiveTimeoutMs(timeoutMs: number, label: string): number {
+	if (!(timeoutMs > 0)) {
+		throw new RangeError(`${label} must be greater than 0.`);
+	}
+
+	return timeoutMs;
 }
 
 function resolvePluginOrder(plugins: RegisteredPlugin[]): RegisteredPlugin[] {
@@ -2006,6 +1930,69 @@ function normalizeError(error: unknown): Error {
 	return new Error('Unknown runtime execution error.');
 }
 
+function boundResolverErrorMessage(message: string): string {
+	const wellFormedMessage = toWellFormedUtf16(message);
+	if (wellFormedMessage.length <= MAX_RESOLVER_ERROR_MESSAGE_LENGTH) {
+		return wellFormedMessage;
+	}
+
+	let end = MAX_RESOLVER_ERROR_MESSAGE_LENGTH - 1;
+	const finalCodeUnit = wellFormedMessage.charCodeAt(end - 1);
+	if (finalCodeUnit >= 0xd800 && finalCodeUnit <= 0xdbff) {
+		end -= 1;
+	}
+
+	return `${wellFormedMessage.slice(0, end)}…`;
+}
+
+function toWellFormedUtf16(value: string): string {
+	let normalized = '';
+	for (let index = 0; index < value.length; index += 1) {
+		const codeUnit = value.charCodeAt(index);
+		if (codeUnit >= 0xd800 && codeUnit <= 0xdbff) {
+			const nextCodeUnit = value.charCodeAt(index + 1);
+			if (nextCodeUnit >= 0xdc00 && nextCodeUnit <= 0xdfff) {
+				normalized += value[index] ?? '';
+				normalized += value[index + 1] ?? '';
+				index += 1;
+			} else {
+				normalized += '\uFFFD';
+			}
+			continue;
+		}
+
+		normalized += codeUnit >= 0xdc00 && codeUnit <= 0xdfff ? '\uFFFD' : (value[index] ?? '');
+	}
+	return normalized;
+}
+
+function limitResolverErrors(errors: ClassificationResolverError[]): ClassificationResolverError[] {
+	return errors.slice(0, MAX_CLASSIFICATION_RESOLVER_ERRORS);
+}
+
+function normalizeCachedResolverErrors(value: unknown): ClassificationResolverError[] {
+	if (!Array.isArray(value)) {
+		return [];
+	}
+
+	return value.slice(0, MAX_CLASSIFICATION_RESOLVER_ERRORS).flatMap((error) => {
+		if (!error || typeof error !== 'object') {
+			return [];
+		}
+
+		const message = (error as { message?: unknown }).message;
+		if (typeof message !== 'string') {
+			return [];
+		}
+
+		const parsed = classificationResolverErrorSchema.safeParse({
+			...error,
+			message: boundResolverErrorMessage(message),
+		});
+		return parsed.success ? [parsed.data] : [];
+	});
+}
+
 function normalizeResolverAtoms(
 	atoms: ResolverAtom[],
 	input: {
@@ -2016,6 +2003,7 @@ function normalizeResolverAtoms(
 ): ClassificationResolvedAtom[] {
 	const normalized = atoms.map((atom) => {
 		const explicitData = toRecordMaybe(atom.data) ?? {};
+		const metadata = toRecordMaybe(atom.metadata) ?? {};
 		const sameAs = normalizeStringArray(atom.sameAs ?? []);
 		const description = toStringMaybe(atom.description);
 		const canonicalId = toStringMaybe(atom.canonicalId);
@@ -2036,9 +2024,11 @@ function normalizeResolverAtoms(
 			pluginId: input.pluginId,
 			resolverId: input.resolverId,
 			hints: toRecordMaybe(atom.hints) ?? {},
-			metadata: toRecordMaybe(atom.metadata) ?? {},
+			metadata,
 			data:
-				Object.keys(explicitData).length > 0 && shouldPreserveExplicitResolverData(atom.schemaType)
+				Object.keys(explicitData).length > 0 &&
+				(shouldPreserveExplicitResolverData(atom.schemaType) ||
+					metadata.resolutionMode === 'identity-only')
 					? mergeDataSameAs(explicitData, sameAs)
 					: buildAtomDataShape({
 							schemaType: atom.schemaType,
@@ -2483,14 +2473,12 @@ function resolveLegacyCategoryForCanonicalType(
 	if (normalized === 'product' || normalized === 'ethereumerc20' || normalized === 'brand') {
 		return 'product';
 	}
-	if (normalized === 'musicrecording') {
+	if (
+		normalized === 'musicrecording' ||
+		normalized === 'musicalbum' ||
+		normalized === 'musicgroup'
+	) {
 		return 'song';
-	}
-	if (normalized === 'musicalbum') {
-		return 'music-album';
-	}
-	if (normalized === 'musicgroup') {
-		return 'artist';
 	}
 	if (normalized === 'podcastseries' || normalized === 'podcastepisode') {
 		return 'podcast';
@@ -3172,4 +3160,579 @@ function deepFreeze<T>(value: T): T {
 
 function isFreezable(value: unknown): value is Record<string, unknown> {
 	return !!value && typeof value === 'object';
+}
+
+export type ClassifyOptions = { signal?: AbortSignal };
+/** @internal Registered forms consumed by the extracted program. */
+export type RegisteredPlugin = AtomClassificationPlugin & {
+	manifest: PluginManifest;
+	registrationOrder: number;
+};
+
+/** @internal Registered forms consumed by the extracted program. */
+export type RegisteredClassifier = AtomClassifier & {
+	pluginId: string;
+	priority: number;
+	runtime: RuntimeTarget;
+	registrationOrder: number;
+};
+
+/** @internal Registered forms consumed by the extracted program. */
+export type RegisteredResolver = AtomResolver & {
+	pluginId: string;
+	priority: number;
+	runtime: RuntimeTarget;
+	registrationOrder: number;
+};
+
+/** @internal Mutable state passed between hook stages in one classification run. */
+export type HookPipelineState = {
+	request: ClassificationRequest;
+	classification?: ClassificationClientClassificationHint;
+	resolved?: ClassificationResolvedPayload;
+	resolverErrors: ClassificationResolverError[];
+	result?: ClassificationResult;
+	metadata: Record<string, unknown>;
+};
+
+/** @internal A normalized resolver candidate before cross-resolver ranking. */
+export type ResolverAtomCandidate = {
+	resolverId: string;
+	pluginId: string;
+	resolverPriority: number;
+	registrationOrder: number;
+	fallbackUsed: boolean;
+	atoms: ClassificationResolvedAtom[];
+	classifications: ClassificationCanonicalEnvelope[];
+	metadata?: Record<string, unknown>;
+};
+
+/** @internal Output of one resolver read/execute step before its best-effort cache write. */
+export type ResolverStepResult = {
+	candidate?: ResolverAtomCandidate;
+	errors: ClassificationResolverError[];
+	terminal?: boolean;
+	classificationMetaPatch?: Record<string, unknown>;
+	cacheWrite?: {
+		cacheKey: string;
+		ttlMs: number;
+	};
+};
+
+type ResolverSelection = {
+	resolvers: RegisteredResolver[];
+};
+
+type ClassifierSelection = {
+	classifiers: RegisteredClassifier[];
+	explicitlyRequested: boolean;
+};
+
+/**
+ * Package-internal capabilities used by the Promise program. Pure
+ * engine policy remains in `engine.ts`; orchestration and cancellation live
+ * here so the Promise edge does not own a second runtime vocabulary.
+ */
+export type ClassificationProgramHost = {
+	readonly runtime: ClassificationRuntime;
+	readonly hookTimeoutMs: number;
+	readonly resolverTimeoutMs: number;
+	readonly cache: ClassificationCacheAdapter | undefined;
+	readonly logger: ClassificationLogger | undefined;
+	readonly secrets: Readonly<Record<string, string>> | undefined;
+	prepareRun(input: ClassificationRequestInput): HookPipelineState;
+	ensureSessionId(request: ClassificationRequest): ClassificationRequest;
+	setLastMetadata(metadata: Record<string, unknown>): void;
+	selectClassifiers(request: ClassificationRequest): ClassifierSelection;
+	selectResolvers(request: ClassificationRequest): ResolverSelection;
+	fallbackClassification(
+		request: ClassificationRequest
+	): ClassificationClientClassificationHint | undefined;
+	buildNoOpMessage(request: ClassificationRequest): string;
+	createBaseResult(
+		request: ClassificationRequest,
+		classification: ClassificationClientClassificationHint
+	): ClassificationResult;
+	createPlaceholderResult(request: ClassificationRequest, message: string): ClassificationResult;
+	mergeResultWithResolution(
+		result: ClassificationResult,
+		request: ClassificationRequest,
+		classification: ClassificationClientClassificationHint | undefined,
+		resolved: ClassificationResolvedPayload | undefined,
+		resolverErrors: ClassificationResolverError[]
+	): ClassificationResult;
+	syncResultWithRequest(
+		result: ClassificationResult,
+		request: ClassificationRequest
+	): ClassificationResult;
+	mergeMetadata(
+		current: Record<string, unknown>,
+		patch: Record<string, unknown>
+	): Record<string, unknown>;
+	cloneRequest(request: ClassificationRequest): ClassificationRequest;
+	cloneClassification(
+		classification: ClassificationClientClassificationHint
+	): ClassificationClientClassificationHint;
+	nowIso(): string;
+	shouldRunResolver(policy: ClassificationResult['policy'], resolver: RegisteredResolver): boolean;
+	resolveResolverCacheTtlMs(resolver: RegisteredResolver): number | undefined;
+	createResolverStep(input: {
+		output: ResolverResult;
+		resolver: RegisteredResolver;
+		classification: ClassificationClientClassificationHint;
+		cacheKey?: string;
+		cacheTtlMs?: number;
+	}): ResolverStepResult | undefined;
+	readCachedResolverStep(
+		entry: ClassificationResolverCachedEntry,
+		resolver: RegisteredResolver
+	): ResolverStepResult | undefined;
+	createResolverCacheEntry(input: {
+		candidate: ResolverAtomCandidate;
+		errors: ClassificationResolverError[];
+		ttlMs: number;
+	}): ClassificationResolverCachedEntry;
+	buildResolution(input: {
+		classification: ClassificationClientClassificationHint;
+		request: ClassificationRequest;
+		attemptedResolvers: string[];
+		errors: ClassificationResolverError[];
+		candidates: ResolverAtomCandidate[];
+	}): {
+		resolved: ClassificationResolvedPayload;
+		errors: ClassificationResolverError[];
+		metadata?: Record<string, unknown>;
+	};
+	buildFallbackResolution(input: {
+		classification: ClassificationClientClassificationHint;
+		request: ClassificationRequest;
+		policy: ClassificationResult['policy'];
+		attemptedResolvers: string[];
+		errors: ClassificationResolverError[];
+	}): {
+		resolved: ClassificationResolvedPayload;
+		errors: ClassificationResolverError[];
+	};
+	reportClassifierError(classifier: RegisteredClassifier, cause: unknown): void;
+	reportResolverError(
+		resolver: RegisteredResolver,
+		cause: unknown,
+		message?: string
+	): ClassificationResolverError;
+	warnResolverCacheWrite(
+		resolver: RegisteredResolver,
+		kind: 'failure' | 'timeout',
+		cause?: unknown
+	): void;
+	getOrderedPlugins(): RegisteredPlugin[];
+	createHookContext(stage: HookStage, state: HookPipelineState): HookContext;
+	createHookErrorContext(
+		stage: HookStage,
+		state: HookPipelineState,
+		error: Error,
+		pluginId: string
+	): HookErrorContext;
+	applyPatch(state: HookPipelineState, patch: HookPatch): HookPipelineState;
+	recordHookError(pluginId: string, stage: HookStage, error: Error): void;
+	normalizeError(error: unknown): Error;
+};
+
+async function buildClassificationProgram(
+	host: ClassificationProgramHost,
+	input: ClassificationRequestInput,
+	signal: AbortSignal
+): Promise<ClassificationResult> {
+	const initialState = host.prepareRun(input);
+
+	let state = initialState;
+
+	state = await executeHookStage(host, 'beforeClassify', state, signal);
+	state.request = host.ensureSessionId(state.request);
+
+	if (!state.classification) {
+		state.classification = await classifyInput(host, state.request, signal);
+	}
+
+	state.result = state.classification
+		? host.createBaseResult(state.request, state.classification)
+		: host.createPlaceholderResult(state.request, host.buildNoOpMessage(state.request));
+	state = await executeHookStage(host, 'afterClassify', state, signal);
+	state = await executeHookStage(host, 'beforeResolve', state, signal);
+	if (!state.result) {
+		if (!state.classification) {
+			state.classification = await classifyInput(host, state.request, signal);
+		}
+		state.result = state.classification
+			? host.createBaseResult(state.request, state.classification)
+			: host.createPlaceholderResult(state.request, host.buildNoOpMessage(state.request));
+	}
+
+	if (!state.resolved && state.classification) {
+		const resolution = await resolveInput(
+			host,
+			state.request,
+			state.classification,
+			state.result.policy,
+			signal
+		);
+		state.resolved = resolution.resolved;
+		state.resolverErrors = limitResolverErrors([...state.resolverErrors, ...resolution.errors]);
+
+		if (resolution.metadata) {
+			state.metadata = host.mergeMetadata(state.metadata, resolution.metadata);
+		}
+	}
+
+	if (state.result) {
+		state.result = host.mergeResultWithResolution(
+			state.result,
+			state.request,
+			state.classification,
+			state.resolved,
+			state.resolverErrors
+		);
+	}
+
+	state = await executeHookStage(host, 'afterResolve', state, signal);
+	state = await executeHookStage(host, 'beforeMerge', state, signal);
+
+	if (state.result) {
+		state.result = classificationResultSchema.parse(
+			host.syncResultWithRequest(state.result, state.request)
+		);
+	}
+
+	state = await executeHookStage(host, 'afterMerge', state, signal);
+
+	const finalRequest = host.ensureSessionId(state.request);
+	const fallbackClassification =
+		state.classification ?? (await classifyInput(host, finalRequest, signal));
+	const finalResult = classificationResultSchema.parse(
+		host.syncResultWithRequest(
+			state.result ??
+				(fallbackClassification
+					? host.createBaseResult(finalRequest, fallbackClassification)
+					: host.createPlaceholderResult(finalRequest, host.buildNoOpMessage(finalRequest))),
+			finalRequest
+		)
+	);
+
+	signal.throwIfAborted();
+	host.setLastMetadata(state.metadata);
+	return finalResult;
+}
+
+/** @internal Promise-edge error funnel shared by the package engine. */
+export function unwrapClassificationOutcome(
+	outcome: Outcome<ClassificationResult>,
+	signal?: AbortSignal
+): ClassificationResult {
+	switch (outcome.kind) {
+		case 'success':
+			return outcome.value;
+		case 'interrupted':
+			throw createClassificationAbortError(outcome.reason ?? signal?.reason);
+		case 'failure':
+			throw outcome.error;
+		case 'defect':
+			throw outcome.error;
+		case 'timeout':
+			throw new Error('Classification timed out outside a resolver boundary.');
+		default:
+			throw new Error('Classification failed with an unknown outcome.');
+	}
+}
+
+function createClassificationAbortError(reason: unknown): Error {
+	const error = new Error(
+		'Classification aborted.',
+		reason === undefined ? undefined : { cause: reason }
+	) as Error & { reason?: unknown };
+	error.name = 'AbortError';
+	if (reason !== undefined) {
+		error.reason = reason;
+	}
+	return error;
+}
+
+async function classifyInput(
+	host: ClassificationProgramHost,
+	request: ClassificationRequest,
+	signal: AbortSignal
+): Promise<ClassificationClientClassificationHint | undefined> {
+	signal.throwIfAborted();
+	const selection = host.selectClassifiers(request);
+	const candidates: {
+		classification: ClassificationClientClassificationHint;
+		classifier: RegisteredClassifier;
+	}[] = [];
+	for (const classifier of selection.classifiers) {
+		const outcome = await runWithSignal(
+			async () => classifier.classify(request.input.trim(), host.cloneRequest(request)),
+			{ signal }
+		);
+		assertNotInterrupted(outcome);
+		if (outcome.kind !== 'success') {
+			host.reportClassifierError(classifier, outcomeCause(outcome));
+			continue;
+		}
+		if (!outcome.value) continue;
+		try {
+			candidates.push({
+				classification: classificationClientClassificationHintSchema.parse(outcome.value),
+				classifier,
+			});
+		} catch (error) {
+			host.reportClassifierError(classifier, error);
+		}
+	}
+	candidates.sort(
+		(a, b) =>
+			b.classification.confidence - a.classification.confidence ||
+			a.classifier.priority - b.classifier.priority ||
+			a.classifier.registrationOrder - b.classifier.registrationOrder
+	);
+	if (candidates[0]) return candidates[0].classification;
+	if (request.clientHints?.clientClassification)
+		return classificationClientClassificationHintSchema.parse(
+			request.clientHints.clientClassification
+		);
+	return selection.explicitlyRequested ? undefined : host.fallbackClassification(request);
+}
+
+async function resolveInput(
+	host: ClassificationProgramHost,
+	request: ClassificationRequest,
+	classification: ClassificationClientClassificationHint,
+	policy: ClassificationResult['policy'],
+	signal: AbortSignal
+): Promise<{
+	resolved?: ClassificationResolvedPayload;
+	errors: ClassificationResolverError[];
+	metadata?: Record<string, unknown>;
+}> {
+	const { resolvers } = host.selectResolvers(request);
+	const attemptedResolvers: string[] = [];
+	const errors: ClassificationResolverError[] = [];
+	const candidates: ResolverAtomCandidate[] = [];
+	for (const resolver of resolvers) {
+		signal.throwIfAborted();
+		if (
+			!host.shouldRunResolver(policy, resolver) ||
+			!resolver.canResolve(classification, host.cloneRequest(request))
+		)
+			continue;
+		attemptedResolvers.push(resolver.id);
+		const timeoutMs = resolver.timeoutMs ?? host.resolverTimeoutMs;
+		const deadlineAtMs = performance.now() + timeoutMs;
+		const deadlineAtEpochMs = Date.now() + timeoutMs;
+		let completedStep: ResolverStepResult | undefined;
+		let cacheWriteStarted = false;
+		const execution: PromiseTask<ResolverStepResult | undefined> = async (attemptSignal) => {
+			const step = await resolveResolverStep(
+				host,
+				request,
+				classification,
+				resolver,
+				deadlineAtEpochMs,
+				attemptSignal
+			);
+			attemptSignal.throwIfAborted();
+			completedStep = step;
+			if (!step?.cacheWrite) return step;
+			cacheWriteStarted = true;
+			const cacheWrite = step.cacheWrite;
+			const writeOutcome = await runWithSignal(
+				async (writeSignal) => {
+					if (!host.cache) return;
+					const entry = host.createResolverCacheEntry({
+						candidate: step.candidate as ResolverAtomCandidate,
+						errors: step.errors,
+						ttlMs: cacheWrite.ttlMs,
+					});
+					await setClassificationCacheEntry(
+						host.cache,
+						cacheWrite.cacheKey,
+						entry,
+						cacheWrite.ttlMs,
+						writeSignal
+					);
+				},
+				{ signal: attemptSignal }
+			);
+			assertNotInterrupted(writeOutcome);
+			if (writeOutcome.kind !== 'success')
+				host.warnResolverCacheWrite(resolver, 'failure', outcomeCause(writeOutcome));
+			return step;
+		};
+		const outcome = await runWithSignal(
+			withTimeout(execution, Math.max(0, deadlineAtMs - performance.now())),
+			{ signal }
+		);
+		assertNotInterrupted(outcome);
+		if (
+			(outcome.kind === 'timeout' ||
+				(outcome.kind === 'success' && performance.now() === deadlineAtMs)) &&
+			!cacheWriteStarted
+		) {
+			const message = `Resolver timed out after ${timeoutMs}ms`;
+			if (errors.length < MAX_CLASSIFICATION_RESOLVER_ERRORS)
+				errors.push(host.reportResolverError(resolver, new Error(message), message));
+			continue;
+		}
+		let step: ResolverStepResult | undefined;
+		if (outcome.kind === 'timeout' && completedStep) {
+			host.warnResolverCacheWrite(resolver, 'timeout');
+			step = completedStep;
+		} else if (outcome.kind !== 'success') {
+			if (errors.length < MAX_CLASSIFICATION_RESOLVER_ERRORS)
+				errors.push(host.reportResolverError(resolver, outcomeCause(outcome)));
+			continue;
+		} else step = outcome.value;
+		if (step) {
+			errors.push(...step.errors.slice(0, MAX_CLASSIFICATION_RESOLVER_ERRORS - errors.length));
+			if (step.candidate) candidates.push(step.candidate);
+			if (step.terminal) {
+				Object.assign(classification.meta, step.classificationMetaPatch ?? {});
+				return { resolved: undefined, errors };
+			}
+		}
+	}
+	return candidates.length > 0
+		? host.buildResolution({ classification, request, attemptedResolvers, errors, candidates })
+		: host.buildFallbackResolution({ classification, request, policy, attemptedResolvers, errors });
+}
+
+async function resolveResolverStep(
+	host: ClassificationProgramHost,
+	request: ClassificationRequest,
+	classification: ClassificationClientClassificationHint,
+	resolver: RegisteredResolver,
+	deadlineAtEpochMs: number,
+	signal: AbortSignal
+): Promise<ResolverStepResult | undefined> {
+	const cacheTtlMs = host.resolveResolverCacheTtlMs(resolver);
+	const cacheKey =
+		host.cache && cacheTtlMs
+			? buildClassificationResolverCacheKey({
+					pluginId: resolver.pluginId,
+					resolverId: resolver.id,
+					runtime: host.runtime,
+					request,
+					classification,
+				})
+			: undefined;
+	if (host.cache && cacheKey && cacheTtlMs) {
+		const cache = host.cache;
+		const outcome = await runWithSignal(
+			async (signal) => getClassificationCacheEntry(cache, cacheKey, signal),
+			{ signal }
+		);
+		assertNotInterrupted(outcome);
+		if (outcome.kind === 'success' && outcome.value) {
+			if (!isClassificationResolverCachedEntryFresh(outcome.value)) {
+				const deletion = await runWithSignal(
+					async (signal) => deleteClassificationCacheEntry(cache, cacheKey, signal),
+					{ signal }
+				);
+				assertNotInterrupted(deletion);
+			} else {
+				const cached = host.readCachedResolverStep(outcome.value, resolver);
+				if (cached) return cached;
+			}
+		}
+	}
+	signal.throwIfAborted();
+	const outcome = await runWithSignal(
+		async (signal) =>
+			resolver.resolve({
+				runtime: host.runtime,
+				request: host.cloneRequest(request),
+				classification: host.cloneClassification(classification),
+				now: host.nowIso(),
+				signal,
+				deadlineAtMs: deadlineAtEpochMs,
+				logger: host.logger,
+				secrets: host.secrets,
+			}),
+		{ signal }
+	);
+	assertNotInterrupted(outcome);
+	if (outcome.kind !== 'success') throw outcomeCause(outcome);
+	return outcome.value
+		? host.createResolverStep({
+				output: outcome.value,
+				resolver,
+				classification,
+				cacheKey,
+				cacheTtlMs,
+			})
+		: undefined;
+}
+
+async function executeHookStage(
+	host: ClassificationProgramHost,
+	stage: HookStage,
+	state: HookPipelineState,
+	signal: AbortSignal
+): Promise<HookPipelineState> {
+	signal.throwIfAborted();
+	let nextState = state;
+	for (const plugin of host.getOrderedPlugins()) {
+		signal.throwIfAborted();
+		const handler = plugin.hooks?.[stage];
+		if (!handler) continue;
+		const task = async () => handler(host.createHookContext(stage, nextState));
+		const outcome = await runWithSignal(
+			host.hookTimeoutMs === 0 ? task : withTimeout(task, host.hookTimeoutMs),
+			{ signal }
+		);
+		assertNotInterrupted(outcome);
+		let hookError: Error | undefined;
+		if (outcome.kind === 'timeout')
+			hookError = new Error(
+				`Hook timed out after ${host.hookTimeoutMs}ms for plugin "${plugin.manifest.id}" at stage "${stage}".`
+			);
+		else if (outcome.kind === 'failure' || outcome.kind === 'defect')
+			hookError = host.normalizeError(outcome.error);
+		else if (outcome.kind === 'success' && outcome.value) {
+			try {
+				nextState = host.applyPatch(nextState, outcome.value);
+			} catch (error) {
+				hookError = host.normalizeError(error);
+			}
+		}
+		if (hookError) {
+			host.recordHookError(plugin.manifest.id, stage, hookError);
+			const onError = plugin.hooks?.onError;
+			if (onError) {
+				const context = host.createHookErrorContext(
+					stage,
+					nextState,
+					hookError,
+					plugin.manifest.id
+				);
+				const task = async () => onError(context);
+				const outcome = await runWithSignal(
+					host.hookTimeoutMs === 0 ? task : withTimeout(task, host.hookTimeoutMs),
+					{ signal }
+				);
+				assertNotInterrupted(outcome);
+			}
+		}
+	}
+	return nextState;
+}
+
+function assertNotInterrupted(outcome: Outcome<unknown>): void {
+	if (outcome.kind === 'interrupted') throw createClassificationAbortError(outcome.reason);
+}
+function outcomeCause(outcome: Outcome<unknown>): unknown {
+	if (outcome.kind === 'failure' || outcome.kind === 'defect') return outcome.error;
+	if (outcome.kind === 'interrupted') return createClassificationAbortError(outcome.reason);
+	return new Error(
+		outcome.kind === 'timeout'
+			? 'Classification operation timed out.'
+			: 'Unexpected classification outcome.'
+	);
 }

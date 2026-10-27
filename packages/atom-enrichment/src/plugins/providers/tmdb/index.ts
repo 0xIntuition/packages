@@ -1,187 +1,335 @@
+import { observeProviderRequest } from '@0xintuition/pipeline-runtime/provider-request-observation';
+import { TMDB_API_BASE_URL } from '@0xintuition/pipeline-runtime/tmdb';
 import { defineEnrichmentPlugin, type EnrichmentPlugin } from '../../../plugins';
-import type { EnrichmentRequest } from '../../../types';
+import type { EnrichmentArtifact, EnrichmentRequest } from '../../../types';
 import { type FetchLike, fetchJsonWithSchema } from '../__shared__/http';
-import { getIdentifier, getRequestName, getRequestUrl } from '../__shared__/request';
-import { tmdbDetailsResponseSchema } from './external';
+import { getIdentifier, getRequestName } from '../__shared__/request';
+import { type TmdbDetailsResponse, tmdbDetailsResponseSchema } from './external';
+import { TmdbPayloadMismatchError } from './payload-mismatch';
+import { classifyTmdbError } from './request-observer';
 import { tmdbDataSchema } from './schema';
 
 type CreateTmdbPluginOptions = {
+	apiKey?: string;
 	fetch?: FetchLike;
+	language?: string;
 	priority?: number;
 	TTL?: number;
-	apiKey?: string;
-	language?: string;
 };
 
-type TmdbGenre = {
-	name?: string;
-};
-
-type TmdbDetailsResponse = {
-	id?: number;
-	title?: string;
-	name?: string;
-	overview?: string;
-	poster_path?: string;
-	backdrop_path?: string;
-	release_date?: string;
-	first_air_date?: string;
-	vote_average?: number;
-	genres?: TmdbGenre[];
-	runtime?: number;
-	episode_run_time?: number[];
-	imdb_id?: string;
-};
-
-type TmdbTarget = {
-	tmdbId: number;
+export type TmdbTarget = {
 	mediaType: 'movie' | 'tv';
+	tmdbId: number;
 };
 
-const tmdbImageBaseUrl = 'https://image.tmdb.org/t/p/w500';
+const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/original';
+const TOP_BILLED_CREDITS_LIMIT = 10;
 
+/**
+ * Restored under JP's 2026-09-01 commercial-licensing ruling, which
+ * supersedes the 2026-08-27 R1b enforcement stub. The key remains optional so
+ * every keyless runtime stays dormant and makes zero TMDB requests.
+ */
 export function createTmdbPlugin(options: CreateTmdbPluginOptions = {}): EnrichmentPlugin {
 	const fetcher = options.fetch ?? (globalThis.fetch as FetchLike);
-	const language = options.language ?? 'en-US';
+	const language = options.language?.trim() || 'en-US';
+	const apiKey = (options.apiKey ?? tmdbApiKeyFromEnv())?.trim();
 
 	return defineEnrichmentPlugin({
 		id: 'tmdb',
-		version: '1.0.0',
+		version: '3.0.0',
 		runtime: 'server',
 		artifactTypes: ['tmdb'],
 		priority: options.priority ?? 55,
 		TTL: options.TTL ?? 43_200,
 
+		observability: {
+			provider: 'tmdb',
+			// A cached run stands in for the details lookup it would have made. A keyless runtime
+			// makes no request, so it has nothing to stand in for.
+			cacheOperations(request) {
+				return apiKey && resolveTmdbTarget(request) ? ['details'] : [];
+			},
+		},
+
 		supports(request: EnrichmentRequest) {
-			return !!resolveTmdbTarget(request);
+			return Boolean(apiKey && resolveTmdbTarget(request));
 		},
 
 		async enrich(request, ctx) {
 			const target = resolveTmdbTarget(request);
-			if (!target) {
+			if (!(target && apiKey)) {
 				return [];
 			}
 
-			const query = new URLSearchParams({ language });
-			if (options.apiKey) {
-				query.set('api_key', options.apiKey);
-			}
-
-			const endpoint = `https://api.themoviedb.org/3/${target.mediaType}/${target.tmdbId}?${query.toString()}`;
-			const payload = await fetchJsonWithSchema(fetcher, endpoint, tmdbDetailsResponseSchema, {
-				signal: ctx.signal,
-			});
-
-			const tmdbId = payload.id ?? target.tmdbId;
-			const title = payload.title ?? payload.name ?? `TMDB ${tmdbId}`;
-			const sourceUrl = `https://www.themoviedb.org/${target.mediaType}/${tmdbId}`;
-
-			return [
-				{
-					artifact_type: 'tmdb',
-					data: tmdbDataSchema.parse({
-						tmdbId,
-						mediaType: target.mediaType,
-						title,
-						overview: toOptionalString(payload.overview),
-						posterUrl: toTmdbImageUrl(toOptionalString(payload.poster_path)),
-						backdropUrl: toTmdbImageUrl(toOptionalString(payload.backdrop_path)),
-						releaseDate: toOptionalString(payload.release_date ?? payload.first_air_date),
-						voteAverage:
-							typeof payload.vote_average === 'number' ? payload.vote_average : undefined,
-						genres: payload.genres
-							?.map((genre) => genre.name)
-							.filter((name): name is string => typeof name === 'string' && name.length > 0),
-						runtime:
-							typeof payload.runtime === 'number' ? payload.runtime : payload.episode_run_time?.[0],
-						imdbId: toOptionalString(payload.imdb_id),
-					}),
-					meta: {
-						pluginId: 'tmdb',
+			const endpoint = buildTmdbDetailsEndpoint(target, apiKey, language);
+			try {
+				const payload = await observeProviderRequest(
+					{
 						provider: 'tmdb',
-						fetchedAt: ctx.now(),
-						sourceUrl,
+						operation: 'details',
+						context: ctx,
+						classifyError: classifyTmdbError,
 					},
-				},
-			];
+					async () => {
+						const details = await fetchTmdbDetails(fetcher, endpoint, ctx.signal);
+						assertTmdbResponseIdentity(details, target);
+						return details;
+					}
+				);
+				return [createTmdbArtifact(target, payload, ctx.now())];
+			} catch (error) {
+				// An unknown or withdrawn id was recorded as a miss: the engine must see "no result"
+				// (cached as empty), not a failed run. The classifier is the only place the rule lives.
+				if (classifyTmdbError(error).outcome === 'miss') return [];
+				throw error;
+			}
 		},
 	});
 }
 
-function resolveTmdbTarget(request: EnrichmentRequest): TmdbTarget | undefined {
-	const identifier = getIdentifier(request, 'tmdb', 'tmdbId');
-	if (identifier) {
-		const parsedIdentifier = parseTmdbReference(identifier);
-		if (parsedIdentifier) {
-			return parsedIdentifier;
-		}
+export function assertTmdbResponseIdentity(
+	payload: { id?: unknown },
+	target: TmdbTarget
+): asserts payload is { id: number } {
+	if (payload.id !== target.tmdbId) {
+		throw new TmdbPayloadMismatchError(
+			`TMDB ${target.mediaType} ${target.tmdbId} returned a mismatched payload id.`
+		);
+	}
+}
+
+export function createTmdbArtifact(
+	target: TmdbTarget,
+	payload: TmdbDetailsResponse,
+	fetchedAt: string
+): EnrichmentArtifact {
+	assertTmdbResponseIdentity(payload, target);
+	const tmdbId = target.tmdbId;
+	const sourceUrl = canonicalTmdbUrl(target.mediaType, tmdbId);
+	const imdbId = normalizeImdbId(payload.external_ids?.imdb_id ?? payload.imdb_id);
+	const tvdbId = positiveInteger(payload.external_ids?.tvdb_id);
+	const wikidataId = normalizeWikidataId(payload.external_ids?.wikidata_id);
+	const sameAs = [sourceUrl, ...(imdbId ? [canonicalImdbUrl(imdbId)] : [])];
+	const identifierRung = [
+		{ scheme: 'tmdb' as const, value: `${target.mediaType}:${tmdbId}` },
+		...(imdbId ? [{ scheme: 'imdb' as const, value: `title:${imdbId}` }] : []),
+	];
+
+	return {
+		artifact_type: 'tmdb',
+		data: tmdbDataSchema.parse({
+			tmdbId,
+			mediaType: target.mediaType,
+			title: payload.title?.trim() || payload.name?.trim(),
+			overview: optionalString(payload.overview),
+			posterPath: optionalString(payload.poster_path),
+			posterUrl: tmdbImageUrl(payload.poster_path),
+			backdropPath: optionalString(payload.backdrop_path),
+			backdropUrl: tmdbImageUrl(payload.backdrop_path),
+			releaseDate: optionalString(payload.release_date ?? payload.first_air_date),
+			voteAverage: finiteNumber(payload.vote_average),
+			voteCount: nonnegativeInteger(payload.vote_count),
+			genres: payload.genres?.map((genre) => genre.name) ?? [],
+			runtime: runtimeFor(payload),
+			originalLanguage: optionalString(payload.original_language),
+			spokenLanguages: uniqueStrings(
+				payload.spoken_languages?.map((languageEntry) => languageEntry.name) ?? []
+			),
+			productionCountries: uniqueStrings(
+				payload.production_countries?.map((country) => country.name) ?? []
+			),
+			keywords: keywordNames(payload),
+			topBilledCredits: topBilledCredits(payload),
+			imdbId,
+			tvdbId,
+			wikidataId,
+			externalIds: { imdbId, tvdbId, wikidataId },
+			identifierRung,
+			sameAs,
+			tmdbApiPayload: payload,
+		}),
+		meta: {
+			pluginId: 'tmdb',
+			provider: 'tmdb',
+			fetchedAt,
+			sourceUrl,
+		},
+	};
+}
+
+function tmdbApiKeyFromEnv(): string | undefined {
+	return process.env.TMDB_API_KEY;
+}
+
+export function buildTmdbDetailsEndpoint(
+	target: TmdbTarget,
+	apiKey: string,
+	language = 'en-US'
+): string {
+	const endpoint = new URL(`${TMDB_API_BASE_URL}/${target.mediaType}/${target.tmdbId}`);
+	endpoint.searchParams.set('language', language);
+	endpoint.searchParams.set('api_key', apiKey);
+	endpoint.searchParams.set(
+		'append_to_response',
+		target.mediaType === 'movie'
+			? 'credits,keywords,external_ids,release_dates,videos'
+			: 'credits,keywords,external_ids,content_ratings,videos'
+	);
+	return endpoint.toString();
+}
+
+export function resolveTmdbTarget(request: EnrichmentRequest): TmdbTarget | undefined {
+	const identifier = getIdentifier(request, 'tmdb', 'tmdbId', 'tmdb_id');
+	const identifierTarget = identifier ? parseTmdbReference(identifier) : undefined;
+	if (identifierTarget) {
+		return identifierTarget;
 	}
 
-	const url = getRequestUrl(request);
-	if (url) {
-		const parsedUrl = parseTmdbUrl(url);
-		if (parsedUrl) {
-			return parsedUrl;
-		}
+	const url = getTmdbRequestUrl(request);
+	const urlTarget = url ? parseTmdbUrl(url) : undefined;
+	if (urlTarget) {
+		return urlTarget;
 	}
 
 	const name = getRequestName(request);
-	if (!name) {
+	return name ? parseTmdbReference(name) : undefined;
+}
+
+function getTmdbRequestUrl(request: EnrichmentRequest): string | undefined {
+	const candidates = [
+		request.input.hints?.url,
+		request.input.jsonLd.url,
+		...(Array.isArray(request.input.jsonLd.sameAs)
+			? request.input.jsonLd.sameAs
+			: [request.input.jsonLd.sameAs]),
+	];
+	return candidates.find(
+		(value): value is string => typeof value === 'string' && parseTmdbUrl(value) !== undefined
+	);
+}
+
+export function parseTmdbReference(value: string): TmdbTarget | undefined {
+	const match = value.trim().match(/^(?:tmdb:)?(movie|tv):([1-9]\d*)$/i);
+	if (!(match?.[1] && match[2])) {
 		return undefined;
 	}
-
-	return parseTmdbReference(name);
+	return {
+		mediaType: match[1].toLowerCase() as 'movie' | 'tv',
+		tmdbId: Number.parseInt(match[2], 10),
+	};
 }
 
-function parseTmdbReference(value: string): TmdbTarget | undefined {
-	const typedMatch = value.match(/^(movie|tv):(\d+)$/i);
-	if (typedMatch?.[1] && typedMatch[2]) {
-		return {
-			mediaType: typedMatch[1].toLowerCase() as 'movie' | 'tv',
-			tmdbId: Number.parseInt(typedMatch[2], 10),
-		};
-	}
-
-	const numericMatch = value.match(/^(\d+)$/);
-	if (numericMatch?.[1]) {
-		return {
-			mediaType: 'movie',
-			tmdbId: Number.parseInt(numericMatch[1], 10),
-		};
-	}
-
-	return undefined;
-}
-
-function parseTmdbUrl(url: string): TmdbTarget | undefined {
+export function parseTmdbUrl(value: string): TmdbTarget | undefined {
 	try {
-		const parsed = new URL(url);
-		if (!parsed.hostname.includes('themoviedb.org')) {
+		const url = new URL(value);
+		const hostname = url.hostname.toLowerCase().replace(/\.+$/, '');
+		if (hostname !== 'themoviedb.org' && hostname !== 'www.themoviedb.org') {
 			return undefined;
 		}
-
-		const match = parsed.pathname.match(/^\/(movie|tv)\/(\d+)/i);
-		if (!match?.[1] || !match[2]) {
-			return undefined;
-		}
-
-		return {
-			mediaType: match[1].toLowerCase() as 'movie' | 'tv',
-			tmdbId: Number.parseInt(match[2], 10),
-		};
+		const match = url.pathname.match(/^\/(movie|tv)\/([1-9]\d*)(?:[-/]|$)/i);
+		return match?.[1] && match[2]
+			? {
+					mediaType: match[1].toLowerCase() as 'movie' | 'tv',
+					tmdbId: Number.parseInt(match[2], 10),
+				}
+			: undefined;
 	} catch {
 		return undefined;
 	}
 }
 
-function toTmdbImageUrl(path: string | undefined): string | undefined {
-	if (!path || path.length === 0) {
-		return undefined;
-	}
-
-	return `${tmdbImageBaseUrl}${path.startsWith('/') ? path : `/${path}`}`;
+async function fetchTmdbDetails(
+	fetcher: FetchLike,
+	endpoint: string,
+	signal: AbortSignal
+): Promise<TmdbDetailsResponse> {
+	return await fetchJsonWithSchema(
+		fetcher,
+		endpoint,
+		tmdbDetailsResponseSchema,
+		{ redirect: 'error', signal },
+		{ allowTmdbApi: true }
+	);
 }
 
-function toOptionalString(value: string | null | undefined): string | undefined {
-	return typeof value === 'string' && value.length > 0 ? value : undefined;
+function runtimeFor(payload: TmdbDetailsResponse): number | undefined {
+	return finiteNumber(payload.runtime) ?? payload.episode_run_time?.find((value) => value > 0);
 }
+
+function keywordNames(payload: TmdbDetailsResponse): string[] {
+	return uniqueStrings(
+		(payload.keywords?.keywords ?? payload.keywords?.results ?? []).map((keyword) => keyword.name)
+	);
+}
+
+function topBilledCredits(payload: TmdbDetailsResponse) {
+	return [...(payload.credits?.cast ?? [])]
+		.sort(
+			(left, right) =>
+				(left.order ?? Number.MAX_SAFE_INTEGER) - (right.order ?? Number.MAX_SAFE_INTEGER)
+		)
+		.slice(0, TOP_BILLED_CREDITS_LIMIT)
+		.map((credit) => ({
+			id: credit.id,
+			name: credit.name,
+			...(optionalString(credit.character) ? { character: credit.character?.trim() } : {}),
+			...(optionalString(credit.credit_id) ? { creditId: credit.credit_id?.trim() } : {}),
+			...(credit.order === undefined ? {} : { order: credit.order }),
+			...(optionalString(credit.profile_path) ? { profilePath: credit.profile_path?.trim() } : {}),
+		}));
+}
+
+function canonicalTmdbUrl(kind: 'movie' | 'tv', id: number): string {
+	return `https://www.themoviedb.org/${kind}/${id}`;
+}
+
+function canonicalImdbUrl(id: string): string {
+	return `https://www.imdb.com/title/${id}/`;
+}
+
+function tmdbImageUrl(path: string | null | undefined): string | undefined {
+	const normalized = optionalString(path);
+	return normalized
+		? `${TMDB_IMAGE_BASE_URL}${normalized.startsWith('/') ? normalized : `/${normalized}`}`
+		: undefined;
+}
+
+function normalizeImdbId(value: unknown): string | undefined {
+	const normalized = typeof value === 'string' ? value.trim().toLowerCase() : '';
+	return /^tt\d+$/.test(normalized) ? normalized : undefined;
+}
+
+function normalizeWikidataId(value: unknown): string | undefined {
+	const normalized = typeof value === 'string' ? value.trim().toUpperCase() : '';
+	return /^Q[1-9]\d*$/.test(normalized) ? normalized : undefined;
+}
+
+function positiveInteger(value: unknown): number | undefined {
+	return typeof value === 'number' && Number.isSafeInteger(value) && value > 0 ? value : undefined;
+}
+
+function nonnegativeInteger(value: unknown): number | undefined {
+	return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 ? value : undefined;
+}
+
+function finiteNumber(value: unknown): number | undefined {
+	return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+}
+
+function optionalString(value: unknown): string | undefined {
+	return typeof value === 'string' && value.trim() ? value.trim() : undefined;
+}
+
+function uniqueStrings(values: readonly unknown[]): string[] {
+	return [
+		...new Set(
+			values
+				.filter((value): value is string => typeof value === 'string')
+				.map((value) => value.trim())
+				.filter(Boolean)
+		),
+	];
+}
+
+export { tmdbDataSchema, tmdbDetailsResponseSchema };

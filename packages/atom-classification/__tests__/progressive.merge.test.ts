@@ -6,6 +6,7 @@ import { createV0TypeProfilesPlugin } from '../src/plugins/type-profiles';
 describe('progressive merge + dedupe contract', () => {
 	it('merges client hints deterministically while preserving canonical server fields', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [createV0TypeProfilesPlugin(), createExampleProductPlugin()],
 		});
@@ -54,6 +55,7 @@ describe('progressive merge + dedupe contract', () => {
 
 	it('lets user-edited fields override server values during progressive merge', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [createV0TypeProfilesPlugin(), createExampleProductPlugin()],
 		});
@@ -94,6 +96,7 @@ describe('progressive merge + dedupe contract', () => {
 
 	it('uses normalized content hash dedupe keys when no canonical identity is present', async () => {
 		const engine = createClassificationEngine({
+			onClassifierError: () => undefined,
 			runtime: 'server',
 			plugins: [
 				createV0TypeProfilesPlugin(),

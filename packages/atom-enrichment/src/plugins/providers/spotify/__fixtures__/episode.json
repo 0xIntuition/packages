@@ -1,0 +1,32 @@
+{
+	"single": {
+		"id": "episodeFixture12345678",
+		"name": "Fixture Episode",
+		"description": "A fixture episode.",
+		"audio_preview_url": "https://p.scdn.co/episode.mp3",
+		"duration_ms": 1800000,
+		"release_date": "2026-02-03",
+		"external_urls": { "spotify": "https://open.spotify.com/episode/episodeFixture12345678" },
+		"images": [{ "url": "https://i.scdn.co/episode.jpg" }],
+		"show": {
+			"id": "showFixture12345678901",
+			"name": "Fixture Show",
+			"external_urls": { "spotify": "https://open.spotify.com/show/showFixture12345678901" }
+		}
+	},
+	"batchItem": {
+		"id": "episodeFixture12345678",
+		"name": "Fixture Episode",
+		"description": "A fixture episode.",
+		"audio_preview_url": "https://p.scdn.co/episode.mp3",
+		"duration_ms": 1800000,
+		"release_date": "2026-02-03",
+		"external_urls": { "spotify": "https://open.spotify.com/episode/episodeFixture12345678" },
+		"images": [{ "url": "https://i.scdn.co/episode.jpg" }],
+		"show": {
+			"id": "showFixture12345678901",
+			"name": "Fixture Show",
+			"external_urls": { "spotify": "https://open.spotify.com/show/showFixture12345678901" }
+		}
+	}
+}

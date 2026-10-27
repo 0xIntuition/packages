@@ -12,6 +12,12 @@ const NPM_DESCRIPTION = 'npm package';
 
 export const npmProfile: PlatformV0Profile = {
 	domain: 'npm',
+	display: {
+		classificationSlugs: ['software', 'software-application'],
+		exampleUrl: 'https://www.npmjs.com/package/react',
+		host: 'npmjs.com',
+		label: 'npm',
+	},
 	supportsOEmbed: false,
 	classifier: {
 		id: 'npm-url-classifier',

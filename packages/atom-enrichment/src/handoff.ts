@@ -1,4 +1,12 @@
 import {
+	formatIntuitionId,
+	getScheme,
+	parseIntuitionId,
+	validateIntuitionId,
+} from '@0xintuition/iid';
+import type { IdentityCategory } from '@0xintuition/iid-ladder';
+import { buildClassifiedAtomIdentifier } from './identifier';
+import {
 	extractAmazonAsinFromUrl,
 	resolveAmazonMarketplace,
 } from './plugins/providers/__shared__/amazon';
@@ -10,6 +18,7 @@ import type {
 	GitHubTarget,
 	XTarget,
 } from './types';
+import { atomTypeSchema } from './types';
 
 type ClassificationInputLike = {
 	type?: string;
@@ -22,20 +31,22 @@ type CanonicalEnvelopeLike = {
 	type: string;
 	data: Record<string, unknown>;
 	meta: {
-		sourceUrl?: string;
+		fallbackStage?: string;
 		provider?: string;
+		sourceUrl?: string;
 	};
 };
 
 type ResolvedAtomLike = {
-	category: ClassifiedAtomInput['atomType'];
+	category: ClassifiedAtomInput['atomType'] | IdentityCategory;
 	schemaType: string;
 	title: string;
 	description?: string;
 	canonicalId?: string;
 	sameAs?: string[];
-	data?: Record<string, unknown>;
+	hints?: Record<string, unknown>;
 	metadata?: Record<string, unknown>;
+	data?: Record<string, unknown>;
 };
 
 export type ClassificationResultLike = {
@@ -54,6 +65,10 @@ type NormalizedResolvedClassificationInput = {
 	description?: string;
 	canonicalId?: string;
 	sameAs: string[];
+	identifiers?: Record<string, string>;
+	anchorEligible?: boolean;
+	fallbackStage?: string;
+	provider?: string;
 	data: Record<string, unknown>;
 };
 
@@ -61,12 +76,60 @@ export function toClassifiedAtomInput(
 	rawInput: string,
 	classificationResult: ClassificationResultLike
 ): ClassifiedAtomInput | null {
+	if (hasTerminalAcquisitionOutcome(classificationResult)) {
+		return null;
+	}
 	const normalizedInput = normalizeResolvedClassificationInput(classificationResult);
 	if (!normalizedInput) {
 		return null;
 	}
 
 	const policy = resolveClassifiedAtomPolicy(rawInput, normalizedInput);
+	if (policy.rawInputKind === 'iid') {
+		// Bare-IID atoms get the identifier-first input (Track C3): no URL, no
+		// invented display fields — providers resolve from the identifier.
+		const iidIdentifier =
+			resolveCanonicalIdentifier(normalizedInput.canonicalId) ??
+			resolveCanonicalIdentifier(rawInput);
+		if (!iidIdentifier) {
+			// IID-shaped input that fails canonicalization is quarantined, not
+			// routed through plain-text enrichment.
+			return null;
+		}
+
+		const identifiers = {
+			[iidIdentifier.scheme]: iidIdentifier.value,
+			...(normalizedInput.identifiers ?? {}),
+		};
+		// Name/description here are classification evidence (e.g. an embedded
+		// payload), never the raw identifier — normalization already guards
+		// IID-shaped titles.
+		const iidHints: NonNullable<ClassifiedAtomInput['hints']> = { identifiers };
+		if (normalizedInput.name && !isHttpUrl(normalizedInput.name)) {
+			iidHints.name = normalizedInput.name;
+		}
+		if (normalizedInput.description) {
+			iidHints.description = normalizedInput.description;
+		}
+
+		return {
+			atomType: normalizedInput.atomType,
+			...(Object.keys(normalizedInput.data).length > 0 ? { jsonLd: normalizedInput.data } : {}),
+			identifier: {
+				...iidIdentifier,
+				...(normalizedInput.anchorEligible === undefined
+					? {}
+					: { anchorEligible: normalizedInput.anchorEligible }),
+			},
+			source: {
+				classificationEngine: '@0xintuition/atom-classification',
+				classifiedAt: new Date().toISOString(),
+				...(normalizedInput.fallbackStage ? { fallbackStage: normalizedInput.fallbackStage } : {}),
+				...(normalizedInput.provider ? { provider: normalizedInput.provider } : {}),
+			},
+			hints: iidHints,
+		};
+	}
 	const normalizedUrl = policy.allowUrlOnlyProviders
 		? resolvePreferredEnrichmentUrl({
 				rawInput,
@@ -93,8 +156,17 @@ export function toClassifiedAtomInput(
 		? normalizedInput.data
 		: omitUrlLikeFields(normalizedInput.data);
 
+	// IID classifications (the `int` plugin, or a payload embedding one) carry
+	// their identifier in canonicalId — surface it first-class so
+	// identifier-driven providers light up (the schema transform derives
+	// hints.identifiers from it). URL-shaped canonical ids stay hints-only.
+	const identifier = normalizedInput.canonicalId?.startsWith('int:')
+		? buildClassifiedAtomIdentifier(normalizedInput.canonicalId)
+		: undefined;
+
 	return {
 		atomType: normalizedInput.atomType,
+		...(identifier ? { identifier } : {}),
 		jsonLd: {
 			'@context': 'https://schema.org',
 			'@type': normalizedInput.schemaType,
@@ -106,7 +178,8 @@ export function toClassifiedAtomInput(
 		source: {
 			classificationEngine: '@0xintuition/atom-classification',
 			classifiedAt: new Date().toISOString(),
-			...resolveClassificationProvenance(classificationResult),
+			...(normalizedInput.fallbackStage ? { fallbackStage: normalizedInput.fallbackStage } : {}),
+			...(normalizedInput.provider ? { provider: normalizedInput.provider } : {}),
 		},
 		...(Object.keys(hints).length > 0 ? { hints } : {}),
 		...(targets ? { targets } : {}),
@@ -114,24 +187,24 @@ export function toClassifiedAtomInput(
 	};
 }
 
-/** Carries platform provenance independently of the chosen presentation envelope. */
-export function resolveClassificationProvenance(
-	result: ClassificationResultLike
-): Pick<ClassifiedAtomInput['source'], 'provider' | 'fallbackStage'> {
-	const atomMeta = result.resolved?.atoms?.[0]?.metadata;
-	const resolver = toRecordMaybe(result.classification?.meta?.platformResolver);
-	const canonical = result.resolved?.publishable?.[0] ?? result.resolved?.classifications?.[0];
-	const provider =
-		toStringMaybe(atomMeta?.provider) ??
-		toStringMaybe(resolver?.domain) ??
-		toStringMaybe(canonical?.meta.provider) ??
-		toStringMaybe(result.classification?.domain);
-	const fallbackStage =
-		toStringMaybe(atomMeta?.fallbackStage) ?? toStringMaybe(resolver?.fallbackStage);
-	return {
-		...(provider && provider.length <= 128 ? { provider } : {}),
-		...(fallbackStage && fallbackStage.length <= 64 ? { fallbackStage } : {}),
-	};
+function hasTerminalAcquisitionOutcome(classificationResult: ClassificationResultLike): boolean {
+	const classificationOutcome = toRecordMaybe(
+		classificationResult.classification?.meta?.acquisitionOutcome
+	);
+	if (isTerminalAcquisitionOutcome(classificationOutcome)) {
+		return true;
+	}
+
+	return (classificationResult.resolved?.atoms ?? []).some((atom) => {
+		const metadata = toRecordMaybe(atom.metadata);
+		return isTerminalAcquisitionOutcome(toRecordMaybe(metadata?.acquisitionOutcome));
+	});
+}
+
+function isTerminalAcquisitionOutcome(outcome: Record<string, unknown> | undefined): boolean {
+	return (
+		outcome?.terminal === true || outcome?.status === 'unavailable' || outcome?.status === 'blocked'
+	);
 }
 
 export function normalizeResolvedClassificationInput(
@@ -143,6 +216,7 @@ export function normalizeResolvedClassificationInput(
 	if (canonical) {
 		const data = toRecordMaybe(canonical.data) ?? {};
 		const sameAs = collectSameAsUrls(data, canonical.meta.sourceUrl);
+		const atomMetadata = toRecordMaybe(classificationResult.resolved?.atoms?.[0]?.metadata);
 		return {
 			atomType: resolveAtomTypeFromClassificationType(canonical.type),
 			schemaType: canonical.type,
@@ -150,6 +224,8 @@ export function normalizeResolvedClassificationInput(
 			description: resolveCanonicalDescription(data),
 			canonicalId: resolveCanonicalIdFromCanonicalData(canonical.type, data, sameAs),
 			sameAs,
+			fallbackStage: canonical.meta.fallbackStage ?? toStringMaybe(atomMetadata?.fallbackStage),
+			provider: canonical.meta.provider,
 			data,
 		};
 	}
@@ -160,12 +236,22 @@ export function normalizeResolvedClassificationInput(
 	}
 
 	return {
-		atomType: atom.category,
+		atomType: atomTypeSchema.safeParse(atom.category).success
+			? (atom.category as ClassifiedAtomInput['atomType'])
+			: resolveAtomTypeFromClassificationType(atom.schemaType),
 		schemaType: atom.schemaType,
-		name: atom.title,
+		// The `int` plugin titles IID atoms with the identifier itself — an
+		// IID is never a display name (D-7); enrichment supplies the name.
+		name: atom.title?.startsWith('int:') ? undefined : atom.title,
 		description: atom.description,
 		canonicalId: atom.canonicalId,
 		sameAs: atom.sameAs ?? [],
+		identifiers: resolveStringRecord(toRecordMaybe(atom.hints)?.identifiers),
+		...(typeof atom.metadata?.anchorEligible === 'boolean'
+			? { anchorEligible: atom.metadata.anchorEligible }
+			: {}),
+		fallbackStage: toStringMaybe(atom.metadata?.fallbackStage),
+		provider: typeof atom.metadata?.provider === 'string' ? atom.metadata.provider : undefined,
 		data: toRecordMaybe(atom.data) ?? {},
 	};
 }
@@ -174,6 +260,13 @@ export function resolveClassifiedAtomPolicy(
 	rawInput: string,
 	normalizedInput: Pick<NormalizedResolvedClassificationInput, 'atomType' | 'schemaType'>
 ): ClassifiedAtomPolicy {
+	if (resolveCanonicalIdentifier(rawInput)) {
+		return {
+			rawInputKind: 'iid',
+			allowUrlOnlyProviders: true,
+		};
+	}
+
 	const rawInputKind = isHttpUrl(rawInput) ? 'url' : 'plain-text';
 	const isPlainTextThing =
 		rawInputKind === 'plain-text' &&
@@ -467,6 +560,54 @@ function toStringMaybe(value: unknown): string | undefined {
 	return typeof value === 'string' && value.trim().length > 0 ? value.trim() : undefined;
 }
 
+function resolveStringRecord(value: unknown): Record<string, string> | undefined {
+	const record = toRecordMaybe(value);
+	if (!record) {
+		return undefined;
+	}
+
+	const entries = Object.entries(record).filter(
+		(entry): entry is [string, string] => typeof entry[1] === 'string' && entry[1].trim().length > 0
+	);
+	return entries.length > 0
+		? Object.fromEntries(entries.map(([key, value]) => [key, value.trim()]))
+		: undefined;
+}
+
+function resolveCanonicalIdentifier(
+	value: string | undefined
+): NonNullable<ClassifiedAtomInput['identifier']> | undefined {
+	const trimmed = value?.trim();
+	if (!trimmed || !/^int:/i.test(trimmed)) {
+		return undefined;
+	}
+
+	const payload = trimmed.slice('int:'.length);
+	const valueSeparator = payload.indexOf(':');
+	const scheme = valueSeparator === -1 ? payload : payload.slice(0, valueSeparator);
+	const rest = valueSeparator === -1 ? '' : payload.slice(valueSeparator);
+	const parsed = parseIntuitionId(`int:${scheme.toLowerCase()}${rest}`);
+	if (!parsed) {
+		return undefined;
+	}
+
+	const canonicalValue = getScheme(parsed.scheme)?.canonicalize(parsed.value);
+	if (!canonicalValue) {
+		return undefined;
+	}
+
+	const iid = formatIntuitionId(parsed.scheme, canonicalValue);
+	if (!validateIntuitionId(iid)) {
+		return undefined;
+	}
+
+	return {
+		iid,
+		scheme: parsed.scheme,
+		value: canonicalValue,
+	};
+}
+
 function collectSameAsUrls(data: Record<string, unknown>, sourceUrl?: string): string[] {
 	const candidates = [
 		...extractStringArray(data.sameAs),
@@ -489,8 +630,11 @@ function extractStringArray(value: unknown): string[] {
 }
 
 function resolveCanonicalName(data: Record<string, unknown>): string | undefined {
+	// The classification engine's shape layer injects `name` from whatever the
+	// plugin titled the atom — for IID atoms that is the identifier itself,
+	// and a raw IID is never a display name (D-7).
 	const directName = toStringMaybe(data.name);
-	if (directName) {
+	if (directName && !directName.startsWith('int:')) {
 		return directName;
 	}
 
@@ -500,11 +644,14 @@ function resolveCanonicalName(data: Record<string, unknown>): string | undefined
 		return `${givenName} ${familyName}`;
 	}
 
+	// Raw IIDs are identifiers, never display names (D-7) — legacy identifier
+	// shapes (isbn:…, eip155:…) keep their historical fallback behavior.
+	const identifierName = toStringMaybe(data.identifier);
 	return (
 		givenName ??
 		familyName ??
 		toStringMaybe(data.address) ??
-		toStringMaybe(data.identifier) ??
+		(identifierName?.startsWith('int:') ? undefined : identifierName) ??
 		toStringMaybe(data.isbn)
 	);
 }
@@ -525,19 +672,29 @@ function resolveCanonicalIdFromCanonicalData(
 ): string | undefined {
 	const identifier = toStringMaybe(data.identifier);
 	if (identifier) {
-		return identifier;
+		return resolveCanonicalIdentifier(identifier)?.iid ?? identifier;
 	}
 
 	const isbn = toStringMaybe(data.isbn);
 	if (isbn) {
-		return `isbn:${isbn}`;
+		const canonicalIsbn = resolveCanonicalIdentifier(`int:isbn:${isbn}`);
+		if (canonicalIsbn) {
+			return canonicalIsbn.iid;
+		}
 	}
 
 	if (type === 'EthereumAccount' || type === 'EthereumSmartContract' || type === 'EthereumERC20') {
 		const address = toStringMaybe(data.address);
 		if (address) {
 			const chainId = toStringMaybe(data.chainId) ?? '1';
-			return `eip155:${chainId}:${address.toLowerCase()}`;
+			const iid =
+				type === 'EthereumERC20'
+					? `int:caip19:eip155:${chainId}/erc20:${address}`
+					: `int:caip10:eip155:${chainId}:${address}`;
+			const canonicalEthereumIdentifier = resolveCanonicalIdentifier(iid);
+			if (canonicalEthereumIdentifier) {
+				return canonicalEthereumIdentifier.iid;
+			}
 		}
 	}
 
@@ -559,14 +716,12 @@ function resolveAtomTypeFromClassificationType(type: string): ClassifiedAtomInpu
 	if (normalized === 'product' || normalized === 'brand' || normalized === 'ethereumerc20') {
 		return 'product';
 	}
-	if (normalized === 'musicrecording') {
+	if (
+		normalized === 'musicrecording' ||
+		normalized === 'musicalbum' ||
+		normalized === 'musicgroup'
+	) {
 		return 'song';
-	}
-	if (normalized === 'musicalbum') {
-		return 'music-album';
-	}
-	if (normalized === 'musicgroup') {
-		return 'artist';
 	}
 	if (normalized === 'podcastseries' || normalized === 'podcastepisode') {
 		return 'podcast';

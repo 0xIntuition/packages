@@ -3,11 +3,22 @@ import { describe, expect, it } from 'bun:test';
 import {
 	classificationFieldProvenanceMapSchema,
 	classificationRequestSchema,
+	classificationResolverErrorSchema,
 	getDefaultEnhancementPolicy,
 	resolveEnhancementPolicy,
 } from '../src/types';
 
 describe('classification mode/config/hint contract', () => {
+	it('round-trips a circuit_open diagnostic through the public resolver-error schema', () => {
+		const diagnostic = {
+			resolverId: 'goodreads-resolver',
+			message: 'opengraph:circuit_open: Host goodreads.com circuit is open',
+			timestamp: '2026-08-24T12:00:00.000Z',
+		};
+
+		expect(classificationResolverErrorSchema.parse(diagnostic)).toEqual(diagnostic);
+	});
+
 	it('applies progressive defaults when policy overrides are omitted', () => {
 		const request = classificationRequestSchema.parse({
 			input: 'https://example.com',

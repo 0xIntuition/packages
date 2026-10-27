@@ -7,6 +7,7 @@ import {
 	createEtherscanPlugin,
 	createFaviconPlugin,
 	createGitHubPlugin,
+	createLetterboxdPlugin,
 	createMicrodataPlugin,
 	createMusicBrainzPlugin,
 	createNpmPlugin,
@@ -17,6 +18,7 @@ import {
 	createPodcastIndexPlugin,
 	createProductListingPlugin,
 	createSpotifyPlugin,
+	createSteamPlugin,
 	createTmdbPlugin,
 	createWikidataPlugin,
 	createWikipediaPlugin,
@@ -33,12 +35,14 @@ type PodcastIndexPluginOptions = NonNullable<Parameters<typeof createPodcastInde
 type BrandPluginOptions = NonNullable<Parameters<typeof createBrandPlugin>[0]>;
 type FaviconPluginOptions = NonNullable<Parameters<typeof createFaviconPlugin>[0]>;
 type GitHubPluginOptions = NonNullable<Parameters<typeof createGitHubPlugin>[0]>;
+type LetterboxdPluginOptions = NonNullable<Parameters<typeof createLetterboxdPlugin>[0]>;
 type MicrodataPluginOptions = NonNullable<Parameters<typeof createMicrodataPlugin>[0]>;
 type MusicBrainzPluginOptions = NonNullable<Parameters<typeof createMusicBrainzPlugin>[0]>;
 type OEmbedPluginOptions = NonNullable<Parameters<typeof createOEmbedPlugin>[0]>;
 type OpenLibraryPluginOptions = NonNullable<Parameters<typeof createOpenLibraryPlugin>[0]>;
 type ProductListingPluginOptions = NonNullable<Parameters<typeof createProductListingPlugin>[0]>;
 type SpotifyPluginOptions = NonNullable<Parameters<typeof createSpotifyPlugin>[0]>;
+type SteamPluginOptions = NonNullable<Parameters<typeof createSteamPlugin>[0]>;
 type TmdbPluginOptions = NonNullable<Parameters<typeof createTmdbPlugin>[0]>;
 type XProfilePluginOptions = NonNullable<Parameters<typeof createXProfilePlugin>[0]>;
 type WikidataPluginOptions = NonNullable<Parameters<typeof createWikidataPlugin>[0]>;
@@ -79,15 +83,17 @@ export type ServerDefaultPresetOptions = {
 	etherscan?: EtherscanPluginOptions;
 	favicon?: FaviconPluginOptions;
 	github?: GitHubPluginOptions;
+	letterboxd?: LetterboxdPluginOptions;
 	microdata?: MicrodataPluginOptions;
 	musicbrainz?: MusicBrainzPluginOptions;
 	oembed?: OEmbedPluginOptions;
-	openlibrary?: OpenLibraryPluginOptions;
 	opengraph?: OpenGraphPluginOptions;
+	openlibrary?: OpenLibraryPluginOptions;
 	places?: PlacesPluginOptions;
 	podcastIndex?: PodcastIndexPluginOptions;
 	productListing?: ProductListingPluginOptions;
 	spotify?: SpotifyPluginOptions;
+	steam?: SteamPluginOptions;
 	tmdb?: TmdbPluginOptions;
 	xProfile?: XProfilePluginOptions;
 	wikidata?: WikidataPluginOptions;
@@ -116,11 +122,14 @@ export function createServerDefaultPresetOptions(
 		github: {
 			token: env.GITHUB_TOKEN,
 		},
+		letterboxd: {},
 		microdata: {},
-		musicbrainz: {},
+		musicbrainz: {
+			userAgent: env.MUSICBRAINZ_USER_AGENT,
+		},
 		oembed: {},
-		openlibrary: {},
 		opengraph: {},
+		openlibrary: {},
 		places: {
 			apiKey: env.GOOGLE_PLACES_API_KEY,
 		},
@@ -136,6 +145,7 @@ export function createServerDefaultPresetOptions(
 			clientSecret: env.SPOTIFY_CLIENT_SECRET,
 			market: env.SPOTIFY_MARKET,
 		},
+		steam: {},
 		tmdb: {
 			apiKey: env.TMDB_API_KEY,
 		},
@@ -183,13 +193,15 @@ export function serverDefaultPreset(options: ServerDefaultPresetOptions = {}): E
 		createWikipediaPlugin(options.wikipedia),
 		createWikidataPlugin(options.wikidata),
 		createGitHubPlugin(options.github),
+		createLetterboxdPlugin(options.letterboxd),
 		createProductListingPlugin(options.productListing),
 		createXProfilePlugin(options.xProfile),
 		createNpmPlugin(),
 		createSpotifyPlugin(options.spotify),
+		createSteamPlugin(options.steam),
+		createOpenLibraryPlugin(options.openlibrary),
 		createAppleMusicPlugin(options.appleMusic),
 		createMusicBrainzPlugin(options.musicbrainz),
-		createOpenLibraryPlugin(options.openlibrary),
 		createTmdbPlugin(options.tmdb),
 		createPlacesPlugin(options.places),
 		createPodcastIndexPlugin(options.podcastIndex),

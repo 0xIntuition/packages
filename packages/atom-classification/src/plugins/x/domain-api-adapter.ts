@@ -2,7 +2,7 @@ import type { ResolverAtom } from '../../plugins';
 import type { ClassificationCanonicalFieldPolicyMap } from '../../types';
 import { normalizeStringArray } from '../shared/domain-html/document';
 import { toRecordMaybe, toStringMaybe } from '../shared/helpers';
-import type { PlatformStageAdapter } from '../shared/platform';
+import { PLATFORM_STAGE_MISS, type PlatformStageAdapter } from '../shared/platform';
 import { buildXPostAtom, buildXProfileAtom, normalizeXHandle } from './shared';
 
 type FetchLike = (
@@ -62,7 +62,7 @@ export function createXDomainApiAdapter(options: XDomainApiAdapterOptions = {}):
 
 	return async ({ domain, classification, canonicalUrl, credential }) => {
 		if (domain !== 'x' || !fetcher) {
-			return null;
+			return PLATFORM_STAGE_MISS;
 		}
 
 		const token =
@@ -70,28 +70,33 @@ export function createXDomainApiAdapter(options: XDomainApiAdapterOptions = {}):
 			toStringMaybe(credential?.token) ??
 			toStringMaybe(credential?.apiKey);
 		if (!token) {
-			return null;
+			return PLATFORM_STAGE_MISS;
 		}
 
 		const headers = {
 			authorization: `Bearer ${token}`,
 		};
 
+		let atom: ResolverAtom | null;
 		switch (classification.subtype) {
 			case 'post':
-				return resolveXPost(fetcher, headers, {
+				atom = await resolveXPost(fetcher, headers, {
 					canonicalUrl,
 					handle: toStringMaybe(classification.meta.handle),
 					postId: toStringMaybe(classification.meta.postId),
 				});
+				break;
 			case 'profile':
-				return resolveXProfile(fetcher, headers, {
+				atom = await resolveXProfile(fetcher, headers, {
 					canonicalUrl,
 					handle: toStringMaybe(classification.meta.handle),
 				});
+				break;
 			default:
-				return null;
+				return PLATFORM_STAGE_MISS;
 		}
+
+		return atom ?? PLATFORM_STAGE_MISS;
 	};
 }
 

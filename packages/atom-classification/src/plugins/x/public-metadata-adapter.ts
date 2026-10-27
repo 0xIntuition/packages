@@ -2,11 +2,14 @@ import type { ResolverAtom } from '../../plugins';
 import type { ClassificationCanonicalFieldPolicyMap } from '../../types';
 import { normalizeStringArray } from '../shared/domain-html/document';
 import {
+	DomainHtmlFetchError,
 	type DomainHtmlFetchLike,
-	fetchJsonDocument,
+	type DomainHtmlResolveHostname,
+	fetchJsonDocumentResult,
 	resolveDomainHtmlFetch,
 } from '../shared/domain-html/fetch';
 import { toRecordMaybe, toStringMaybe } from '../shared/helpers';
+import { PLATFORM_STAGE_MISS } from '../shared/platform';
 import {
 	createPublicMetadataPlatformAdapter,
 	type PublicMetadataPlatformAdapter,
@@ -35,6 +38,7 @@ const X_PUBLIC_FIELD_POLICIES: ClassificationCanonicalFieldPolicyMap = {
 export type XPublicMetadataAdapterOptions = {
 	fetch?: DomainHtmlFetchLike;
 	headers?: Record<string, string>;
+	resolveHostname?: DomainHtmlResolveHostname;
 };
 
 export type XPublicMetadataAdapter = PublicMetadataPlatformAdapter;
@@ -51,22 +55,27 @@ export function createXPublicMetadataAdapter(
 				id: 'x-syndication',
 				family: 'public-json',
 				resolve: async ({ classification, canonicalUrl }) => {
-					if (!fetcher || classification.subtype !== 'post') {
-						return null;
+					if (classification.subtype !== 'post') {
+						return PLATFORM_STAGE_MISS;
 					}
 
 					const postId = toStringMaybe(classification.meta.postId);
 					if (!postId) {
-						return null;
+						return PLATFORM_STAGE_MISS;
 					}
 
-					const payload = await fetchJsonDocument<Record<string, unknown>>(fetcher, {
+					const payloadResult = await fetchJsonDocumentResult<Record<string, unknown>>(fetcher, {
 						url: buildXSyndicationUrl(postId),
 						headers: options.headers,
+						resolveHostname: options.resolveHostname,
 					});
+					if (payloadResult.ok === false) {
+						throw new DomainHtmlFetchError(payloadResult.failure);
+					}
+					const payload = payloadResult.value;
 					const record = toRecordMaybe(payload);
 					if (!record || isTweetTombstone(record)) {
-						return null;
+						return PLATFORM_STAGE_MISS;
 					}
 
 					const atom = buildXSyndicationAtom({
@@ -81,7 +90,7 @@ export function createXPublicMetadataAdapter(
 								atom,
 								fieldPolicies: X_PUBLIC_FIELD_POLICIES,
 							}
-						: null;
+						: PLATFORM_STAGE_MISS;
 				},
 			},
 		],

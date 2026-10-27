@@ -4,17 +4,31 @@ import {
 	type PlatformV0PluginOptions,
 	type PlatformV0Profile,
 } from '../shared/platform';
+import { createInstagramOpenGraphAdapter } from './opengraph-adapter';
 
-export type InstagramPluginOptions = PlatformV0PluginOptions;
+export type InstagramPluginOptions = PlatformV0PluginOptions & {
+	// Instagram has no oEmbed/domain-api tier by default, so richer identity
+	// data (name/bio/avatar) only ever arrives via OpenGraph. Opt-in per
+	// caller (defaults to on, matching the ticket's expectation that Person
+	// classification works for social profiles even without bespoke wiring)
+	// so tests can still exercise the pure identity-only fallback.
+	useDefaultOpenGraphAdapter?: boolean;
+};
 
 export const instagramProfile: PlatformV0Profile = {
 	domain: 'instagram',
+	display: {
+		classificationSlugs: ['social-media-account', 'image', 'video-object'],
+		exampleUrl: 'https://www.instagram.com/instagram/',
+		host: 'instagram.com',
+		label: 'Instagram',
+	},
 	supportsOEmbed: true,
 	classifier: {
 		id: 'instagram-url-classifier',
 		priority: 10,
 		classify(input: string) {
-			const parsed = tryParseUrl(input);
+			const parsed = tryParseUrl(input, { allowBareHost: true });
 			if (!parsed || !parsed.hostname.includes('instagram.com')) {
 				return null;
 			}
@@ -153,10 +167,21 @@ export const instagramProfile: PlatformV0Profile = {
 };
 
 export function createInstagramPlugin(options: InstagramPluginOptions = {}) {
+	const { useDefaultOpenGraphAdapter = true, ...platformOptions } = options;
+	const openGraphAdapter =
+		platformOptions.adapters?.openGraph ??
+		(useDefaultOpenGraphAdapter ? createInstagramOpenGraphAdapter() : undefined);
+
 	return createPlatformPlugin({
 		pluginId: 'instagram',
 		resolverId: 'instagram-resolver',
 		profile: instagramProfile,
-		options,
+		options: {
+			...platformOptions,
+			adapters: {
+				...platformOptions.adapters,
+				openGraph: openGraphAdapter,
+			},
+		},
 	});
 }

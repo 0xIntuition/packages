@@ -3,6 +3,7 @@ export {
 	getDoiFromRequest,
 	getDomainFromUrl,
 	getIdentifier,
+	getRequestIid,
 	getRequestName,
 	getRequestUrl,
 	parseDoiFromUrl,

@@ -1,6 +1,6 @@
 import { defineEnrichmentPlugin, type EnrichmentPlugin } from '../../../plugins';
 import type { EnrichmentRequest } from '../../../types';
-import type { FetchLike } from '../__shared__/http';
+import { type FetchLike, fetchJsonWithSchema, fetchProviderHttpResponse } from '../__shared__/http';
 import { getIdentifier, getRequestUrl } from '../__shared__/request';
 import {
 	type PlaceResult,
@@ -148,38 +148,33 @@ async function searchPlace(
 	}
 
 	try {
-		const response = await fetcher(SEARCH_TEXT_ENDPOINT, {
-			method: 'POST',
-			headers: {
-				'content-type': 'application/json',
-				'X-Goog-Api-Key': apiKey,
-				'X-Goog-FieldMask': SEARCH_FIELD_MASK,
-			},
-			body: JSON.stringify({
-				textQuery: target.name,
-				...(target.latitude !== undefined && target.longitude !== undefined
-					? {
-							locationBias: {
-								circle: {
-									center: { latitude: target.latitude, longitude: target.longitude },
-									radius: LOCATION_BIAS_RADIUS_METERS,
+		const payload = await fetchJsonWithSchema(
+			fetcher,
+			SEARCH_TEXT_ENDPOINT,
+			placesSearchTextResponseSchema,
+			{
+				method: 'POST',
+				headers: {
+					'content-type': 'application/json',
+					'X-Goog-Api-Key': apiKey,
+					'X-Goog-FieldMask': SEARCH_FIELD_MASK,
+				},
+				body: JSON.stringify({
+					textQuery: target.name,
+					...(target.latitude !== undefined && target.longitude !== undefined
+						? {
+								locationBias: {
+									circle: {
+										center: { latitude: target.latitude, longitude: target.longitude },
+										radius: LOCATION_BIAS_RADIUS_METERS,
+									},
 								},
-							},
-						}
-					: {}),
-			}),
-			...(signal ? { signal } : {}),
-		});
-		if (!response.ok) {
-			// Surface API-level failures (disabled API, key restrictions, quota)
-			// instead of degrading invisibly. Never log the key or full body.
-			logger?.warn('places: text search failed; degrading to URL-derived data', {
-				status: response.status,
-				message: await readErrorMessage(response),
-			});
-			return undefined;
-		}
-		const payload = placesSearchTextResponseSchema.parse(await response.json());
+							}
+						: {}),
+				}),
+				...(signal ? { signal } : {}),
+			}
+		);
 		return payload.places?.[0];
 	} catch (error) {
 		logger?.warn('places: text search errored; degrading to URL-derived data', {
@@ -206,18 +201,15 @@ async function resolvePhotoUri(
 	}
 
 	try {
-		const response = await fetcher(
+		const payload = await fetchJsonWithSchema(
+			fetcher,
 			`https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=${PHOTO_MAX_WIDTH_PX}&skipHttpRedirect=true`,
+			placePhotoMediaResponseSchema,
 			{
 				headers: { 'X-Goog-Api-Key': apiKey },
 				...(signal ? { signal } : {}),
 			}
 		);
-		if (!response.ok) {
-			logger?.warn('places: photo media lookup failed', { status: response.status });
-			return undefined;
-		}
-		const payload = placePhotoMediaResponseSchema.parse(await response.json());
 		const photoUri = payload.photoUri;
 		if (!photoUri || !/^https:\/\//.test(photoUri) || photoUri.includes(apiKey)) {
 			return undefined;
@@ -231,28 +223,17 @@ async function resolvePhotoUri(
 	}
 }
 
-async function readErrorMessage(response: Response): Promise<string> {
-	try {
-		const payload = (await response.json()) as { error?: { message?: string } };
-		return typeof payload.error?.message === 'string'
-			? payload.error.message.slice(0, 300)
-			: 'no error message';
-	} catch {
-		return 'unparseable error body';
-	}
-}
-
 async function expandShortLink(
 	fetcher: FetchLike,
 	url: string,
 	signal: AbortSignal | undefined
 ): Promise<string | undefined> {
 	try {
-		const response = await fetcher(url, {
+		const response = await fetchProviderHttpResponse(fetcher, url, {
 			method: 'GET',
-			redirect: 'follow',
 			...(signal ? { signal } : {}),
 		});
+		await response.body?.cancel().catch(() => undefined);
 		return response.url || undefined;
 	} catch {
 		return undefined;

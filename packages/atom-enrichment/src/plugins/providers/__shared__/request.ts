@@ -1,16 +1,59 @@
+import { resolveCanonicalIid, resolveIdentifierHints } from '../../../identifier';
 import type { AmazonTarget, EnrichmentRequest, GitHubTarget, XTarget } from '../../../types';
 
 const urlLikePattern = /^https?:\/\//i;
 const doiPattern = /^10\.\d{4,9}\/.+/;
 
+/** Classifier-generated display title for a Goodreads book it could not read a title for. */
+export const GOODREADS_PLACEHOLDER_TITLE_PATTERN = /^Goodreads Book \d+$/i;
+
+const GENERATED_PROVIDER_PLACEHOLDERS = [
+	{ host: 'amazon.com', pattern: /^Amazon Product [A-Z0-9]{10}$/i, provider: 'amazon' },
+	{ host: 'etsy.com', pattern: /^Etsy Listing \d+$/i, provider: 'etsy' },
+	{ host: 'goodreads.com', pattern: GOODREADS_PLACEHOLDER_TITLE_PATTERN, provider: 'goodreads' },
+	{ host: 'imdb.com', pattern: /^IMDb (?:Person|Title) [a-z]{2}\d+$/i, provider: 'imdb' },
+	{
+		host: 'instagram.com',
+		pattern: /^Instagram (?:Post|Video) [A-Za-z0-9_-]+$/i,
+		provider: 'instagram',
+	},
+	{
+		host: 'openlibrary.org',
+		pattern: /^OpenLibrary (?:(?:Book|Edition) OL\d+M|Work OL\d+W)$/i,
+		provider: 'openlibrary',
+	},
+	{
+		host: 'open.spotify.com',
+		pattern: /^(?:Spotify )?(?:Track|Album|Artist|Playlist|Show|Episode) [A-Za-z0-9]{8,}$/i,
+		provider: 'spotify',
+	},
+	{ host: 'steampowered.com', pattern: /^Steam App \d+$/i, provider: 'steam' },
+	{ host: 'tiktok.com', pattern: /^TikTok Video \d+$/i, provider: 'tiktok' },
+	{
+		host: 'themoviedb.org',
+		pattern: /^TMDB (?:Movie|TV Series) \d+$/i,
+		provider: 'tmdb',
+	},
+	{ host: 'youtube.com', pattern: /^YouTube Video [A-Za-z0-9_-]+$/i, provider: 'youtube' },
+	{ host: null, pattern: /^Website [a-z0-9.-]+$/i, provider: 'default-url' },
+] as const;
+
 export function getRequestUrl(request: EnrichmentRequest): string | undefined {
 	const hintUrl = request.input.hints?.url;
-	if (typeof hintUrl === 'string' && urlLikePattern.test(hintUrl)) {
+	if (
+		typeof hintUrl === 'string' &&
+		urlLikePattern.test(hintUrl) &&
+		!isForbiddenTmdbSourceUrl(hintUrl)
+	) {
 		return hintUrl;
 	}
 
 	const jsonLdUrl = request.input.jsonLd.url;
-	if (typeof jsonLdUrl === 'string' && urlLikePattern.test(jsonLdUrl)) {
+	if (
+		typeof jsonLdUrl === 'string' &&
+		urlLikePattern.test(jsonLdUrl) &&
+		!isForbiddenTmdbSourceUrl(jsonLdUrl)
+	) {
 		return jsonLdUrl;
 	}
 
@@ -25,7 +68,7 @@ export function getRequestUrl(request: EnrichmentRequest): string | undefined {
 function findFirstUrl(value: unknown): string | undefined {
 	if (typeof value === 'string') {
 		const trimmed = value.trim();
-		return urlLikePattern.test(trimmed) ? trimmed : undefined;
+		return urlLikePattern.test(trimmed) && !isForbiddenTmdbSourceUrl(trimmed) ? trimmed : undefined;
 	}
 
 	if (!Array.isArray(value)) {
@@ -40,6 +83,18 @@ function findFirstUrl(value: unknown): string | undefined {
 	}
 
 	return undefined;
+}
+
+function isForbiddenTmdbSourceUrl(value: string): boolean {
+	try {
+		const hostname = new URL(value).hostname.toLowerCase().replace(/\.+$/, '');
+		if (hostname === 'imdb.com' || hostname.endsWith('.imdb.com')) return true;
+		// JP ruling R1b (2026-08-27): TMDB is identity-only. No page, image,
+		// OpenGraph, or API hostname may be used as an enrichment source.
+		return hostname.endsWith('themoviedb.org') || hostname.endsWith('tmdb.org');
+	} catch {
+		return false;
+	}
 }
 
 export function getRequestName(request: EnrichmentRequest): string | undefined {
@@ -62,111 +117,52 @@ export function getRequestName(request: EnrichmentRequest): string | undefined {
 	return undefined;
 }
 
-// Pure display-fallback guard, based on v2 __shared__/request.ts. No IID resolution.
-const providerPlaceholders = [
-	{
-		provider: 'amazon',
-		host: 'amazon.com',
-		pattern: /^Amazon Product [A-Z0-9]{10}$/i,
-		id: /^[A-Z0-9]{10}$/i,
-	},
-	{ provider: 'etsy', host: 'etsy.com', pattern: /^Etsy Listing \d+$/i, id: /^\d+$/ },
-	{ provider: 'goodreads', host: 'goodreads.com', pattern: /^Goodreads Book \d+$/i, id: /^\d+$/ },
-	{
-		provider: 'imdb',
-		host: 'imdb.com',
-		pattern: /^IMDb (?:Person|Title) [a-z]{2}\d+$/i,
-		id: /^(?:tt|nm)\d+$/i,
-	},
-	{
-		provider: 'instagram',
-		host: 'instagram.com',
-		pattern: /^Instagram (?:Post|Video) [A-Za-z0-9_-]+$/i,
-	},
-	{
-		provider: 'openlibrary',
-		host: 'openlibrary.org',
-		pattern: /^OpenLibrary (?:(?:Book|Edition) OL\d+M|Work OL\d+W)$/i,
-		id: /^OL\d+[MWA]$/i,
-	},
-	{
-		provider: 'spotify',
-		host: 'open.spotify.com',
-		pattern: /^(?:Spotify )?(?:Track|Album|Artist|Playlist|Show|Episode) [A-Za-z0-9]{8,}$/i,
-		id: /^[A-Za-z0-9]{8,}$/,
-	},
-	{ provider: 'steam', host: 'steampowered.com', pattern: /^Steam App \d+$/i, id: /^\d+$/ },
-	{ provider: 'tiktok', host: 'tiktok.com', pattern: /^TikTok Video \d+$/i, id: /^\d+$/ },
-	{
-		provider: 'tmdb',
-		host: 'themoviedb.org',
-		pattern: /^TMDB (?:Movie|TV Series) \d+$/i,
-		id: /^\d+$/,
-	},
-	{
-		provider: 'youtube',
-		host: 'youtube.com',
-		pattern: /^YouTube Video [A-Za-z0-9_-]+$/i,
-		id: /^[A-Za-z0-9_-]{11}$/,
-	},
-	{ provider: 'default-url', pattern: /^Website [a-z0-9.-]+$/i },
-] satisfies Array<{ provider: string; host?: string; pattern: RegExp; id?: RegExp }>;
-
+/** Prevents catalog/search providers from querying with classifier-generated display fallbacks. */
 export function isSynthesizedProviderPlaceholderTitle(
 	request: EnrichmentRequest,
-	title = getRequestName(request)
+	title: string
 ): boolean {
-	if (!title) return false;
-	const name = title.trim();
-	const provider = request.input.source.provider?.trim().toLowerCase();
-	const stage = request.input.source.fallbackStage?.trim().toLowerCase();
-	for (const placeholder of providerPlaceholders) {
-		const matchesProvider =
-			provider === placeholder.provider || provider === `${placeholder.provider}-url`;
-		const displayMatches = placeholder.pattern.test(name);
-		let bareIdMatches = false;
-		if ('id' in placeholder && placeholder.id?.test(name) && 'host' in placeholder) {
-			const requestUrl = getRequestUrl(request);
-			if (requestUrl) {
-				try {
-					const url = new URL(requestUrl);
-					const host = url.hostname.toLowerCase().replace(/^www\./, '');
-					const pathId = decodeURIComponent(url.pathname.split('/').filter(Boolean).pop() ?? '');
-					bareIdMatches =
-						(host === placeholder.host || host.endsWith(`.${placeholder.host}`)) &&
-						(pathId === name ||
-							pathId.startsWith(`${name}-`) ||
-							pathId.startsWith(`${name}.`) ||
-							url.searchParams.get('v') === name);
-				} catch {
-					/* Bare IDs require a valid corroborating source URL. */
-				}
-			}
-		}
-		if (matchesProvider && stage === 'generic' && (displayMatches || bareIdMatches)) return true;
-		// v2's legacy Goodreads host fallback applies only when no stage is available.
-		if (
-			!displayMatches ||
-			placeholder.provider !== 'goodreads' ||
-			stage !== undefined ||
-			(provider !== undefined && !matchesProvider) ||
-			!('host' in placeholder)
-		)
-			continue;
-		const url = getRequestUrl(request);
-		if (!url) continue;
-		try {
-			const host = new URL(url).hostname.toLowerCase().replace(/^www\./, '');
-			if (host === placeholder.host || host.endsWith(`.${placeholder.host}`)) return true;
-		} catch {
-			/* Invalid source URLs provide no provenance. */
-		}
+	const normalizedTitle = title.trim();
+	const placeholder = GENERATED_PROVIDER_PLACEHOLDERS.find(({ pattern }) =>
+		pattern.test(normalizedTitle)
+	);
+	if (!placeholder) {
+		return false;
 	}
-	return false;
+
+	const sourceProvider = request.input.source.provider?.trim().toLowerCase();
+	const fallbackStage = request.input.source.fallbackStage?.trim().toLowerCase();
+	const providerMatches =
+		sourceProvider === placeholder.provider || sourceProvider === `${placeholder.provider}-url`;
+	if (providerMatches && fallbackStage === 'generic') {
+		return true;
+	}
+
+	// Preserve only the historical Goodreads host fallback. All newer provider
+	// guards fail open unless the handoff carries an explicit generic stage.
+	if (
+		placeholder.provider !== 'goodreads' ||
+		fallbackStage !== undefined ||
+		(sourceProvider !== undefined && !providerMatches) ||
+		!placeholder.host
+	) {
+		return false;
+	}
+	const requestUrl = getRequestUrl(request);
+	if (!requestUrl) {
+		return false;
+	}
+
+	try {
+		const hostname = new URL(requestUrl).hostname.replace(/^www\./i, '').toLowerCase();
+		return hostname === placeholder.host || hostname.endsWith(`.${placeholder.host}`);
+	} catch {
+		return false;
+	}
 }
 
 export function getIdentifier(request: EnrichmentRequest, ...keys: string[]): string | undefined {
-	const identifiers = request.input.hints?.identifiers;
+	const identifiers = resolveIdentifierHints(request.input);
 	if (!identifiers) {
 		return undefined;
 	}
@@ -179,6 +175,10 @@ export function getIdentifier(request: EnrichmentRequest, ...keys: string[]): st
 	}
 
 	return undefined;
+}
+
+export function getRequestIid(request: EnrichmentRequest): string | undefined {
+	return resolveCanonicalIid(request.input);
 }
 
 export function getGitHubTarget(request: EnrichmentRequest): GitHubTarget | undefined {

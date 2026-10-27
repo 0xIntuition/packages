@@ -1,7 +1,7 @@
 import { type EnrichmentPlugin, isPluginRuntimeCompatible } from './plugins';
 import { canonicalizeEnrichmentSlug, canonicalizeEnrichmentSlugs } from './slug-aliases';
 import {
-	type EnrichmentRequest,
+	type EnrichmentRequestInput,
 	type EnrichmentSkippedPlugin,
 	enrichmentRequestSchema,
 } from './types';
@@ -19,7 +19,7 @@ export type EnrichmentPluginRegistry = {
 	register(plugin: EnrichmentPlugin, options?: RegisterPluginOptions): void;
 	unregister(pluginId: string): boolean;
 	list(): EnrichmentPlugin[];
-	resolve(request: EnrichmentRequest): ResolvePluginsResult;
+	resolve(request: EnrichmentRequestInput): ResolvePluginsResult;
 	has(pluginId: string): boolean;
 	get(pluginId: string): EnrichmentPlugin | undefined;
 };
@@ -69,7 +69,7 @@ export function createEnrichmentPluginRegistry(
 					continue;
 				}
 
-				if (pluginAllowList && !pluginAllowList.has(plugin.id)) {
+				if (pluginAllowList && !pluginAllowList.has(canonicalizeEnrichmentSlug(plugin.id))) {
 					skipped.push({
 						pluginId: plugin.id,
 						reason: 'filtered',
@@ -79,7 +79,9 @@ export function createEnrichmentPluginRegistry(
 
 				if (
 					artifactTypeAllowList &&
-					!plugin.artifactTypes.some((slug) => artifactTypeAllowList.has(slug))
+					!plugin.artifactTypes.some((slug) =>
+						artifactTypeAllowList.has(canonicalizeEnrichmentSlug(slug))
+					)
 				) {
 					skipped.push({
 						pluginId: plugin.id,
@@ -112,7 +114,11 @@ function registerInternal(
 	plugin: EnrichmentPlugin,
 	options?: RegisterPluginOptions
 ): void {
-	if (definitions.has(plugin.id) && !options?.override) {
+	// Store under the canonical slug so registration, lookups, and
+	// resolve() agree when a plugin registers under an alias source id
+	// (the steam plugin's id 'steam' canonicalizes to 'steam-app').
+	const canonicalId = canonicalizeEnrichmentSlug(plugin.id);
+	if (definitions.has(canonicalId) && !options?.override) {
 		throw new Error(
 			`Plugin "${plugin.id}" is already registered. Pass { override: true } to replace it.`
 		);
@@ -126,7 +132,7 @@ function registerInternal(
 		throw new Error(`Plugin "${plugin.id}" must implement enrich(request, ctx).`);
 	}
 
-	definitions.set(plugin.id, plugin);
+	definitions.set(canonicalId, plugin);
 }
 
 function sortPlugins(plugins: EnrichmentPlugin[]): EnrichmentPlugin[] {

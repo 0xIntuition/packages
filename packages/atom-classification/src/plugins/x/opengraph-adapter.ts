@@ -15,6 +15,7 @@ import {
 export type XOpenGraphAdapterOptions = {
 	fetch?: Parameters<typeof createOpenGraphPlatformAdapter>[0]['fetch'];
 	headers?: Record<string, string>;
+	resolveHostname?: Parameters<typeof createOpenGraphPlatformAdapter>[0]['resolveHostname'];
 };
 
 export type XOpenGraphAdapter = OpenGraphPlatformAdapter;
@@ -23,6 +24,7 @@ export function createXOpenGraphAdapter(options: XOpenGraphAdapterOptions = {}):
 	return createOpenGraphPlatformAdapter({
 		fetch: options.fetch,
 		headers: options.headers,
+		resolveHostname: options.resolveHostname,
 		domains: ['x'],
 		map: ({ classification, canonicalUrl, metadata }) => {
 			if (classification.subtype === 'post') {

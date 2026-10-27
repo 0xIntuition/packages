@@ -1,0 +1,61 @@
+{
+	"name": "openlibrary-work-multi-isbn",
+	"url": "https://openlibrary.org/works/OL468431W",
+	"atom": {
+		"schemaType": "Book",
+		"category": "thing",
+		"title": "The Great Gatsby",
+		"canonicalId": "openlibrary:work:OL468431W",
+		"sameAs": ["https://openlibrary.org/works/OL468431W"],
+		"hints": {
+			"identifiers": {
+				"goodreadsBookId": "4671",
+				"olid": "OL468431W",
+				"isbn": "9780743273565"
+			}
+		},
+		"data": {
+			"@context": "https://schema.org/",
+			"@type": "Book",
+			"name": "The Great Gatsby",
+			"identifier": "int:olid:OL468431W",
+			"url": "https://openlibrary.org/works/OL468431W",
+			"sameAs": ["https://openlibrary.org/works/OL468431W"],
+			"isbn": ["9780743273565", "9780141182636"]
+		}
+	},
+	"identifierRung": [
+		{
+			"rung": "olid",
+			"value": "OL468431W"
+		},
+		{
+			"rung": "isbn",
+			"value": "9780141182636"
+		},
+		{
+			"rung": "isbn",
+			"value": "9780743273565"
+		},
+		{
+			"rung": "goodreads:book",
+			"value": "4671"
+		}
+	],
+	"aliases": ["int:goodreads:book:4671", "int:isbn:9780141182636", "int:isbn:9780743273565"],
+	"identifierSet": [
+		"int:olid:OL468431W",
+		"int:isbn:9780141182636",
+		"int:isbn:9780743273565",
+		"int:goodreads:book:4671",
+		"int:url:https://openlibrary.org/works/OL468431W"
+	],
+	"work": {
+		"status": "hit",
+		"workKey": "OL468431W",
+		"workUrl": "https://openlibrary.org/works/OL468431W",
+		"title": "The Great Gatsby",
+		"authorNames": [],
+		"isbns": ["9780743273565", "9780141182636"]
+	}
+}

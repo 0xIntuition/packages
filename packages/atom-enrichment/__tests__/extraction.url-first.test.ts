@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'bun:test';
+import schemaTypeToAtomTypeSnapshot from '../src/extraction/schema-type-to-atom-type.snapshot.json';
 import {
 	buildUrlFirstClassifiedAtomInput,
 	hasArtifactOfType,
 	readWikibaseItemFromArtifacts,
 	resolveUrlFirstClassification,
+	SCHEMA_TYPE_TO_ATOM_TYPE,
 } from '../src/extraction/url-first';
-import type { EnrichmentArtifact } from '../src/types';
+import type { AtomType, EnrichmentArtifact } from '../src/types';
 
 const WIKIPEDIA_URL = 'https://en.wikipedia.org/wiki/Vitalik_Buterin';
 
@@ -27,6 +29,7 @@ describe('resolveUrlFirstClassification', () => {
 		expect(classification?.atomType).toBe('person');
 		expect(classification?.type).toBe('Person');
 		expect(classification?.preset).toBe('default');
+		// familyName is optional since IID decision D25 (mononym support).
 		expect(classification?.requiredFieldKeys).toEqual(['givenName']);
 	});
 
@@ -38,6 +41,35 @@ describe('resolveUrlFirstClassification', () => {
 
 	it('returns null for unknown slugs', () => {
 		expect(resolveUrlFirstClassification('not-a-spec')).toBeNull();
+	});
+
+	// ENG-13699: the type-picker (url-first) path and the FE client-side
+	// synthesized preview (use-atom-create-flow.ts) each keep their own copy
+	// of the schemaType -> atomType table (no shared package can bridge them
+	// without a new cross-package dependency). This copy was missing the
+	// Podcast entries the other copy already had, so a podcast picked via the
+	// type-picker silently downgraded to atomType 'thing' — a real,
+	// reproducible instance of the "same URL, two rule sets, two answers"
+	// pattern the ticket describes, even though the exact reported repro
+	// couldn't be reproduced.
+	it('maps podcast series and episode specs to the podcast atom type, matching every other entry point', () => {
+		expect(resolveUrlFirstClassification('podcast-series')?.atomType).toBe('podcast');
+		expect(resolveUrlFirstClassification('podcast-episode')?.atomType).toBe('podcast');
+	});
+});
+
+// Review finding #3 (drift guard): this table is hand-synced with an
+// identical one in apps/experimental/src/features/atoms/create/
+// use-atom-create-flow.ts — the two packages can't share it directly without
+// a new cross-package dependency (blocked this pass). Both sides assert
+// against the same schema-type-to-atom-type.snapshot.json fixture instead of
+// against each other directly, so editing only one table (or only the
+// snapshot) fails at least one side's test.
+describe('SCHEMA_TYPE_TO_ATOM_TYPE drift guard', () => {
+	it('matches the shared snapshot both this package and the FE test assert against', () => {
+		expect(SCHEMA_TYPE_TO_ATOM_TYPE).toEqual(
+			schemaTypeToAtomTypeSnapshot as Record<string, AtomType>
+		);
 	});
 });
 
@@ -52,9 +84,9 @@ describe('buildUrlFirstClassifiedAtomInput', () => {
 		);
 
 		expect(input.atomType).toBe('person');
-		expect(input.jsonLd['@type']).toBe('Person');
-		expect(input.jsonLd.url).toBe(WIKIPEDIA_URL);
-		expect(input.jsonLd.sameAs).toEqual([WIKIPEDIA_URL]);
+		expect(input.jsonLd?.['@type']).toBe('Person');
+		expect(input.jsonLd?.url).toBe(WIKIPEDIA_URL);
+		expect(input.jsonLd?.sameAs).toEqual([WIKIPEDIA_URL]);
 		expect(input.hints?.url).toBe(WIKIPEDIA_URL);
 		// No name hint: the wikidata plugin must never fall back to fuzzy
 		// name search in the URL-first flow.
