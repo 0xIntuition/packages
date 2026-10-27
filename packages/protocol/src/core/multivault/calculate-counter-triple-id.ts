@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, ContractFunctionReturnType } from 'viem';
 
-import { MultiVaultAbi } from '../../contracts';
+import { MultiVaultAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -14,7 +14,7 @@ export async function multiVaultCalculateCounterTripleId(
 	inputs: {
 		args: ContractFunctionArgs<typeof MultiVaultAbi, 'pure', 'calculateCounterTripleId'>;
 	}
-) {
+): Promise<MultiVaultCalculateCounterTripleIdResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 
@@ -25,3 +25,9 @@ export async function multiVaultCalculateCounterTripleId(
 		args,
 	});
 }
+
+export type MultiVaultCalculateCounterTripleIdResult = ContractFunctionReturnType<
+	typeof MultiVaultAbi,
+	'view' | 'pure',
+	'calculateCounterTripleId'
+>;

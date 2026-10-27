@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, ContractFunctionReturnType } from 'viem';
 
-import { TrustBondingAbi } from '../../contracts';
+import { TrustBondingAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -12,9 +12,13 @@ import type { ReadConfig } from '../../types';
 export async function trustBondingGetUnclaimedRewardsForEpoch(
 	config: ReadConfig,
 	inputs: {
-		args: ContractFunctionArgs<typeof TrustBondingAbi, 'view', 'getUnclaimedRewardsForEpoch'>;
+		args: ContractFunctionArgs<
+			typeof TrustBondingAbi,
+			'view' | 'pure',
+			'getUnclaimedRewardsForEpoch'
+		>;
 	}
-) {
+): Promise<TrustBondingGetUnclaimedRewardsForEpochResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 
@@ -25,3 +29,9 @@ export async function trustBondingGetUnclaimedRewardsForEpoch(
 		args,
 	});
 }
+
+export type TrustBondingGetUnclaimedRewardsForEpochResult = ContractFunctionReturnType<
+	typeof TrustBondingAbi,
+	'view' | 'pure',
+	'getUnclaimedRewardsForEpoch'
+>;

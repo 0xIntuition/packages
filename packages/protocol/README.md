@@ -60,7 +60,7 @@ Core deployment ownership in this release:
 This is the `4.0.0` candidate. New v1.1.0 functions require a matching contract
 deployment; existing mainnet addresses may still run the older implementation.
 Core artifacts are verified against `@0xintuition/contracts-v2@1.1.0-alpha.1`.
-See the [contract artifact provenance](https://github.com/0xIntuition/packages/blob/update/v1.1.0-alpha/docs/contract-artifacts.md).
+See the [contract artifact provenance](https://github.com/0xIntuition/packages/blob/main/docs/contract-artifacts.md).
 
 `previewTripleCreate` now takes subject, predicate, object, and assets. Dynamic-fee
 read models use redeem lots and separate deposit/redeem configuration. Receipt
@@ -1703,7 +1703,9 @@ type CurveDetailsType = {
 
 ## Contract ABIs
 
-The package exports ABIs and bytecodes for all protocol contracts:
+The root provides named ABI re-exports from deployments for the core contracts.
+Bytecode is available only through `@0xintuition/protocol/contracts`;
+`@0xintuition/deployments/bytecode` is the canonical source.
 
 ```typescript
 import {
@@ -1896,7 +1898,7 @@ bun run check:write
 ```
 packages/protocol/
 ├── src/
-│   ├── contracts/        # Contract ABIs and bytecodes
+│   ├── contracts/        # Named deployments re-exports; bytecode on ./contracts
 │   ├── core/
 │   │   ├── multivault/   # MultiVault functions
 │   │   ├── trustbonding/ # TrustBonding functions
@@ -1931,3 +1933,57 @@ MIT License - see the [main repository](https://github.com/0xIntuition/packages)
 - **Documentation**: [docs.intuition.systems](https://docs.intuition.systems)
 - **Explorer (Mainnet)**: [explorer.intuition.systems](https://explorer.intuition.systems)
 - **Explorer (Testnet)**: [testnet.explorer.intuition.systems](https://testnet.explorer.intuition.systems)
+
+## Subpaths
+
+| Import | Surface |
+| --- | --- |
+| `@0xintuition/protocol` | Core wrappers, ABI re-exports, events, network configuration and types; no bytecode or curve math shims |
+| `@0xintuition/protocol/contracts` | Named ABI and bytecode re-exports from deployments |
+| `@0xintuition/protocol/package.json` | Package metadata |
+
+`@0xintuition/deployments/bytecode` is the canonical bytecode source.
+
+## Migration to 4.0.0
+
+Import bytecode from `@0xintuition/deployments/bytecode` (or the explicit
+`@0xintuition/protocol/contracts` compatibility subpath). The root no longer
+re-exports bytecode. Pure curve math now lives exclusively in
+`@0xintuition/curves`; replace the removed protocol aliases as follows.
+
+| Removed protocol export | Import from curves |
+| --- | --- |
+| `linearCurveConvertToShares` | `linearConvertToShares` |
+| `linearCurveConvertToAssets` | `linearConvertToAssets` |
+| `linearCurvePreviewDeposit` | `linearPreviewDeposit` |
+| `linearCurvePreviewRedeem` | `linearPreviewRedeem` |
+| `linearCurvePreviewMint` | `linearPreviewMint` |
+| `linearCurvePreviewWithdraw` | `linearPreviewWithdraw` |
+| `linearCurveCurrentPrice` | `linearCurrentPrice` |
+| `offsetProgressiveCurveConvertToShares` | `offsetProgressiveConvertToShares` |
+| `offsetProgressiveCurveConvertToAssets` | `offsetProgressiveConvertToAssets` |
+| `offsetProgressiveCurvePreviewDeposit` | `offsetProgressivePreviewDeposit` |
+| `offsetProgressiveCurvePreviewRedeem` | `offsetProgressivePreviewRedeem` |
+| `offsetProgressiveCurvePreviewMint` | `offsetProgressivePreviewMint` |
+| `offsetProgressiveCurvePreviewWithdraw` | `offsetProgressivePreviewWithdraw` |
+| `offsetProgressiveCurveCurrentPrice` | `offsetProgressiveCurrentPrice` |
+| `progressiveCurveConvertToShares` | `progressiveConvertToShares` |
+| `progressiveCurveConvertToAssets` | `progressiveConvertToAssets` |
+| `progressiveCurvePreviewDeposit` | `progressivePreviewDeposit` |
+| `progressiveCurvePreviewRedeem` | `progressivePreviewRedeem` |
+| `progressiveCurvePreviewMint` | `progressivePreviewMint` |
+| `progressiveCurvePreviewWithdraw` | `progressivePreviewWithdraw` |
+| `progressiveCurveCurrentPrice` | `progressiveCurrentPrice` |
+| `LinearCurveState`, `ProgressiveCurveState`, `OffsetProgressiveCurveState` | `CurveState` |
+| `ProgressiveCurveConfig`, `OffsetProgressiveCurveConfig` | Same names |
+
+`dynamicFeeFlatPriceCurveGetConfig` now returns the ABI-derived
+`DynamicFeeFlatPriceCurveGetConfigResult` instead of the curves package's
+`DynamicFeeConfig`. The two are structurally compatible, so callers passing the
+result to `@0xintuition/curves` helpers need no change; code that named the old type
+should import the new one.
+
+Math utilities formerly available in the internal `core/curves/math` module
+(`WAD`, `mulDivDown`, `mulDivUp`, `mulWadDown`, `mulWadUp`, `divWadDown`,
+`divWadUp`, `sqrt`, `sqrtWad`, `squareWadDown`, `squareWadUp`,
+`requirePositiveEvenSlope`) retain their names in `@0xintuition/curves`.

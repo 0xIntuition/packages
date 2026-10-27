@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, ContractFunctionReturnType } from 'viem';
 
-import { WrappedTrustAbi } from '../../contracts';
+import { WrappedTrustAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -12,9 +12,9 @@ import type { ReadConfig } from '../../types';
 export async function wrappedTrustAllowance(
 	config: ReadConfig,
 	inputs: {
-		args: ContractFunctionArgs<typeof WrappedTrustAbi, 'view', 'allowance'>;
+		args: ContractFunctionArgs<typeof WrappedTrustAbi, 'view' | 'pure', 'allowance'>;
 	}
-) {
+): Promise<WrappedTrustAllowanceResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 
@@ -25,3 +25,9 @@ export async function wrappedTrustAllowance(
 		args,
 	});
 }
+
+export type WrappedTrustAllowanceResult = ContractFunctionReturnType<
+	typeof WrappedTrustAbi,
+	'view' | 'pure',
+	'allowance'
+>;

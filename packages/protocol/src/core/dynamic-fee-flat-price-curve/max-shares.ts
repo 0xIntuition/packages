@@ -1,4 +1,5 @@
-import { DynamicFeeFlatPriceCurveAbi } from '../../contracts';
+import type { ContractFunctionReturnType } from 'viem';
+import { DynamicFeeFlatPriceCurveAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -8,7 +9,9 @@ import type { ReadConfig } from '../../types';
  * @param config Contract address and public client.
  * @returns The curve's share ceiling.
  */
-export async function dynamicFeeFlatPriceCurveMaxShares(config: ReadConfig) {
+export async function dynamicFeeFlatPriceCurveMaxShares(
+	config: ReadConfig
+): Promise<DynamicFeeFlatPriceCurveMaxSharesResult> {
 	const { address, publicClient } = config;
 
 	return await publicClient.readContract({
@@ -17,3 +20,9 @@ export async function dynamicFeeFlatPriceCurveMaxShares(config: ReadConfig) {
 		functionName: 'maxShares',
 	});
 }
+
+export type DynamicFeeFlatPriceCurveMaxSharesResult = ContractFunctionReturnType<
+	typeof DynamicFeeFlatPriceCurveAbi,
+	'view' | 'pure',
+	'maxShares'
+>;

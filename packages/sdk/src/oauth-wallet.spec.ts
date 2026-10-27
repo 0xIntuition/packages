@@ -1,5 +1,5 @@
+import { BeaconProxyBytecode } from '@0xintuition/deployments/bytecode';
 import { calculateOAuthAtomId } from '@0xintuition/ids';
-import { BeaconProxyBytecode } from '@0xintuition/protocol';
 import type { Address } from 'viem';
 import { describe, expect, it, vi } from 'vitest';
 

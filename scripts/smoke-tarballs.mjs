@@ -2,17 +2,19 @@
 
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
 	assertRegistryIntegrity,
+	internalDependencyRange,
 	PACKAGES,
 	packageRootFor,
 	requiredTarballFiles,
 } from './package-registry.mjs';
 
-const repoRoot = resolve(new URL('..', import.meta.url).pathname);
+const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const tempRoot = mkdtempSync(join(tmpdir(), 'intuition-packages-smoke-'));
 const workspaceManifests = assertRegistryIntegrity(repoRoot);
 const tarballPaths = [];
@@ -73,7 +75,7 @@ function assertInternalDependencyVersions(packageJson, packageName) {
 				workspacePackageVersions.get(dependencyName);
 			assert.equal(
 				versionRange,
-				expectedVersion,
+				internalDependencyRange(expectedVersion),
 				`${packageName} ${fieldName}.${dependencyName} must match the packed workspace version.`
 			);
 		}
@@ -86,12 +88,26 @@ try {
 		if (kind === 'compiled') {
 			run('bun', ['run', 'build'], cwd);
 		}
+		if (packageName === 'cli') {
+			const library = readFileSync(resolve(cwd, 'dist/index.js'), 'utf8');
+			assert.match(library, /import[\s\S]*?from ['"]viem['"]/);
+			assert.doesNotMatch(
+				library,
+				/node_modules\/viem|function (?:encodeFunctionData|parseAbi|createPublicClient)\(/
+			);
+		}
 		const dryRun = JSON.parse(run('npm', ['pack', '--ignore-scripts', '--dry-run', '--json'], cwd));
 		const packedFiles = new Set(dryRun[0]?.files?.map((entry) => entry.path));
 		for (const filePath of requiredTarballFiles(kind)) {
 			assert(packedFiles.has(filePath), `${packageName} tarball is missing ${filePath}`);
 		}
 		for (const filePath of packedFiles) {
+			if (!packageName.startsWith('atom-')) {
+				assert(
+					!filePath.endsWith('.d.ts.map'),
+					`${packageName} ships an unusable declaration map: ${filePath}`
+				);
+			}
 			assert(!filePath.startsWith('src/'), `${packageName} tarball leaked source file ${filePath}`);
 		}
 		const tarballPath = run('bun', ['run', 'pack:release'], cwd).trim().split('\n').at(-1);
@@ -102,6 +118,8 @@ try {
 		assertNoWorkspaceProtocol(tarballPackageJson, `@0xintuition/${packageName}`);
 		assertInternalDependencyVersions(tarballPackageJson, `@0xintuition/${packageName}`);
 	}
+
+	run('node', [resolve(repoRoot, 'scripts/check-doc-imports.mjs')], repoRoot);
 
 	writeFileSync(
 		resolve(tempRoot, 'package.json'),
@@ -157,6 +175,16 @@ try {
 		const iidLadder = await import('@0xintuition/iid-ladder');
 		results.iidLadder = iidLadder.projectIdentifierLadder({ strongIdentifiers: { isrc: 'USUM71703861' } });
 		results.iidLadderRejectsUnregistered = iidLadder.projectIdentifierLadder({ providerCanonicalId: 'spotify:track:1kcfGBb6kSrGqNIMW7rAlB' });
+		results.iidLadderMint = iidLadder.createLadder({ providerLocalHandles: 'mint' }).projectIdentifierLadder({ providerCanonicalId: 'goodreads:book:123' });
+		const pipeline = await import('@0xintuition/pipeline-runtime');
+		results.pipelineError = pipeline.isPipelineErrorKind('circuit_open');
+		for (const subpath of ['bounded-text', 'cache', 'circuit-breaker', 'concurrency', 'errors', 'outcome', 'provider-observer', 'provider-metrics-contract', 'retry-after', 'letterboxd', 'letterboxd-page', 'tmdb', 'testing/prometheus-exposition']) {
+			results['pipeline:' + subpath] = Object.keys(await import('@0xintuition/pipeline-runtime/' + subpath)).sort();
+		}
+		const { forEachBounded } = await import('@0xintuition/pipeline-runtime/concurrency');
+		results.pipelineBounded = await forEachBounded([1, 2], async (value) => value * 2, { concurrency: 2 });
+		const { CircuitBreaker } = await import('@0xintuition/pipeline-runtime/circuit-breaker');
+		results.pipelineCircuit = await new CircuitBreaker({ name: 'smoke', failureThreshold: 1, resetAfterMs: 10 }).execute(async () => 'ok');
 		const ethereumAccountClassification = await import('@0xintuition/classifications/ethereum-account');
 		results.classificationSubpath = ethereumAccountClassification.ethereumAccount.type;
 		const musicRecordingCreation = await import('@0xintuition/classifications/creation/music-recording');
@@ -205,10 +233,12 @@ try {
 		}
 		const sdk = await import('@0xintuition/sdk');
 		results.sdk = typeof sdk.multivaultPrepareDepositTx;
-		results.sdkMultiVault = sdk.getMultiVaultAddressFromChainId(deployments.INTUITION_MAINNET_CHAIN_ID);
+		if ('getMultiVaultAddressFromChainId' in sdk || 'MultiVaultAbi' in sdk || 'MultiVaultBytecode' in sdk) throw new Error('SDK root leaked a low-level export');
+		if (typeof sdk.calculateTripleId !== 'function') throw new Error('SDK root must keep the deterministic id helpers');
 		const sdkApi = await import('@0xintuition/sdk/api');
 		const sdkActions = await import('@0xintuition/sdk/actions');
 		const sdkProtocol = await import('@0xintuition/sdk/protocol');
+		results.sdkMultiVault = sdkProtocol.getMultiVaultAddressFromChainId(deployments.INTUITION_MAINNET_CHAIN_ID);
 		const sdkTrustSwapAndBridgeRouter = await import('@0xintuition/sdk/trust-swap-and-bridge-router');
 		const sdkUtils = await import('@0xintuition/sdk/utils');
 		results.sdkApiSubpath = typeof sdkApi.createIntuitionApiClient;
@@ -220,6 +250,34 @@ try {
 		results.cli = typeof cli.buildMultiVaultDepositPlan;
 		const react = await import('@0xintuition/react');
 		results.react = typeof react.IntuitionProvider;
+		// Every runtime export must work from the tarball under both runtimes,
+		// including helper subpaths that Core does not happen to import today.
+		results.atomRuntimeExports = {};
+		for (const name of ['atom-parser', 'atom-classification', 'atom-enrichment']) {
+			const specifier = '@0xintuition/' + name;
+			const manifest = JSON.parse(readFileSync(require.resolve(specifier + '/package.json'), 'utf8'));
+			const subpaths = Object.keys(manifest.exports).filter((key) => key !== './package.json');
+			for (const subpath of subpaths) {
+				await import(specifier + (subpath === '.' ? '' : subpath.slice(1)));
+			}
+			results.atomRuntimeExports[name] = subpaths.length;
+		}
+		const { parseAtom } = await import('@0xintuition/atom-parser/parse');
+		results.parsedAtomKind = (await parseAtom('https://example.com', { remoteFetch: false })).kind;
+		const { createClientEngine } = await import('@0xintuition/atom-classification/client');
+		const { createPlainTextPlugin } = await import('@0xintuition/atom-classification/plugins/plain-text');
+		const { createTypeProfilesPlugin } = await import('@0xintuition/atom-classification/plugins/type-profiles');
+		const classified = await createClientEngine({ plugins: [createTypeProfilesPlugin(), createPlainTextPlugin()] }).classify({
+			input: 'a shared atom runtime', mode: 'client-only', classificationSessionId: 'packed-smoke',
+		});
+		results.classifiedAtomType = classified.resolved?.classifications[0]?.type;
+		const { createEnrichmentEngine } = await import('@0xintuition/atom-enrichment');
+		const { createMockPlugin, createMockArtifact, createMockRequest } = await import('@0xintuition/atom-enrichment/testing');
+		const enriched = await createEnrichmentEngine({
+			plugins: [createMockPlugin({ mockArtifacts: [createMockArtifact()] })],
+		}).enrich(createMockRequest());
+		results.enrichmentStatus = enriched.status;
+		results.enrichedArtifactTypes = enriched.artifacts.map((artifact) => artifact.artifact_type);
 		console.log(JSON.stringify(results));
 	`;
 
@@ -284,6 +342,11 @@ try {
 	assert.equal(nodeResult.sdkUtilsSubpath, 'function');
 	assert.equal(nodeResult.cli, 'function');
 	assert.equal(nodeResult.react, 'function');
+	for (const count of Object.values(nodeResult.atomRuntimeExports)) assert(count > 0);
+	assert.equal(nodeResult.parsedAtomKind, 'url');
+	assert.equal(nodeResult.classifiedAtomType, 'Thing');
+	assert.equal(nodeResult.enrichmentStatus, 'success');
+	assert.deepEqual(nodeResult.enrichedArtifactTypes, ['opengraph']);
 
 	const bunResult = JSON.parse(run('bun', ['--eval', importProgram]).trim());
 	assert.equal(bunResult.musicRecordingCreationProfile, 'music-recording');
@@ -296,6 +359,13 @@ try {
 	assert.equal(bunResult.cli, 'function');
 	assert.equal(bunResult.react, 'function');
 
+	assert.deepEqual(bunResult.iidLadderMint, { iid: 'int:goodreads:book:123', rung: 'handle' });
+	assert.equal(bunResult.pipelineError, true);
+	assert.equal(bunResult.pipelineCircuit, 'ok');
+	assert.deepEqual(bunResult.pipelineBounded, [
+		{ kind: 'success', value: 2 },
+		{ kind: 'success', value: 4 },
+	]);
 	assert.deepEqual(bunResult, nodeResult, 'Node and Bun must agree on every consumer result');
 
 	// Resolve declarations from packed artifacts, without repository aliases or
@@ -306,10 +376,33 @@ try {
 		import { buildIidAnchor } from '@0xintuition/primitives/anchor';
 		import { inspectIntuitionId } from '@0xintuition/iid';
 		import { classificationForIid } from '@0xintuition/iid-registry';
-		import { projectIdentifierLadder } from '@0xintuition/iid-ladder';
+		import { createLadder, projectIdentifierLadder } from '@0xintuition/iid-ladder';
+		import { forEachBounded } from '@0xintuition/pipeline-runtime/concurrency';
+		import { CircuitBreaker, type CircuitSnapshot } from '@0xintuition/pipeline-runtime/circuit-breaker';
+		import { type Outcome, runWithSignal, withTimeout } from '@0xintuition/pipeline-runtime/outcome';
+		const outcomes: ReadonlyArray<Outcome<number>> = await forEachBounded([1], async (value) => value, { concurrency: 1 });
+		const breaker = new CircuitBreaker({ name: 'typed', failureThreshold: 1, resetAfterMs: 10 });
+		const snapshot: CircuitSnapshot = breaker.snapshot();
+		await breaker.execute(async (signal) => signal.aborted, { signal: new AbortController().signal });
+		await runWithSignal(withTimeout(async () => 1, 100));
+		createLadder({ providerLocalHandles: 'mint' }).iidForIdentityRung('goodreads:book', '123');
 		import { multiVaultCreateAtomsWithUrisEncode, eventParseAtomCreated } from '@0xintuition/protocol';
 		import { buildMultiVaultDepositPlan } from '@0xintuition/cli';
 		import { multivaultPrepareDepositTx } from '@0xintuition/sdk/actions';
+		import { parseAtom } from '@0xintuition/atom-parser/parse';
+		import type { ParseResult } from '@0xintuition/atom-parser/types';
+		import { createClientEngine } from '@0xintuition/atom-classification/client';
+		import { createPlainTextPlugin } from '@0xintuition/atom-classification/plugins/plain-text';
+		import { createTypeProfilesPlugin } from '@0xintuition/atom-classification/plugins/type-profiles';
+		import { createEnrichmentEngine, type EnrichmentRunResult } from '@0xintuition/atom-enrichment';
+		import { createMockPlugin, createMockArtifact, createMockRequest } from '@0xintuition/atom-enrichment/testing';
+		const parsed: ParseResult = await parseAtom('hello', { remoteFetch: false });
+		await createClientEngine({ plugins: [createTypeProfilesPlugin(), createPlainTextPlugin()] }).classify({
+			input: parsed.normalizedInput, mode: 'client-only', classificationSessionId: 'typed-smoke',
+		});
+		const enriched: EnrichmentRunResult = await createEnrichmentEngine({
+			plugins: [createMockPlugin({ mockArtifacts: [createMockArtifact()] })],
+		}).enrich(createMockRequest());
 		type CliPlan = ReturnType<typeof buildMultiVaultDepositPlan>;
 		type SdkPlan = Awaited<ReturnType<typeof multivaultPrepareDepositTx>>;
 		import type { Hex } from 'viem';

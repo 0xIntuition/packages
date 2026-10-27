@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, ContractFunctionReturnType } from 'viem';
 
-import { TrustBondingAbi } from '../../contracts';
+import { TrustBondingAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -12,9 +12,9 @@ import type { ReadConfig } from '../../types';
 export async function trustBondingLockedEnd(
 	config: ReadConfig,
 	inputs: {
-		args: ContractFunctionArgs<typeof TrustBondingAbi, 'view', 'locked__end'>;
+		args: ContractFunctionArgs<typeof TrustBondingAbi, 'view' | 'pure', 'locked__end'>;
 	}
-) {
+): Promise<TrustBondingLockedEndResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 
@@ -25,3 +25,9 @@ export async function trustBondingLockedEnd(
 		args,
 	});
 }
+
+export type TrustBondingLockedEndResult = ContractFunctionReturnType<
+	typeof TrustBondingAbi,
+	'view' | 'pure',
+	'locked__end'
+>;

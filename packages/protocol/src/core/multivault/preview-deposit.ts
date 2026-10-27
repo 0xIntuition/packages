@@ -1,10 +1,10 @@
-import type { Account, Address, ContractFunctionArgs } from 'viem';
+import type { Account, Address, ContractFunctionArgs, ContractFunctionReturnType } from 'viem';
 
-import { type MultiVaultAbi, MultiVaultWithRevertsAbi } from '../../contracts';
+import { type MultiVaultAbi, MultiVaultWithRevertsAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 export type PreviewDepositCurveInputs = {
-	args: ContractFunctionArgs<typeof MultiVaultAbi, 'view', 'previewDeposit'>;
+	args: ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'previewDeposit'>;
 	/**
 	 * Optional `from` for the call. MultiVault's preview path does not read `msg.sender`, so this
 	 * changes nothing on chain; it exists only for nodes or middleware that key on a caller.
@@ -26,7 +26,7 @@ export type PreviewDepositCurveInputs = {
 export async function multiVaultPreviewDeposit(
 	config: ReadConfig,
 	inputs: PreviewDepositCurveInputs
-) {
+): Promise<MultiVaultPreviewDepositResult> {
 	const { address, publicClient } = config;
 	const { args, account } = inputs;
 
@@ -38,3 +38,9 @@ export async function multiVaultPreviewDeposit(
 		args,
 	});
 }
+
+export type MultiVaultPreviewDepositResult = ContractFunctionReturnType<
+	typeof MultiVaultWithRevertsAbi,
+	'view' | 'pure',
+	'previewDeposit'
+>;

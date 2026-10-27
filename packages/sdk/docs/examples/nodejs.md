@@ -3,13 +3,8 @@
 Target v1 public-surface example for a backend script.
 
 ```ts
-import {
-  createIntuitionApiClient,
-  getIntuitionApiUrl,
-  getMultiVaultAddressFromChainId,
-  intuitionTestnet,
-  multivaultCreateAndSeedTerm,
-} from '@0xintuition/sdk'
+import { createIntuitionApiClient, getIntuitionApiUrl, multivaultCreateAndSeedTerm } from '@0xintuition/sdk'
+import { getMultiVaultAddressFromChainId, intuitionTestnet } from '@0xintuition/sdk/protocol'
 import { createPublicClient, createWalletClient, http, toHex } from 'viem'
 
 const api = createIntuitionApiClient({

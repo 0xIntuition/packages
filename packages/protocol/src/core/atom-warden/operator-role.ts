@@ -1,8 +1,11 @@
-import { AtomWardenAbi } from '../../contracts';
+import type { ContractFunctionReturnType } from 'viem';
+import { AtomWardenAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /** Reads the `OPERATOR_ROLE` access-control role identifier. */
-export async function atomWardenOperatorRole(config: ReadConfig) {
+export async function atomWardenOperatorRole(
+	config: ReadConfig
+): Promise<AtomWardenOperatorRoleResult> {
 	const { address, publicClient } = config;
 
 	return await publicClient.readContract({
@@ -11,3 +14,9 @@ export async function atomWardenOperatorRole(config: ReadConfig) {
 		functionName: 'OPERATOR_ROLE',
 	});
 }
+
+export type AtomWardenOperatorRoleResult = ContractFunctionReturnType<
+	typeof AtomWardenAbi,
+	'view' | 'pure',
+	'OPERATOR_ROLE'
+>;

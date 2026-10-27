@@ -1,6 +1,6 @@
 {
 	"name": "@0xintuition/curves",
-	"version": "0.1.0",
+	"version": "0.1.0-alpha.1",
 	"description": "Mathematical curve helpers for Intuition bonding curve flows",
 	"private": false,
 	"license": "MIT",
@@ -61,5 +61,8 @@
 	"devDependencies": {
 		"typescript": "^5.9.3",
 		"vitest": "^4.0.16"
+	},
+	"engines": {
+		"node": ">=20"
 	}
 }

@@ -1,14 +1,14 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, ContractFunctionReturnType } from 'viem';
 
-import { TrustAbi } from '../../contracts';
+import { TrustAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 export async function trustBalanceOf(
 	config: ReadConfig,
 	inputs: {
-		args: ContractFunctionArgs<typeof TrustAbi, 'view', 'balanceOf'>;
+		args: ContractFunctionArgs<typeof TrustAbi, 'view' | 'pure', 'balanceOf'>;
 	}
-) {
+): Promise<TrustBalanceOfResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 
@@ -19,3 +19,9 @@ export async function trustBalanceOf(
 		args,
 	});
 }
+
+export type TrustBalanceOfResult = ContractFunctionReturnType<
+	typeof TrustAbi,
+	'view' | 'pure',
+	'balanceOf'
+>;

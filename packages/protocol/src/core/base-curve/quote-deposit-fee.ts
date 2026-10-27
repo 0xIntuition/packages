@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, ContractFunctionReturnType } from 'viem';
 
-import { IBaseCurveAbi } from '../../contracts';
+import { IBaseCurveAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -15,9 +15,9 @@ import type { ReadConfig } from '../../types';
 export async function baseCurveQuoteDepositFee(
 	config: ReadConfig,
 	inputs: {
-		args: ContractFunctionArgs<typeof IBaseCurveAbi, 'view', 'quoteDepositFee'>;
+		args: ContractFunctionArgs<typeof IBaseCurveAbi, 'view' | 'pure', 'quoteDepositFee'>;
 	}
-) {
+): Promise<BaseCurveQuoteDepositFeeResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 
@@ -28,3 +28,9 @@ export async function baseCurveQuoteDepositFee(
 		args,
 	});
 }
+
+export type BaseCurveQuoteDepositFeeResult = ContractFunctionReturnType<
+	typeof IBaseCurveAbi,
+	'view' | 'pure',
+	'quoteDepositFee'
+>;

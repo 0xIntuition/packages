@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -12,7 +12,7 @@ import {
 } from './package-registry.mjs';
 
 function fixture(t) {
-	const root = mkdtempSync(join(tmpdir(), 'intuition-registry-'));
+	const root = mkdtempSync(join(tmpdir(), 'intuition registry-'));
 	t.after(() => rmSync(root, { recursive: true, force: true }));
 	const write = (dir, overrides = {}) => {
 		const path = join(root, 'packages', dir);
@@ -51,12 +51,12 @@ test('rejects colliding package names', (t) => {
 	assert.throws(() => assertRegistryIntegrity(root), /duplicate name/);
 });
 
-test('rejects mismatched exact pins and invalid publish order', (t) => {
+test('rejects mismatched dependency ranges and invalid publish order', (t) => {
 	const { root, write } = fixture(t);
 	write('iid', { dependencies: { '@0xintuition/react': '0.1.0' } });
 	assert.throws(
 		() => assertRegistryIntegrity(root),
-		/exact-pinned[\s\S]*topological publish order/
+		/workspace dependency range[\s\S]*topological publish order/
 	);
 });
 
@@ -124,4 +124,39 @@ test('direct publication rejects instructions nested under an allowed docs direc
 	);
 	assert.equal(result.status, 1, result.stderr);
 	assert.match(result.stderr, /internal agent files in npm tarball: docs\/AGENTS.md/);
+});
+
+test('accepts stable carets and exact prereleases across dependency fields', (t) => {
+	const { root, write } = fixture(t);
+	write('ids', { version: '0.1.0-alpha.1' });
+	write('sdk', {
+		dependencies: { '@0xintuition/protocol': '^1.0.0', '@0xintuition/ids': '0.1.0-alpha.1' },
+		devDependencies: { '@0xintuition/curves': '^1.0.0' },
+	});
+	assert.doesNotThrow(() => assertRegistryIntegrity(root));
+});
+
+test('rejects stable exact pins, open ranges, stale carets and prerelease ranges', (t) => {
+	const { root, write } = fixture(t);
+	for (const range of ['1.0.0', '*', '>=1.0.0', '^0.9.0']) {
+		write('sdk', { dependencies: { '@0xintuition/protocol': range } });
+		assert.throws(() => assertRegistryIntegrity(root), /workspace dependency range/);
+	}
+	write('ids', { version: '0.1.0-alpha.1' });
+	write('sdk', { dependencies: { '@0xintuition/ids': '^0.1.0-alpha.1' } });
+	assert.throws(() => assertRegistryIntegrity(root), /workspace dependency range/);
+});
+
+test('direct CLI validates and reports failures in paths containing spaces', (t) => {
+	const { root, write } = fixture(t);
+	mkdirSync(join(root, 'scripts'));
+	const script = join(root, 'scripts/package-registry.mjs');
+	copyFileSync(fileURLToPath(new URL('./package-registry.mjs', import.meta.url)), script);
+	const valid = spawnSync(process.execPath, [script], { encoding: 'utf8' });
+	assert.equal(valid.status, 0, valid.stderr);
+	assert.match(valid.stdout, /Package registry integrity check passed/);
+	write('forgotten');
+	const invalid = spawnSync(process.execPath, [script], { encoding: 'utf8' });
+	assert.equal(invalid.status, 1);
+	assert.match(invalid.stderr, /forgotten: publishable package is missing/);
 });

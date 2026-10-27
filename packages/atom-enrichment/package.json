@@ -1,0 +1,141 @@
+{
+	"name": "@0xintuition/atom-enrichment",
+	"private": false,
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./types": {
+			"types": "./dist/types.d.ts",
+			"import": "./dist/types.js"
+		},
+		"./handoff": {
+			"types": "./dist/handoff.d.ts",
+			"import": "./dist/handoff.js"
+		},
+		"./provider-data": {
+			"types": "./dist/provider-data.d.ts",
+			"import": "./dist/provider-data.js"
+		},
+		"./plugins": {
+			"types": "./dist/plugins.d.ts",
+			"import": "./dist/plugins.js"
+		},
+		"./providers": {
+			"types": "./dist/plugins/providers/index.d.ts",
+			"import": "./dist/plugins/providers/index.js"
+		},
+		"./presets": {
+			"types": "./dist/presets/index.d.ts",
+			"import": "./dist/presets/index.js"
+		},
+		"./engine": {
+			"types": "./dist/engine.d.ts",
+			"import": "./dist/engine.js"
+		},
+		"./plugin-registry": {
+			"types": "./dist/plugin-registry.d.ts",
+			"import": "./dist/plugin-registry.js"
+		},
+		"./cache": {
+			"types": "./dist/cache.d.ts",
+			"import": "./dist/cache.js"
+		},
+		"./testing": {
+			"types": "./dist/testing/index.d.ts",
+			"import": "./dist/testing/index.js"
+		},
+		"./classifications": {
+			"types": "./dist/classifications/index.d.ts",
+			"import": "./dist/classifications/index.js"
+		},
+		"./classifications/defaults": {
+			"types": "./dist/classifications/defaults.d.ts",
+			"import": "./dist/classifications/defaults.js"
+		},
+		"./classifications/registry": {
+			"types": "./dist/classifications/registry.d.ts",
+			"import": "./dist/classifications/registry.js"
+		},
+		"./classifications/schemas": {
+			"types": "./dist/classifications/schemas.d.ts",
+			"import": "./dist/classifications/schemas.js"
+		},
+		"./provider-external-data": {
+			"types": "./dist/provider-external-data.d.ts",
+			"import": "./dist/provider-external-data.js"
+		},
+		"./provider-plan": {
+			"types": "./dist/provider-plan.d.ts",
+			"import": "./dist/provider-plan.js"
+		},
+		"./slug-aliases": {
+			"types": "./dist/slug-aliases.d.ts",
+			"import": "./dist/slug-aliases.js"
+		},
+		"./extraction": {
+			"types": "./dist/extraction/index.d.ts",
+			"import": "./dist/extraction/index.js"
+		},
+		"./package.json": "./package.json"
+	},
+	"license": "MIT",
+	"scripts": {
+		"build": "node ../../scripts/clean-dist.mjs && tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"dev": "tsc --watch",
+		"pack:dry-run": "bun run build && npm pack --ignore-scripts --dry-run --json",
+		"pack:release": "bun run build && node ../../scripts/pack-release.mjs",
+		"prepack": "bun run build",
+		"prepublishOnly": "bun run build && node ../../scripts/guard-direct-publish.mjs",
+		"test": "bun test __tests__ && bun run test:node",
+		"test:watch": "bun test --watch __tests__",
+		"typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
+		"ci": "biome check",
+		"lint": "biome lint",
+		"format": "biome format",
+		"check": "biome check",
+		"lint:write": "biome lint --write",
+		"format:write": "biome format --write",
+		"check:write": "biome check --write",
+		"check:unsafe:write": "biome check --write --unsafe",
+		"test:node": "bun run build && node --test tests/node-testing.test.mjs"
+	},
+	"dependencies": {
+		"@0xintuition/classifications": "0.1.0-alpha.1",
+		"zod": "4.1.12"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.3.3",
+		"typescript": "^5.9.3"
+	},
+	"version": "0.1.0-alpha.0",
+	"description": "Composable atom enrichment engine, provider adapters, extraction, and cache contracts",
+	"sideEffects": false,
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE",
+		"docs"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/0xIntuition/packages.git",
+		"directory": "packages/atom-enrichment"
+	},
+	"bugs": {
+		"url": "https://github.com/0xIntuition/packages/issues"
+	},
+	"homepage": "https://github.com/0xIntuition/packages/tree/main/packages/atom-enrichment#readme",
+	"publishConfig": {
+		"access": "public",
+		"tag": "alpha"
+	},
+	"engines": {
+		"node": ">=20"
+	}
+}

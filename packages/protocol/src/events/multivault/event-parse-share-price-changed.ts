@@ -1,5 +1,6 @@
+import type { ParseEventLogsReturnType } from 'viem';
 import { type Address, type Hex, type PublicClient, parseEventLogs } from 'viem';
-import { MultiVaultAbi } from '../../contracts';
+import { MultiVaultAbi } from '../../contracts/abis';
 import { receiptLogs } from '../receipt-logs.js';
 
 /**
@@ -14,7 +15,7 @@ export async function eventParseSharePriceChanged(
 	client: PublicClient,
 	hash: Hex,
 	address: Address | undefined = undefined
-) {
+): Promise<EventParseSharePriceChangedResult> {
 	const logs = await receiptLogs(client, hash, address);
 
 	const events = parseEventLogs({
@@ -25,3 +26,9 @@ export async function eventParseSharePriceChanged(
 
 	return events;
 }
+
+export type EventParseSharePriceChangedResult = ParseEventLogsReturnType<
+	typeof MultiVaultAbi,
+	'SharePriceChanged',
+	true
+>;

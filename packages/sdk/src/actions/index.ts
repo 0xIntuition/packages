@@ -4,5 +4,7 @@ export * from './fee-proxy-affiliate-profile';
 export * from './fee-proxy-builders';
 export * from './fee-proxy-claim-refund-if-any';
 export * from './multivault';
+export * from './plans';
 export * from './portfolio';
+export * from './schema';
 export * from './trust-bonding';

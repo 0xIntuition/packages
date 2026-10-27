@@ -1,5 +1,5 @@
 import { describe, it } from 'vitest';
-import { assertEncoderRoundTrip } from './test-helpers';
+import { assertEncoderRoundTrip } from './encoders.test-helpers';
 import * as trustSwapAndBridgeRouter from './trust-swap-and-bridge-router';
 import { trustSwapAndBridgeRouterEncoderManifest } from './trust-swap-and-bridge-router/manifest';
 

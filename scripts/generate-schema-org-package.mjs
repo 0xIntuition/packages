@@ -3,13 +3,14 @@
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const SCHEMA_ORG_CONTEXT = 'https://schema.org/';
 const SCHEMA_ORG_VERSION = '30.0';
 const SCHEMA_ORG_RELEASE_DATE = '2026-03-19';
 const SCHEMA_ORG_SOURCE_URL = 'https://schema.org/version/30.0/schemaorg-current-https.jsonld';
 
-const repoRoot = resolve(new URL('..', import.meta.url).pathname);
+const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const packageRoot = resolve(repoRoot, 'packages/schema-org');
 const vendorRoot = resolve(packageRoot, 'vendor');
 const schemaOrgSnapshotPath = resolve(vendorRoot, `schemaorg-v${SCHEMA_ORG_VERSION}.jsonld`);
@@ -81,7 +82,9 @@ function idValue(value) {
 }
 
 function idsFrom(value) {
-	return asArray(value).map(idValue).filter((id) => typeof id === 'string');
+	return asArray(value)
+		.map(idValue)
+		.filter((id) => typeof id === 'string');
 }
 
 function schemaNameFromId(id) {
@@ -201,7 +204,9 @@ async function fetchSchemaOrgDocument() {
 	const response = await fetch(SCHEMA_ORG_SOURCE_URL);
 
 	if (!response.ok) {
-		throw new Error(`Failed to fetch ${SCHEMA_ORG_SOURCE_URL}: ${response.status} ${response.statusText}`);
+		throw new Error(
+			`Failed to fetch ${SCHEMA_ORG_SOURCE_URL}: ${response.status} ${response.statusText}`
+		);
 	}
 
 	return response.json();
@@ -323,7 +328,10 @@ for (const typeSpec of typeSpecs) {
 	writeFileSync(resolve(generatedTypesRoot, `${typeSpec.name}.ts`), moduleSourceForType(typeSpec));
 }
 
-writeFileSync(resolve(generatedRoot, 'metadata.ts'), metadataSource({ propertyCount, typeCount: typeSpecs.length }));
+writeFileSync(
+	resolve(generatedRoot, 'metadata.ts'),
+	metadataSource({ propertyCount, typeCount: typeSpecs.length })
+);
 writeFileSync(resolve(generatedRoot, 'index.ts'), indexSource(typeSpecs));
 formatGeneratedFiles();
 

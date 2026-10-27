@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, Hex } from 'viem';
 
-import { type MultiVaultAbi, MultiVaultWithRevertsAbi } from '../../contracts';
+import { type MultiVaultAbi, MultiVaultWithRevertsAbi } from '../../contracts/abis';
 import type { WriteConfig } from '../../types';
 
 export type CreateTriplesForInputs = {
@@ -20,7 +20,7 @@ export type CreateTriplesForInputs = {
 export async function multiVaultCreateTriplesFor(
 	config: WriteConfig,
 	inputs: CreateTriplesForInputs
-) {
+): Promise<MultiVaultCreateTriplesForResult> {
 	const { address, walletClient, publicClient } = config;
 	const { args, value } = inputs;
 
@@ -35,3 +35,5 @@ export async function multiVaultCreateTriplesFor(
 
 	return await walletClient.writeContract(request);
 }
+
+export type MultiVaultCreateTriplesForResult = Hex;

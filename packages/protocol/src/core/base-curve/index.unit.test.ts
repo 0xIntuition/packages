@@ -7,7 +7,7 @@ import {
 } from 'viem';
 import { describe, expect, it } from 'vitest';
 
-import { DynamicFeeFlatPriceCurveAbi, IBaseCurveAbi } from '../../contracts';
+import { DynamicFeeFlatPriceCurveAbi, IBaseCurveAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 import * as dynamicFeeCurve from '../dynamic-fee-flat-price-curve';
 import * as baseCurve from './index';

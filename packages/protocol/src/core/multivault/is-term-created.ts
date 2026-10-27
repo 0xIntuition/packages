@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, ContractFunctionReturnType } from 'viem';
 
-import { MultiVaultAbi } from '../../contracts';
+import { MultiVaultAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -12,9 +12,9 @@ import type { ReadConfig } from '../../types';
 export async function multiVaultIsTermCreated(
 	config: ReadConfig,
 	inputs: {
-		args: ContractFunctionArgs<typeof MultiVaultAbi, 'view', 'isTermCreated'>;
+		args: ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'isTermCreated'>;
 	}
-) {
+): Promise<MultiVaultIsTermCreatedResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 
@@ -25,3 +25,9 @@ export async function multiVaultIsTermCreated(
 		args,
 	});
 }
+
+export type MultiVaultIsTermCreatedResult = ContractFunctionReturnType<
+	typeof MultiVaultAbi,
+	'view' | 'pure',
+	'isTermCreated'
+>;

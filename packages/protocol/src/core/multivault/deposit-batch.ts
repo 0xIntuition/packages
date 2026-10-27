@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, Hex } from 'viem';
 
-import { type MultiVaultAbi, MultiVaultWithRevertsAbi } from '../../contracts';
+import { type MultiVaultAbi, MultiVaultWithRevertsAbi } from '../../contracts/abis';
 import type { WriteConfig } from '../../types';
 
 export type DepositBatchInputs = {
@@ -14,7 +14,10 @@ export type DepositBatchInputs = {
  * @param inputs Function args and call value.
  * @returns Transaction hash from the wallet client.
  */
-export async function multiVaultDepositBatch(config: WriteConfig, inputs: DepositBatchInputs) {
+export async function multiVaultDepositBatch(
+	config: WriteConfig,
+	inputs: DepositBatchInputs
+): Promise<MultiVaultDepositBatchResult> {
 	const { address, walletClient, publicClient } = config;
 	const { args, value } = inputs;
 
@@ -29,3 +32,5 @@ export async function multiVaultDepositBatch(config: WriteConfig, inputs: Deposi
 
 	return await walletClient.writeContract(request);
 }
+
+export type MultiVaultDepositBatchResult = Hex;
