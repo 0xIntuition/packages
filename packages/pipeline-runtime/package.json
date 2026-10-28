@@ -1,6 +1,6 @@
 {
 	"name": "@0xintuition/pipeline-runtime",
-	"version": "0.1.0-alpha.0",
+	"version": "0.1.0-alpha.1",
 	"description": "Effect-free Promise utilities, cancellation, provider observation, and provider host policies",
 	"private": false,
 	"license": "MIT",

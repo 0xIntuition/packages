@@ -57,7 +57,7 @@
 	"dependencies": {
 		"multiformats": "^13.3.2",
 		"viem": "^2.23.2",
-		"@0xintuition/iid": "0.1.0-alpha.0"
+		"@0xintuition/iid": "0.1.0-alpha.1"
 	},
 	"devDependencies": {
 		"typescript": "^5.9.3"

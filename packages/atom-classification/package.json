@@ -222,13 +222,13 @@
 		"@0xintuition/atom-enrichment": "0.1.0-alpha.1",
 		"@0xintuition/atom-parser": "0.1.0-alpha.1",
 		"@0xintuition/classifications": "0.1.0-alpha.1",
-		"@0xintuition/iid": "0.1.0-alpha.0",
+		"@0xintuition/iid": "0.1.0-alpha.1",
 		"@0xintuition/iid-ladder": "0.1.0-alpha.1",
-		"@0xintuition/iid-registry": "0.1.0-alpha.0",
-		"@0xintuition/pipeline-runtime": "0.1.0-alpha.0",
+		"@0xintuition/iid-registry": "0.1.0-alpha.1",
+		"@0xintuition/pipeline-runtime": "0.1.0-alpha.1",
 		"@0xintuition/predicates": "0.1.0-alpha.1",
 		"@0xintuition/primitives": "0.1.0-alpha.1",
-		"@0xintuition/schema-org": "0.1.0-alpha.0",
+		"@0xintuition/schema-org": "0.1.0-alpha.1",
 		"zod": "4.1.12"
 	},
 	"devDependencies": {

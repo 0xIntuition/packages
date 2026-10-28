@@ -15,7 +15,7 @@ Deterministic, plugin-first atom classification engine with explicit runtime mod
 ## Installation and runtime
 
 ```sh
-bun add @0xintuition/atom-classification@0.1.0-alpha.0
+bun add @0xintuition/atom-classification@0.1.0-alpha.1
 ```
 
 The package exports compiled ESM and TypeScript declarations. Use Node.js 20+

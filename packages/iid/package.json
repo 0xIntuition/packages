@@ -1,6 +1,6 @@
 {
 	"name": "@0xintuition/iid",
-	"version": "0.1.0-alpha.0",
+	"version": "0.1.0-alpha.1",
 	"description": "Intuition Identifier (IID) reference implementation: deterministic entity identifiers, scheme canonicalizers, NORM-1, gen1 derivation, and the declarative identity-ladder engine",
 	"private": false,
 	"license": "MIT",
@@ -66,7 +66,7 @@
 		"viem": "^2.0.0"
 	},
 	"devDependencies": {
-		"@0xintuition/iid-spec": "0.1.0-alpha.0",
+		"@0xintuition/iid-spec": "0.1.0-alpha.1",
 		"typescript": "^5.9.3",
 		"viem": "^2.31.4",
 		"vitest": "^4.0.16"

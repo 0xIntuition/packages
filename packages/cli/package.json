@@ -1,6 +1,6 @@
 {
 	"name": "@0xintuition/cli",
-	"version": "0.1.0-alpha.0",
+	"version": "0.1.0-alpha.1",
 	"description": "Agent-oriented calldata encoders and the intuition executable for Intuition protocol workflows; action envelope builders live in @0xintuition/sdk.",
 	"private": false,
 	"license": "MIT",
@@ -78,8 +78,8 @@
 	},
 	"dependencies": {
 		"viem": "^2.31.4",
-		"@0xintuition/sdk": "^4.0.0",
-		"@0xintuition/protocol": "^4.0.0",
+		"@0xintuition/sdk": "4.0.0-alpha.0",
+		"@0xintuition/protocol": "4.0.0-alpha.0",
 		"@0xintuition/periphery": "0.1.0-alpha.1"
 	},
 	"devDependencies": {

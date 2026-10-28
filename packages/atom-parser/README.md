@@ -5,7 +5,7 @@ Classifies and normalizes arbitrary string inputs into structured types. Detects
 ## Installation
 
 ```bash
-bun add @0xintuition/atom-parser@0.1.0-alpha.0
+bun add @0xintuition/atom-parser@0.1.0-alpha.1
 ```
 
 The package ships compiled ESM and TypeScript declarations. It uses standard Fetch and Web Streams APIs for remote inspection; Node.js 22+ and Bun are supported. Local detection can run without network access by passing `{ remoteFetch: false }`.

@@ -1,6 +1,6 @@
 {
 	"name": "@0xintuition/schema-org",
-	"version": "0.1.0-alpha.0",
+	"version": "0.1.0-alpha.1",
 	"description": "Pinned schema.org type and property vocabulary for Intuition data packages",
 	"private": false,
 	"license": "MIT",

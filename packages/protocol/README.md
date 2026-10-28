@@ -57,7 +57,7 @@ Core deployment ownership in this release:
 
 ## Candidate compatibility
 
-This is the `4.0.0` candidate. New v1.1.0 functions require a matching contract
+This is the `4.0.0-alpha.0` candidate. New v1.1.0 functions require a matching contract
 deployment; existing mainnet addresses may still run the older implementation.
 Core artifacts are verified against `@0xintuition/contracts-v2@1.1.0-alpha.1`.
 See the [contract artifact provenance](https://github.com/0xIntuition/packages/blob/main/docs/contract-artifacts.md).

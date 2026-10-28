@@ -1,6 +1,6 @@
 {
 	"name": "@0xintuition/protocol",
-	"version": "4.0.0",
+	"version": "4.0.0-alpha.0",
 	"description": "Intuition protocol contract ABIs and interaction helpers",
 	"private": false,
 	"license": "MIT",

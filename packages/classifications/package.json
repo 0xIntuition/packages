@@ -75,13 +75,13 @@
 	},
 	"devDependencies": {
 		"@0xintuition/predicates": "0.1.0-alpha.1",
-		"@0xintuition/schema-org": "0.1.0-alpha.0",
+		"@0xintuition/schema-org": "0.1.0-alpha.1",
 		"typescript": "^5.9.3",
 		"viem": "^2.31.4",
 		"vitest": "^4.0.16"
 	},
 	"dependencies": {
-		"@0xintuition/iid": "0.1.0-alpha.0"
+		"@0xintuition/iid": "0.1.0-alpha.1"
 	},
 	"peerDependencies": {
 		"viem": "^2.0.0"

@@ -1,6 +1,6 @@
 {
 	"name": "@0xintuition/iid-registry",
-	"version": "0.1.0-alpha.0",
+	"version": "0.1.0-alpha.1",
 	"description": "Pure scheme-to-classification and scheme-to-provider resolution for Intuition Identifiers (IIDs): the semantic bridge between the IID grammar and Intuition classifications",
 	"private": false,
 	"license": "MIT",
@@ -65,14 +65,14 @@
 		"viem": "^2.0.0"
 	},
 	"devDependencies": {
-		"@0xintuition/schema-org": "0.1.0-alpha.0",
+		"@0xintuition/schema-org": "0.1.0-alpha.1",
 		"typescript": "^5.9.3",
 		"viem": "^2.31.4",
 		"vitest": "^4.0.16"
 	},
 	"dependencies": {
 		"@0xintuition/classifications": "0.1.0-alpha.1",
-		"@0xintuition/iid": "0.1.0-alpha.0"
+		"@0xintuition/iid": "0.1.0-alpha.1"
 	},
 	"engines": {
 		"node": ">=20"

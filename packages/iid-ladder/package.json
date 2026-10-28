@@ -61,10 +61,10 @@
 		"check:unsafe:write": "biome check --write --unsafe"
 	},
 	"dependencies": {
-		"@0xintuition/iid": "0.1.0-alpha.0"
+		"@0xintuition/iid": "0.1.0-alpha.1"
 	},
 	"devDependencies": {
-		"@0xintuition/iid-registry": "0.1.0-alpha.0",
+		"@0xintuition/iid-registry": "0.1.0-alpha.1",
 		"typescript": "^5.9.3",
 		"vitest": "^4.0.16"
 	},
