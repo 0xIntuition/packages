@@ -3,12 +3,12 @@
 	"packages": [
 		{
 			"directory": "iid-spec",
-			"version": "0.1.0-alpha.1",
+			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
 		},
 		{
 			"directory": "iid",
-			"version": "0.1.0-alpha.1",
+			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
 		},
 		{
@@ -38,22 +38,22 @@
 		},
 		{
 			"directory": "pipeline-runtime",
-			"version": "0.1.0-alpha.1",
+			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
 		},
 		{
 			"directory": "atom-parser",
-			"version": "0.1.0-alpha.1",
+			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
 		},
 		{
 			"directory": "iid-registry",
-			"version": "0.1.0-alpha.1",
+			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
 		},
 		{
 			"directory": "iid-ladder",
-			"version": "0.1.0-alpha.1",
+			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
 		},
 		{
@@ -68,22 +68,22 @@
 		},
 		{
 			"directory": "protocol",
-			"version": "4.0.0-alpha.0",
+			"version": "3.0.0-alpha.0",
 			"tag": "alpha"
 		},
 		{
 			"directory": "atom-enrichment",
-			"version": "0.1.0-alpha.1",
+			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
 		},
 		{
 			"directory": "atom-classification",
-			"version": "0.1.0-alpha.1",
+			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
 		},
 		{
 			"directory": "atom-runtime",
-			"version": "0.1.0-alpha.1",
+			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
 		},
 		{
@@ -98,7 +98,7 @@
 		},
 		{
 			"directory": "cli",
-			"version": "0.1.0-alpha.1",
+			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
 		},
 		{

@@ -19,7 +19,7 @@ const packageJson = JSON.parse(
 
 describe('@0xintuition/protocol package manifest', () => {
 	it('publishes the release candidate on alpha without moving latest', () => {
-		expect(packageJson.version).toBe('4.0.0-alpha.0');
+		expect(packageJson.version).toBe('3.0.0-alpha.0');
 		expect(packageJson.publishConfig).toEqual({ access: 'public', tag: 'alpha' });
 	});
 

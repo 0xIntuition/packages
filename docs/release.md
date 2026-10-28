@@ -25,11 +25,12 @@ The public package set has two release tracks:
 | Package family | Current version line | Intended dist-tags |
 | --- | --- | --- |
 | Fresh public packages | `0.1.0-alpha.*` | Publish to `alpha`; inspect dist-tags after first publication and record any registry-created `latest` tag |
-| `@0xintuition/protocol`, `@0xintuition/sdk` | `4.x` | Publish this candidate to `alpha`; leave the existing `latest` line unchanged until a release owner explicitly promotes it |
+| `@0xintuition/protocol` (`3.x`), `@0xintuition/sdk` (`4.x`) | `3.0.0-alpha.*` / `4.0.0-alpha.*` | Publish this candidate to `alpha`; leave the existing `latest` line unchanged until a release owner explicitly promotes it |
 
 For this candidate, every entry in `release-plan.json` uses `alpha`, with
-protocol/SDK at `4.0.0-alpha.0` and all `0.1.0-alpha.*` packages at
-`0.1.0-alpha.1`.
+`@0xintuition/protocol` at `3.0.0-alpha.0`, `@0xintuition/sdk` at `4.0.0-alpha.0`,
+the 9 already-published `0.1.0-alpha.0` packages bumped to `0.1.0-alpha.1`, and
+the 10 never-published packages starting at `0.1.0-alpha.0`.
 
 Registry state recorded on 2026-10-22: deployments, curves, periphery, ids,
 classifications, predicates, primitives, react, and schema-org each have
@@ -327,12 +328,14 @@ Prefer deprecation and superseding releases over unpublish.
 
 ## Candidate version decision
 
-This train uses `0.1.0-alpha.1` across all `0.1.0-alpha.*` workspace packages
-and `4.0.0-alpha.0` for `@0xintuition/protocol` and `@0xintuition/sdk`.
+This train follows strict per-package SemVer: the 10 brand-new packages start at
+`0.1.0-alpha.0`, the 9 packages already published at `0.1.0-alpha.0` advance to
+`0.1.0-alpha.1`, `@0xintuition/protocol` advances from `2.0.3` to `3.0.0-alpha.0`,
+and `@0xintuition/sdk` advances from `3.0.1` to `4.0.0-alpha.0`.
 Every candidate includes its `-alpha` prerelease suffix; all dependent pins and
 `release-plan.json` move together. Registry validation reads manifest versions
 directly, so no second hard-coded version list exists. All candidates use
-the `alpha` tag, and promoting to stable (`0.1.0` / `4.0.0` on `latest`)
+the `alpha` tag, and promoting to stable (`0.1.0` / `3.0.0` / `4.0.0` on `latest`)
 requires a separate release decision.
 Check registry availability before publishing and never overwrite an existing
 immutable version: `bun run release:registry` is the live registry preflight, it is not
@@ -342,7 +345,7 @@ part of CI, and it must pass on the exact revision being published.
 
 `@0xintuition/atom-parser`, `@0xintuition/atom-classification`, and
 `@0xintuition/atom-enrichment` are reconciled with the application lineage and
-included in `release-plan.json` at `0.1.0-alpha.1`. The Promise-based composition
-root, `@0xintuition/atom-runtime`, joins at `0.1.0-alpha.1`. Publish prerequisites
+included in `release-plan.json` at `0.1.0-alpha.0`. The Promise-based composition
+root, `@0xintuition/atom-runtime`, joins at `0.1.0-alpha.0`. Publish prerequisites
 first, then parser, enrichment, classification, and runtime in registry order.
 Publication remains subject to the release gates above.

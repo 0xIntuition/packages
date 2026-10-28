@@ -47,18 +47,18 @@
 		"prepublishOnly": "bun run build && node ../../scripts/guard-direct-publish.mjs"
 	},
 	"dependencies": {
-		"@0xintuition/atom-classification": "0.1.0-alpha.1",
-		"@0xintuition/atom-enrichment": "0.1.0-alpha.1",
-		"@0xintuition/atom-parser": "0.1.0-alpha.1",
-		"@0xintuition/pipeline-runtime": "0.1.0-alpha.1",
-		"@0xintuition/iid-registry": "0.1.0-alpha.1",
+		"@0xintuition/atom-classification": "0.1.0-alpha.0",
+		"@0xintuition/atom-enrichment": "0.1.0-alpha.0",
+		"@0xintuition/atom-parser": "0.1.0-alpha.0",
+		"@0xintuition/pipeline-runtime": "0.1.0-alpha.0",
+		"@0xintuition/iid-registry": "0.1.0-alpha.0",
 		"zod": "4.1.12"
 	},
 	"devDependencies": {
 		"typescript": "^5.9.3",
 		"@types/bun": "^1.3.3"
 	},
-	"version": "0.1.0-alpha.1",
+	"version": "0.1.0-alpha.0",
 	"description": "Promise-based composition root for atom classification and enrichment",
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",

@@ -21,7 +21,7 @@
 		"check:unsafe:write": "biome check --write --unsafe"
 	},
 	"dependencies": {
-		"@0xintuition/atom-classification": "0.1.0-alpha.1"
+		"@0xintuition/atom-classification": "0.1.0-alpha.0"
 	},
 	"devDependencies": {
 		"typescript": "^5.9.3",

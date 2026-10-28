@@ -81,7 +81,7 @@
 		"vitest": "^4.0.16"
 	},
 	"dependencies": {
-		"@0xintuition/iid": "0.1.0-alpha.1"
+		"@0xintuition/iid": "0.1.0-alpha.0"
 	},
 	"peerDependencies": {
 		"viem": "^2.0.0"

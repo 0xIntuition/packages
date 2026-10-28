@@ -3,7 +3,7 @@
 Composable enrichment engine, provider adapters, field extraction, and cache contracts for classified atoms. Published as typed ESM for Node.js 20+ and Bun.
 
 ```sh
-npm install @0xintuition/atom-enrichment@0.1.0-alpha.1
+npm install @0xintuition/atom-enrichment@0.1.0-alpha.0
 ```
 
 ```ts

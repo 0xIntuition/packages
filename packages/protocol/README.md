@@ -57,7 +57,7 @@ Core deployment ownership in this release:
 
 ## Candidate compatibility
 
-This is the `4.0.0-alpha.0` candidate. New v1.1.0 functions require a matching contract
+This is the `3.0.0-alpha.0` candidate. New v1.1.0 functions require a matching contract
 deployment; existing mainnet addresses may still run the older implementation.
 Core artifacts are verified against `@0xintuition/contracts-v2@1.1.0-alpha.1`.
 See the [contract artifact provenance](https://github.com/0xIntuition/packages/blob/main/docs/contract-artifacts.md).
@@ -1944,7 +1944,7 @@ MIT License - see the [main repository](https://github.com/0xIntuition/packages)
 
 `@0xintuition/deployments/bytecode` is the canonical bytecode source.
 
-## Migration to 4.0.0
+## Migration to 3.0.0
 
 Import bytecode from `@0xintuition/deployments/bytecode` (or the explicit
 `@0xintuition/protocol/contracts` compatibility subpath). The root no longer

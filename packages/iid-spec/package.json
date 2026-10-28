@@ -1,6 +1,6 @@
 {
 	"name": "@0xintuition/iid-spec",
-	"version": "0.1.0-alpha.1",
+	"version": "0.1.0-alpha.0",
 	"description": "The Intuition ID (IID) specification: a deterministic, canonical identifier for real-world entities, with normative per-scheme rules and machine-readable conformance vectors",
 	"private": false,
 	"license": "MIT",
