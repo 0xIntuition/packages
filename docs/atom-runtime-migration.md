@@ -6,9 +6,9 @@ This migration reconciles the reusable atom packages with the application lineag
 
 | Package | Initial public version | Public library owns | Core owns |
 | --- | --- | --- | --- |
-| `@0xintuition/atom-parser` | `0.1.0-alpha.1` | Input detection, normalization, optional remote inspection, parser types | Configured fetch policy and worker integration |
-| `@0xintuition/atom-classification` | `0.1.0-alpha.1` | Classification engine, plugin contracts, reusable classifiers/resolvers, configurable presets | Enabled plugins, application fallback policy, injected identity capabilities and service wiring |
-| `@0xintuition/atom-enrichment` | `0.1.0-alpha.1` | Enrichment engine, provider adapters, extraction, artifact validation, cache interfaces and reusable adapters | Credentials, cache provisioning/configuration, queue scheduling, retries, persistence and service wiring |
+| `@0xintuition/atom-parser` | `0.1.0-alpha.0` | Input detection, normalization, optional remote inspection, parser types | Configured fetch policy and worker integration |
+| `@0xintuition/atom-classification` | `0.1.0-alpha.0` | Classification engine, plugin contracts, reusable classifiers/resolvers, configurable presets | Enabled plugins, application fallback policy, injected identity capabilities and service wiring |
+| `@0xintuition/atom-enrichment` | `0.1.0-alpha.0` | Enrichment engine, provider adapters, extraction, artifact validation, cache interfaces and reusable adapters | Credentials, cache provisioning/configuration, queue scheduling, retries, persistence and service wiring |
 | `@0xintuition/atom-runtime` | `0.1.0-alpha.0` | Shared configuration, preset composition, cache setup, fingerprints and memoized engines | Persistence, scheduling and application lifecycle |
 
 `@0xintuition/classifications@0.1.0-alpha.1` remains the canonical entity specification dependency of enrichment. It depends on `@0xintuition/iid@0.1.0-alpha.0`. The enrichment artifact registry validates provider payloads and does not replace those specifications. `@0xintuition/iid-registry` remains responsible for IID provider planning. The extraction does not activate production IID adapters or redesign the taxonomy.
@@ -28,15 +28,15 @@ Before publication, temporary Core root overrides may point to absolute `file:` 
 ## Publication and merge order
 
 1. After review and explicit authorization to push/open PRs, prepare the packages and matching Core changes as coordinated reviews. Merge the approved packages implementation and release metadata first, keeping Core's consumption change unmerged while registry versions are unavailable.
-2. With separate release authorization, publish the prerequisite package train using the repository's reviewed release process and `release-plan.json` order. IID must be available before classifications, and classifications before atom-enrichment. Publish parser, classification and enrichment as `0.1.0-alpha.1`, then atom-runtime as `0.1.0-alpha.0` on the `alpha` tag. An already published immutable version must not be overwritten; use a new version and update dependents if its content differs from the reviewed candidate.
+2. With separate release authorization, publish the prerequisite package train using the repository's reviewed release process and `release-plan.json` order. IID must be available before classifications, and classifications before atom-enrichment. Publish parser, classification, enrichment, and atom-runtime as `0.1.0-alpha.0` on the `alpha` tag. An already published immutable version must not be overwritten; use a new version and update dependents if its content differs from the reviewed candidate.
 3. Verify exact registry versions before finalizing Core's dependency resolution:
 
    ```sh
    npm view @0xintuition/iid@0.1.0-alpha.0 version
    npm view @0xintuition/classifications@0.1.0-alpha.1 version
-   npm view @0xintuition/atom-parser@0.1.0-alpha.1 version
-   npm view @0xintuition/atom-classification@0.1.0-alpha.1 version
-   npm view @0xintuition/atom-enrichment@0.1.0-alpha.1 version
+   npm view @0xintuition/atom-parser@0.1.0-alpha.0 version
+   npm view @0xintuition/atom-classification@0.1.0-alpha.0 version
+   npm view @0xintuition/atom-enrichment@0.1.0-alpha.0 version
    npm view @0xintuition/ids@0.1.0-alpha.1 version
    ```
 

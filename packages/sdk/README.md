@@ -23,7 +23,7 @@ Out of scope for v1:
 
 ## Status
 
-This is the `4.0.0` candidate, published to `alpha` only after release gates pass. It contains selected shared types, deterministic utilities, and higher-level action helpers. The v1 design terminology below describes the integration API design, not the npm major version. Contract artifacts are pending authoritative publication; new functions require matching deployments.
+This is the `4.0.0-alpha.0` candidate, published to `alpha` only after release gates pass. It contains selected shared types, deterministic utilities, and higher-level action helpers. The v1 design terminology below describes the integration API design, not the npm major version. Contract artifacts are pending authoritative publication; new functions require matching deployments.
 
 Import guidance:
 - [`./docs/migration.md`](./docs/migration.md)

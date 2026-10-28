@@ -26,7 +26,7 @@ If a conformance vector fails against a released implementation:
 
 ## Application-local provider handles (ENG-17075)
 
-`@0xintuition/iid-ladder` 0.1.0-alpha.1 adds an opt-in
+`@0xintuition/iid-ladder` 0.1.0-alpha.0 adds an opt-in
 `providerLocalHandles: 'mint'` application policy to preserve historical provider
 identities from the app at `7fc0c82b4`. Its default remains `'reject'`, consistent
 with §9's closed registry; this is not a deviation in `@0xintuition/iid` and does

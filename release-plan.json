@@ -1,5 +1,5 @@
 {
-	"description": "Candidate versions in dependency order, including the reconciled Promise-based atom packages. Validate the release using docs/release.md. schema-org is unchanged and already published.",
+	"description": "Candidate alpha versions in dependency order across all 21 public packages. Validate the release using docs/release.md.",
 	"packages": [
 		{
 			"directory": "iid-spec",
@@ -27,6 +27,11 @@
 			"tag": "alpha"
 		},
 		{
+			"directory": "schema-org",
+			"version": "0.1.0-alpha.1",
+			"tag": "alpha"
+		},
+		{
 			"directory": "classifications",
 			"version": "0.1.0-alpha.1",
 			"tag": "alpha"
@@ -38,7 +43,7 @@
 		},
 		{
 			"directory": "atom-parser",
-			"version": "0.1.0-alpha.1",
+			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
 		},
 		{
@@ -48,7 +53,7 @@
 		},
 		{
 			"directory": "iid-ladder",
-			"version": "0.1.0-alpha.1",
+			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
 		},
 		{
@@ -63,17 +68,17 @@
 		},
 		{
 			"directory": "protocol",
-			"version": "4.0.0",
+			"version": "3.0.0-alpha.0",
 			"tag": "alpha"
 		},
 		{
 			"directory": "atom-enrichment",
-			"version": "0.1.0-alpha.1",
+			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
 		},
 		{
 			"directory": "atom-classification",
-			"version": "0.1.0-alpha.1",
+			"version": "0.1.0-alpha.0",
 			"tag": "alpha"
 		},
 		{
@@ -88,7 +93,7 @@
 		},
 		{
 			"directory": "sdk",
-			"version": "4.0.0",
+			"version": "4.0.0-alpha.0",
 			"tag": "alpha"
 		},
 		{

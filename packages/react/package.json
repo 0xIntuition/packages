@@ -67,7 +67,7 @@
 		"react": ">=18",
 		"viem": "^2.0.0",
 		"wagmi": ">=2",
-		"@0xintuition/protocol": "^4.0.0",
+		"@0xintuition/protocol": "3.0.0-alpha.0",
 		"@0xintuition/deployments": "0.1.0-alpha.1"
 	},
 	"devDependencies": {
@@ -81,7 +81,7 @@
 		"react-dom": "19.1.0",
 		"viem": "^2.31.4",
 		"wagmi": "^2.15.4",
-		"@0xintuition/protocol": "^4.0.0",
+		"@0xintuition/protocol": "3.0.0-alpha.0",
 		"@0xintuition/deployments": "0.1.0-alpha.1"
 	},
 	"engines": {

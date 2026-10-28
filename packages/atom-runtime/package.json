@@ -47,9 +47,9 @@
 		"prepublishOnly": "bun run build && node ../../scripts/guard-direct-publish.mjs"
 	},
 	"dependencies": {
-		"@0xintuition/atom-classification": "0.1.0-alpha.1",
-		"@0xintuition/atom-enrichment": "0.1.0-alpha.1",
-		"@0xintuition/atom-parser": "0.1.0-alpha.1",
+		"@0xintuition/atom-classification": "0.1.0-alpha.0",
+		"@0xintuition/atom-enrichment": "0.1.0-alpha.0",
+		"@0xintuition/atom-parser": "0.1.0-alpha.0",
 		"@0xintuition/pipeline-runtime": "0.1.0-alpha.0",
 		"@0xintuition/iid-registry": "0.1.0-alpha.0",
 		"zod": "4.1.12"
