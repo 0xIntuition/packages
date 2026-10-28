@@ -1,3 +1,4 @@
+import type { IdentityClass } from '@0xintuition/iid';
 import type { Hex } from 'viem';
 
 /**
@@ -49,6 +50,72 @@ export interface CounterTripleBlueprint {
 	predicateId: Hex;
 	/** The atom ID of the object (same as the original triple). */
 	objectId: Hex;
+}
+
+/**
+ * Representation profile of an IID atom (IID spec §7): `p0` bare anchor,
+ * `p1` identity context, `p2` enriched.
+ */
+export type AnchorProfile = 'p0' | 'p1' | 'p2';
+
+/** Caller-supplied URI manifest limits (mirror `getAtomUriConfig` live values). */
+export interface UriLimits {
+	readonly maxUris: number;
+	readonly maxUriBytes: number;
+}
+
+/** Options for the IID anchor builder. */
+export interface IidAnchorOptions {
+	/**
+	 * Authoritative candidate IID; validated without re-deriving it from values.
+	 * The profile then follows the candidate's eligibility (`p0` when eligible,
+	 * otherwise `p1`), as in the reference; `profile` is not consulted.
+	 */
+	readonly candidateIid?: string;
+	/**
+	 * Requested profile. Default: the strongest legal one (`p0` when the
+	 * derived identifier is anchor-eligible, otherwise `p1`). Requesting
+	 * `p0` for an ineligible identifier is a structured error. Not consulted
+	 * when `candidateIid` is set.
+	 */
+	readonly profile?: AnchorProfile;
+	/** Ordered URI context manifest (deduplicated, order-preserving). */
+	readonly contextUris?: readonly string[];
+	/** Live protocol limits; defaults to the offline policy floor. */
+	readonly uriLimits?: UriLimits;
+}
+
+/**
+ * A canonical IID atom anchor: on-chain-ready atom bytes derived from a
+ * classification's identity ladder, plus read-side hints.
+ *
+ * URI context never changes `data`, `dataHex`, or `id`.
+ */
+export interface AtomAnchor {
+	/** Classification slug resolved for the identifier. */
+	classification: string;
+	/** Representation profile the data was serialized at. */
+	profile: AnchorProfile;
+	/** The derived canonical Intuition ID, or null for a fallback envelope. */
+	iid: string | null;
+	/** IID scheme that fired, or null when no usable identifier was derived. */
+	scheme: string | null;
+	/** Identity class of that scheme (A/B/C/D), or null for a fallback envelope. */
+	class: IdentityClass | null;
+	/** Stable gen1 rung tag when a derived rung fired. */
+	tag?: number;
+	/** Exact atom data string (bare IID at p0; deterministic JSON at p1/p2). */
+	data: string;
+	/** UTF-8 bytes of `data` as hex. */
+	dataHex: Hex;
+	/** Deterministic atom ID over `data`. */
+	id: Hex;
+	/** Normalized, ordered, deduplicated URI context manifest. */
+	contextUris: readonly string[];
+	/** Ordered enrichment provider capability plan for the identifier. */
+	providerPlan: readonly string[];
+	/** The original field values used to derive the identifier. */
+	values: Readonly<Record<string, unknown>>;
 }
 
 /**

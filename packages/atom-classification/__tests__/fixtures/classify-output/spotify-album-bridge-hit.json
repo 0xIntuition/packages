@@ -1,0 +1,70 @@
+{
+	"name": "spotify-album-bridge-hit",
+	"url": "https://open.spotify.com/album/4uLU6hMCjMI75M1A2tKUQC",
+	"atom": {
+		"schemaType": "MusicAlbum",
+		"category": "music-album",
+		"title": "Fixture spotify-album",
+		"canonicalId": "int:mbid:release-group:e5b96d62-1414-337b-b0c3-28a6c5d5b65a",
+		"sameAs": [
+			"https://open.spotify.com/album/4uLU6hMCjMI75M1A2tKUQC",
+			"https://www.wikidata.org/wiki/Q189729",
+			"https://musicbrainz.org/release-group/e5b96d62-1414-337b-b0c3-28a6c5d5b65a"
+		],
+		"hints": {
+			"identifiers": {
+				"spotifyAlbumId": "4uLU6hMCjMI75M1A2tKUQC",
+				"wd": "Q189729",
+				"mbid": "release-group:e5b96d62-1414-337b-b0c3-28a6c5d5b65a",
+				"wikidata": "Q189729"
+			},
+			"providerCanonicalIds": ["spotify:album:4uLU6hMCjMI75M1A2tKUQC"],
+			"identifierSet": [
+				"int:mbid:release-group:e5b96d62-1414-337b-b0c3-28a6c5d5b65a",
+				"int:wd:Q189729",
+				"int:spotify:album:4uLU6hMCjMI75M1A2tKUQC"
+			]
+		},
+		"metadata": {
+			"identityBridge": {
+				"property": "P2205",
+				"providerCanonicalId": "spotify:album:4uLU6hMCjMI75M1A2tKUQC",
+				"qid": "Q189729",
+				"outcome": "hit",
+				"promotionPending": false
+			}
+		},
+		"data": {
+			"@type": "MusicAlbum",
+			"identifier": "int:mbid:release-group:e5b96d62-1414-337b-b0c3-28a6c5d5b65a",
+			"name": "Fixture spotify-album",
+			"sameAs": [
+				"https://open.spotify.com/album/4uLU6hMCjMI75M1A2tKUQC",
+				"https://www.wikidata.org/wiki/Q189729",
+				"https://musicbrainz.org/release-group/e5b96d62-1414-337b-b0c3-28a6c5d5b65a"
+			]
+		}
+	},
+	"identifierSet": [
+		"int:mbid:release-group:e5b96d62-1414-337b-b0c3-28a6c5d5b65a",
+		"int:wd:Q189729",
+		"int:spotify:album:4uLU6hMCjMI75M1A2tKUQC"
+	],
+	"primaryIid": "int:mbid:release-group:e5b96d62-1414-337b-b0c3-28a6c5d5b65a",
+	"identifierRung": [
+		{
+			"rung": "mbid:release-group",
+			"value": "release-group:e5b96d62-1414-337b-b0c3-28a6c5d5b65a"
+		},
+		{
+			"rung": "wd",
+			"value": "Q189729"
+		},
+		{
+			"rung": "spotify:album",
+			"value": "4uLU6hMCjMI75M1A2tKUQC"
+		}
+	],
+	"aliases": ["int:spotify:album:4uLU6hMCjMI75M1A2tKUQC", "int:wd:Q189729"],
+	"appAliases": ["int:spotify:album:4uLU6hMCjMI75M1A2tKUQC", "int:wd:Q189729"]
+}

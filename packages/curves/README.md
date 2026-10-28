@@ -13,8 +13,72 @@ bun add @0xintuition/curves@alpha
 ## Usage
 
 ```ts
-import { createLinearCurve, linearPreviewDeposit } from '@0xintuition/curves'
+import { createLinearCurve } from '@0xintuition/curves'
 
 const curve = createLinearCurve()
-const preview = linearPreviewDeposit(curve, 100n)
+const preview = curve.previewDeposit(100n, { totalAssets: 0n, totalShares: 0n })
+// 100n shares
 ```
+
+## Dynamic-fee curve
+
+This candidate targets `@0xintuition/contracts-v2@1.1.0-alpha.1`. Its
+net-anchored deposit bands differ from the older `1.1.0-alpha.0` contract revision.
+Exact contract parity, including uint256 overflow/revert behavior, remains a
+release gate. See the [contract artifact provenance](https://github.com/0xIntuition/packages/blob/main/docs/contract-artifacts.md).
+
+Preview tier boundaries and deposit or redeem fees for the flat-price dynamic-fee curve. Deposits pay each traversed tier's rate; manual overrides remain capped by the configured maximum. The tier ladder reports `null` for the top tier's edge and width because that tier is unbounded. Supply the curve's current configuration when quoting.
+
+```ts
+import { dynamicFeeQuoteDepositFee, WAD } from '@0xintuition/curves'
+
+const config = {
+  width0: 1_000n * WAD,
+  tierCount: 4n,
+  tierWidthGrowthBps: 0n,
+  depositBaseBps: 100n,
+  depositGrowthBps: 50n,
+  depositCapBps: 500n,
+  depositFulcrumAlphaBps: 10_000n,
+  depositKernelSpread: 4n * WAD,
+  redeemFulcrumAlphaBps: 10_000n,
+  redeemKernelSpread: 4n * WAD,
+  redeemBaseBps: 80n,
+  redeemGrowthBps: 40n,
+  redeemCapBps: 400n,
+  redeemToFulcrumTiersBps: 0n,
+  depositToPriorTierBps: 0n,
+  minEligibleTierStakeBps: 0n,
+}
+const depositFee = dynamicFeeQuoteDepositFee(0n, 10n * WAD, config)
+// 100_000_000_000_000_000n
+```
+
+## Gross-up quotes
+
+Use `grossUpAtomDeposit`, `grossUpTripleDeposit`, `grossUpAtomCreate`, or `grossUpTripleCreate` to solve the wallet debit for an exact net deposit after percentage fees. Deposit helpers take explicit fee-applicability flags and an optional first-vault minimum-share cost; create helpers take the fixed creation cost and omit entry fees. The returned `GrossDepositQuote` includes `grossAssets`, `feeBase`, `assetsAfterFees`, and `fixupIterations`. Invalid inputs throw. The solver uses a bounded logarithmic search, including near-total fee schedules. `fixupIterations` counts search steps. The quote achieves the exact net amount but does not guarantee the smallest gross amount when independently rounded fees produce multiple solutions.
+
+```ts
+import { grossUpAtomDeposit, WAD } from '@0xintuition/curves'
+
+const fees = { denominator: 10_000n, protocolFee: 125n, entryFee: 50n, exitFee: 0n }
+const quote = grossUpAtomDeposit(WAD, fees, { atomWalletDepositFee: 50n }, true)
+// quote.assetsAfterFees === WAD; quote.grossAssets is the wallet debit.
+```
+
+## API by module
+
+All names below are exported from `@0xintuition/curves`; module names describe
+source ownership, not additional package subpaths.
+
+| Module | Exports |
+| --- | --- |
+| `dynamic-fee-curve` | `DYNAMIC_FEE_BPS`, `dynamicFeeDepositFeeBps`, `dynamicFeeQuoteDepositBands`, `dynamicFeeQuoteDepositFee`, `dynamicFeeQuoteRedeemFee`, `dynamicFeeQuoteRedeemFeeForLots`, `dynamicFeeQuoteRedeemFeeLots`, `dynamicFeeRedeemFeeBps`, `dynamicFeeTierLadder`, `dynamicFeeTierOf`, `dynamicFeeTierUpperEdge`, `dynamicFeeTierWidthAt` |
+| `dynamic-fee-distribution` | `DynamicFeeDepositBandLanding`, `DynamicFeeDepositDistribution`, `DynamicFeeRedeemDistribution`, `DynamicFeeRedeemLotDraw`, `DynamicFeeTierOccupancy`, `DynamicFeeTierPayout`, `DYNAMIC_FEE_ACC_PRECISION`, `DYNAMIC_FEE_NO_LOT`, `DYNAMIC_FEE_TIER_PRECISION`, `DYNAMIC_FEE_WEIGHT_PRECISION`, `dynamicFeeDistributeDeposit`, `dynamicFeeDistributeRedeem`, `dynamicFeeProjectHolderEarning` |
+| `fees` | `grossUpAtomCreate`, `grossUpAtomDeposit`, `grossUpTripleCreate`, `grossUpTripleDeposit`, `previewAtomDeposit`, `previewDepositWithFees`, `previewRedeemWithFees`, `previewTripleDeposit`, `totalFees` |
+| `linear-curve` | `createLinearCurve`, `linearConvertToAssets`, `linearConvertToShares`, `linearCurrentPrice`, `linearPreviewDeposit`, `linearPreviewMint`, `linearPreviewRedeem`, `linearPreviewWithdraw` |
+| `market-cap` | `marketCapFromState` |
+| `math` | `divWadDown`, `divWadUp`, `feeOnRaw`, `marketCap`, `mulDivDown`, `mulDivUp`, `mulWadDown`, `mulWadUp`, `requirePositiveEvenSlope`, `sqrt`, `sqrtWad`, `squareWadDown`, `squareWadUp`, `WAD` |
+| `offset-progressive-curve` | `createOffsetProgressiveCurve`, `offsetProgressiveConvertToAssets`, `offsetProgressiveConvertToShares`, `offsetProgressiveCurrentPrice`, `offsetProgressivePreviewDeposit`, `offsetProgressivePreviewMint`, `offsetProgressivePreviewRedeem`, `offsetProgressivePreviewWithdraw` |
+| `progressive-curve` | `createProgressiveCurve`, `progressiveConvertToAssets`, `progressiveConvertToShares`, `progressiveCurrentPrice`, `progressivePreviewDeposit`, `progressivePreviewMint`, `progressivePreviewRedeem`, `progressivePreviewWithdraw` |
+| `types` | `AtomFees`, `Curve`, `CurveState`, `DepositQuote`, `DynamicFeeAccumulators`, `DynamicFeeConfig`, `DynamicFeeDepositBand`, `DynamicFeeLot`, `DynamicFeeLots`, `DynamicFeeRedeemLotCharge`, `DynamicFeeTierLadderEntry`, `DynamicFeeTierOverride`, `FeeBreakdown`, `FeeSchedule`, `GrossDepositQuote`, `OffsetProgressiveCurveConfig`, `ProgressiveCurveConfig`, `RedeemQuote`, `TripleFees` |

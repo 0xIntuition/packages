@@ -24,11 +24,16 @@ function walkFiles(directory) {
 
 function hasExtension(specifier) {
 	const lastSegment = specifier.split('/').at(-1) ?? '';
-	return extname(lastSegment).length > 0;
+	return ['.js', '.mjs', '.cjs', '.json', '.node', '.wasm'].includes(extname(lastSegment));
 }
 
 function normalizeSpecifier(sourceFilePath, specifier) {
-	if (!specifier.startsWith('./') && !specifier.startsWith('../')) {
+	if (
+		specifier !== '.' &&
+		specifier !== '..' &&
+		!specifier.startsWith('./') &&
+		!specifier.startsWith('../')
+	) {
 		return specifier;
 	}
 
@@ -37,12 +42,18 @@ function normalizeSpecifier(sourceFilePath, specifier) {
 	}
 
 	const jsTarget = resolve(dirname(sourceFilePath), `${specifier}.js`);
-	if (existsSync(jsTarget)) {
+	if (
+		existsSync(jsTarget) ||
+		(sourceFilePath.endsWith('.d.ts') && existsSync(jsTarget.replace(/\.js$/, '.d.ts')))
+	) {
 		return `${specifier}.js`;
 	}
 
 	const indexTarget = resolve(dirname(sourceFilePath), specifier, 'index.js');
-	if (existsSync(indexTarget)) {
+	if (
+		existsSync(indexTarget) ||
+		(sourceFilePath.endsWith('.d.ts') && existsSync(indexTarget.replace(/\.js$/, '.d.ts')))
+	) {
 		return `${specifier}/index.js`;
 	}
 
@@ -52,6 +63,11 @@ function normalizeSpecifier(sourceFilePath, specifier) {
 function normalizeFile(filePath) {
 	const source = readFileSync(filePath, 'utf8');
 	const normalized = source
+		.replace(
+			/(\bimport\(\s*['"])(\.{1,2}(?:\/[^'"]*)?)(['"])/g,
+			(_match, prefix, specifier, suffix) =>
+				`${prefix}${normalizeSpecifier(filePath, specifier)}${suffix}`
+		)
 		.replace(
 			/(from\s*['"])(\.{1,2}\/[^'"]+)(['"])/g,
 			(_match, prefix, specifier, suffix) =>

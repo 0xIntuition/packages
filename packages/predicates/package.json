@@ -1,6 +1,6 @@
 {
 	"name": "@0xintuition/predicates",
-	"version": "0.1.0-alpha.0",
+	"version": "0.1.0-alpha.1",
 	"description": "Canonical Intuition predicate registry, entity mappings, and display helpers",
 	"private": false,
 	"license": "MIT",
@@ -63,7 +63,7 @@
 		"check:unsafe:write": "biome check --write --unsafe"
 	},
 	"dependencies": {
-		"@0xintuition/ids": "0.1.0-alpha.0"
+		"@0xintuition/ids": "0.1.0-alpha.1"
 	},
 	"peerDependencies": {
 		"viem": "^2.0.0"
@@ -72,5 +72,8 @@
 		"typescript": "^5.9.3",
 		"vitest": "^4.0.16",
 		"viem": "^2.31.4"
+	},
+	"engines": {
+		"node": ">=20"
 	}
 }

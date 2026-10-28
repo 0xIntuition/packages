@@ -1,7 +1,7 @@
 {
 	"name": "@0xintuition/deployments",
-	"version": "0.1.0-alpha.0",
-	"description": "Typed Intuition chain metadata and deployment address helpers",
+	"version": "0.1.0-alpha.1",
+	"description": "Intuition contract ABIs, bytecode, deployment addresses and chain metadata",
 	"private": false,
 	"license": "MIT",
 	"type": "module",
@@ -18,13 +18,19 @@
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.js"
 		},
+		"./bytecode": {
+			"types": "./dist/bytecode/index.d.ts",
+			"import": "./dist/bytecode/index.js"
+		},
 		"./package.json": "./package.json"
 	},
 	"keywords": [
 		"intuition",
 		"deployments",
 		"addresses",
-		"viem"
+		"abi",
+		"viem",
+		"ethereum"
 	],
 	"repository": {
 		"type": "git",
@@ -66,5 +72,8 @@
 		"typescript": "^5.9.3",
 		"vitest": "^4.0.16",
 		"viem": "^2.31.4"
+	},
+	"engines": {
+		"node": ">=20"
 	}
 }

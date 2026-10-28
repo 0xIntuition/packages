@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, Hex } from 'viem';
 
-import { MultiVaultAbi } from '../../contracts';
+import { type MultiVaultAbi, MultiVaultWithRevertsAbi } from '../../contracts/abis';
 import type { WriteConfig } from '../../types';
 
 export type CreateAtomsInputs = {
@@ -14,14 +14,17 @@ export type CreateAtomsInputs = {
  * @param inputs Function args and optional call value.
  * @returns Transaction hash from the wallet client.
  */
-export async function multiVaultCreateAtoms(config: WriteConfig, inputs: CreateAtomsInputs) {
+export async function multiVaultCreateAtoms(
+	config: WriteConfig,
+	inputs: CreateAtomsInputs
+): Promise<MultiVaultCreateAtomsResult> {
 	const { address, walletClient, publicClient } = config;
 	const { args, value } = inputs;
 
 	const { request } = await publicClient.simulateContract({
 		account: walletClient.account,
 		address,
-		abi: MultiVaultAbi,
+		abi: MultiVaultWithRevertsAbi,
 		functionName: 'createAtoms',
 		args,
 		value,
@@ -29,3 +32,5 @@ export async function multiVaultCreateAtoms(config: WriteConfig, inputs: CreateA
 
 	return await walletClient.writeContract(request);
 }
+
+export type MultiVaultCreateAtomsResult = Hex;

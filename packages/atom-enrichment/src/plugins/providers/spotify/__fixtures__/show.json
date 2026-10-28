@@ -1,0 +1,23 @@
+{
+	"single": {
+		"id": "showFixture12345678901",
+		"name": "Fixture Show",
+		"description": "A fixture podcast.",
+		"publisher": "Fixture Network",
+		"total_episodes": 42,
+		"languages": ["en"],
+		"external_urls": { "spotify": "https://open.spotify.com/show/showFixture12345678901" },
+		"images": [{ "url": "https://i.scdn.co/show.jpg" }],
+		"episodes": { "items": [{ "id": "episode-not-consumed" }], "total": 42 }
+	},
+	"batchItem": {
+		"id": "showFixture12345678901",
+		"name": "Fixture Show",
+		"description": "A fixture podcast.",
+		"publisher": "Fixture Network",
+		"total_episodes": 42,
+		"languages": ["en"],
+		"external_urls": { "spotify": "https://open.spotify.com/show/showFixture12345678901" },
+		"images": [{ "url": "https://i.scdn.co/show.jpg" }]
+	}
+}

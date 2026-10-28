@@ -36,3 +36,24 @@ console.log(title?.originType)
 Generated artifacts are intentionally normalized: a type file stores only that type's directly declared properties plus its `subClassOf` chain. `getPropertiesFor` derives inherited properties at runtime.
 
 Types whose schema.org names are not safe exact JavaScript exports, such as `3DModel`, `Number`, `Date`, or `Map`, are still available from their subpath module via the `schemaOrg<Name>` named export or default export.
+
+## Root API
+
+| Exports | Purpose |
+| --- | --- |
+| `getType`, `hasType`, `listTypes` | Look up, test, and enumerate pinned schema.org types |
+| `getPropertiesFor` | Resolve properties including inherited definitions |
+| `normalizeSchemaOrgName` | Normalize schema.org names and URIs |
+| `SCHEMA_ORG_TYPES` | Generated type registry |
+| `SCHEMA_ORG_CONTEXT`, `SCHEMA_ORG_VERSION` | Vocabulary context and pinned version |
+| `SCHEMA_ORG_RELEASE_DATE`, `SCHEMA_ORG_SOURCE_URL` | Source provenance |
+| `SCHEMA_ORG_GENERATED_TYPE_COUNT`, `SCHEMA_ORG_GENERATED_PROPERTY_COUNT` | Generated vocabulary counts |
+| `SchemaOrgTypeSpec`, `SchemaOrgPropertySpec`, `ResolvedSchemaOrgPropertySpec` | TypeScript type and property records |
+
+## Subpath contract
+
+`@0xintuition/schema-org/<TypeName>` resolves a generated type module using the
+exact, case-sensitive schema.org name, for example `@0xintuition/schema-org/Book`.
+That module exports the named record `schemaOrgBook`. The wildcard supports
+only type names present in this pinned vocabulary; an arbitrary name does not
+resolve. `@0xintuition/schema-org/package.json` exposes package metadata.

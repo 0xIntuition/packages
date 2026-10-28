@@ -6,6 +6,7 @@ export const musicAlbum: ClassificationSpec = {
 	displayName: 'Music Album',
 	description: 'A music album identity with an optional artist disambiguator.',
 	category: 'Media',
+	atomCategory: 'song',
 	schema: { context: 'https://schema.org/', type: 'MusicAlbum' },
 	metadataPredicates: ['byArtist', 'track', 'contain', 'hasCategory', 'sameAs'] as const,
 	fields: [
@@ -42,7 +43,7 @@ export const musicAlbum: ClassificationSpec = {
 		identifies: 'the release-group (the album as a work)',
 		ladder: [
 			{ kind: 'scheme', scheme: 'mbid', source: { kind: 'same-as' } },
-			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' } },
+			{ kind: 'scheme', scheme: 'wd', source: { kind: 'same-as' }, wdSlug: 'album' },
 			// D21: byArtist omitted — artist linkage is a triple
 			{ kind: 'gen1', tag: 4, recipe: [{ key: 'name', from: 'field' }] },
 		],

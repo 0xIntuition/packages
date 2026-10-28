@@ -1,0 +1,88 @@
+{
+	"name": "@0xintuition/atom-parser",
+	"private": false,
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./types": {
+			"types": "./dist/types.d.ts",
+			"import": "./dist/types.js"
+		},
+		"./detect": {
+			"types": "./dist/detect.d.ts",
+			"import": "./dist/detect.js"
+		},
+		"./remote": {
+			"types": "./dist/remote.d.ts",
+			"import": "./dist/remote.js"
+		},
+		"./parse": {
+			"types": "./dist/parse.d.ts",
+			"import": "./dist/parse.js"
+		},
+		"./package.json": "./package.json",
+		"./iid": {
+			"types": "./dist/iid.d.ts",
+			"import": "./dist/iid.js"
+		},
+		"./ssrf": {
+			"types": "./dist/ssrf.d.ts",
+			"import": "./dist/ssrf.js"
+		},
+		"./testing/dns": {
+			"types": "./dist/testing/dns.d.ts",
+			"import": "./dist/testing/dns.js"
+		}
+	},
+	"license": "MIT",
+	"scripts": {
+		"build": "node ../../scripts/clean-dist.mjs && tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"dev": "tsc --watch",
+		"typecheck": "tsc --noEmit",
+		"test": "bun test __tests__",
+		"ci": "biome check",
+		"lint": "biome lint",
+		"format": "biome format",
+		"check": "biome check",
+		"check:write": "biome check --write",
+		"pack:dry-run": "bun run build && npm pack --ignore-scripts --dry-run --json",
+		"pack:release": "bun run build && node ../../scripts/pack-release.mjs",
+		"prepack": "bun run build",
+		"prepublishOnly": "bun run build && node ../../scripts/guard-direct-publish.mjs"
+	},
+	"dependencies": {
+		"multiformats": "^13.3.2",
+		"viem": "^2.23.2",
+		"@0xintuition/iid": "0.1.0-alpha.0"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3"
+	},
+	"version": "0.1.0-alpha.1",
+	"description": "Detect and normalize atom inputs, with optional remote content inspection",
+	"sideEffects": false,
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/0xIntuition/packages.git",
+		"directory": "packages/atom-parser"
+	},
+	"bugs": {
+		"url": "https://github.com/0xIntuition/packages/issues"
+	},
+	"homepage": "https://github.com/0xIntuition/packages/tree/main/packages/atom-parser#readme",
+	"publishConfig": {
+		"access": "public",
+		"tag": "alpha"
+	}
+}

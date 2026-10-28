@@ -1,6 +1,6 @@
 import { type Address, formatUnits, type PublicClient } from 'viem';
 
-import { MultiVaultAbi } from '../../contracts';
+import { MultiVaultAbi } from '../../contracts/abis';
 import type { MultivaultConfig } from '../../types';
 
 export type MultiCallIntuitionConfigs = {
@@ -15,7 +15,9 @@ const DEFAULT_MULTICALL3_ADDRESS = '0xcA11bde05977b3631167028862bE2a173976CA11' 
  * @param config Contract address and public client.
  * @returns Aggregated configuration values with raw and formatted fields.
  */
-export async function multiVaultMultiCallIntuitionConfigs(config: MultiCallIntuitionConfigs) {
+export async function multiVaultMultiCallIntuitionConfigs(
+	config: MultiCallIntuitionConfigs
+): Promise<MultiVaultMultiCallIntuitionConfigsResult> {
 	const { address, publicClient } = config;
 	const multicallAddress = publicClient.chain?.contracts?.multicall3?.address
 		? publicClient.chain.contracts.multicall3.address
@@ -85,12 +87,13 @@ export async function multiVaultMultiCallIntuitionConfigs(config: MultiCallIntui
 	const tripleCost = rawResults[1] as bigint;
 	const formattedTripleCost = formatUnits(tripleCost, 18);
 
+	// `atomConfig()` returns `(atomCreationProtocolFee, atomWalletDepositFee)`.
 	const atomConfig = rawResults[2] as readonly bigint[];
-	const atomWalletInitialDepositAmount = atomConfig[0] as bigint;
-	const formattedAtomWalletInitialDepositAmount = formatUnits(atomWalletInitialDepositAmount, 18);
-
-	const atomCreationProtocolFee = atomConfig[1] as bigint;
+	const atomCreationProtocolFee = atomConfig[0] as bigint;
 	const formattedAtomCreationProtocolFee = formatUnits(atomCreationProtocolFee, 18);
+
+	const atomWalletInitialDepositAmount = atomConfig[1] as bigint;
+	const formattedAtomWalletInitialDepositAmount = formatUnits(atomWalletInitialDepositAmount, 18);
 
 	const tripleConfig = rawResults[3] as readonly bigint[];
 	const tripleCreationProtocolFee = tripleConfig[0] as bigint;
@@ -145,3 +148,5 @@ export async function multiVaultMultiCallIntuitionConfigs(config: MultiCallIntui
 		formatted_min_deposit: formattedMinDeposit,
 	} as MultivaultConfig;
 }
+
+export type MultiVaultMultiCallIntuitionConfigsResult = MultivaultConfig;

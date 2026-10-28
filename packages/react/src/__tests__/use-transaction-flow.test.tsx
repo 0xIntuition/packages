@@ -150,4 +150,89 @@ describe('useTransactionFlow', () => {
 			})
 		);
 	});
+	it.each([
+		'success',
+		'reverted',
+	] as const)('settles a %s receipt and calls the matching callback', async (status) => {
+		mockUseWaitForTransactionReceipt.mockReturnValue({ data: undefined, error: undefined });
+		const onConfirmed = vi.fn();
+		const onError = vi.fn();
+		const { result, rerender } = renderHook(() =>
+			useTransactionFlow({
+				mutationFn: async () => mockReceipt.transactionHash,
+				onConfirmed,
+				onError,
+			})
+		);
+		let completion!: Promise<TransactionReceipt | Error>;
+		await act(async () => {
+			completion = result.current.execute({}).catch((error) => error);
+		});
+		const receipt = { ...mockReceipt, status };
+		mockUseWaitForTransactionReceipt.mockReturnValue({ data: receipt, error: undefined });
+		act(() => rerender());
+		const settled = await completion;
+		if (status === 'success') {
+			expect(settled).toEqual(receipt);
+			expect(result.current.status).toBe('confirmed');
+			expect(onConfirmed).toHaveBeenCalledExactlyOnceWith(receipt);
+			expect(onError).not.toHaveBeenCalled();
+		} else {
+			expect(settled).toEqual(new Error('Transaction reverted.'));
+			expect(result.current.status).toBe('error');
+			expect(onConfirmed).not.toHaveBeenCalled();
+			expect(onError).toHaveBeenCalledTimes(1);
+		}
+	});
+
+	it('rejects overlapping calls without replacing the first promise', async () => {
+		mockUseWaitForTransactionReceipt.mockReturnValue({ data: undefined, error: undefined });
+		const mutationFn = vi.fn(async () => mockReceipt.transactionHash);
+		const { result, rerender } = renderHook(() => useTransactionFlow({ mutationFn }));
+		let first!: Promise<TransactionReceipt>;
+		let second!: Promise<unknown>;
+		await act(async () => {
+			first = result.current.execute({});
+			second = result.current.execute({}).catch((error) => error);
+		});
+		expect(await second).toEqual(new Error('A transaction is already in progress.'));
+		expect(mutationFn).toHaveBeenCalledTimes(1);
+		mockUseWaitForTransactionReceipt.mockReturnValue({ data: mockReceipt, error: undefined });
+		act(() => rerender());
+		expect(await first).toEqual(mockReceipt);
+	});
+
+	it('reset rejects an in-flight wallet request and ignores its late response', async () => {
+		mockUseWaitForTransactionReceipt.mockReturnValue({ data: undefined, error: undefined });
+		let submit!: (hash: Hex) => void;
+		const mutationFn = () =>
+			new Promise<Hex>((resolve) => {
+				submit = resolve;
+			});
+		const { result } = renderHook(() => useTransactionFlow({ mutationFn }));
+		let completion!: Promise<unknown>;
+		act(() => {
+			completion = result.current.execute({}).catch((error) => error);
+		});
+		act(() => result.current.reset());
+		expect(await completion).toEqual(new Error('Transaction flow reset.'));
+		await act(async () => {
+			submit(mockReceipt.transactionHash);
+		});
+		expect(result.current.status).toBe('idle');
+		expect(result.current.hash).toBeUndefined();
+	});
+
+	it('unmount rejects an awaiting confirmation', async () => {
+		mockUseWaitForTransactionReceipt.mockReturnValue({ data: undefined, error: undefined });
+		const { result, unmount } = renderHook(() =>
+			useTransactionFlow({ mutationFn: async () => mockReceipt.transactionHash })
+		);
+		let completion!: Promise<unknown>;
+		await act(async () => {
+			completion = result.current.execute({}).catch((error) => error);
+		});
+		unmount();
+		expect(await completion).toEqual(new Error('Transaction flow unmounted.'));
+	});
 });

@@ -1,7 +1,8 @@
-import { TrustAbi } from '../../contracts';
+import type { ContractFunctionReturnType } from 'viem';
+import { TrustAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
-export async function trustTotalSupply(config: ReadConfig) {
+export async function trustTotalSupply(config: ReadConfig): Promise<TrustTotalSupplyResult> {
 	const { address, publicClient } = config;
 
 	return await publicClient.readContract({
@@ -10,3 +11,9 @@ export async function trustTotalSupply(config: ReadConfig) {
 		functionName: 'totalSupply',
 	});
 }
+
+export type TrustTotalSupplyResult = ContractFunctionReturnType<
+	typeof TrustAbi,
+	'view' | 'pure',
+	'totalSupply'
+>;

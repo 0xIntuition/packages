@@ -1,0 +1,307 @@
+{
+	"summaries": {
+		"Koyaanisqatsi": {
+			"title": "Koyaanisqatsi",
+			"description": "1982 film by Godfrey Reggio",
+			"extract": "Koyaanisqatsi is a 1982 American non-narrative documentary film directed and produced by Godfrey Reggio, featuring music by Philip Glass, cinematography by Ron Fricke and presented by filmmaker Francis Ford Coppola. Described as an \"essay in images and sound on the state of American civilization\", the film comprises a montage of stock footage, slow motion, and time-lapse visuals of natural and urban environments across the United States. Following its premieres at the Telluride and New York Film Festivals in 1982, it began a limited theatrical release the next year. Produced on a budget of $2.5 million, the film grossed $3.2 million at the box office, and was one of the highest-grossing documentaries of the 1980s.",
+			"extract_html": "<p><i><b>Koyaanisqatsi</b></i> is a 1982 American non-narrative documentary film directed and produced by Godfrey Reggio, featuring music by Philip Glass, cinematography by Ron Fricke and presented by filmmaker Francis Ford Coppola. Described as an \"essay in images and sound on the state of American civilization\", the film comprises a montage of stock footage, slow motion, and time-lapse visuals of natural and urban environments across the United States. Following its premieres at the Telluride and New York Film Festivals in 1982, it began a limited theatrical release the next year. Produced on a budget of $2.5 million, the film grossed $3.2 million at the box office, and was one of the highest-grossing documentaries of the 1980s.</p>",
+			"thumbnail": {
+				"source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8d/Koyaanisqatsi_%281982_poster%29.jpg/330px-Koyaanisqatsi_%281982_poster%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+				"width": 330,
+				"height": 484
+			},
+			"content_urls": {
+				"desktop": {
+					"page": "https://en.wikipedia.org/wiki/Koyaanisqatsi",
+					"revisions": "https://en.wikipedia.org/wiki/Koyaanisqatsi?action=history",
+					"edit": "https://en.wikipedia.org/wiki/Koyaanisqatsi?action=edit",
+					"talk": "https://en.wikipedia.org/wiki/Talk:Koyaanisqatsi"
+				},
+				"mobile": {
+					"page": "https://en.wikipedia.org/wiki/Koyaanisqatsi",
+					"revisions": "https://en.wikipedia.org/wiki/Special:History/Koyaanisqatsi",
+					"edit": "https://en.wikipedia.org/wiki/Koyaanisqatsi?action=edit",
+					"talk": "https://en.wikipedia.org/wiki/Talk:Koyaanisqatsi"
+				}
+			},
+			"pageid": 18932654,
+			"lang": "en",
+			"timestamp": "2026-09-24T14:49:54Z",
+			"wikibase_item": "Q1127828",
+			"type": "standard",
+			"displaytitle": "<i>Koyaanisqatsi</i>",
+			"namespace": {
+				"id": 0,
+				"text": ""
+			},
+			"titles": {
+				"canonical": "Koyaanisqatsi",
+				"normalized": "Koyaanisqatsi",
+				"display": "<i>Koyaanisqatsi</i>"
+			},
+			"originalimage": {
+				"source": "https://upload.wikimedia.org/wikipedia/commons/8/8d/Koyaanisqatsi_%281982_poster%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+				"width": 908,
+				"height": 1333
+			},
+			"dir": "ltr",
+			"revision": "1376501014",
+			"tid": "33f315d5-b827-11f1-8df6-615f341d5fdf",
+			"description_source": "local"
+		},
+		"Suspiria": {
+			"title": "Suspiria",
+			"description": "1977 Italian horror film by Dario Argento",
+			"extract": "Suspiria is a 1977 Italian supernatural horror film directed by Dario Argento, who co-wrote the screenplay with Daria Nicolodi, partially based on Thomas De Quincey's 1845 essay Suspiria de Profundis. The film stars Jessica Harper as an American ballet student who transfers to a prestigious European dance academy but realizes, after a series of murders, that the school is a front for something sinister. It also features Stefania Casini, Flavio Bucci, Miguel Bos\u00e9, Alida Valli, Udo Kier, and Joan Bennett, in her final film role.",
+			"extract_html": "<p><i><b>Suspiria</b></i> is a 1977 Italian supernatural horror film directed by Dario Argento, who co-wrote the screenplay with Daria Nicolodi, partially based on Thomas De Quincey's 1845 essay <i>Suspiria de Profundis</i>. The film stars Jessica Harper as an American ballet student who transfers to a prestigious European dance academy but realizes, after a series of murders, that the school is a front for something sinister. It also features Stefania Casini, Flavio Bucci, Miguel Bos\u00e9, Alida Valli, Udo Kier, and Joan Bennett, in her final film role.</p>",
+			"thumbnail": {
+				"source": "https://upload.wikimedia.org/wikipedia/en/c/cd/SuspiriaItaly.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+				"width": 250,
+				"height": 348
+			},
+			"content_urls": {
+				"desktop": {
+					"page": "https://en.wikipedia.org/wiki/Suspiria",
+					"revisions": "https://en.wikipedia.org/wiki/Suspiria?action=history",
+					"edit": "https://en.wikipedia.org/wiki/Suspiria?action=edit",
+					"talk": "https://en.wikipedia.org/wiki/Talk:Suspiria"
+				},
+				"mobile": {
+					"page": "https://en.wikipedia.org/wiki/Suspiria",
+					"revisions": "https://en.wikipedia.org/wiki/Special:History/Suspiria",
+					"edit": "https://en.wikipedia.org/wiki/Suspiria?action=edit",
+					"talk": "https://en.wikipedia.org/wiki/Talk:Suspiria"
+				}
+			},
+			"pageid": 347000,
+			"lang": "en",
+			"timestamp": "2026-09-28T13:28:20Z",
+			"wikibase_item": "Q546900",
+			"type": "standard",
+			"displaytitle": "<i>Suspiria</i>",
+			"namespace": {
+				"id": 0,
+				"text": ""
+			},
+			"titles": {
+				"canonical": "Suspiria",
+				"normalized": "Suspiria",
+				"display": "<i>Suspiria</i>"
+			},
+			"originalimage": {
+				"source": "https://upload.wikimedia.org/wikipedia/en/c/cd/SuspiriaItaly.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+				"width": 250,
+				"height": 348
+			},
+			"dir": "ltr",
+			"revision": "1377242601",
+			"tid": "788cf349-bb40-11f1-a558-1e684837f4c5",
+			"description_source": "local"
+		}
+	},
+	"entities": {
+		"Q1127828": {
+			"id": "Q1127828",
+			"labels": {
+				"en": {
+					"value": "Koyaanisqatsi",
+					"language": "en"
+				},
+				"mul": {
+					"value": "Koyaanisqatsi",
+					"language": "mul"
+				}
+			},
+			"descriptions": {
+				"en": {
+					"value": "1982 film by Godfrey Reggio",
+					"language": "en"
+				}
+			},
+			"claims": {
+				"P31": [
+					{
+						"mainsnak": {
+							"datavalue": {
+								"value": {
+									"entity-type": "item",
+									"numeric-id": 11424,
+									"id": "Q11424"
+								},
+								"type": "wikibase-entityid"
+							},
+							"snaktype": "value",
+							"property": "P31",
+							"hash": "fa41184cb03f49f0edfbf2fc4f9d33e35afecaea",
+							"datatype": "wikibase-item"
+						},
+						"type": "statement",
+						"id": "q1127828$740C580B-2AEF-424E-AC98-8346B1409391",
+						"rank": "normal",
+						"references": [
+							{
+								"hash": "c456dc5cd2117249948c288206ff3f8b1bf574f0",
+								"snaks": {
+									"P143": [
+										{
+											"snaktype": "value",
+											"property": "P143",
+											"hash": "e17507043402fe54ae6c4d65cc51f46cec987de9",
+											"datavalue": {
+												"value": {
+													"entity-type": "item",
+													"numeric-id": 8449,
+													"id": "Q8449"
+												},
+												"type": "wikibase-entityid"
+											},
+											"datatype": "wikibase-item"
+										}
+									]
+								},
+								"snaks-order": ["P143"]
+							}
+						]
+					}
+				]
+			},
+			"sitelinks": {
+				"enwiki": {
+					"site": "enwiki",
+					"title": "Koyaanisqatsi",
+					"url": "https://en.wikipedia.org/wiki/Koyaanisqatsi",
+					"badges": []
+				}
+			}
+		},
+		"Q546900": {
+			"id": "Q546900",
+			"labels": {
+				"en": {
+					"value": "Suspiria",
+					"language": "en"
+				}
+			},
+			"descriptions": {
+				"en": {
+					"value": "1977 film by Dario Argento",
+					"language": "en"
+				}
+			},
+			"claims": {
+				"P31": [
+					{
+						"mainsnak": {
+							"datavalue": {
+								"value": {
+									"entity-type": "item",
+									"numeric-id": 11424,
+									"id": "Q11424"
+								},
+								"type": "wikibase-entityid"
+							},
+							"snaktype": "value",
+							"property": "P31",
+							"hash": "fa41184cb03f49f0edfbf2fc4f9d33e35afecaea",
+							"datatype": "wikibase-item"
+						},
+						"type": "statement",
+						"id": "q546900$3351ED18-2B88-4B39-B0F1-32EACB8BE9B4",
+						"rank": "normal",
+						"references": [
+							{
+								"hash": "9a24f7c0208b05d6be97077d855671d1dfdbc0dd",
+								"snaks": {
+									"P143": [
+										{
+											"snaktype": "value",
+											"property": "P143",
+											"hash": "d38375ffe6fe142663ff55cd783aa4df4301d83d",
+											"datavalue": {
+												"value": {
+													"entity-type": "item",
+													"numeric-id": 48183,
+													"id": "Q48183"
+												},
+												"type": "wikibase-entityid"
+											},
+											"datatype": "wikibase-item"
+										}
+									]
+								},
+								"snaks-order": ["P143"]
+							}
+						]
+					}
+				]
+			},
+			"sitelinks": {
+				"enwiki": {
+					"site": "enwiki",
+					"title": "Suspiria",
+					"url": "https://en.wikipedia.org/wiki/Suspiria",
+					"badges": []
+				}
+			}
+		},
+		"Q3978305": {
+			"id": "Q3978305",
+			"labels": {
+				"en": {
+					"value": "Suspiria",
+					"language": "en"
+				},
+				"mul": {
+					"value": "Suspiria",
+					"language": "mul"
+				}
+			},
+			"descriptions": {
+				"en": {
+					"value": "album by Goblin",
+					"language": "en"
+				}
+			},
+			"claims": {
+				"P31": [
+					{
+						"mainsnak": {
+							"datavalue": {
+								"value": {
+									"entity-type": "item",
+									"numeric-id": 482994,
+									"id": "Q482994"
+								},
+								"type": "wikibase-entityid"
+							},
+							"snaktype": "value",
+							"property": "P31",
+							"hash": "dc16d32b615bf1c6edf1919941065eedccacb8e4",
+							"datatype": "wikibase-item"
+						},
+						"type": "statement",
+						"id": "Q3978305$9EF498C2-275B-4154-A585-E3A54AAE6971",
+						"rank": "normal"
+					}
+				]
+			},
+			"sitelinks": {
+				"enwiki": {
+					"site": "enwiki",
+					"title": "Suspiria (1977 soundtrack)",
+					"url": "https://en.wikipedia.org/wiki/Suspiria_(1977_soundtrack)",
+					"badges": []
+				}
+			}
+		}
+	},
+	"search": [
+		{
+			"id": "Q546900"
+		},
+		{
+			"id": "Q3978305"
+		}
+	],
+	"recordedAt": "2026-10-01"
+}

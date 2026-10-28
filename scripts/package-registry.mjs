@@ -1,0 +1,207 @@
+#!/usr/bin/env node
+
+/**
+ * Central registry of publishable workspace packages.
+ *
+ * This module is the single source of truth for package order and packaging
+ * metadata. Pack, smoke, and release scripts must consume it instead of
+ * carrying their own hard-coded arrays.
+ *
+ * Order is the topological publish/pack order: every runtime internal
+ * dependency of a package must appear earlier in the list. devDependencies do
+ * not constrain order (they are not installed by consumers) but must still be
+ * follow the same stable-range/prerelease-pin policy.
+ *
+ * kind:
+ * - 'compiled'  — ships dist/ output; tarball must contain compiled entrypoints
+ * - 'docs-only' — normative documents/fixtures only; no build step, no dist/
+ */
+
+import { existsSync, readdirSync, readFileSync, realpathSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+export const PACKAGES = [
+	{ dirName: 'iid-spec', kind: 'docs-only' },
+	{ dirName: 'iid', kind: 'compiled' },
+	{ dirName: 'deployments', kind: 'compiled' },
+	{ dirName: 'curves', kind: 'compiled' },
+	{ dirName: 'ids', kind: 'compiled' },
+	{ dirName: 'schema-org', kind: 'compiled' },
+	{ dirName: 'classifications', kind: 'compiled' },
+	{ dirName: 'pipeline-runtime', kind: 'compiled' },
+	{ dirName: 'atom-parser', kind: 'compiled' },
+	{ dirName: 'iid-registry', kind: 'compiled' },
+	{ dirName: 'iid-ladder', kind: 'compiled' },
+	{ dirName: 'predicates', kind: 'compiled' },
+	{ dirName: 'primitives', kind: 'compiled' },
+	{ dirName: 'protocol', kind: 'compiled' },
+	{ dirName: 'atom-enrichment', kind: 'compiled' },
+	{ dirName: 'atom-classification', kind: 'compiled' },
+	{ dirName: 'atom-runtime', kind: 'compiled' },
+	{ dirName: 'periphery', kind: 'compiled' },
+	{ dirName: 'sdk', kind: 'compiled' },
+	{ dirName: 'cli', kind: 'compiled' },
+	{ dirName: 'react', kind: 'compiled' },
+];
+
+export const PACKAGE_ORDER = PACKAGES.map((entry) => entry.dirName);
+
+const RUNTIME_DEPENDENCY_FIELDS = ['dependencies', 'peerDependencies', 'optionalDependencies'];
+
+const ALL_DEPENDENCY_FIELDS = [...RUNTIME_DEPENDENCY_FIELDS, 'devDependencies'];
+
+/** Prereleases stay coordinated; stable dependencies accept compatible updates. */
+export function internalDependencyRange(version) {
+	return version.includes('-') ? version : `^${version}`;
+}
+
+export function packageRootFor(repoRoot, dirName) {
+	return resolve(repoRoot, 'packages', dirName);
+}
+
+export function readWorkspaceManifest(repoRoot, dirName) {
+	const manifestPath = resolve(packageRootFor(repoRoot, dirName), 'package.json');
+	return JSON.parse(readFileSync(manifestPath, 'utf8'));
+}
+
+/** Internal assistant configuration and working notes are never package API. */
+export function assertPublicTarballFiles(files, packageName) {
+	const internalPath =
+		/(?:^|\/)(?:\.local|\.planning|\.agents|\.claude|\.codex)(?:\/|$)|(?:^|\/)(?:AGENTS(?:\.local)?|CLAUDE|GEMINI|SKILL)\.md$/i;
+	const leaked = files.filter((file) => internalPath.test(file.replaceAll('\\', '/')));
+	if (leaked.length)
+		throw new Error(`${packageName}: internal agent files in npm tarball: ${leaked.join(', ')}`);
+}
+
+export function requiredTarballFiles(kind) {
+	if (kind === 'docs-only') {
+		return ['README.md', 'LICENSE'];
+	}
+	return ['dist/index.js', 'dist/index.d.ts', 'README.md', 'LICENSE'];
+}
+
+function internalDependencyEntries(manifest, fieldNames) {
+	const entries = [];
+	for (const fieldName of fieldNames) {
+		const dependencies = manifest[fieldName];
+		if (!dependencies || typeof dependencies !== 'object') {
+			continue;
+		}
+		for (const [dependencyName, versionRange] of Object.entries(dependencies)) {
+			if (dependencyName.startsWith('@0xintuition/')) {
+				entries.push({ fieldName, dependencyName, versionRange });
+			}
+		}
+	}
+	return entries;
+}
+
+/**
+ * Loads every registered workspace manifest, keyed by directory name.
+ */
+export function readAllWorkspaceManifests(repoRoot) {
+	const manifests = new Map();
+	for (const { dirName } of PACKAGES) {
+		manifests.set(dirName, readWorkspaceManifest(repoRoot, dirName));
+	}
+	return manifests;
+}
+
+/**
+ * Asserts that PACKAGES covers exactly the set of registered names, that
+ * registry order is a valid topological order over runtime internal
+ * dependencies, and that every internal dependency (including dev) is
+ * a caret range for a stable workspace version or an exact prerelease pin.
+ *
+ * Throws with an aggregate message listing every violation.
+ */
+export function assertRegistryIntegrity(repoRoot) {
+	const manifests = readAllWorkspaceManifests(repoRoot);
+	const failures = [];
+	for (const entry of readdirSync(resolve(repoRoot, 'packages'), { withFileTypes: true })) {
+		if (!entry.isDirectory()) continue;
+		const path = resolve(repoRoot, 'packages', entry.name, 'package.json');
+		if (!existsSync(path)) continue;
+		const manifest = JSON.parse(readFileSync(path, 'utf8'));
+		if (manifest.private !== true && !manifests.has(entry.name)) {
+			failures.push(`${entry.name}: publishable package is missing from PACKAGES`);
+		}
+	}
+	if (new Set(PACKAGE_ORDER).size !== PACKAGE_ORDER.length) {
+		failures.push('PACKAGES contains duplicate directories');
+	}
+
+	const nameToDirName = new Map();
+	const versionsByName = new Map();
+	for (const [dirName, manifest] of manifests) {
+		if (manifest.private !== false) failures.push(`${dirName}: registered package must be public`);
+		if (!manifest.name?.startsWith('@0xintuition/')) {
+			failures.push(`${dirName}: package name ${manifest.name} is not in the @0xintuition scope`);
+			continue;
+		}
+		if (nameToDirName.has(manifest.name))
+			failures.push(`${dirName}: duplicate name ${manifest.name}`);
+		nameToDirName.set(manifest.name, dirName);
+		versionsByName.set(manifest.name, manifest.version);
+	}
+
+	const positionByDirName = new Map(PACKAGE_ORDER.map((dirName, index) => [dirName, index]));
+
+	for (const [dirName, manifest] of manifests) {
+		const position = positionByDirName.get(dirName);
+
+		for (const { fieldName, dependencyName, versionRange } of internalDependencyEntries(
+			manifest,
+			ALL_DEPENDENCY_FIELDS
+		)) {
+			const expectedVersion = versionsByName.get(dependencyName);
+			if (expectedVersion === undefined) {
+				failures.push(
+					`${dirName}: ${fieldName}.${dependencyName} is not a registered workspace package`
+				);
+				continue;
+			}
+			if (versionRange !== internalDependencyRange(expectedVersion)) {
+				failures.push(
+					`${dirName}: ${fieldName}.${dependencyName} must use workspace dependency range ${internalDependencyRange(expectedVersion)}, found "${versionRange}"`
+				);
+			}
+		}
+
+		for (const { fieldName, dependencyName } of internalDependencyEntries(
+			manifest,
+			RUNTIME_DEPENDENCY_FIELDS
+		)) {
+			const dependencyDirName = nameToDirName.get(dependencyName);
+			if (dependencyDirName === undefined) {
+				continue;
+			}
+			const dependencyPosition = positionByDirName.get(dependencyDirName);
+			if (dependencyPosition >= position) {
+				failures.push(
+					`${dirName}: ${fieldName}.${dependencyName} must appear earlier in PACKAGE_ORDER (topological publish order)`
+				);
+			}
+		}
+	}
+
+	if (failures.length > 0) {
+		throw new Error(
+			`Package registry integrity check failed:\n${failures.map((failure) => `- ${failure}`).join('\n')}`
+		);
+	}
+
+	return manifests;
+}
+
+const isDirectInvocation =
+	process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isDirectInvocation) {
+	const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
+	assertRegistryIntegrity(repoRoot);
+	console.log(
+		`Package registry integrity check passed for ${PACKAGES.length} packages: ${PACKAGE_ORDER.join(', ')}.`
+	);
+}

@@ -6,6 +6,7 @@ export const comment: ClassificationSpec = {
 	displayName: 'Comment',
 	description: 'A minimal comment identity linked to a stable target.',
 	category: 'Creative Work',
+	atomCategory: 'thing',
 	schema: { context: 'https://schema.org/', type: 'Comment' },
 	metadataPredicates: ['authoredBy', 'parentItem', 'sameAs'] as const,
 	fields: [

@@ -1,0 +1,192 @@
+{
+	"provenance": {
+		"referenceSha": "31b62f35a787b6a7b9318f7a5d245ba6d0c76e9b",
+		"reference": "reference implementation @ 31b62f3",
+		"note": "Historical parser corpus supplied alongside the generated oracle; selected without changing expectations."
+	},
+	"cases": [
+		{
+			"name": "iid_canonical_p0_isrc",
+			"input": "int:isrc:USQX91300108",
+			"options": {
+				"remoteFetch": false
+			},
+			"expected": {
+				"kind": "iid",
+				"normalizedInput": "int:isrc:USQX91300108",
+				"data": {
+					"valid": true,
+					"scheme": "isrc",
+					"value": "USQX91300108",
+					"canonicalIid": "int:isrc:USQX91300108",
+					"anchorEligible": true
+				},
+				"remote": null,
+				"warnings": []
+			}
+		},
+		{
+			"name": "iid_legacy_bare_wd_parse_only",
+			"input": "int:wd:Q42",
+			"options": {
+				"remoteFetch": false
+			},
+			"expected": {
+				"kind": "iid",
+				"normalizedInput": "int:wd:Q42",
+				"data": {
+					"valid": true,
+					"scheme": "wd",
+					"value": "Q42",
+					"canonicalIid": "int:wd:Q42",
+					"anchorEligible": false
+				},
+				"remote": null,
+				"warnings": []
+			}
+		},
+		{
+			"name": "iid_typed_mbid_recording",
+			"input": "int:mbid:recording:d28cfc80-b16c-47c9-a370-f13f49732e75",
+			"options": {
+				"remoteFetch": false
+			},
+			"expected": {
+				"kind": "iid",
+				"normalizedInput": "int:mbid:recording:d28cfc80-b16c-47c9-a370-f13f49732e75",
+				"data": {
+					"valid": true,
+					"scheme": "mbid",
+					"value": "recording:d28cfc80-b16c-47c9-a370-f13f49732e75",
+					"canonicalIid": "int:mbid:recording:d28cfc80-b16c-47c9-a370-f13f49732e75",
+					"anchorEligible": true
+				},
+				"remote": null,
+				"warnings": []
+			}
+		},
+		{
+			"name": "iid_noncanonical_isbn10",
+			"input": "int:isbn:0-684-83272-0",
+			"options": {
+				"remoteFetch": false
+			},
+			"expected": {
+				"kind": "iid",
+				"normalizedInput": "int:isbn:0-684-83272-0",
+				"data": {
+					"valid": true,
+					"scheme": "isbn",
+					"value": "9780684832722",
+					"canonicalIid": "int:isbn:9780684832722",
+					"anchorEligible": true
+				},
+				"remote": null,
+				"warnings": []
+			}
+		},
+		{
+			"name": "iid_unknown_scheme",
+			"input": "int:bogus:x",
+			"options": {
+				"remoteFetch": false
+			},
+			"expected": {
+				"kind": "iid",
+				"normalizedInput": "int:bogus:x",
+				"data": {
+					"valid": false,
+					"scheme": "bogus",
+					"value": "x",
+					"canonicalIid": null,
+					"anchorEligible": false,
+					"reason": "unknown_or_malformed_iid"
+				},
+				"remote": null,
+				"warnings": []
+			}
+		},
+		{
+			"name": "iid_invalid_isrc_value",
+			"input": "int:isrc:notanisrc",
+			"options": {
+				"remoteFetch": false
+			},
+			"expected": {
+				"kind": "iid",
+				"normalizedInput": "int:isrc:notanisrc",
+				"data": {
+					"valid": false,
+					"scheme": "isrc",
+					"value": "notanisrc",
+					"canonicalIid": null,
+					"anchorEligible": false,
+					"reason": "invalid_iid_value"
+				},
+				"remote": null,
+				"warnings": []
+			}
+		},
+		{
+			"name": "iid_whatwg_url_trap",
+			"input": "int:isrc:X",
+			"options": {
+				"remoteFetch": false
+			},
+			"expected": {
+				"kind": "iid",
+				"normalizedInput": "int:isrc:X",
+				"data": {
+					"valid": false,
+					"scheme": "isrc",
+					"value": "X",
+					"canonicalIid": null,
+					"anchorEligible": false,
+					"reason": "invalid_iid_value"
+				},
+				"remote": null,
+				"warnings": []
+			}
+		},
+		{
+			"name": "iid_uppercase_prefix_scheme",
+			"input": "INT:ISRC:usqx91300108",
+			"options": {
+				"remoteFetch": false
+			},
+			"expected": {
+				"kind": "iid",
+				"normalizedInput": "INT:ISRC:usqx91300108",
+				"data": {
+					"valid": true,
+					"scheme": "isrc",
+					"value": "USQX91300108",
+					"canonicalIid": "int:isrc:USQX91300108",
+					"anchorEligible": true
+				},
+				"remote": null,
+				"warnings": []
+			}
+		},
+		{
+			"name": "iid_remote_enabled_short_circuit",
+			"input": "int:isrc:USQX91300108",
+			"options": {
+				"remoteFetch": true
+			},
+			"expected": {
+				"kind": "iid",
+				"normalizedInput": "int:isrc:USQX91300108",
+				"data": {
+					"valid": true,
+					"scheme": "isrc",
+					"value": "USQX91300108",
+					"canonicalIid": "int:isrc:USQX91300108",
+					"anchorEligible": true
+				},
+				"remote": null,
+				"warnings": []
+			}
+		}
+	]
+}

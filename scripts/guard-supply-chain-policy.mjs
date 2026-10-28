@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 const scriptPath = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(scriptPath), '..');
 const minReleaseAgeSeconds = 1_209_600;
+const exceptionPolicyPath = path.join(repoRoot, 'supply-chain-exceptions.json');
 const failures = [];
 
 const dependencySections = [
@@ -60,6 +61,30 @@ const addFailure = (filePath, message) => {
 
 const readTextFile = (filePath) => fs.readFileSync(filePath, 'utf8');
 
+let cachedExceptionPolicy;
+
+const readExceptionPolicy = () => {
+	if (cachedExceptionPolicy) {
+		return cachedExceptionPolicy;
+	}
+
+	if (!fs.existsSync(exceptionPolicyPath)) {
+		cachedExceptionPolicy = { schemaVersion: 1, minimumReleaseAge: [] };
+		return cachedExceptionPolicy;
+	}
+
+	try {
+		cachedExceptionPolicy = JSON.parse(readTextFile(exceptionPolicyPath));
+	} catch {
+		addFailure(exceptionPolicyPath, 'must contain valid JSON');
+		cachedExceptionPolicy = { schemaVersion: 1, minimumReleaseAge: [] };
+	}
+
+	return cachedExceptionPolicy;
+};
+
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const listFiles = (startPath, predicate) => {
 	if (!fs.existsSync(startPath)) {
 		return [];
@@ -91,7 +116,116 @@ const packageJsonFiles = listFiles(
 	(filePath) => path.basename(filePath) === 'package.json'
 );
 
+// This decodes key segments and single-line basic strings, not TOML documents.
+const decodeBasicString = (literal) => {
+	return literal.slice(1, -1).replace(/\\(U[0-9a-fA-F]{8}|u[0-9a-fA-F]{4}|.)/g, (_, escape) => {
+		const simple = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r', '"': '"', '\\': '\\' };
+		if (Object.hasOwn(simple, escape)) return simple[escape];
+		if (/^[uU][0-9a-fA-F]+$/.test(escape)) {
+			const point = Number.parseInt(escape.slice(1), 16);
+			if (point <= 0x10ffff && !(point >= 0xd800 && point <= 0xdfff)) return String.fromCodePoint(point);
+		}
+		throw new Error('unsupported string escape');
+	});
+};
+
+const parseKeySegments = (key) => {
+	const segments = [];
+	let remaining = key.trim();
+	while (remaining) {
+		const token = /^(?:[A-Za-z0-9_-]+|"(?:[^"\\\r\n]|\\[^\r\n])*"|'[^'\r\n]*')/.exec(remaining)?.[0];
+		if (!token) throw new Error('unsupported key');
+		segments.push({ value: token[0] === '"' ? decodeBasicString(token) : token[0] === "'" ? token.slice(1, -1) : token, bare: !/^["']/.test(token) });
+		remaining = remaining.slice(token.length).trim();
+		if (!remaining) break;
+		if (!remaining.startsWith('.')) throw new Error('unsupported key');
+		remaining = remaining.slice(1).trim();
+		if (!remaining) throw new Error('empty key segment');
+	}
+	if (!segments.length) throw new Error('empty key');
+	return segments;
+};
+
+const outsideStringIndex = (line, delimiter) => {
+	let quote = null;
+	for (let i = 0; i < line.length; i++) {
+		const c = line[i];
+		if (quote === '"' && c === '\\') { i++; continue; }
+		if (quote) { if (c === quote) quote = null; continue; }
+		if (c === '"' || c === "'") quote = c;
+		else if (c === delimiter) return i;
+	}
+	return -1;
+};
+
+const parseExcludes = (value) => {
+	if (!value.startsWith('[') || !value.endsWith(']')) throw new Error('array');
+	let remaining = value.slice(1, -1).trim();
+	const names = [];
+	while (remaining) {
+		const token = /^"(?:[^"\\\r\n]|\\[^\r\n])*"/.exec(remaining)?.[0];
+		if (!token || /[\x00-\x08\x0a-\x1f]/.test(token)) throw new Error('basic string');
+		names.push(decodeBasicString(token));
+		remaining = remaining.slice(token.length).trim();
+		if (!remaining) break;
+		if (!remaining.startsWith(',')) throw new Error('array separator');
+		remaining = remaining.slice(1).trim();
+	}
+	return names;
+};
+
+// Find value boundaries without interpreting unrelated TOML keys or values.
+// Quotes are stateful: opposite quotes and # inside a string are content.
+const scanValueBoundary = (lines, startLine, startColumn) => {
+	let quote = null;
+	let multilineString = false;
+	const stack = [];
+	let malformed = false;
+	for (let endLine = startLine; endLine < lines.length; endLine++) {
+		const line = lines[endLine];
+		for (let i = endLine === startLine ? startColumn : 0; i < line.length; i++) {
+			const c = line[i];
+			if (quote) {
+				if (quote[0] === '"' && c === '\\') { i++; continue; }
+				if (quote.length === 3) {
+					if (line.startsWith(quote, i)) {
+						// TOML allows one or two content quotes immediately before
+						// the closing delimiter (a run of four or five quotes).
+						while (line[i + 1] === c) i++;
+						quote = null;
+					}
+				} else if (c === quote) quote = null;
+				continue;
+			}
+			if (c === '#') break;
+			if (c === '"' || c === "'") {
+				quote = line.startsWith(c.repeat(3), i) ? c.repeat(3) : c;
+				if (quote.length === 3) { multilineString = true; i += 2; }
+			} else if (c === '[' || c === '{') stack.push(c);
+			else if (c === ']' || c === '}') {
+				if (stack.pop() !== (c === ']' ? '[' : '{')) malformed = true;
+			}
+		}
+		if ((!quote && stack.length === 0) || malformed || quote?.length === 1) {
+			return { endLine, complete: !quote && !stack.length && !malformed, multilineString };
+		}
+	}
+	return { endLine: lines.length - 1, complete: false, multilineString };
+};
+
 const checkBunPolicy = () => {
+	/*
+	 * Canonical form: exactly one bare [install] header (bracket whitespace and
+	 * trailing comments allowed); inside it, bare minimumReleaseAge = decimal
+	 * digits and optional bare minimumReleaseAgeExcludes = a single-line array
+	 * of double-quoted basic strings, with optional trailing comments. Comments
+	 * start only outside strings. Quoted/dotted policy keys and alternate install
+	 * table forms fail closed. [install.scopes], [install.cache], [install.lockfile]
+	 * are independent tables, never sources of these policy values.
+	 * This is a canonical-form linter, not TOML: unrelated values are opaque,
+	 * including multiline arrays and strings. Consume their boundaries before
+	 * looking for the next assignment/header; policy values stay single-line.
+	 */
 	const bunfigPath = path.join(repoRoot, 'bunfig.toml');
 
 	if (!fs.existsSync(bunfigPath)) {
@@ -99,17 +233,171 @@ const checkBunPolicy = () => {
 		return;
 	}
 
-	const bunfig = readTextFile(bunfigPath);
-	const ageMatch = bunfig.match(/^\s*minimumReleaseAge\s*=\s*(\d+)/m);
+	let table = 'root';
+	let installHeaders = 0;
+	let ageSeen = false;
+	let installRejected = false;
+	let excludesValid = true;
+	let configuredExcludes = [];
+	const seenPolicyKeys = new Set();
+	const unsupported = (message) => addFailure(bunfigPath, `unsupported bunfig representation: ${message}`);
+	const lines = readTextFile(bunfigPath).split(/\r?\n/);
+	for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+		const rawLine = lines[lineIndex];
+		if (rawLine.trimStart().startsWith('#')) continue;
+		const comment = outsideStringIndex(rawLine, '#');
+		const line = (comment < 0 ? rawLine : rawLine.slice(0, comment)).trim();
+		if (!line) continue;
+		if (line.startsWith('[')) {
+			const header = /^(\[\[?)(.*?)(\]\]?)$/.exec(line);
+			let segments;
+			try {
+				if (!header || header[1].length !== header[3].length) throw new Error('table');
+				segments = parseKeySegments(header[2]);
+			} catch {
+				table = 'other';
+				installRejected = true;
+				unsupported(`table header syntax ${line}`);
+				continue;
+			}
+			table = 'other';
+			const policySegment = segments.find(({ value }) => value === 'minimumReleaseAge' || value === 'minimumReleaseAgeExcludes');
+			if (policySegment) {
+				if (policySegment.value === 'minimumReleaseAge') ageSeen = true;
+				else excludesValid = false;
+				unsupported(`policy table ${line} must use a bare assignment inside [install]`);
+				continue;
+			}
+			if (segments[0].value === 'install') {
+				if (!segments[0].bare || header[1] === '[[') {
+					installRejected = true;
+					unsupported(`install table must use bare [install]; found ${line}`);
+					continue;
+				}
+				if (segments.length === 1) {
+					table = 'install';
+					if (++installHeaders > 1) unsupported('duplicate [install] header');
+				}
+			}
+			continue;
+		}
+		const equals = outsideStringIndex(line, '=');
+		const key = line.slice(0, equals).trim();
+		const value = line.slice(equals + 1).trim();
+		let segments;
+		try {
+			if (equals < 0) throw new Error('assignment');
+			segments = parseKeySegments(key);
+		} catch {
+			installRejected = true;
+			excludesValid = false;
+			unsupported(`assignment/key syntax ${line}`);
+			continue;
+		}
+		// Use the original text: stripping comments with single-line quote rules
+		// would discard # content inside a multiline string's opening line.
+		const boundary = scanValueBoundary(lines, lineIndex, outsideStringIndex(rawLine, '=') + 1);
+		lineIndex = boundary.endLine;
+		const policySegment = segments.find(({ value }) => value === 'minimumReleaseAge' || value === 'minimumReleaseAgeExcludes');
+		if (policySegment?.value === 'minimumReleaseAge') ageSeen = true;
+		if (table === 'root' && segments[0].value === 'install' && !policySegment) {
+			installRejected = true;
+			unsupported(`install table must use bare [install]; found assignment ${key}`);
+			continue;
+		}
+		if (policySegment) {
+			if (table !== 'install' || segments.length !== 1 || !segments[0].bare) {
+				if (policySegment.value === 'minimumReleaseAgeExcludes') excludesValid = false;
+				unsupported(`policy key ${key} must be bare inside [install]`);
+				continue;
+			}
+			if (seenPolicyKeys.has(key)) {
+				if (key === 'minimumReleaseAgeExcludes') excludesValid = false;
+				unsupported(`duplicate policy key ${key}`);
+				continue;
+			}
+			seenPolicyKeys.add(key);
+			if (key === 'minimumReleaseAge') {
+				if (!/^\d+$/.test(value)) unsupported(`minimumReleaseAge must be plain decimal digits; found ${value}`);
+				else if (BigInt(value) < BigInt(minReleaseAgeSeconds)) addFailure(bunfigPath, `minimumReleaseAge must be at least ${minReleaseAgeSeconds} seconds`);
+			} else {
+				try { configuredExcludes = parseExcludes(value); }
+				catch {
+					excludesValid = false;
+					unsupported('minimumReleaseAgeExcludes must be a single-line string array');
+				}
+			}
+			continue;
+		}
+		if (!boundary.complete) {
+			unsupported(boundary.multilineString
+				? `multiline string value for ${key}`
+				: `multiline or unbalanced value for ${key}`);
+		}
+	}
+	if (!ageSeen && !installRejected) addFailure(bunfigPath, 'missing minimumReleaseAge');
+	if (installHeaders === 0 && !installRejected) unsupported('missing bare [install] header');
 
-	if (!ageMatch) {
-		addFailure(bunfigPath, 'missing minimumReleaseAge');
-	} else if (Number(ageMatch[1]) < minReleaseAgeSeconds) {
-		addFailure(bunfigPath, `minimumReleaseAge must be at least ${minReleaseAgeSeconds} seconds`);
+	if (!fs.existsSync(exceptionPolicyPath)) {
+		if (configuredExcludes.length > 0) {
+			addFailure(exceptionPolicyPath, 'missing exception manifest for minimumReleaseAgeExcludes');
+		}
+		return;
 	}
 
-	if (/^\s*minimumReleaseAgeExcludes\s*=/.test(bunfig)) {
-		addFailure(bunfigPath, 'minimumReleaseAgeExcludes requires explicit review');
+	const policy = readExceptionPolicy();
+
+	if (policy.schemaVersion !== 1 || !Array.isArray(policy.minimumReleaseAge)) {
+		addFailure(exceptionPolicyPath, 'must use schemaVersion 1 with a minimumReleaseAge array');
+		return;
+	}
+
+	const approvedNames = policy.minimumReleaseAge.map((entry) => entry.package);
+	if (excludesValid && new Set(configuredExcludes).size !== configuredExcludes.length) {
+		addFailure(bunfigPath, 'minimumReleaseAgeExcludes contains duplicate package names');
+	}
+	if (new Set(approvedNames).size !== approvedNames.length) {
+		addFailure(exceptionPolicyPath, 'contains duplicate package exceptions');
+	}
+	if (
+		excludesValid && (configuredExcludes.length !== approvedNames.length ||
+		configuredExcludes.some((name) => !approvedNames.includes(name)))
+	) {
+		addFailure(
+			bunfigPath,
+			'minimumReleaseAgeExcludes must exactly match supply-chain-exceptions.json'
+		);
+	}
+
+	for (const entry of policy.minimumReleaseAge) {
+		if (
+			typeof entry.package !== 'string' ||
+			typeof entry.version !== 'string' ||
+			!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(entry.version) ||
+			typeof entry.integrity !== 'string' ||
+			!entry.integrity.startsWith('sha512-') ||
+			Number.isNaN(Date.parse(entry.publishedAt)) ||
+			Number.isNaN(Date.parse(entry.removeAfter)) ||
+			typeof entry.reason !== 'string' ||
+			entry.reason.trim().length === 0
+		) {
+			addFailure(exceptionPolicyPath, `invalid exception record for ${entry.package ?? 'unknown'}`);
+			continue;
+		}
+
+		const expectedRemoval = Date.parse(entry.publishedAt) + minReleaseAgeSeconds * 1_000;
+		if (Date.parse(entry.removeAfter) !== expectedRemoval) {
+			addFailure(
+				exceptionPolicyPath,
+				`${entry.package}@${entry.version} removeAfter must equal publishedAt + minimumReleaseAge`
+			);
+		}
+		if (Date.now() >= Date.parse(entry.removeAfter)) {
+			addFailure(
+				exceptionPolicyPath,
+				`${entry.package}@${entry.version} is now old enough; remove its release-age exception`
+			);
+		}
 	}
 };
 
@@ -129,6 +417,7 @@ const checkRootInstallPolicy = () => {
 	}
 
 	const packageJson = JSON.parse(readTextFile(rootPackagePath));
+	const exceptionPolicy = readExceptionPolicy();
 
 	if (!packageJson.packageManager?.startsWith('bun@')) {
 		addFailure(rootPackagePath, 'packageManager must pin Bun');
@@ -140,6 +429,15 @@ const checkRootInstallPolicy = () => {
 
 	if (!fs.existsSync(path.join(repoRoot, 'scripts/enforce-bun-install.mjs'))) {
 		addFailure(rootPackagePath, 'missing scripts/enforce-bun-install.mjs');
+	}
+
+	for (const entry of exceptionPolicy.minimumReleaseAge ?? []) {
+		if (packageJson.devDependencies?.[entry.package] !== entry.version) {
+			addFailure(
+				rootPackagePath,
+				`devDependencies.${entry.package} must pin approved exception version ${entry.version}`
+			);
+		}
 	}
 };
 
@@ -166,6 +464,12 @@ const getDependencyEntries = (manifest, sectionName) => {
 };
 
 const checkPackageManifests = () => {
+	const exceptionPolicy = readExceptionPolicy();
+	const approvedVersions = new Map(
+		(exceptionPolicy.minimumReleaseAge ?? []).map((entry) => [entry.package, entry.version])
+	);
+	const seenApprovedDependencies = new Set();
+
 	for (const packagePath of packageJsonFiles) {
 		const manifest = JSON.parse(readTextFile(packagePath));
 
@@ -175,10 +479,55 @@ const checkPackageManifests = () => {
 
 		for (const sectionName of dependencySections) {
 			for (const [name, version] of getDependencyEntries(manifest, sectionName)) {
+				if (approvedVersions.has(name)) {
+					seenApprovedDependencies.add(name);
+					if (version !== approvedVersions.get(name)) {
+						addFailure(
+							packagePath,
+							`${sectionName}.${name} must equal approved exception version ${approvedVersions.get(name)}`
+						);
+					}
+				}
 				if (dependencyGitPattern.test(version)) {
 					addFailure(packagePath, `${sectionName}.${name} uses a Git dependency (${version})`);
 				}
 			}
+		}
+	}
+
+	for (const packageName of approvedVersions.keys()) {
+		if (!seenApprovedDependencies.has(packageName)) {
+			addFailure(exceptionPolicyPath, `${packageName} exception has no exact manifest dependency`);
+		}
+	}
+};
+
+const checkExceptionLockfile = () => {
+	const lockfilePath = path.join(repoRoot, 'bun.lock');
+	if (!fs.existsSync(lockfilePath)) {
+		addFailure(lockfilePath, 'missing Bun lockfile');
+		return;
+	}
+
+	const lockfile = readTextFile(lockfilePath);
+	for (const entry of readExceptionPolicy().minimumReleaseAge ?? []) {
+		const packageKey = `"${entry.package}"`;
+		const resolution = `"${entry.package}@${entry.version}"`;
+		if (!lockfile.includes(packageKey) || !lockfile.includes(resolution)) {
+			addFailure(
+				lockfilePath,
+				`missing exact exception resolution ${entry.package}@${entry.version}`
+			);
+		}
+
+		const tuplePattern = new RegExp(
+			`${escapeRegExp(packageKey)}:\\s*\\[${escapeRegExp(resolution)}[\\s\\S]{0,4000}${escapeRegExp(`"${entry.integrity}"`)}\\]`
+		);
+		if (!tuplePattern.test(lockfile)) {
+			addFailure(
+				lockfilePath,
+				`${entry.package}@${entry.version} lock entry must match approved registry integrity`
+			);
 		}
 	}
 };
@@ -251,6 +600,7 @@ const checkIncidentIocs = () => {
 		path.join(repoRoot, 'tooling'),
 		path.join(repoRoot, 'bun.lock'),
 		path.join(repoRoot, 'bunfig.toml'),
+		path.join(repoRoot, 'supply-chain-exceptions.json'),
 		path.join(repoRoot, 'package.json'),
 	];
 	const filesToScan = scanRoots.flatMap((scanRoot) => {
@@ -287,6 +637,7 @@ const checkIncidentIocs = () => {
 checkBunPolicy();
 checkRootInstallPolicy();
 checkPackageManifests();
+checkExceptionLockfile();
 checkWorkflowPolicy();
 checkIncidentIocs();
 

@@ -2,7 +2,7 @@ import type { PredicateSpec } from './types.js';
 
 /**
  * Cross-referential consistency gate for the predicate set (see
- * `.planning/predicate-spec-decisions.md` §5.1). These rules need the whole set — key existence,
+ * the public predicate specification). These rules need the whole set — key existence,
  * inverse mirroring, contradicts symmetry, specializes acyclicity, contradiction-vs-hierarchy
  * coherence. Per-spec rules (symmetry/inverse conflict, polarity∧transitive, literalType,
  * supersededBy status) are enforced in `definePredicateRecord`.

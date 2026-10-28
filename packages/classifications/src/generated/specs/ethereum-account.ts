@@ -6,8 +6,9 @@ export const ethereumAccount: ClassificationSpec = {
 	displayName: 'Ethereum Account',
 	description: 'A wallet or externally owned account identity on an EVM chain.',
 	category: 'Blockchain',
+	atomCategory: 'thing',
 	schema: {
-		context: 'https://schema.intuition.systems/v1/ethereum.jsonld',
+		context: 'https://schemas.intuition.systems/v1',
 		type: 'EthereumAccount',
 	},
 	metadataPredicates: ['linkedAccount'] as const,

@@ -1,0 +1,51 @@
+{
+	"id": 550,
+	"title": "Acme Origins",
+	"overview": "Origin story of Acme.",
+	"poster_path": "/poster.jpg",
+	"backdrop_path": "/backdrop.jpg",
+	"release_date": "2025-10-01",
+	"vote_average": 7.8,
+	"vote_count": 4201,
+	"genres": [{ "id": 18, "name": "Drama" }, { "id": 53, "name": "Thriller" }],
+	"runtime": 123,
+	"original_language": "en",
+	"spoken_languages": [{ "english_name": "English", "iso_639_1": "en", "name": "English" }],
+	"production_countries": [{ "iso_3166_1": "US", "name": "United States of America" }],
+	"credits": {
+		"cast": [
+			{
+				"adult": false,
+				"cast_id": 4,
+				"character": "Narrator",
+				"credit_id": "credit-2",
+				"id": 2,
+				"name": "Second Billing",
+				"order": 1,
+				"original_name": "Second Billing",
+				"profile_path": "/second.jpg"
+			},
+			{
+				"adult": false,
+				"cast_id": 3,
+				"character": "Lead",
+				"credit_id": "credit-1",
+				"id": 1,
+				"name": "First Billing",
+				"order": 0,
+				"original_name": "First Billing",
+				"profile_path": "/first.jpg"
+			}
+		]
+	},
+	"keywords": {
+		"keywords": [{ "id": 101, "name": "origin story" }, { "id": 102, "name": "fixture" }]
+	},
+	"external_ids": {
+		"imdb_id": "tt1234567",
+		"tvdb_id": 9876,
+		"wikidata_id": "Q12345"
+	},
+	"release_dates": { "results": [{ "iso_3166_1": "US", "release_dates": [] }] },
+	"fixture_extra": { "retained": true }
+}

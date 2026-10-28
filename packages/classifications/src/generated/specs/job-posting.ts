@@ -6,6 +6,7 @@ export const jobPosting: ClassificationSpec = {
 	displayName: 'Job Posting',
 	description: 'A job opening with title and hiring organization as the durable identity.',
 	category: 'Other',
+	atomCategory: 'thing',
 	schema: { context: 'https://schema.org/', type: 'JobPosting' },
 	metadataPredicates: ['hiringOrganization', 'jobLocation', 'url', 'hasTag', 'sameAs'] as const,
 	fields: [

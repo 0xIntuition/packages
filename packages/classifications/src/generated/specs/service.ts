@@ -6,6 +6,7 @@ export const service: ClassificationSpec = {
 	displayName: 'Service',
 	description: 'A service identity with optional provider and area-served disambiguators.',
 	category: 'Product',
+	atomCategory: 'company',
 	schema: { context: 'https://schema.org/', type: 'Service' },
 	metadataPredicates: ['provider', 'areaServed', 'hasCategory', 'url', 'sameAs'] as const,
 	fields: [

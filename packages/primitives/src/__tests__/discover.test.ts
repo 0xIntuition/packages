@@ -73,7 +73,7 @@ describe('getRequiredFields', () => {
 		expect(fields).toContainEqual(
 			expect.objectContaining({
 				key: 'familyName',
-				required: true,
+				required: false,
 				fieldType: 'string',
 			})
 		);

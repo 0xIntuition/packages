@@ -1,4 +1,5 @@
-import { TrustBondingAbi } from '../../contracts';
+import type { ContractFunctionReturnType } from 'viem';
+import { TrustBondingAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -6,7 +7,9 @@ import type { ReadConfig } from '../../types';
  * @param config Contract address and public client.
  * @returns Previous epoch as returned by the contract.
  */
-export async function trustBondingPreviousEpoch(config: ReadConfig) {
+export async function trustBondingPreviousEpoch(
+	config: ReadConfig
+): Promise<TrustBondingPreviousEpochResult> {
 	const { address, publicClient } = config;
 
 	return await publicClient.readContract({
@@ -15,3 +18,9 @@ export async function trustBondingPreviousEpoch(config: ReadConfig) {
 		functionName: 'previousEpoch',
 	});
 }
+
+export type TrustBondingPreviousEpochResult = ContractFunctionReturnType<
+	typeof TrustBondingAbi,
+	'view' | 'pure',
+	'previousEpoch'
+>;

@@ -6,6 +6,7 @@ export const image: ClassificationSpec = {
 	displayName: 'Image',
 	description: 'An image identity with a canonical source URL.',
 	category: 'Media',
+	atomCategory: 'thing',
 	schema: { context: 'https://schema.org/', type: 'ImageObject' },
 	metadataPredicates: [
 		'authoredBy',

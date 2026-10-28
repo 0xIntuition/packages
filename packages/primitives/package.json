@@ -1,6 +1,6 @@
 {
 	"name": "@0xintuition/primitives",
-	"version": "0.1.0-alpha.0",
+	"version": "0.1.0-alpha.1",
 	"description": "High-level Intuition atom, claim, and validation primitives",
 	"private": false,
 	"license": "MIT",
@@ -42,6 +42,10 @@
 		"./types": {
 			"types": "./dist/types.d.ts",
 			"import": "./dist/types.js"
+		},
+		"./anchor": {
+			"types": "./dist/anchor.d.ts",
+			"import": "./dist/anchor.js"
 		}
 	},
 	"keywords": [
@@ -84,9 +88,11 @@
 		"check:unsafe:write": "biome check --write --unsafe"
 	},
 	"dependencies": {
-		"@0xintuition/classifications": "0.1.0-alpha.0",
-		"@0xintuition/ids": "0.1.0-alpha.0",
-		"@0xintuition/predicates": "0.1.0-alpha.0"
+		"@0xintuition/classifications": "0.1.0-alpha.1",
+		"@0xintuition/ids": "0.1.0-alpha.1",
+		"@0xintuition/iid": "0.1.0-alpha.0",
+		"@0xintuition/iid-registry": "0.1.0-alpha.0",
+		"@0xintuition/predicates": "0.1.0-alpha.1"
 	},
 	"peerDependencies": {
 		"viem": "^2.0.0"
@@ -95,5 +101,8 @@
 		"typescript": "^5.9.3",
 		"vitest": "^4.0.16",
 		"viem": "^2.31.4"
+	},
+	"engines": {
+		"node": ">=20"
 	}
 }

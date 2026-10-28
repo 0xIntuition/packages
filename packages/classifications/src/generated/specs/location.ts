@@ -6,6 +6,7 @@ export const location: ClassificationSpec = {
 	displayName: 'Location',
 	description: 'A place identity with optional address and canonical references.',
 	category: 'Entity',
+	atomCategory: 'place',
 	schema: { context: 'https://schema.org/', type: 'Place' },
 	metadataPredicates: [
 		'containedInPlace',

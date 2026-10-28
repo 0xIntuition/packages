@@ -1,0 +1,18 @@
+{
+	"single": {
+		"id": "artistFixture123456789",
+		"name": "Fixture Artist",
+		"popularity": 88,
+		"genres": ["indie", "electronic"],
+		"external_urls": { "spotify": "https://open.spotify.com/artist/artistFixture123456789" },
+		"images": [{ "url": "https://i.scdn.co/artist.jpg" }]
+	},
+	"batchItem": {
+		"id": "artistFixture123456789",
+		"name": "Fixture Artist",
+		"popularity": 88,
+		"genres": ["indie", "electronic"],
+		"external_urls": { "spotify": "https://open.spotify.com/artist/artistFixture123456789" },
+		"images": [{ "url": "https://i.scdn.co/artist.jpg" }]
+	}
+}

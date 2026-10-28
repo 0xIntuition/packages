@@ -1,0 +1,75 @@
+{
+	"specVersion": "0.1.0",
+	"fixtureVersion": 1,
+	"kind": "gen1",
+	"vectors": [
+		{
+			"id": "gen1-001",
+			"slug": "movie",
+			"tag": 4,
+			"fields": {
+				"name": "Inception",
+				"yearPublished": "2010"
+			},
+			"preimage": "{\"c\":\"movie\",\"f\":{\"name\":\"inception\",\"yearPublished\":\"2010\"}}",
+			"iid": "int:gen1:movie:r4:fb681afe7d438cad73ae90a70f1cc55a",
+			"note": "spec §6.5 worked example"
+		},
+		{
+			"id": "gen1-002",
+			"slug": "movie",
+			"tag": 5,
+			"fields": {
+				"name": "Inception"
+			},
+			"preimage": "{\"c\":\"movie\",\"f\":{\"name\":\"inception\"}}",
+			"iid": "int:gen1:movie:r5:ed2d2ab3773c903a3e8f9ebac3a13122",
+			"note": "same fields minus year — different rung, different hash"
+		},
+		{
+			"id": "gen1-003",
+			"slug": "music-group",
+			"tag": 4,
+			"fields": {
+				"name": "Nirvana"
+			},
+			"preimage": "{\"c\":\"music-group\",\"f\":{\"name\":\"nirvana\"}}",
+			"iid": "int:gen1:music-group:r4:d202109df634438f49760a50b943e0fe",
+			"note": "name-level concept; every band named Nirvana collides"
+		},
+		{
+			"id": "gen1-004",
+			"slug": "music-group",
+			"tag": 4,
+			"fields": {
+				"name": "  NIRVANA  "
+			},
+			"preimage": "{\"c\":\"music-group\",\"f\":{\"name\":\"nirvana\"}}",
+			"iid": "int:gen1:music-group:r4:d202109df634438f49760a50b943e0fe",
+			"note": "NORM-1 convergence: formatting variants collide"
+		},
+		{
+			"id": "gen1-005",
+			"slug": "person",
+			"tag": 3,
+			"fields": {
+				"name": "Sigur Rós"
+			},
+			"preimage": "{\"c\":\"person\",\"f\":{\"name\":\"sigur rós\"}}",
+			"iid": "int:gen1:person:r3:40cd11c4bf61e7628462df1ccc40040e",
+			"note": "unicode name normalizes without diacritic loss"
+		},
+		{
+			"id": "gen1-006",
+			"slug": "book",
+			"tag": 2,
+			"fields": {
+				"name": "Don’t Panic",
+				"yearPublished": "1988"
+			},
+			"preimage": "{\"c\":\"book\",\"f\":{\"name\":\"don't panic\",\"yearPublished\":\"1988\"}}",
+			"iid": "int:gen1:book:r2:71c1fa3b18f0980d2bbe8d2fa8612b46",
+			"note": "punctuation folding in preimage"
+		}
+	]
+}

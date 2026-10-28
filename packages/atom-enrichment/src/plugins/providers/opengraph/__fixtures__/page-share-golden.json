@@ -1,0 +1,149 @@
+{
+	"goodreads": [
+		{
+			"artifact_type": "microdata",
+			"data": {
+				"url": "https://www.goodreads.com/book/show/2657",
+				"title": "The Example Book by A. Writer | Goodreads",
+				"imageUrl": "https://images.example-gr.test/books/2657.jpg",
+				"jsonLd": [
+					{
+						"@context": "https://schema.org",
+						"@type": "Book",
+						"name": "The Example Book",
+						"author": {
+							"@type": "Person",
+							"name": "A. Writer"
+						},
+						"isbn": "9780000000002",
+						"image": "https://images.example-gr.test/books/2657.jpg"
+					}
+				]
+			},
+			"meta": {
+				"pluginId": "microdata",
+				"provider": "page-jsonld",
+				"fetchedAt": "2026-01-01T00:00:00.000Z",
+				"sourceUrl": "https://www.goodreads.com/book/show/2657"
+			}
+		},
+		{
+			"artifact_type": "opengraph",
+			"data": {
+				"title": "The Example Book",
+				"description": "An invented book used as a fixture.",
+				"image": "https://images.example-gr.test/books/2657.jpg",
+				"url": "https://www.goodreads.com/book/show/2657",
+				"siteName": "Goodreads",
+				"type": "books.book"
+			},
+			"meta": {
+				"pluginId": "opengraph",
+				"provider": "website",
+				"fetchedAt": "2026-01-01T00:00:00.000Z",
+				"sourceUrl": "https://www.goodreads.com/book/show/2657",
+				"imagePolicy": {
+					"authorizedUrl": "https://www.goodreads.com/book/show/2657",
+					"kind": "allowlisted"
+				}
+			}
+		}
+	],
+	"product": [
+		{
+			"artifact_type": "microdata",
+			"data": {
+				"url": "https://acme.example/widget",
+				"title": "Acme Widget",
+				"imageUrl": "https://acme.example/widget.png",
+				"jsonLd": [
+					{
+						"@context": "https://schema.org",
+						"@type": "Product",
+						"name": "Acme Widget",
+						"image": "https://acme.example/widget.png"
+					}
+				]
+			},
+			"meta": {
+				"pluginId": "microdata",
+				"provider": "page-jsonld",
+				"fetchedAt": "2026-01-01T00:00:00.000Z",
+				"sourceUrl": "https://acme.example/widget"
+			}
+		},
+		{
+			"artifact_type": "opengraph",
+			"data": {
+				"title": "Acme Widget",
+				"description": "A widget.",
+				"image": "https://acme.example/widget.png",
+				"url": "https://acme.example/widget",
+				"siteName": "Acme",
+				"type": "product"
+			},
+			"meta": {
+				"pluginId": "opengraph",
+				"provider": "website",
+				"fetchedAt": "2026-01-01T00:00:00.000Z",
+				"sourceUrl": "https://acme.example/widget",
+				"imagePolicy": {
+					"authorizedUrl": "https://acme.example/widget",
+					"kind": "generic-user-pasted"
+				}
+			}
+		}
+	],
+	"letterboxd": [
+		{
+			"artifact_type": "microdata",
+			"data": {
+				"url": "https://letterboxd.com/film/example-film/",
+				"title": "Example Film (2019) directed by A. Director | Letterboxd",
+				"imageUrl": "https://images.example-lb.test/film/example.jpg",
+				"jsonLd": [
+					{
+						"@context": "http://schema.org",
+						"@type": "Movie",
+						"name": "Example Film",
+						"dateCreated": "2019",
+						"image": "https://images.example-lb.test/film/example.jpg",
+						"director": [
+							{
+								"@type": "Person",
+								"name": "A. Director"
+							}
+						]
+					}
+				]
+			},
+			"meta": {
+				"pluginId": "microdata",
+				"provider": "page-jsonld",
+				"fetchedAt": "2026-01-01T00:00:00.000Z",
+				"sourceUrl": "https://letterboxd.com/film/example-film/"
+			}
+		},
+		{
+			"artifact_type": "opengraph",
+			"data": {
+				"title": "Example Film (2019)",
+				"description": "An invented film used as a fixture.",
+				"image": "https://images.example-lb.test/film/example.jpg",
+				"url": "https://letterboxd.com/film/example-film/",
+				"siteName": "Letterboxd",
+				"type": "video.movie"
+			},
+			"meta": {
+				"pluginId": "opengraph",
+				"provider": "website",
+				"fetchedAt": "2026-01-01T00:00:00.000Z",
+				"sourceUrl": "https://letterboxd.com/film/example-film/",
+				"imagePolicy": {
+					"authorizedUrl": "https://letterboxd.com/film/example-film/",
+					"kind": "allowlisted"
+				}
+			}
+		}
+	]
+}

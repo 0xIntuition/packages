@@ -11,10 +11,8 @@ import {
 } from './deployments';
 
 describe('intuitionPeripheryDeployments', () => {
-	it('includes TrustSwapAndBridgeRouter on Base', () => {
-		expect(intuitionPeripheryDeployments.TrustSwapAndBridgeRouter?.[base.id]).toBe(
-			'0xA1EC6f95A88Bfc7A8Fd35f1296b64ebaf91C93fb'
-		);
+	it('carries no TrustSwapAndBridgeRouter address until the deadline router is redeployed', () => {
+		expect(intuitionPeripheryDeployments.TrustSwapAndBridgeRouter).toEqual({});
 	});
 
 	it('includes direct bridge deployments for MetaHub/MetaSpoke/MetaNativeSpoke', () => {
@@ -43,6 +41,13 @@ describe('intuitionPeripheryDeployments', () => {
 
 	it('does not claim ownership of WrappedTrust deployments', () => {
 		expect(intuitionPeripheryDeployments.WrappedTrust).toBeUndefined();
+	});
+
+	it('carries the mainnet and testnet FeeProxy', () => {
+		expect(intuitionPeripheryDeployments.FeeProxy).toEqual({
+			1155: '0x45B65BB9FFC4BC51C9e3a56902d9183dcff51B55',
+			13579: '0x847801465DcB17811089107c0051c49E0135F6B8',
+		});
 	});
 
 	it('maps recipient domains by direction', () => {

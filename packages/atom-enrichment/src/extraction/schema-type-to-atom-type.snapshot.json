@@ -1,0 +1,18 @@
+{
+	"Person": "person",
+	"Place": "place",
+	"LocalBusiness": "place",
+	"Organization": "company",
+	"Brand": "company",
+	"Service": "company",
+	"Product": "product",
+	"MusicRecording": "song",
+	"MusicAlbum": "song",
+	"MusicPlaylist": "song",
+	"MusicGroup": "song",
+	"PodcastSeries": "podcast",
+	"PodcastEpisode": "podcast",
+	"SoftwareApplication": "software",
+	"SoftwareSourceCode": "software",
+	"MobileApplication": "software"
+}

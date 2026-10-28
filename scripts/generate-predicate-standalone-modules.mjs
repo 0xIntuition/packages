@@ -2,9 +2,10 @@
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
-const repoRoot = resolve(new URL('..', import.meta.url).pathname);
+const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const generatedRoot = resolve(repoRoot, 'packages/predicates/src/generated');
 const specsRoot = resolve(generatedRoot, 'specs');
 const generatedIndexPath = resolve(generatedRoot, 'index.ts');

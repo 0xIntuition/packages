@@ -6,6 +6,7 @@ export const podcastSeries: ClassificationSpec = {
 	displayName: 'Podcast Series',
 	description: 'A podcast series identity with a canonical series URL.',
 	category: 'Media',
+	atomCategory: 'podcast',
 	schema: { context: 'https://schema.org/', type: 'PodcastSeries' },
 	metadataPredicates: ['url', 'sameAs', 'createdBy', 'publisher', 'hasCategory', 'actor'] as const,
 	fields: [

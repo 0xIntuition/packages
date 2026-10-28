@@ -1,12 +1,12 @@
 import type { Address } from 'viem';
 import { base, baseSepolia } from 'viem/chains';
 
+import { intuitionMainnet, intuitionTestnet } from './networks';
+
 export const BASE_CHAIN_ID = base.id;
 export const BASE_SEPOLIA_CHAIN_ID = baseSepolia.id;
 export const INTUITION_MAINNET_CHAIN_ID = 1155;
 export const INTUITION_TESTNET_CHAIN_ID = 13579;
-
-import { intuitionMainnet, intuitionTestnet } from './networks.js';
 
 export type IntuitionDeploymentName =
 	| 'Trust'
@@ -18,6 +18,7 @@ export type IntuitionDeploymentName =
 	| 'BondingCurveRegistry'
 	| 'LinearCurve'
 	| 'OffsetProgressiveCurve'
+	| 'DynamicFeeFlatPriceCurve'
 	| 'AtomWalletFactory'
 	| 'AtomWalletBeacon'
 	| 'AtomWarden'
@@ -34,46 +35,52 @@ export const intuitionDeployments: {
 	},
 	BaseEmissionsController: {
 		[base.id]: '0x7745bDEe668501E5eeF7e9605C746f9cDfb60667',
-		[baseSepolia.id]: '0xEA4bB93907b35C09244f069c35A7E60EbeCA0f72',
+		[baseSepolia.id]: '0x6B96fB3867b666A7957fa589866627ea902ec2C6',
 	},
 	WrappedTrust: {
 		[intuitionTestnet.id]: '0xDE80b6EE63f7D809427CA350e30093F436A0fe35',
 		[intuitionMainnet.id]: '0x81cFb09cb44f7184Ad934C09F82000701A4bF672',
 	},
 	MultiVault: {
-		[intuitionTestnet.id]: '0xeBc49d356B7f64D888130D85CC6D17114a6843ec',
+		// Reference canonical testnet deployment; historical instances use overrides.
+		[intuitionTestnet.id]: '0xF76d6976DeBFbB012ebc53e925BC4AEFCaA7C6c6',
 		[intuitionMainnet.id]: '0x6E35cF57A41fA15eA0EaE9C33e751b01A784Fe7e',
 	},
 	TrustBonding: {
-		[intuitionTestnet.id]: '0xfa1bF01055239C674845aAEe5A5416f98f801BE3',
+		[intuitionTestnet.id]: '0x9E79446fE4B1683eF1678654554535a9c90B1C3D',
 		[intuitionMainnet.id]: '0x635bBD1367B66E7B16a21D6E5A63C812fFC00617',
 	},
 	SatelliteEmissionsController: {
-		[intuitionTestnet.id]: '0x67bacf20FF9EE3092F71E5a48270f20F1DAb8309',
+		[intuitionTestnet.id]: '0x2f4ef00b05f5AA9976154125Cc46D47CAB75B1b7',
 		[intuitionMainnet.id]: '0x73B8819f9b157BE42172E3866fB0Ba0d5fA0A5c6',
 	},
 	BondingCurveRegistry: {
-		[intuitionTestnet.id]: '0xbFE8068d5C5117c57d37464e33c937bC08317F88',
+		[intuitionTestnet.id]: '0xb3bfd62d259E07d623844fC7bDB7D54F74Ff9052',
 		[intuitionMainnet.id]: '0xd0E488Fb32130232527eedEB72f8cE2BFC0F9930',
 	},
 	LinearCurve: {
-		[intuitionTestnet.id]: '0x9f272DAEfa66e031081430Ec138FD34190d6f671',
+		[intuitionTestnet.id]: '0x7499bFa918DBc73Ace4A05D6194a5Cd343AE32Dd',
 		[intuitionMainnet.id]: '0xc3eFD5471dc63d74639725f381f9686e3F264366',
 	},
 	OffsetProgressiveCurve: {
-		[intuitionTestnet.id]: '0xd50CB061b1CE0560108fc3D58685d4eDb7594f20',
+		[intuitionTestnet.id]: '0x96bb9020ba4D027E42C29eCB3CEcc2471E505E6C',
 		[intuitionMainnet.id]: '0x23afF95153aa88D28B9B97Ba97629E05D5fD335d',
 	},
+	// Registered as curve id 3 in the testnet BondingCurveRegistry. The mainnet curve deploys and
+	// registers separately, after the v1.1.0 upgrade; add its address then.
+	DynamicFeeFlatPriceCurve: {
+		[intuitionTestnet.id]: '0x3Bd2D1335161f3F2FA9eaA35a537415F7b10156A',
+	},
 	AtomWalletFactory: {
-		[intuitionTestnet.id]: '0xdbaDd9a5f5B75A32ae403B7D44F5510Ac16939CA',
+		[intuitionTestnet.id]: '0x900cff1007055c850FB48695a3CB121290d6f17b',
 		[intuitionMainnet.id]: '0x33827373a7D1c7C78a01094071C2f6CE74253B9B',
 	},
 	AtomWalletBeacon: {
-		[intuitionTestnet.id]: '0x8497Eb80fB9742265AeFE711856b2ecACABF1Cb0',
+		[intuitionTestnet.id]: '0x16deCCF5484bE9FFb5c8a2d800E0fdf27b876012',
 		[intuitionMainnet.id]: '0xC23cD55CF924b3FE4b97deAA0EAF222a5082A1FF',
 	},
 	AtomWarden: {
-		[intuitionTestnet.id]: '0x1f2622D57D09B5E21738a8e0acE24ed9d4a2E32F',
+		[intuitionTestnet.id]: '0xf3f875E0d390C9bA8Aa21881E983baDe91866A38',
 		[intuitionMainnet.id]: '0x98C9BCecf318d0D1409Bf81Ea3551b629fAEC165',
 	},
 	EntryPoint: {

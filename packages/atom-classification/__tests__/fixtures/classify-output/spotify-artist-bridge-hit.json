@@ -1,0 +1,88 @@
+{
+	"name": "spotify-artist-bridge-hit",
+	"url": "https://open.spotify.com/artist/4uLU6hMCjMI75M1A2tKUQC",
+	"atom": {
+		"schemaType": "MusicGroup",
+		"category": "artist",
+		"title": "Fixture spotify-artist",
+		"canonicalId": "int:isni:0000000121367029",
+		"sameAs": [
+			"https://open.spotify.com/artist/4uLU6hMCjMI75M1A2tKUQC",
+			"https://www.wikidata.org/wiki/Q189729",
+			"https://musicbrainz.org/artist/5ae54dee-4dba-49c0-802a-a3b3b3adfe9b",
+			"https://isni.org/isni/0000000121367029"
+		],
+		"hints": {
+			"identifiers": {
+				"spotifyArtistId": "4uLU6hMCjMI75M1A2tKUQC",
+				"wd": "Q189729",
+				"isni": "0000000121367029",
+				"mbid": "artist:5ae54dee-4dba-49c0-802a-a3b3b3adfe9b",
+				"wikidata": "Q189729"
+			},
+			"providerCanonicalIds": ["spotify:artist:4uLU6hMCjMI75M1A2tKUQC"],
+			"identifierSet": [
+				"int:isni:0000000121367029",
+				"int:mbid:artist:5ae54dee-4dba-49c0-802a-a3b3b3adfe9b",
+				"int:wd:Q189729",
+				"int:spotify:artist:4uLU6hMCjMI75M1A2tKUQC"
+			]
+		},
+		"metadata": {
+			"identityBridge": {
+				"property": "P1902",
+				"providerCanonicalId": "spotify:artist:4uLU6hMCjMI75M1A2tKUQC",
+				"qid": "Q189729",
+				"outcome": "hit",
+				"promotionPending": false
+			}
+		},
+		"data": {
+			"@type": "MusicGroup",
+			"identifier": "int:isni:0000000121367029",
+			"name": "Fixture spotify-artist",
+			"sameAs": [
+				"https://open.spotify.com/artist/4uLU6hMCjMI75M1A2tKUQC",
+				"https://www.wikidata.org/wiki/Q189729",
+				"https://musicbrainz.org/artist/5ae54dee-4dba-49c0-802a-a3b3b3adfe9b",
+				"https://isni.org/isni/0000000121367029"
+			]
+		}
+	},
+	"identifierSet": [
+		"int:isni:0000000121367029",
+		"int:mbid:artist:5ae54dee-4dba-49c0-802a-a3b3b3adfe9b",
+		"int:wd:Q189729",
+		"int:spotify:artist:4uLU6hMCjMI75M1A2tKUQC"
+	],
+	"primaryIid": "int:isni:0000000121367029",
+	"identifierRung": [
+		{
+			"rung": "isni",
+			"value": "0000000121367029"
+		},
+		{
+			"rung": "mbid:artist",
+			"value": "artist:5ae54dee-4dba-49c0-802a-a3b3b3adfe9b"
+		},
+		{
+			"rung": "wd",
+			"value": "Q189729"
+		},
+		{
+			"rung": "spotify:artist",
+			"value": "4uLU6hMCjMI75M1A2tKUQC"
+		}
+	],
+	"aliases": [
+		"int:mbid:artist:5ae54dee-4dba-49c0-802a-a3b3b3adfe9b",
+		"int:spotify:artist:4uLU6hMCjMI75M1A2tKUQC",
+		"int:wd:Q189729"
+	],
+	"appAliases": [
+		"int:isni:0000000121367029",
+		"int:mbid:artist:5ae54dee-4dba-49c0-802a-a3b3b3adfe9b",
+		"int:spotify:artist:4uLU6hMCjMI75M1A2tKUQC",
+		"int:wd:Q189729"
+	]
+}

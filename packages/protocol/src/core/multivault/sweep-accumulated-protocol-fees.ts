@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, Hex } from 'viem';
 
-import { MultiVaultAbi } from '../../contracts';
+import { MultiVaultAbi } from '../../contracts/abis';
 import type { WriteConfig } from '../../types';
 
 export type MultiVaultSweepAccumulatedProtocolFeesInputs = {
@@ -16,7 +16,7 @@ export type MultiVaultSweepAccumulatedProtocolFeesInputs = {
 export async function multiVaultSweepAccumulatedProtocolFees(
 	config: WriteConfig,
 	inputs: MultiVaultSweepAccumulatedProtocolFeesInputs
-) {
+): Promise<MultiVaultSweepAccumulatedProtocolFeesResult> {
 	const { address, walletClient, publicClient } = config;
 	const { args } = inputs;
 
@@ -30,3 +30,5 @@ export async function multiVaultSweepAccumulatedProtocolFees(
 
 	return await walletClient.writeContract(request);
 }
+
+export type MultiVaultSweepAccumulatedProtocolFeesResult = Hex;

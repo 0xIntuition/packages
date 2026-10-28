@@ -1,0 +1,54 @@
+{
+	"name": "wikidata-tmdb",
+	"url": "https://www.themoviedb.org/movie/603",
+	"atom": {
+		"schemaType": "Movie",
+		"category": "thing",
+		"title": "Fixture wikidata-tmdb",
+		"canonicalId": "int:wd:film:Q83495",
+		"sameAs": ["https://www.themoviedb.org/movie/603"],
+		"hints": {
+			"identifiers": {
+				"tmdbId": "603",
+				"mediaType": "movie",
+				"imdbId": "tt0133093",
+				"wd": "Q83495",
+				"wikidata": "Q83495",
+				"wdSlug": "film"
+			},
+			"providerCanonicalIds": ["imdb:title:tt0133093"]
+		},
+		"metadata": {
+			"identityBridgeEligible": true,
+			"identityBridge": {
+				"property": "P4947",
+				"providerCanonicalId": "tmdb:movie:603",
+				"qid": "Q83495"
+			}
+		},
+		"data": {
+			"@type": "Movie",
+			"identifier": "int:wd:film:Q83495",
+			"name": "Fixture wikidata-tmdb",
+			"tmdbId": "603",
+			"mediaType": "movie",
+			"sameAs": ["https://www.imdb.com/title/tt0133093/", "https://www.themoviedb.org/movie/603"]
+		}
+	},
+	"identifierRung": [
+		{
+			"rung": "wd:film",
+			"value": "Q83495"
+		},
+		{
+			"rung": "tmdb:movie",
+			"value": "603"
+		},
+		{
+			"rung": "imdb:title",
+			"value": "tt0133093"
+		}
+	],
+	"aliases": ["int:imdb:tt0133093", "int:tmdb:movie:603"],
+	"identifierSet": ["int:wd:film:Q83495", "int:tmdb:movie:603", "int:imdb:tt0133093"]
+}

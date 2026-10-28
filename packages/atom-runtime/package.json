@@ -1,0 +1,88 @@
+{
+	"name": "@0xintuition/atom-runtime",
+	"private": false,
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./presets": {
+			"types": "./dist/presets.d.ts",
+			"import": "./dist/presets.js"
+		},
+		"./fingerprint": {
+			"types": "./dist/fingerprint.d.ts",
+			"import": "./dist/fingerprint.js"
+		},
+		"./consumers": {
+			"types": "./dist/consumers.d.ts",
+			"import": "./dist/consumers.js"
+		},
+		"./config": {
+			"types": "./dist/config.d.ts",
+			"import": "./dist/config.js"
+		},
+		"./adapters/upstash": {
+			"types": "./dist/adapters/upstash.d.ts",
+			"import": "./dist/adapters/upstash.js"
+		},
+		"./package.json": "./package.json"
+	},
+	"license": "MIT",
+	"scripts": {
+		"build": "node ../../scripts/clean-dist.mjs && tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"dev": "tsc --watch",
+		"typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
+		"test": "bun test __tests__ src",
+		"ci": "biome check",
+		"lint": "biome lint",
+		"format": "biome format",
+		"check": "biome check",
+		"check:write": "biome check --write",
+		"pack:dry-run": "bun run build && npm pack --ignore-scripts --dry-run --json",
+		"pack:release": "bun run build && node ../../scripts/pack-release.mjs",
+		"prepack": "bun run build",
+		"prepublishOnly": "bun run build && node ../../scripts/guard-direct-publish.mjs"
+	},
+	"dependencies": {
+		"@0xintuition/atom-classification": "0.1.0-alpha.1",
+		"@0xintuition/atom-enrichment": "0.1.0-alpha.1",
+		"@0xintuition/atom-parser": "0.1.0-alpha.1",
+		"@0xintuition/pipeline-runtime": "0.1.0-alpha.0",
+		"@0xintuition/iid-registry": "0.1.0-alpha.0",
+		"zod": "4.1.12"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3",
+		"@types/bun": "^1.3.3"
+	},
+	"version": "0.1.0-alpha.0",
+	"description": "Promise-based composition root for atom classification and enrichment",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE",
+		"docs"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/0xIntuition/packages.git",
+		"directory": "packages/atom-runtime"
+	},
+	"bugs": {
+		"url": "https://github.com/0xIntuition/packages/issues"
+	},
+	"homepage": "https://github.com/0xIntuition/packages/tree/main/packages/atom-runtime#readme",
+	"publishConfig": {
+		"access": "public",
+		"tag": "alpha"
+	},
+	"engines": {
+		"node": ">=20"
+	},
+	"sideEffects": false
+}

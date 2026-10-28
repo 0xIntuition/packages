@@ -1,0 +1,22 @@
+{
+	"single": {
+		"id": "albumFixture1234567890",
+		"name": "Fixture Album",
+		"release_date": "2026-01-02",
+		"popularity": 71,
+		"genres": ["indie"],
+		"external_urls": { "spotify": "https://open.spotify.com/album/albumFixture1234567890" },
+		"artists": [{ "id": "artistFixture123456789", "name": "Fixture Artist" }],
+		"images": [{ "url": "https://i.scdn.co/album.jpg" }]
+	},
+	"batchItem": {
+		"id": "albumFixture1234567890",
+		"name": "Fixture Album",
+		"release_date": "2026-01-02",
+		"popularity": 71,
+		"genres": ["indie"],
+		"external_urls": { "spotify": "https://open.spotify.com/album/albumFixture1234567890" },
+		"artists": [{ "id": "artistFixture123456789", "name": "Fixture Artist" }],
+		"images": [{ "url": "https://i.scdn.co/album.jpg" }]
+	}
+}

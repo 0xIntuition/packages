@@ -1,15 +1,14 @@
 /**
- * Scheme registry metadata for the identity ladders (IID spec §3, D30).
+ * Scheme registry metadata for the identity ladders (IID spec §3, §7.3).
  *
  * The ladders themselves live on each generated `ClassificationSpec` as
- * declarative data. This module carries the per-scheme facts consumers and
- * tests need without a derivation engine: the identity class of every
- * scheme, and whether a bare IID of that scheme names its classification
- * (anchor eligibility, D30).
+ * declarative data. The per-scheme facts — identity class and scheme
+ * typing — are OWNED by `@0xintuition/iid` and surfaced here under the
+ * names existing consumers already use.
  *
- * Source of truth: intuition-v2 `.planning/intuition-id/scheme-registry.md`
- * and `@0xintuition/iid` `SCHEMES` / `SCHEME_TYPING`.
+ * Normative source: `@0xintuition/iid-spec` (schemes/ registry).
  */
+import { SCHEME_TYPING, SCHEMES } from '@0xintuition/iid';
 import type {
 	ClassificationSpec,
 	IdentityClass,
@@ -18,70 +17,22 @@ import type {
 } from './types.js';
 
 /** IID spec §3 — Class A registered authority, B intrinsic key, C derived. */
-export const IDENTITY_SCHEME_CLASS: Readonly<Record<IdentitySchemeName, IdentityClass>> = {
-	isbn: 'A',
-	isrc: 'A',
-	iswc: 'A',
-	isni: 'A',
-	orcid: 'A',
-	lei: 'A',
-	gtin: 'A',
-	doi: 'A',
-	eidr: 'A',
-	wd: 'A',
-	mbid: 'A',
-	olid: 'A',
-	imdb: 'A',
-	tmdb: 'A',
-	podcastguid: 'A',
-	url: 'B',
-	caip10: 'B',
-	caip19: 'B',
-	hash: 'B',
-	appid: 'B',
-	purl: 'B',
-	geo: 'B',
-	acct: 'B',
-	rssitem: 'B',
-	termset: 'B',
-	gen1: 'C',
-};
+export const IDENTITY_SCHEME_CLASS: Readonly<Record<IdentitySchemeName, IdentityClass>> =
+	Object.freeze(
+		Object.fromEntries(
+			Object.values(SCHEMES).map((definition) => [definition.scheme, definition.class])
+		) as Record<IdentitySchemeName, IdentityClass>
+	);
 
 /**
- * D30 scheme typing: a P0 anchor (atom data = the bare IID string) is only
- * legal when the scheme implies the entity's classification. Polymorphic
- * schemes floor at P1, where `@type` lives in the payload.
+ * Scheme typing (IID spec §7.3): a P0 anchor (atom data = the bare IID
+ * string) is only legal when the scheme implies the entity's
+ * classification. Polymorphic schemes floor at P1, where `@type` lives in
+ * the payload.
  */
 export const IDENTITY_SCHEME_TYPING: Readonly<
 	Record<IdentitySchemeName, 'unambiguous' | 'polymorphic'>
-> = {
-	isbn: 'unambiguous',
-	isrc: 'unambiguous',
-	iswc: 'unambiguous',
-	isni: 'polymorphic', // persons AND bands/orgs
-	orcid: 'polymorphic', // kept symmetric with isni
-	lei: 'unambiguous',
-	gtin: 'unambiguous',
-	doi: 'polymorphic', // articles, datasets, film
-	eidr: 'unambiguous',
-	wd: 'polymorphic',
-	mbid: 'unambiguous', // type segment in-value
-	olid: 'unambiguous', // W/M/A suffix in-value
-	imdb: 'polymorphic',
-	tmdb: 'polymorphic',
-	podcastguid: 'unambiguous',
-	url: 'polymorphic',
-	caip10: 'polymorphic', // account OR contract
-	caip19: 'unambiguous',
-	hash: 'polymorphic',
-	appid: 'unambiguous',
-	purl: 'unambiguous',
-	geo: 'polymorphic',
-	acct: 'unambiguous',
-	rssitem: 'unambiguous',
-	termset: 'unambiguous',
-	gen1: 'unambiguous', // slug in-value (still never P0 — Class C floors at P1)
-};
+> = SCHEME_TYPING;
 
 /** The identity class a rung asserts (gen1 rungs are Class C by definition). */
 export function rungClass(rung: IdentityRung): IdentityClass {
@@ -89,7 +40,7 @@ export function rungClass(rung: IdentityRung): IdentityClass {
 }
 
 /**
- * D29/D30: may this classification's STRONGEST rung mint as a P0 anchor?
+ * May this classification's STRONGEST rung mint as a P0 anchor (spec §7.2)?
  * True only when that rung is Class A/B on an unambiguous scheme. Class C
  * recipe fields are preimage evidence and must travel in a P1 payload.
  */

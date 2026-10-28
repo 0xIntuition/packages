@@ -1,0 +1,102 @@
+{
+	"name": "@0xintuition/sdk",
+	"version": "4.0.0",
+	"description": "Intuition SDK",
+	"private": false,
+	"license": "MIT",
+	"type": "module",
+	"sideEffects": false,
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE",
+		"docs"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./api": {
+			"types": "./dist/api/index.d.ts",
+			"import": "./dist/api/index.js"
+		},
+		"./actions": {
+			"types": "./dist/actions/index.d.ts",
+			"import": "./dist/actions/index.js"
+		},
+		"./protocol": {
+			"types": "./dist/protocol.d.ts",
+			"import": "./dist/protocol.js"
+		},
+		"./trust-swap-and-bridge-router": {
+			"types": "./dist/trust-swap-and-bridge-router/index.d.ts",
+			"import": "./dist/trust-swap-and-bridge-router/index.js"
+		},
+		"./utils": {
+			"types": "./dist/utils/index.d.ts",
+			"import": "./dist/utils/index.js"
+		},
+		"./package.json": "./package.json"
+	},
+	"keywords": [
+		"intuition",
+		"sdk",
+		"protocol",
+		"viem",
+		"ethereum"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/0xIntuition/packages.git",
+		"directory": "packages/sdk"
+	},
+	"bugs": {
+		"url": "https://github.com/0xIntuition/packages/issues"
+	},
+	"homepage": "https://github.com/0xIntuition/packages/tree/main/packages/sdk#readme",
+	"publishConfig": {
+		"access": "public",
+		"tag": "alpha"
+	},
+	"scripts": {
+		"build": "node ../../scripts/clean-dist.mjs && tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"dev": "tsc --watch",
+		"pack:dry-run": "bun run build && npm pack --ignore-scripts --dry-run --json",
+		"pack:release": "bun run build && node ../../scripts/pack-release.mjs",
+		"prepack": "bun run build",
+		"prepublishOnly": "bun run build && node ../../scripts/guard-direct-publish.mjs",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"typecheck": "tsc --noEmit",
+		"ci": "biome check",
+		"lint": "biome lint",
+		"format": "biome format",
+		"check": "biome check",
+		"lint:write": "biome lint --write",
+		"format:write": "biome format --write",
+		"check:write": "biome check --write",
+		"check:unsafe:write": "biome check --write --unsafe"
+	},
+	"dependencies": {
+		"@0xintuition/curves": "0.1.0-alpha.1",
+		"@0xintuition/deployments": "0.1.0-alpha.1",
+		"@0xintuition/ids": "0.1.0-alpha.1",
+		"@0xintuition/periphery": "0.1.0-alpha.1",
+		"@0xintuition/protocol": "^4.0.0"
+	},
+	"peerDependencies": {
+		"viem": "^2.0.0"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3",
+		"vitest": "^4.0.16",
+		"viem": "^2.31.4"
+	},
+	"engines": {
+		"node": ">=20"
+	}
+}

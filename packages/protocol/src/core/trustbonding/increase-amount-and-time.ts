@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, Hex } from 'viem';
 
-import { TrustBondingAbi } from '../../contracts';
+import { TrustBondingAbi } from '../../contracts/abis';
 import type { WriteConfig } from '../../types';
 
 export type TrustBondingIncreaseAmountAndTimeInputs = {
@@ -16,7 +16,7 @@ export type TrustBondingIncreaseAmountAndTimeInputs = {
 export async function trustBondingIncreaseAmountAndTime(
 	config: WriteConfig,
 	inputs: TrustBondingIncreaseAmountAndTimeInputs
-) {
+): Promise<TrustBondingIncreaseAmountAndTimeResult> {
 	const { address, walletClient, publicClient } = config;
 	const { args } = inputs;
 
@@ -30,3 +30,5 @@ export async function trustBondingIncreaseAmountAndTime(
 
 	return await walletClient.writeContract(request);
 }
+
+export type TrustBondingIncreaseAmountAndTimeResult = Hex;

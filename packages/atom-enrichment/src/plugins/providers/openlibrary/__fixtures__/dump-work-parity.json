@@ -1,0 +1,54 @@
+[
+	{
+		"authors": [{ "key": "/authors/OL3965328A", "name": "Mahdi Isa Saqr" }],
+		"candidate_id": 550080,
+		"matched_via": "source_url",
+		"ol_key": "OL10000302W",
+		"record": {
+			"authors": [{ "author": { "key": "/authors/OL3965328A" }, "type": "/type/author_role" }],
+			"created": { "type": "/type/datetime", "value": "2009-12-11T01:57:19.964652" },
+			"key": "/works/OL10000302W",
+			"last_modified": { "type": "/type/datetime", "value": "2009-12-11T01:57:19.964652" },
+			"latest_revision": 1,
+			"revision": 1,
+			"title": "al-Shati al-thani (Riwayah)",
+			"type": { "key": "/type/work" }
+		}
+	},
+	{
+		"authors": [
+			{ "key": "/authors/OL3966476A", "name": "Centre National de Documentation Pédagogique - CN" }
+		],
+		"candidate_id": 550083,
+		"matched_via": "source_url",
+		"ol_key": "OL10001351W",
+		"record": {
+			"authors": [{ "author": { "key": "/authors/OL3966476A" }, "type": "/type/author_role" }],
+			"covers": [3142852],
+			"created": { "type": "/type/datetime", "value": "2009-12-11T01:57:29.804644" },
+			"key": "/works/OL10001351W",
+			"last_modified": { "type": "/type/datetime", "value": "2010-04-28T06:54:19.472104" },
+			"latest_revision": 3,
+			"revision": 3,
+			"title": "Qu'apprend-on à l'école élémentaire ? Les programmes officiels",
+			"type": { "key": "/type/work" }
+		}
+	},
+	{
+		"authors": [{ "key": "/authors/OL3966773A", "name": "Jean-FranÃ§ois Nahmias" }],
+		"candidate_id": 550086,
+		"matched_via": "source_url",
+		"ol_key": "OL10001588W",
+		"record": {
+			"authors": [{ "author": { "key": "/authors/OL3966773A" }, "type": "/type/author_role" }],
+			"covers": [3143529],
+			"created": { "type": "/type/datetime", "value": "2009-12-11T01:57:29.804644" },
+			"key": "/works/OL10001588W",
+			"last_modified": { "type": "/type/datetime", "value": "2010-04-28T06:54:19.472104" },
+			"latest_revision": 3,
+			"revision": 3,
+			"title": "Titus. Le Voile de BÃ©rÃ©nice, tome 2",
+			"type": { "key": "/type/work" }
+		}
+	}
+]

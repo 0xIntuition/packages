@@ -1,0 +1,282 @@
+{
+	"provenance": "Reference source: factory/ref-head/packages/processing-runtime/src/presets.ts and referenced atom preset factories; captured 2026-10-27 after Promise port. IDs and TTL declarations preserved from reference sources.",
+	"classification": [
+		"type-profiles",
+		"etherscan",
+		"isbn",
+		"int",
+		"plain-text",
+		"spotify",
+		"amazon",
+		"github",
+		"goodreads",
+		"letterboxd",
+		"places",
+		"npm",
+		"x",
+		"instagram",
+		"tiktok",
+		"youtube",
+		"wikipedia",
+		"wikidata",
+		"imdb",
+		"tmdb",
+		"openlibrary",
+		"steam",
+		"coingecko",
+		"coinmarketcap",
+		"etsy",
+		"shopify",
+		"default-url"
+	],
+	"enrichment": {
+		"default": [
+			{
+				"id": "opengraph",
+				"ttl": 2592000
+			},
+			{
+				"id": "microdata",
+				"ttl": 2592000
+			},
+			{
+				"id": "oembed",
+				"ttl": 3600
+			},
+			{
+				"id": "wikipedia",
+				"ttl": 43200
+			},
+			{
+				"id": "wikidata",
+				"ttl": 43200
+			},
+			{
+				"id": "github",
+				"ttl": 300
+			},
+			{
+				"id": "letterboxd",
+				"ttl": 43200
+			},
+			{
+				"id": "product-listing",
+				"ttl": 300
+			},
+			{
+				"id": "x-profile",
+				"ttl": 300
+			},
+			{
+				"id": "npm",
+				"ttl": 3600
+			},
+			{
+				"id": "spotify",
+				"ttl": 900
+			},
+			{
+				"id": "steam",
+				"ttl": 43200
+			},
+			{
+				"id": "openlibrary",
+				"ttl": 43200
+			},
+			{
+				"id": "apple-music",
+				"ttl": 43200
+			},
+			{
+				"id": "musicbrainz",
+				"ttl": 3600
+			},
+			{
+				"id": "tmdb",
+				"ttl": 43200
+			},
+			{
+				"id": "places",
+				"ttl": 43200
+			},
+			{
+				"id": "podcast-index",
+				"ttl": 43200
+			},
+			{
+				"id": "youtube",
+				"ttl": 3600
+			},
+			{
+				"id": "brand",
+				"ttl": 43200
+			},
+			{
+				"id": "favicon",
+				"ttl": 86400
+			},
+			{
+				"id": "coingecko",
+				"ttl": 300
+			},
+			{
+				"id": "etherscan",
+				"ttl": 60
+			},
+			{
+				"id": "crossref",
+				"ttl": 43200
+			}
+		],
+		"company": [
+			{
+				"id": "opengraph",
+				"ttl": 2592000
+			},
+			{
+				"id": "brand",
+				"ttl": 43200
+			},
+			{
+				"id": "favicon",
+				"ttl": 86400
+			}
+		],
+		"music": [
+			{
+				"id": "opengraph",
+				"ttl": 2592000
+			},
+			{
+				"id": "spotify",
+				"ttl": 900
+			},
+			{
+				"id": "musicbrainz",
+				"ttl": 3600
+			},
+			{
+				"id": "apple-music",
+				"ttl": 43200
+			}
+		],
+		"crypto": [
+			{
+				"id": "etherscan",
+				"ttl": 60
+			},
+			{
+				"id": "coingecko",
+				"ttl": 300
+			}
+		],
+		"academic": [
+			{
+				"id": "crossref",
+				"ttl": 43200
+			},
+			{
+				"id": "wikipedia",
+				"ttl": 43200
+			}
+		],
+		"custom": [
+			{
+				"id": "opengraph",
+				"ttl": 2592000
+			},
+			{
+				"id": "microdata",
+				"ttl": 2592000
+			},
+			{
+				"id": "oembed",
+				"ttl": 3600
+			},
+			{
+				"id": "wikipedia",
+				"ttl": 43200
+			},
+			{
+				"id": "wikidata",
+				"ttl": 43200
+			},
+			{
+				"id": "github",
+				"ttl": 300
+			},
+			{
+				"id": "letterboxd",
+				"ttl": 43200
+			},
+			{
+				"id": "product-listing",
+				"ttl": 300
+			},
+			{
+				"id": "x-profile",
+				"ttl": 300
+			},
+			{
+				"id": "npm",
+				"ttl": 3600
+			},
+			{
+				"id": "spotify",
+				"ttl": 900
+			},
+			{
+				"id": "steam",
+				"ttl": 43200
+			},
+			{
+				"id": "openlibrary",
+				"ttl": 43200
+			},
+			{
+				"id": "apple-music",
+				"ttl": 43200
+			},
+			{
+				"id": "musicbrainz",
+				"ttl": 3600
+			},
+			{
+				"id": "tmdb",
+				"ttl": 43200
+			},
+			{
+				"id": "places",
+				"ttl": 43200
+			},
+			{
+				"id": "podcast-index",
+				"ttl": 43200
+			},
+			{
+				"id": "youtube",
+				"ttl": 3600
+			},
+			{
+				"id": "brand",
+				"ttl": 43200
+			},
+			{
+				"id": "favicon",
+				"ttl": 86400
+			},
+			{
+				"id": "coingecko",
+				"ttl": 300
+			},
+			{
+				"id": "etherscan",
+				"ttl": 60
+			},
+			{
+				"id": "crossref",
+				"ttl": 43200
+			}
+		]
+	}
+}

@@ -4,8 +4,10 @@ export const musicRecording: ClassificationSpec = {
 	slug: 'music-recording',
 	type: 'MusicRecording',
 	displayName: 'Music Recording',
+	commonName: 'Song',
 	description: 'An individual music track with optional artist and album disambiguators.',
 	category: 'Media',
+	atomCategory: 'song',
 	schema: { context: 'https://schema.org/', type: 'MusicRecording' },
 	metadataPredicates: ['byArtist', 'inAlbum', 'inPlaylist', 'hasCategory', 'sameAs'] as const,
 	fields: [

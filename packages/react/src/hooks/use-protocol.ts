@@ -1,7 +1,8 @@
 'use client';
 
 import { MultiVaultAbi } from '@0xintuition/protocol';
-import type { Hex } from 'viem';
+import type { ContractFunctionArgs, ContractFunctionReturnType, Hex } from 'viem';
+import type { UseReadContractReturnType } from 'wagmi';
 import { useReadContract } from 'wagmi';
 
 import { useChainConfig, useIntuitionConfig } from '../provider';
@@ -33,7 +34,7 @@ export function useProtocolConfig(): IntuitionConfig {
  * }
  * ```
  */
-export function useProtocolFees(options?: { chainId?: number }) {
+export function useProtocolFees(options?: { chainId?: number }): UseProtocolFeesResult {
 	const { multivaultAddress, chainId } = useChainConfig(options?.chainId);
 
 	return useReadContract({
@@ -68,7 +69,7 @@ export function useProtocolFees(options?: { chainId?: number }) {
  * // atomCost is bigint in wei
  * ```
  */
-export function useAtomCost(options?: { chainId?: number }) {
+export function useAtomCost(options?: { chainId?: number }): UseAtomCostResult {
 	const { multivaultAddress, chainId } = useChainConfig(options?.chainId);
 
 	return useReadContract({
@@ -88,7 +89,7 @@ export function useAtomCost(options?: { chainId?: number }) {
  * // tripleCost is bigint in wei
  * ```
  */
-export function useTripleCost(options?: { chainId?: number }) {
+export function useTripleCost(options?: { chainId?: number }): UseTripleCostResult {
 	const { multivaultAddress, chainId } = useChainConfig(options?.chainId);
 
 	return useReadContract({
@@ -107,7 +108,7 @@ export function useTripleCost(options?: { chainId?: number }) {
  * const { data: config } = useGeneralConfig()
  * ```
  */
-export function useGeneralConfig(options?: { chainId?: number }) {
+export function useGeneralConfig(options?: { chainId?: number }): UseGeneralConfigResult {
 	const { multivaultAddress, chainId } = useChainConfig(options?.chainId);
 
 	return useReadContract({
@@ -127,7 +128,7 @@ export function useGeneralConfig(options?: { chainId?: number }) {
  * const { data: curveConfig } = useBondingCurveConfig()
  * ```
  */
-export function useBondingCurveConfig(options?: { chainId?: number }) {
+export function useBondingCurveConfig(options?: { chainId?: number }): UseBondingCurveConfigResult {
 	const { multivaultAddress, chainId } = useChainConfig(options?.chainId);
 
 	return useReadContract({
@@ -150,7 +151,7 @@ export function useBondingCurveConfig(options?: { chainId?: number }) {
  * }
  * ```
  */
-export function useAtomConfig(options?: { chainId?: number }) {
+export function useAtomConfig(options?: { chainId?: number }): UseAtomConfigResult {
 	const { multivaultAddress, chainId } = useChainConfig(options?.chainId);
 
 	return useReadContract({
@@ -173,7 +174,7 @@ export function useAtomConfig(options?: { chainId?: number }) {
  * }
  * ```
  */
-export function useTripleConfig(options?: { chainId?: number }) {
+export function useTripleConfig(options?: { chainId?: number }): UseTripleConfigResult {
 	const { multivaultAddress, chainId } = useChainConfig(options?.chainId);
 
 	return useReadContract({
@@ -192,7 +193,7 @@ export function useTripleConfig(options?: { chainId?: number }) {
  * const { data: walletConfig } = useWalletConfig()
  * ```
  */
-export function useWalletConfig(options?: { chainId?: number }) {
+export function useWalletConfig(options?: { chainId?: number }): UseWalletConfigResult {
 	const { multivaultAddress, chainId } = useChainConfig(options?.chainId);
 
 	return useReadContract({
@@ -219,7 +220,7 @@ export function useWalletConfig(options?: { chainId?: number }) {
 export function useIsTermCreated(
 	termId: Hex | undefined,
 	options?: { chainId?: number; enabled?: boolean }
-) {
+): UseIsTermCreatedResult {
 	const { multivaultAddress, chainId } = useChainConfig(options?.chainId);
 	const enabled = options?.enabled !== false && termId !== undefined;
 
@@ -249,7 +250,7 @@ export function useIsTermCreated(
 export function useCounterTripleId(
 	tripleId: Hex | undefined,
 	options?: { chainId?: number; enabled?: boolean }
-) {
+): UseCounterTripleIdResult {
 	const { multivaultAddress, chainId } = useChainConfig(options?.chainId);
 	const enabled = options?.enabled !== false && tripleId !== undefined;
 
@@ -280,7 +281,7 @@ export function usePreviewAtomCreate(
 	termId: Hex | undefined,
 	assets: bigint,
 	options?: { chainId?: number; enabled?: boolean }
-) {
+): UsePreviewAtomCreateResult {
 	const { multivaultAddress, chainId } = useChainConfig(options?.chainId);
 	const enabled = options?.enabled !== false && termId !== undefined && assets > 0n;
 
@@ -296,31 +297,114 @@ export function usePreviewAtomCreate(
 
 /**
  * Previews triple creation: returns expected shares and fees for a given asset amount.
+ * Keyed on the three atom ids, since the contract evaluates the atom-deposit fraction against the
+ * atom vaults and the triple does not exist yet.
  *
- * @param termId - The term ID of the triple to create.
+ * @param subjectId - The subject atom ID.
+ * @param predicateId - The predicate atom ID.
+ * @param objectId - The object atom ID.
  * @param assets - The asset amount in wei.
  * @param options - Optional settings.
  * @param options.enabled - Whether the query is enabled.
  *
  * @example
  * ```tsx
- * const { data: preview } = usePreviewTripleCreate(tripleTermId, parseEther('0.01'))
+ * const { data: preview } = usePreviewTripleCreate(subjectId, predicateId, objectId, parseEther('0.01'))
  * ```
  */
 export function usePreviewTripleCreate(
-	termId: Hex | undefined,
+	subjectId: Hex | undefined,
+	predicateId: Hex | undefined,
+	objectId: Hex | undefined,
 	assets: bigint,
 	options?: { chainId?: number; enabled?: boolean }
-) {
+): UsePreviewTripleCreateResult {
 	const { multivaultAddress, chainId } = useChainConfig(options?.chainId);
-	const enabled = options?.enabled !== false && termId !== undefined && assets > 0n;
+	const hasAtoms = subjectId !== undefined && predicateId !== undefined && objectId !== undefined;
+	const enabled = options?.enabled !== false && hasAtoms && assets > 0n;
 
 	return useReadContract({
 		address: multivaultAddress,
 		abi: MultiVaultAbi,
 		functionName: 'previewTripleCreate',
-		args: termId ? [termId, assets] : undefined,
+		args: hasAtoms ? [subjectId, predicateId, objectId, assets] : undefined,
 		chainId,
 		query: { enabled },
 	});
 }
+
+export type UseProtocolFeesResult = UseReadContractReturnType<
+	typeof MultiVaultAbi,
+	'getVaultFees',
+	readonly [],
+	ProtocolFees
+>;
+export type UseAtomCostResult = UseReadContractReturnType<
+	typeof MultiVaultAbi,
+	'getAtomCost',
+	ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'getAtomCost'>,
+	ContractFunctionReturnType<typeof MultiVaultAbi, 'view' | 'pure', 'getAtomCost'> | undefined
+>;
+export type UseTripleCostResult = UseReadContractReturnType<
+	typeof MultiVaultAbi,
+	'getTripleCost',
+	ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'getTripleCost'>,
+	ContractFunctionReturnType<typeof MultiVaultAbi, 'view' | 'pure', 'getTripleCost'> | undefined
+>;
+export type UseGeneralConfigResult = UseReadContractReturnType<
+	typeof MultiVaultAbi,
+	'getGeneralConfig',
+	ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'getGeneralConfig'>,
+	ContractFunctionReturnType<typeof MultiVaultAbi, 'view' | 'pure', 'getGeneralConfig'> | undefined
+>;
+export type UseBondingCurveConfigResult = UseReadContractReturnType<
+	typeof MultiVaultAbi,
+	'getBondingCurveConfig',
+	ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'getBondingCurveConfig'>,
+	| ContractFunctionReturnType<typeof MultiVaultAbi, 'view' | 'pure', 'getBondingCurveConfig'>
+	| undefined
+>;
+export type UseAtomConfigResult = UseReadContractReturnType<
+	typeof MultiVaultAbi,
+	'getAtomConfig',
+	ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'getAtomConfig'>,
+	ContractFunctionReturnType<typeof MultiVaultAbi, 'view' | 'pure', 'getAtomConfig'> | undefined
+>;
+export type UseTripleConfigResult = UseReadContractReturnType<
+	typeof MultiVaultAbi,
+	'getTripleConfig',
+	ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'getTripleConfig'>,
+	ContractFunctionReturnType<typeof MultiVaultAbi, 'view' | 'pure', 'getTripleConfig'> | undefined
+>;
+export type UseWalletConfigResult = UseReadContractReturnType<
+	typeof MultiVaultAbi,
+	'getWalletConfig',
+	ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'getWalletConfig'>,
+	ContractFunctionReturnType<typeof MultiVaultAbi, 'view' | 'pure', 'getWalletConfig'> | undefined
+>;
+export type UseIsTermCreatedResult = UseReadContractReturnType<
+	typeof MultiVaultAbi,
+	'isTermCreated',
+	ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'isTermCreated'>,
+	ContractFunctionReturnType<typeof MultiVaultAbi, 'view' | 'pure', 'isTermCreated'> | undefined
+>;
+export type UseCounterTripleIdResult = UseReadContractReturnType<
+	typeof MultiVaultAbi,
+	'getCounterIdFromTripleId',
+	ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'getCounterIdFromTripleId'>,
+	| ContractFunctionReturnType<typeof MultiVaultAbi, 'view' | 'pure', 'getCounterIdFromTripleId'>
+	| undefined
+>;
+export type UsePreviewAtomCreateResult = UseReadContractReturnType<
+	typeof MultiVaultAbi,
+	'previewAtomCreate',
+	ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'previewAtomCreate'>,
+	ContractFunctionReturnType<typeof MultiVaultAbi, 'view' | 'pure', 'previewAtomCreate'> | undefined
+>;
+export type UsePreviewTripleCreateResult = UseReadContractReturnType<
+	typeof MultiVaultAbi,
+	'previewTripleCreate',
+	ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'previewTripleCreate'>,
+	| ContractFunctionReturnType<typeof MultiVaultAbi, 'view' | 'pure', 'previewTripleCreate'>
+	| undefined
+>;

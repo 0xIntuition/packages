@@ -1,6 +1,6 @@
-import type { ContractFunctionArgs } from 'viem';
+import type { ContractFunctionArgs, ContractFunctionReturnType } from 'viem';
 
-import { MultiVaultAbi } from '../../contracts';
+import { type MultiVaultAbi, MultiVaultWithRevertsAbi } from '../../contracts/abis';
 import type { ReadConfig } from '../../types';
 
 /**
@@ -12,16 +12,22 @@ import type { ReadConfig } from '../../types';
 export async function multiVaultConvertToAssets(
 	config: ReadConfig,
 	inputs: {
-		args: ContractFunctionArgs<typeof MultiVaultAbi, 'view', 'convertToAssets'>;
+		args: ContractFunctionArgs<typeof MultiVaultAbi, 'view' | 'pure', 'convertToAssets'>;
 	}
-) {
+): Promise<MultiVaultConvertToAssetsResult> {
 	const { address, publicClient } = config;
 	const { args } = inputs;
 
 	return await publicClient.readContract({
 		address,
-		abi: MultiVaultAbi,
+		abi: MultiVaultWithRevertsAbi,
 		functionName: 'convertToAssets',
 		args,
 	});
 }
+
+export type MultiVaultConvertToAssetsResult = ContractFunctionReturnType<
+	typeof MultiVaultWithRevertsAbi,
+	'view' | 'pure',
+	'convertToAssets'
+>;

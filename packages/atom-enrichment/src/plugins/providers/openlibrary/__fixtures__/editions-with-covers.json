@@ -1,0 +1,24 @@
+{
+	"entries": [
+		{
+			"key": "/books/OL30M",
+			"covers": [300],
+			"publish_year": 2018,
+			"publish_date": "2018"
+		},
+		{
+			"key": "/books/OL20M",
+			"covers": [200],
+			"description": "Preferred described edition",
+			"publish_year": 2012,
+			"publish_date": "2012"
+		},
+		{
+			"key": "/books/OL10M",
+			"covers": [100],
+			"description": "Older described edition",
+			"publish_year": 1998,
+			"publish_date": "1998"
+		}
+	]
+}

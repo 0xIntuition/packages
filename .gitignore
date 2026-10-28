@@ -15,3 +15,14 @@ coverage
 *.tgz
 **/dist
 **/node_modules
+
+# Local agent instructions, plans, and session notes (never publish or track).
+.local/
+.planning/
+.agents/
+.claude/
+.codex/
+AGENTS.md
+AGENTS.local.md
+CLAUDE.md
+GEMINI.md

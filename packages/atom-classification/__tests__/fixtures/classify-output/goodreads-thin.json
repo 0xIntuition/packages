@@ -1,0 +1,30 @@
+{
+	"name": "goodreads-thin",
+	"url": "https://www.goodreads.com/book/show/4671",
+	"atom": {
+		"schemaType": "Book",
+		"category": "thing",
+		"title": "Fixture goodreads-thin",
+		"canonicalId": "goodreads:book:4671",
+		"sameAs": ["https://www.goodreads.com/book/show/4671"],
+		"hints": {
+			"identifiers": {
+				"goodreadsBookId": "4671"
+			}
+		},
+		"metadata": {},
+		"data": {
+			"@type": "Book",
+			"identifier": "int:goodreads:book:4671",
+			"name": "Fixture goodreads-thin"
+		}
+	},
+	"identifierRung": [
+		{
+			"rung": "goodreads:book",
+			"value": "4671"
+		}
+	],
+	"aliases": [],
+	"identifierSet": ["int:goodreads:book:4671"]
+}

@@ -1,8 +1,16 @@
-export { MetaERC20HubAbi } from './MetaERC20Hub-abi';
-export { MetaERC20HubBytecode } from './MetaERC20Hub-bytecode';
-export { MetaERC20SpokeAbi } from './MetaERC20Spoke-abi';
-export { MetaERC20SpokeBytecode } from './MetaERC20Spoke-bytecode';
-export { MetaNativeSpokeAbi } from './MetaNativeSpoke-abi';
-export { MetaNativeSpokeBytecode } from './MetaNativeSpoke-bytecode';
-export { TrustSwapAndBridgeRouterAbi } from './TrustSwapAndBridgeRouter-abi';
-export { TrustSwapAndBridgeRouterBytecode } from './TrustSwapAndBridgeRouter-bytecode';
+// ABIs and bytecode live in @0xintuition/deployments. Named re-exports keep this entry's surface
+// fixed: it must not pick up anything else deployments adds.
+export {
+	FeeProxyAbi,
+	MetaERC20HubAbi,
+	MetaERC20SpokeAbi,
+	MetaNativeSpokeAbi,
+	TrustSwapAndBridgeRouterAbi,
+} from '@0xintuition/deployments';
+export {
+	FeeProxyBytecode,
+	MetaERC20HubBytecode,
+	MetaERC20SpokeBytecode,
+	MetaNativeSpokeBytecode,
+	TrustSwapAndBridgeRouterBytecode,
+} from '@0xintuition/deployments/bytecode';

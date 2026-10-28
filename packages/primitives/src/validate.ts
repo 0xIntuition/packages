@@ -1,4 +1,5 @@
 import { hasClassification, validateClassificationValues } from '@0xintuition/classifications';
+import { validateIntuitionId } from '@0xintuition/iid';
 
 import type { ValidationResult } from './types.js';
 
@@ -72,11 +73,30 @@ export function validateAtom(
  * @returns `true` if the string is a valid JSON object, `false` otherwise.
  */
 export function isValidAtomData(data: string): boolean {
+	return recognizeAtomData(data) !== 'invalid';
+}
+
+/**
+ * Classify an atom data string without reclassifying arbitrary strings:
+ *
+ * - `'iid-anchor'` — a VALID canonical IID (P0 anchor bytes). Only strings
+ *   that pass full IID validation qualify; a well-formed but non-canonical
+ *   or unknown-scheme string is NOT an anchor.
+ * - `'json-object'` — a JSON object (legacy JSON-LD and P1/P2 payloads).
+ * - `'invalid'` — anything else.
+ */
+export function recognizeAtomData(data: string): 'iid-anchor' | 'json-object' | 'invalid' {
+	if (validateIntuitionId(data)) {
+		return 'iid-anchor';
+	}
+
 	try {
 		const parsed: unknown = JSON.parse(data);
 
-		return !!parsed && typeof parsed === 'object' && !Array.isArray(parsed);
+		return !!parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+			? 'json-object'
+			: 'invalid';
 	} catch {
-		return false;
+		return 'invalid';
 	}
 }

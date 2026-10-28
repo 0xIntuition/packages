@@ -1,0 +1,43 @@
+{
+	"name": "imdb-tmdb",
+	"url": "https://www.themoviedb.org/movie/603",
+	"atom": {
+		"schemaType": "Movie",
+		"category": "thing",
+		"title": "Fixture imdb-tmdb",
+		"canonicalId": "tmdb:movie:603",
+		"sameAs": ["https://www.themoviedb.org/movie/603"],
+		"hints": {
+			"identifiers": {
+				"tmdbId": "603",
+				"mediaType": "movie",
+				"imdbId": "tt0133093"
+			},
+			"providerCanonicalIds": ["imdb:title:tt0133093"]
+		},
+		"metadata": {
+			"identityBridgeEligible": true
+		},
+		"data": {
+			"@type": "Movie",
+			"identifier": "int:tmdb:movie:603",
+			"name": "Fixture imdb-tmdb",
+			"tmdbId": "603",
+			"mediaType": "movie",
+			"sameAs": ["https://www.imdb.com/title/tt0133093/", "https://www.themoviedb.org/movie/603"]
+		}
+	},
+	"identifierRung": [
+		{
+			"rung": "tmdb:movie",
+			"value": "603"
+		},
+		{
+			"rung": "imdb:title",
+			"value": "tt0133093"
+		}
+	],
+	"aliases": ["int:imdb:tt0133093"],
+	"identifierSet": ["int:tmdb:movie:603", "int:imdb:tt0133093"],
+	"appAliases": ["int:imdb:tt0133093", "int:tmdb:movie:603"]
+}

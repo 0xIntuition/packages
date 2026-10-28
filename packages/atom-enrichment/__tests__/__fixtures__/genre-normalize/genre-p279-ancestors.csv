@@ -1,0 +1,11 @@
+genre_qid,ancestor_qid,ancestor_label_en
+Q20656232,Q20656232,science fiction action film
+Q20656232,Q188473,action film
+Q20656232,Q471839,science fiction film
+Q20656232,Q24925,science fiction
+Q20656232,Q17537576,creative work
+Q20656232,Q35120,entity
+Q471839,Q471839,science fiction film
+Q471839,Q24925,science fiction
+Q471839,Q17537576,creative work
+Q471839,Q35120,entity
