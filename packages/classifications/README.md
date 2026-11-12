@@ -1,13 +1,13 @@
 # @0xintuition/classifications
 
-Canonical classification specs, Creation Profiles, and JSON-LD atom data builders for Intuition alpha packages.
+Canonical classification specs, Creation Profiles, and JSON-LD atom data builders for Intuition packages.
 
 Runtime: ESM-only. This package does not publish CommonJS `require` entrypoints.
 
 ## Install
 
 ```bash
-bun add @0xintuition/classifications@alpha
+bun add @0xintuition/classifications
 ```
 
 ## Usage

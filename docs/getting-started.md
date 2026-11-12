@@ -11,13 +11,11 @@ The packages are ESM-only. Use `import`, and set `"type": "module"` in a Node
 application. The examples use TypeScript and `viem` 2.x.
 
 ```bash
-npm install @0xintuition/primitives@alpha viem@^2
+npm install @0xintuition/primitives viem@^2
 ```
 
-The IID packages and anchor API are new in this release candidate. Until the
-candidate is published, npm's existing `alpha` tag does not include them. To try
-the checked-out candidate, use the repository's workspace packages after
-`bun install --frozen-lockfile` and `bun run build`.
+To try unreleased changes from a checkout, use the repository's workspace
+packages after `bun install --frozen-lockfile` and `bun run build`.
 
 | Task | Package |
 | --- | --- |
@@ -126,8 +124,8 @@ Use `@0xintuition/deployments` to select the network/address, then compose
    context by atom ID. The transaction recipient may be a router.
 
 See the [protocol README](../packages/protocol/README.md) for the exact API and
-[contract release prerequisites](./contract-artifacts.md) for this candidate's
-unpublished contract dependencies. React's existing creation hooks currently
+[contract artifact provenance](./contract-artifacts.md) for the contract
+versions these packages target. React's existing creation hooks currently
 use `createAtoms`; URI-aware creation is available through the protocol helpers.
 
 Further reading: [IID explainer](../packages/iid-spec/explainer.md),

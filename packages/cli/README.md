@@ -5,13 +5,13 @@ Agent-oriented, side-effect-free calldata encoders, plan builders, and an execut
 ## Install
 
 ```bash
-npm install @0xintuition/cli@alpha
+npm install @0xintuition/cli
 ```
 
 Install the executable globally when you want the `intuition` command on your PATH:
 
 ```bash
-npm install -g @0xintuition/cli@alpha
+npm install -g @0xintuition/cli
 ```
 
 Runtime: ESM-only, Node.js 20+. The executable bundles its protocol, periphery and SDK code. The package declares those packages as exact dependencies because its exported TypeScript types reference their APIs; it also depends on `viem`.

@@ -1,6 +1,6 @@
 {
 	"name": "@0xintuition/schema-org",
-	"version": "0.1.0-alpha.1",
+	"version": "0.1.0",
 	"description": "Pinned schema.org type and property vocabulary for Intuition data packages",
 	"private": false,
 	"license": "MIT",
@@ -41,7 +41,7 @@
 	"homepage": "https://github.com/0xIntuition/packages/tree/main/packages/schema-org#readme",
 	"publishConfig": {
 		"access": "public",
-		"tag": "alpha"
+		"tag": "latest"
 	},
 	"scripts": {
 		"build": "node ../../scripts/clean-dist.mjs && tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",

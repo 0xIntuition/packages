@@ -1,6 +1,6 @@
 {
 	"name": "@0xintuition/classifications",
-	"version": "0.1.0-alpha.1",
+	"version": "0.1.0",
 	"description": "Canonical Intuition classification specs and atom data builders",
 	"private": false,
 	"license": "MIT",
@@ -49,7 +49,7 @@
 	"homepage": "https://github.com/0xIntuition/packages/tree/main/packages/classifications#readme",
 	"publishConfig": {
 		"access": "public",
-		"tag": "alpha"
+		"tag": "latest"
 	},
 	"scripts": {
 		"build": "node ../../scripts/clean-dist.mjs && tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
@@ -74,14 +74,14 @@
 		"check:unsafe:write": "biome check --write --unsafe"
 	},
 	"devDependencies": {
-		"@0xintuition/predicates": "0.1.0-alpha.1",
-		"@0xintuition/schema-org": "0.1.0-alpha.1",
+		"@0xintuition/predicates": "^0.1.0",
+		"@0xintuition/schema-org": "^0.1.0",
 		"typescript": "^5.9.3",
 		"viem": "^2.31.4",
 		"vitest": "^4.0.16"
 	},
 	"dependencies": {
-		"@0xintuition/iid": "0.1.0-alpha.0"
+		"@0xintuition/iid": "^0.1.0"
 	},
 	"peerDependencies": {
 		"viem": "^2.0.0"

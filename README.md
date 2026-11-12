@@ -24,9 +24,8 @@ result.value.dataHex; // hex bytes for contract calls
 result.value.id;      // deterministic bytes32 atom ID
 ```
 
-The IID packages and anchor API are new in this release candidate; the existing
-npm `alpha` tags do not yet contain them. See the [release guide](./docs/release.md)
-for package versions and validation requirements.
+See the [release guide](./docs/release.md) for package versions and validation
+requirements.
 
 To run the dry-run UI example from a checkout, use Node 20 minimum (Node 24 tested) and the Bun version
 pinned in `package.json`:
@@ -124,15 +123,15 @@ Use `fields` to render atom inputs and `relationships` to suggest triples such a
 
 Published packages can be installed with npm, Bun, or another package manager.
 The repository itself uses Bun. Packages are ESM-only; use `import`.
-For the currently published semantic APIs:
+For example, the semantic data packages:
 
 ```bash
-npm install @0xintuition/classifications@alpha @0xintuition/predicates@alpha viem@^2
+npm install @0xintuition/classifications @0xintuition/predicates viem@^2
 ```
 
-`@0xintuition/protocol` uses the `4.x` line. This candidate publishes to `alpha`;
-changing `latest` is a separate release-owner decision. Consult each package
-README for peers and public subpaths.
+Packages follow semantic versioning. `@0xintuition/protocol` and `@0xintuition/sdk`
+use the `4.x` line; the other packages start at `0.1.0`, where a breaking change
+bumps the minor version. Consult each package README for peers and public subpaths.
 
 ## Validation
 

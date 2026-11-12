@@ -1,6 +1,6 @@
 {
 	"name": "@0xintuition/predicates",
-	"version": "0.1.0-alpha.1",
+	"version": "0.1.0",
 	"description": "Canonical Intuition predicate registry, entity mappings, and display helpers",
 	"private": false,
 	"license": "MIT",
@@ -40,7 +40,7 @@
 	"homepage": "https://github.com/0xIntuition/packages/tree/main/packages/predicates#readme",
 	"publishConfig": {
 		"access": "public",
-		"tag": "alpha"
+		"tag": "latest"
 	},
 	"scripts": {
 		"build": "node ../../scripts/generate-predicate-standalone-modules.mjs && node ../../scripts/clean-dist.mjs && tsc -p tsconfig.build.json && node ../../scripts/normalize-dist-imports.mjs",
@@ -63,7 +63,7 @@
 		"check:unsafe:write": "biome check --write --unsafe"
 	},
 	"dependencies": {
-		"@0xintuition/ids": "0.1.0-alpha.1"
+		"@0xintuition/ids": "^0.1.0"
 	},
 	"peerDependencies": {
 		"viem": "^2.0.0"

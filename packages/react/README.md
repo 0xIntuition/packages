@@ -6,7 +6,7 @@ ESM-only; use `import`.
 ## Install
 
 ```bash
-npm install @0xintuition/react@alpha @0xintuition/deployments@alpha @0xintuition/protocol@alpha react@">=18" @tanstack/react-query@^5 wagmi@^2 viem@^2
+npm install @0xintuition/react @0xintuition/deployments @0xintuition/protocol react@">=18" @tanstack/react-query@^5 wagmi@^2 viem@^2
 ```
 
 The package declares React 18+ support. Release checks currently exercise React
@@ -77,7 +77,7 @@ transaction. Always handle the returned promise's rejection.
 logs. Existing `useCreateAtom` and `useCreateAtomFlow` use `createAtoms`; for URI
 context creation, compose `multiVaultCreateAtomsWithUris` from
 `@0xintuition/protocol` with `useTransactionFlow`. A dedicated URI-aware React
-hook is not included in this candidate.
+hook is not included in this release.
 
 ## Peers
 

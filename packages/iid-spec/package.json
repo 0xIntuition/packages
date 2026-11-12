@@ -1,6 +1,6 @@
 {
 	"name": "@0xintuition/iid-spec",
-	"version": "0.1.0-alpha.0",
+	"version": "0.1.0",
 	"description": "The Intuition ID (IID) specification: a deterministic, canonical identifier for real-world entities, with normative per-scheme rules and machine-readable conformance vectors",
 	"private": false,
 	"license": "MIT",
@@ -40,7 +40,7 @@
 	"homepage": "https://github.com/0xIntuition/packages/tree/main/packages/iid-spec#readme",
 	"publishConfig": {
 		"access": "public",
-		"tag": "alpha"
+		"tag": "latest"
 	},
 	"scripts": {
 		"clean": "git clean -xdf .cache .turbo node_modules",

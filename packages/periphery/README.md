@@ -9,7 +9,7 @@ Runtime: ESM-only. This package does not publish CommonJS `require` entrypoints.
 ## Install
 
 ```bash
-npm install viem @0xintuition/periphery@alpha
+npm install viem @0xintuition/periphery
 ```
 
 **Peer Dependencies:** `viem ^2.0.0`. Release smoke tests install `viem@2.31.4`.

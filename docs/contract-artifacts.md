@@ -51,9 +51,9 @@ derived locally. They are not certified by the core provenance record.
    packed consumers, and affected application integrations.
 
 The 14-day release-age policy remains enabled. Temporary exceptions must bind an
-exact version and registry integrity and expire at normal eligibility. The current
-core and router exceptions expire on November 2, 2026; remove each from both
-`supply-chain-exceptions.json` and `bunfig.toml` when eligible.
+exact version and registry integrity and expire at normal eligibility. The core
+and router exceptions reached normal eligibility on November 2, 2026 and have been
+removed; there are no active exceptions.
 
 ## Compatibility
 

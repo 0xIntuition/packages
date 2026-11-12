@@ -7,7 +7,7 @@ Runtime: ESM-only. This package does not publish CommonJS `require` entrypoints.
 ## Install
 
 ```bash
-bun add @0xintuition/deployments@alpha
+bun add @0xintuition/deployments
 ```
 
 Peer dependency: `viem ^2.0.0`. Release smoke tests install `viem@2.31.4`.
@@ -42,7 +42,7 @@ ABIs and bytecode are generated from the Intuition contracts build.
 
 `MetaERC20Hub`, `MetaERC20Spoke` and `MetaNativeSpoke` are Metalayer contracts. Their ABI and bytecode are vendored as-is. Their `<Name>Bytecode` exports are the deployed runtime code, not creation code, so they cannot be used to deploy.
 
-## Candidate compatibility
+## Contract compatibility
 
 Core v1.1.0 artifacts match `@0xintuition/contracts-v2@1.1.0-alpha.1`; router artifacts match `@0xintuition/contracts-v2-periphery@1.1.0-alpha.0`. A deployment address alone does not imply support for the new ABI:
 mainnet must be upgraded before new functions can be used there. See the

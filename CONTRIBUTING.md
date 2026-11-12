@@ -196,8 +196,8 @@ Release PRs should:
 5. document publish order and dist-tag expectations, and
 6. follow [docs/release.md](./docs/release.md).
 
-Alpha package versions are intentionally allowed to move faster than stable
-packages, but published versions must never be reused.
+Packages below `1.0.0` may ship breaking changes in a minor version, but
+published versions must never be reused.
 
 ## Public Repo Hygiene
 

@@ -494,7 +494,7 @@ try {
 		'0x095ea7b3000000000000000000000000111111111111111111111111111111111111111100000000000000000000000000000000000000000000000000000000000003e8'
 	);
 
-	console.log('Clean-room tarball smoke passed for all public alpha packages.');
+	console.log('Clean-room tarball smoke passed for all public packages.');
 } finally {
 	rmSync(tempRoot, { force: true, recursive: true });
 	for (const tarballPath of tarballPaths) {

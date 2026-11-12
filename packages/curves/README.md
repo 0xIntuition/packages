@@ -7,7 +7,7 @@ Runtime: ESM-only. This package does not publish CommonJS `require` entrypoints.
 ## Install
 
 ```bash
-bun add @0xintuition/curves@alpha
+bun add @0xintuition/curves
 ```
 
 ## Usage
@@ -22,10 +22,10 @@ const preview = curve.previewDeposit(100n, { totalAssets: 0n, totalShares: 0n })
 
 ## Dynamic-fee curve
 
-This candidate targets `@0xintuition/contracts-v2@1.1.0-alpha.1`. Its
+This release targets `@0xintuition/contracts-v2@1.1.0-alpha.1`. Its
 net-anchored deposit bands differ from the older `1.1.0-alpha.0` contract revision.
-Exact contract parity, including uint256 overflow/revert behavior, remains a
-release gate. See the [contract artifact provenance](https://github.com/0xIntuition/packages/blob/main/docs/contract-artifacts.md).
+Exact contract parity, including uint256 overflow/revert behavior, is a release
+gate. See the [contract artifact provenance](https://github.com/0xIntuition/packages/blob/main/docs/contract-artifacts.md).
 
 Preview tier boundaries and deposit or redeem fees for the flat-price dynamic-fee curve. Deposits pay each traversed tier's rate; manual overrides remain capped by the configured maximum. The tier ladder reports `null` for the top tier's edge and width because that tier is unbounded. Supply the curve's current configuration when quoting.
 

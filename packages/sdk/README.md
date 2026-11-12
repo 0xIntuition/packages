@@ -23,7 +23,7 @@ Out of scope for v1:
 
 ## Status
 
-This is the `4.0.0-alpha.0` candidate, published to `alpha` only after release gates pass. It contains selected shared types, deterministic utilities, and higher-level action helpers. The v1 design terminology below describes the integration API design, not the npm major version. Contract artifacts are pending authoritative publication; new functions require matching deployments.
+This is the stable `4.0.0` release. It contains selected shared types, deterministic utilities, and higher-level action helpers. The v1 design terminology below describes the integration API design, not the npm major version. Contract artifacts target `@0xintuition/contracts-v2@1.1.0-alpha.1`; new v1.1.0 functions require matching contract deployments.
 
 Import guidance:
 - [`./docs/migration.md`](./docs/migration.md)
@@ -36,7 +36,7 @@ Examples:
 ## Installation
 
 ```bash
-bun add @0xintuition/sdk@alpha viem
+bun add @0xintuition/sdk viem
 ```
 
 `viem` is a peer dependency (`^2.0.0`). Release smoke tests install `viem@2.31.4`.

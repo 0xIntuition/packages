@@ -1,6 +1,8 @@
 # Atom runtime migration and release runbook
 
-This migration reconciles the reusable atom packages with the application lineage and exposes a shared Promise-based composition root for Core and other consumers. It prepares coordinated releases; it does not authorize publication, pushing branches, opening PRs, or merging them. Those actions remain gated on the release owner's explicit instruction. The existing package train is still awaiting registry publication. This document describes required checks, not a claim that every release gate has passed.
+This migration reconciles the reusable atom packages with the application lineage and exposes a shared Promise-based composition root for Core and other consumers. It prepares coordinated releases; it does not authorize publication, pushing branches, opening PRs, or merging them. Those actions remain gated on the release owner's explicit instruction. This document describes required checks, not a claim that every release gate has passed.
+
+> **Status:** completed. The atom packages were first published at `0.1.0-alpha.0` on October 28, 2026, Core now consumes them from npm, and the stable train promotes them to `0.1.0` on `latest`. The steps below are kept as the record of the alpha migration; new consumers should install the stable versions.
 
 ## Ownership
 
@@ -99,7 +101,7 @@ This extraction does not bump Core's `@0xintuition/contracts-v2`, replace its le
 
 ## Shared composition root
 
-`@0xintuition/atom-runtime@0.1.0-alpha.0` replaces consumer-owned engine wiring.
+`@0xintuition/atom-runtime` replaces consumer-owned engine wiring.
 Pass explicit configuration to `createProcessingRuntime({ env, cache, classification, enrichment })`
 or use `createProcessingRuntime({ config, runtime, overrides })` for injected services and plugins.
 The root and `presets`, `fingerprint`, `consumers`, `config`, and `adapters/upstash` subpaths are public.

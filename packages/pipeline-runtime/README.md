@@ -9,7 +9,7 @@ observation. No runtime or peer dependencies.
 ## Install
 
 ```sh
-npm install @0xintuition/pipeline-runtime@alpha
+npm install @0xintuition/pipeline-runtime
 ```
 
 ## Bounded work and cancellation

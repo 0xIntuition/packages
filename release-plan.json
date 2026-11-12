@@ -1,110 +1,110 @@
 {
-	"description": "Candidate alpha versions in dependency order across all 21 public packages. Validate the release using docs/release.md.",
+	"description": "Stable versions in dependency order across all 21 public packages. Validate the release using docs/release.md.",
 	"packages": [
 		{
 			"directory": "iid-spec",
-			"version": "0.1.0-alpha.0",
-			"tag": "alpha"
+			"version": "0.1.0",
+			"tag": "latest"
 		},
 		{
 			"directory": "iid",
-			"version": "0.1.0-alpha.0",
-			"tag": "alpha"
+			"version": "0.1.0",
+			"tag": "latest"
 		},
 		{
 			"directory": "deployments",
-			"version": "0.1.0-alpha.1",
-			"tag": "alpha"
+			"version": "0.1.0",
+			"tag": "latest"
 		},
 		{
 			"directory": "curves",
-			"version": "0.1.0-alpha.1",
-			"tag": "alpha"
+			"version": "0.1.0",
+			"tag": "latest"
 		},
 		{
 			"directory": "ids",
-			"version": "0.1.0-alpha.1",
-			"tag": "alpha"
+			"version": "0.1.0",
+			"tag": "latest"
 		},
 		{
 			"directory": "schema-org",
-			"version": "0.1.0-alpha.1",
-			"tag": "alpha"
+			"version": "0.1.0",
+			"tag": "latest"
 		},
 		{
 			"directory": "classifications",
-			"version": "0.1.0-alpha.1",
-			"tag": "alpha"
+			"version": "0.1.0",
+			"tag": "latest"
 		},
 		{
 			"directory": "pipeline-runtime",
-			"version": "0.1.0-alpha.0",
-			"tag": "alpha"
+			"version": "0.1.0",
+			"tag": "latest"
 		},
 		{
 			"directory": "atom-parser",
-			"version": "0.1.0-alpha.0",
-			"tag": "alpha"
+			"version": "0.1.0",
+			"tag": "latest"
 		},
 		{
 			"directory": "iid-registry",
-			"version": "0.1.0-alpha.0",
-			"tag": "alpha"
+			"version": "0.1.0",
+			"tag": "latest"
 		},
 		{
 			"directory": "iid-ladder",
-			"version": "0.1.0-alpha.0",
-			"tag": "alpha"
+			"version": "0.1.0",
+			"tag": "latest"
 		},
 		{
 			"directory": "predicates",
-			"version": "0.1.0-alpha.1",
-			"tag": "alpha"
+			"version": "0.1.0",
+			"tag": "latest"
 		},
 		{
 			"directory": "primitives",
-			"version": "0.1.0-alpha.1",
-			"tag": "alpha"
+			"version": "0.1.0",
+			"tag": "latest"
 		},
 		{
 			"directory": "protocol",
-			"version": "3.0.0-alpha.0",
-			"tag": "alpha"
+			"version": "4.0.0",
+			"tag": "latest"
 		},
 		{
 			"directory": "atom-enrichment",
-			"version": "0.1.0-alpha.0",
-			"tag": "alpha"
+			"version": "0.1.0",
+			"tag": "latest"
 		},
 		{
 			"directory": "atom-classification",
-			"version": "0.1.0-alpha.0",
-			"tag": "alpha"
+			"version": "0.1.0",
+			"tag": "latest"
 		},
 		{
 			"directory": "atom-runtime",
-			"version": "0.1.0-alpha.0",
-			"tag": "alpha"
+			"version": "0.1.0",
+			"tag": "latest"
 		},
 		{
 			"directory": "periphery",
-			"version": "0.1.0-alpha.1",
-			"tag": "alpha"
+			"version": "0.1.0",
+			"tag": "latest"
 		},
 		{
 			"directory": "sdk",
-			"version": "4.0.0-alpha.0",
-			"tag": "alpha"
+			"version": "4.0.0",
+			"tag": "latest"
 		},
 		{
 			"directory": "cli",
-			"version": "0.1.0-alpha.0",
-			"tag": "alpha"
+			"version": "0.1.0",
+			"tag": "latest"
 		},
 		{
 			"directory": "react",
-			"version": "0.1.0-alpha.1",
-			"tag": "alpha"
+			"version": "0.1.0",
+			"tag": "latest"
 		}
 	]
 }
