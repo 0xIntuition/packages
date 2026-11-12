@@ -6,7 +6,7 @@ ESM-only.
 ## Install
 
 ```bash
-npm install @0xintuition/iid-ladder@alpha
+npm install @0xintuition/iid-ladder
 ```
 
 The ladder selects the first canonical identity available in this order:

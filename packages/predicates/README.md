@@ -2,7 +2,7 @@
 
 Canonical Intuition predicate registry, launch constants, entity mappings, and display helpers.
 
-Alpha status: published under the alpha dist-tag. Predicate standalone modules are generated from per-predicate source specs.
+Predicate standalone modules are generated from per-predicate source specs.
 
 Runtime: ESM-only. This package does not publish CommonJS `require` entrypoints.
 
@@ -64,7 +64,7 @@ const bootstrapTriples = getLaunchPredicateBootstrapTriples()
 ## Install
 
 ```bash
-bun add @0xintuition/predicates@alpha @0xintuition/ids@alpha viem
+bun add @0xintuition/predicates @0xintuition/ids viem
 ```
 
 Peer dependency: `viem ^2.0.0`. Release smoke tests install `viem@2.31.4`.

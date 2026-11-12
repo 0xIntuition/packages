@@ -28,10 +28,10 @@ const distEntry = (path: string) => ({
 });
 
 describe('@0xintuition/sdk package manifest', () => {
-	it('publishes sdk v4 on alpha without changing latest', () => {
-		expect(packageJson.version).toBe('4.0.0-alpha.0');
+	it('publishes stable sdk v4 on latest', () => {
+		expect(packageJson.version).toBe('4.0.0');
 		expect(packageJson.private).toBe(false);
-		expect(packageJson.publishConfig).toEqual({ access: 'public', tag: 'alpha' });
+		expect(packageJson.publishConfig).toEqual({ access: 'public', tag: 'latest' });
 	});
 
 	it('defines the documented package export map over built entrypoints', () => {

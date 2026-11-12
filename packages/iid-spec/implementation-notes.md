@@ -2,7 +2,7 @@
 
 This document records every known disagreement between this specification and the reference implementation ([`@0xintuition/iid`](https://www.npmjs.com/package/@0xintuition/iid)), per [§1.4](./spec/01-conformance.md). The specification states the intended rule; each note states what the code currently does. Nothing here is repaired silently — canonicalization defects, if any arise after ratification, are frozen with the scheme per [§9.3](./spec/09-registry-governance.md).
 
-**As of specification 0.1.0 and `@0xintuition/iid` 0.1.0-alpha.0, there are no known deviations.** Every vector in [`conformance/`](./conformance/) passes against the reference implementation on Node and Bun.
+**As of specification 0.1.0 and `@0xintuition/iid` 0.1.0, there are no known deviations.** Every vector in [`conformance/`](./conformance/) passes against the reference implementation on Node and Bun.
 
 ## Resolved during publication
 
@@ -26,7 +26,7 @@ If a conformance vector fails against a released implementation:
 
 ## Application-local provider handles (ENG-17075)
 
-`@0xintuition/iid-ladder` 0.1.0-alpha.0 adds an opt-in
+`@0xintuition/iid-ladder` 0.1.0 adds an opt-in
 `providerLocalHandles: 'mint'` application policy to preserve historical provider
 identities from the app at `7fc0c82b4`. Its default remains `'reject'`, consistent
 with §9's closed registry; this is not a deviation in `@0xintuition/iid` and does

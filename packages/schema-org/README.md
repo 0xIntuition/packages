@@ -1,6 +1,6 @@
 # @0xintuition/schema-org
 
-Pinned schema.org type and property vocabulary for Intuition alpha packages.
+Pinned schema.org type and property vocabulary for Intuition packages.
 
 Runtime: ESM-only. This package does not publish CommonJS `require` entrypoints.
 
@@ -15,7 +15,7 @@ Runtime: ESM-only. This package does not publish CommonJS `require` entrypoints.
 ## Install
 
 ```bash
-bun add @0xintuition/schema-org@alpha
+bun add @0xintuition/schema-org
 ```
 
 ## Usage

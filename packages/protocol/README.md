@@ -34,13 +34,13 @@ A comprehensive TypeScript/JavaScript SDK for interacting with the Intuition onc
 
 ```bash
 # npm
-npm install viem @0xintuition/protocol@alpha
+npm install viem @0xintuition/protocol
 
 # pnpm
-pnpm install viem @0xintuition/protocol@alpha
+pnpm install viem @0xintuition/protocol
 
 # bun
-bun install viem @0xintuition/protocol@alpha
+bun install viem @0xintuition/protocol
 ```
 
 **Peer Dependencies:** `viem ^2.0.0`. Release smoke tests install `viem@2.31.4`.
@@ -55,9 +55,11 @@ Core deployment ownership in this release:
 - `Trust` and `BaseEmissionsController` are Base-side core contracts and resolve on Base mainnet (`8453`) plus Base Sepolia (`84532`).
 - `MultiVault`, `TrustBonding`, and `SatelliteEmissionsController` resolve on Intuition mainnet (`1155`) plus Intuition testnet (`13579`).
 
-## Candidate compatibility
+## Contract compatibility
 
-This is the `3.0.0-alpha.0` candidate. New v1.1.0 functions require a matching contract
+Version `4.0.0` moved contract bytecode exports to `@0xintuition/deployments` and
+bonding-curve math to `@0xintuition/curves`. Code written against `2.x` or the June 2026
+`3.0.0` release must update those imports; see [Migration to 4.0.0](#migration-to-400). New v1.1.0 functions require a matching contract
 deployment; existing mainnet addresses may still run the older implementation.
 Core artifacts are verified against `@0xintuition/contracts-v2@1.1.0-alpha.1`.
 See the [contract artifact provenance](https://github.com/0xIntuition/packages/blob/main/docs/contract-artifacts.md).
@@ -1944,7 +1946,10 @@ MIT License - see the [main repository](https://github.com/0xIntuition/packages)
 
 `@0xintuition/deployments/bytecode` is the canonical bytecode source.
 
-## Migration to 3.0.0
+## Migration to 4.0.0
+
+This applies when upgrading from `2.x`, from the June 2026 `3.0.0` release, or from
+`3.0.0-alpha.0`; `3.0.0` still exported bytecode and curve math from the root.
 
 Import bytecode from `@0xintuition/deployments/bytecode` (or the explicit
 `@0xintuition/protocol/contracts` compatibility subpath). The root no longer
