@@ -17,6 +17,7 @@ export * from './dynamic-fee-flat-price-curve-max-assets-encode';
 export * from './dynamic-fee-flat-price-curve-max-shares-encode';
 export * from './dynamic-fee-flat-price-curve-multi-vault-address-encode';
 export * from './dynamic-fee-flat-price-curve-name-encode';
+export * from './dynamic-fee-flat-price-curve-owner-encode';
 export * from './dynamic-fee-flat-price-curve-pending-for-encode';
 export * from './dynamic-fee-flat-price-curve-preview-mint-encode';
 export * from './dynamic-fee-flat-price-curve-preview-redeem-for-encode';
