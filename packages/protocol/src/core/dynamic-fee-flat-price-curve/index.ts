@@ -14,6 +14,7 @@ export * from './max-assets';
 export * from './max-shares';
 export * from './multi-vault-address';
 export * from './name';
+export * from './owner';
 export * from './pending-for';
 export * from './preview-mint';
 export * from './preview-redeem-for';

@@ -119,7 +119,9 @@ function getAbiFunction(abiName: string, functionName: string): AbiFunction {
 const REVERT_AUGMENTED_ABI = /(?:WithReverts|BubbledErrors)Abi$/;
 
 function extractAbiName(source: string, filePath: string): string {
-	const match = source.match(/import\s*\{([^}]*)\}\s*from\s*['"]..\/..\/contracts['"]/);
+	const match = source.match(
+		/import\s*\{([^}]*)\}\s*from\s*['"]\.\.\/\.\.\/contracts(?:\/abis)?['"]/
+	);
 	const abiNames = (match?.[1] ?? '')
 		.split(',')
 		.map((name) => name.replace(/^\s*type\s+/, '').trim())

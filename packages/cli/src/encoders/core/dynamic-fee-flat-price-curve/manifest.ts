@@ -159,6 +159,16 @@ export const dynamicFeeFlatPriceCurveEncoderManifest: readonly CoreEncoderManife
 	{
 		contract: 'dynamic-fee-flat-price-curve',
 		kind: 'read',
+		encoderName: 'dynamicFeeFlatPriceCurveOwnerEncode',
+		abiName: 'DynamicFeeFlatPriceCurveAbi',
+		functionName: 'owner',
+		stateMutability: 'view',
+		sourceWrapper: 'dynamicFeeFlatPriceCurveOwner',
+		sourceFile: 'owner.ts',
+	},
+	{
+		contract: 'dynamic-fee-flat-price-curve',
+		kind: 'read',
 		encoderName: 'dynamicFeeFlatPriceCurvePendingForEncode',
 		abiName: 'DynamicFeeFlatPriceCurveAbi',
 		functionName: 'pendingFor',

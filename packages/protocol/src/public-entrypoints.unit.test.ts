@@ -97,6 +97,7 @@ describe('@0xintuition/protocol wrapper entrypoints', () => {
 		'dynamicFeeFlatPriceCurveClaimableAcross',
 		'dynamicFeeFlatPriceCurveGetConfig',
 		'dynamicFeeFlatPriceCurveMultiVaultAddress',
+		'dynamicFeeFlatPriceCurveOwner',
 		'dynamicFeeFlatPriceCurvePendingFor',
 		'dynamicFeeFlatPriceCurvePreviewRedeemFor',
 		'dynamicFeeFlatPriceCurveQuoteDepositFee',

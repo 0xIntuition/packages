@@ -11,7 +11,7 @@ describe('metaERC20SpokeTransferRemote', () => {
 			address: '0xdddddddddddddddddddddddddddddddddddddddd' as Address,
 		} as WalletClient['account'];
 		const request = { to: address, data: '0x1234' as Hex };
-		const recipient = '0x000000000000000000000000b8e3452e62b45e654a300a296061597e3cf3e039' as const;
+		const recipient = '0x000000000000000000000000aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' as const;
 		const value = 12_345n;
 
 		const simulateContract = vi.fn().mockResolvedValue({ request });
